@@ -1,0 +1,86 @@
+---
+title: "Spatial model"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Spatial model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{pdp}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/spatial.Rmd")
+# PDF
+#  library(rmarkdown); render( "vignettes/spatial.Rmd", pdf_document())
+```
+
+```{r setup, echo=TRUE, message=FALSE}
+library(tinyVAST)
+library(pdp)  # approx = TRUE gives effects for average of other covariates
+library(lattice)
+library(visreg)
+library(fmesher)
+set.seed(101)
+```
+
+`tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
+We here show how it can fit spatial structural equation models
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Simulate
+R = exp(-0.4 * abs(outer(1:10, 1:10, FUN="-")) )
+z = mvtnorm::rmvnorm(1, sigma=kronecker(R,R) )
+t = sample(1:10, replace=TRUE, size=length(z))
+Data = data.frame( expand.grid(x=1:10, y=1:10), t=t, z=as.vector(z) + cos(t/10*2*pi))
+
+Data$n = Data$z + rnorm(nrow(Data), sd=1)
+
+# make mesh
+mesh = fm_mesh_2d( Data[,c('x','y')] )
+
+# fit model
+out = fit( data = Data,
+           formula = n ~ s(t),
+           spatial_graph = mesh,
+           quiet = TRUE )
+```
+
+`tinyVAST` then has a standard `predict` function:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+predict(out, newdata=data.frame(x=1, y=1, t=1) )
+```
+
+and this is used to compute the spatial response
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Prediction grid
+pred = outer( seq(1,10,len=51),
+              seq(1,10,len=51),
+              FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,t=1)) )
+image( x=seq(1,10,len=51), y=seq(1,10,len=51), z=pred, main="Prediction" )
+
+# True value
+image( x=1:10, y=1:10, z=matrix(Data$z,ncol=10), main="Prediction" )
+```
+
+We can also compute the marginal time effect
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# compute partial dependence plot
+Partial = partial( object = out,
+                   pred.var = "t",
+                   pred.fun = \(object,newdata) predict(object,newdata),
+                   train = Data,
+                   approx = TRUE )
+
+# Lattice plots as default option
+plotPartial( Partial )
+```
+

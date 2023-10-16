@@ -6,18 +6,17 @@
 #' @export
 predict.tinyVAST <-
 function( object,
-          newdata ){
+          newdata,
+          ... ){
 
   # extract original X and Z
-  origdata = eval(object$call$data)
+  origdata = object$data
   if(missing(newdata)) newdata = origdata
   tmb_data = object$tmb_inputs$tmb_data
   gam = object$gam_setup
 
   # Check newdata for missing variables and/or factors
-  #response_name = as.character(gam$formula)[2]
-  #pred_set = setdiff( colnames(gam$mf), response_name )
-  pred_set = strsplit( as.character(object$gam_setup$pred.formula)[2], split=" + ", fixed=TRUE )[[1]]
+  pred_set = all.vars( object$gam_setup$pred.formula )
   for(pred in pred_set ){
     if( !(pred %in% colnames(newdata)) ){
       stop("Missing ", pred, " in newdata")
@@ -34,19 +33,28 @@ function( object,
   if(is.null(Zpred)) Zpred = matrix(0, nrow=nrow(newdata),ncol=ncol(tmb_data$Z))
 
   # Assemble Xpred
-  formula_no_sm <- remove_s_and_t2(gam$formula)
-  mf <- model.frame(formula_no_sm, origdata)
-  terms = attr(mf, "terms")
-  f2 <- remove_s_and_t2(gam$formula)
-  tt <- stats::terms(f2)
-  attr(tt, "predvars") <- attr(terms, "predvars")
-  Terms <- stats::delete.response(tt)
-  mf2 <- model.frame(Terms, newdata, xlev = .getXlevels(Terms,mf))
-  Xpred <- model.matrix(Terms, mf2)
+  #formula_no_sm = remove_s_and_t2(gam$formula)
+  #mf = model.frame(formula_no_sm, origdata)
+  #terms = attr(mf, "terms")
+  f2 = remove_s_and_t2(gam$formula)
+  tt = stats::terms(f2)
+  attr(tt, "predvars") = attr(terms, "predvars")
+  Terms = stats::delete.response(tt)
+  mf2 = model.frame(Terms, newdata, xlev = .getXlevels(Terms,mf))
+  Xpred = model.matrix(Terms, mf2)
+
+  # Assemble Apred_is
+  if( "fm_mesh_2d" %in% class(object$spatial_graph) ){
+    Apred_is = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,object$data_colnames$spatial]) )$proj$A
+    Apred_is = as.matrix(Apred_is)  # Apred_is must be dense!
+  } else {
+    Apred_is = matrix(0, nrow=nrow(newdata), ncol=0)
+  }
 
   #
-  object$obj$env$data$Xpred = Xpred # object$tmb_inputs$tmb_data$X
-  object$obj$env$data$Zpred = Zpred # object$tmb_inputs$tmb_data$Z
+  object$obj$env$data$Xpred = Xpred          # object$tmb_inputs$tmb_data$X
+  object$obj$env$data$Zpred = Zpred          # object$tmb_inputs$tmb_data$Z
+  object$obj$env$data$Apred_is = Apred_is    # object$tmb_inputs$tmb_data$Z
   out = object$obj$report()$mu_pred
   return(out)
 }
