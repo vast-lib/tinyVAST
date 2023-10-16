@@ -15,11 +15,13 @@ Authors@R:
              email = "wouter@zoology.ubc.ca",
              comment = c(ORCID = "0000-0002-7366-1868"))
     )
+Imports:
+    visreg
 Depends:
     R (>= 4.0.0),
     TMB,
     mgcv,
-    Matrix
+    Matrix,
 Suggests:
     pdp
 LinkingTo:
