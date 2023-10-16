@@ -4,7 +4,7 @@
 \alias{predict.tinyVAST}
 \title{Predict using vector autoregressive spatio-temporal model}
 \usage{
-\method{predict}{tinyVAST}(object, newdata)
+\method{predict}{tinyVAST}(object, newdata, ...)
 }
 \description{
 Predicts values given new covariates using a tinyVAST model

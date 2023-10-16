@@ -4,7 +4,16 @@
 \alias{fit}
 \title{Fit vector autoregressive spatio-temporal model}
 \usage{
-fit(data, formula)
+fit(
+  data,
+  formula,
+  sem,
+  times,
+  variables,
+  data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time"),
+  spatial_graph = NULL,
+  quiet = FALSE
+)
 }
 \description{
 Fits a vector autoregressive spatio-temporal model using

@@ -16,17 +16,19 @@ Authors@R:
              comment = c(ORCID = "0000-0002-7366-1868"))
     )
 Imports:
-    visreg
+    visreg,
+    dsem
 Depends:
     R (>= 4.0.0),
     TMB,
     mgcv,
     Matrix,
 Suggests:
-    pdp
+    pdp,
+    dsem
 LinkingTo:
+    TMB,
     RcppEigen,
-    TMB
 Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
 	using a minimal feature-set, including using dynamic 
 	structural equation model (DSEM) to specify the space-time-variable interactions
