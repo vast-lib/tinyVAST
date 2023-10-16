@@ -1,0 +1,74 @@
+---
+title: "Dynamic structural equation model"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Dynamic structural equation model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{dsem}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/dsem.Rmd")
+# PDF
+#  library(rmarkdown); render( "vignettes/dsem.Rmd", pdf_document())
+```
+
+```{r setup, echo=TRUE, message=FALSE}
+library(tinyVAST)
+set.seed(101)
+```
+
+`tinyVAST` includes features to fit a dynamic structural equation model
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+data(isle_royale, package="dsem")
+
+data = expand.grid( "time"=isle_royale[,1], "var"=colnames(isle_royale[,2:3]) )
+data$logn = unlist(log(isle_royale[2:3]))
+
+sem = "
+  wolves -> wolves, -1, arW
+  moose -> wolves, -1, MtoW
+  wolves -> moose, -1, WtoM
+  moose -> moose, -1, arM
+  wolves -> moose, 0, corr
+"
+# initial first without delta0 (to improve starting values)
+mytiny = fit( sem = sem,
+                 data = data,
+                 times = isle_royale[,1],
+                 variables = colnames(isle_royale[,2:3]),
+                 estimate_delta0 = FALSE,
+                 formula = logn ~ 0 + var,
+                 quiet = TRUE )
+mytiny
+```
+
+We can then compare this with package `dsem`
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+library(dsem)
+dsem_data = ts( log(isle_royale[,2:3]), start=1959)
+family = c("normal","normal")
+
+# initial first without delta0 (to improve starting values)
+mydsem = dsem( sem = sem,
+             tsdata = dsem_data,
+             estimate_delta0 = FALSE,
+             quiet = TRUE,
+             getsd = FALSE,
+             family = family )
+mydsem
+```
+
+

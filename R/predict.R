@@ -33,15 +33,14 @@ function( object,
   if(is.null(Zpred)) Zpred = matrix(0, nrow=nrow(newdata),ncol=ncol(tmb_data$Z))
 
   # Assemble Xpred
-  #formula_no_sm = remove_s_and_t2(gam$formula)
-  #mf = model.frame(formula_no_sm, origdata)
-  #terms = attr(mf, "terms")
-  f2 = remove_s_and_t2(gam$formula)
-  tt = stats::terms(f2)
-  attr(tt, "predvars") = attr(terms, "predvars")
-  Terms = stats::delete.response(tt)
-  mf2 = model.frame(Terms, newdata, xlev = .getXlevels(Terms,mf))
-  Xpred = model.matrix(Terms, mf2)
+  formula_no_sm = remove_s_and_t2(gam$formula)
+  mf1 = model.frame(formula_no_sm, origdata)
+  terms1 = attr(mf1, "terms")
+  terms2 = stats::terms(formula_no_sm)
+  attr(terms2, "predvars") = attr(terms1, "predvars")
+  terms2 = stats::delete.response(terms2)
+  mf2 = model.frame(terms2, newdata, xlev=.getXlevels(terms1,mf1))
+  Xpred = model.matrix(terms2, mf2)
 
   # Assemble Apred_is
   if( "fm_mesh_2d" %in% class(object$spatial_graph) ){

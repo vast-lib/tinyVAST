@@ -5,7 +5,11 @@
 \title{Print fitted tinyVAST object}
 \usage{
 \method{print}{tinyVAST}(x, ...)
+
+\method{print}{tinyVAST}(x, ...)
 }
 \description{
+Prints output from fitted tinyVAST model
+
 Prints output from fitted tinyVAST model
 }
