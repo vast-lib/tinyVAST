@@ -14,9 +14,9 @@ function( data,
           estimate_delta0 = FALSE,
           #spatial_sem,
           #spatiotemporal_sem,
-          times,
-          variables,
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time"),
+          times = sort(unique(data[,data_colnames$time])),
+          variables = unique(data[,data_colnames$var]),
           spatial_graph = NULL,
           quiet = FALSE ){
 
@@ -78,6 +78,9 @@ function( data,
                          "M1" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
                          "M2" = as(Matrix(nrow=0,ncol=0),"dgCMatrix") )
   }
+  Atriplet = Matrix::mat2triplet(A_is)
+  t_i = match( data[,data_colnames$time], times )
+  c_i = match( data[,data_colnames$var], variables )
 
   # make dat
   tmb_data = list(
@@ -86,17 +89,20 @@ function( data,
     Y = y_i,
     X = X,
     Z = Z,
-    t_i = match( data[,data_colnames$time], times ) - 1,  # -1 to convert to CPP index
-    c_i = match( data[,data_colnames$var], variables ) - 1, # -1 to convert to CPP index
+    t_i = t_i - 1, # -1 to convert to CPP index
+    c_i = c_i - 1, # -1 to convert to CPP index
     S = S_combined,
     Sdims = Sdims,
     spatial_list = spatial_list,
-    A_is = A_is,
+    Aistc = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1,     # Triplet form, i, s, t
+    Ax = Atriplet$x,
     RAM = as.matrix(na.omit(ram[,1:4])),
     RAMstart = as.numeric(ram[,5]),
     Xpred = matrix(ncol=ncol(X),nrow=0),
     Zpred = matrix(ncol=ncol(Z),nrow=0),
-    Apred_is = matrix(nrow=0,ncol=ncol(A_is))
+    Apred = matrix(nrow=0,ncol=ncol(A_is)),
+    tpred = integer(0),
+    cpred = integer(0)
   )
 
   # Scale starting values with higher value for two-headed than one-headed arrows
@@ -106,15 +112,16 @@ function( data,
   # make params
   tmb_par = list(
     log_kappa = log(1),
-    log_tau = log(1),
+    #log_tau = log(1),
     alpha = rep(0,ncol(X)),  # Spline coefficients
     gamma = rep(0,ncol(Z)),  # Spline coefficients
-    omega = rep(0, spatial_graph$n),
+    #omega = rep(0, spatial_graph$n),
     beta_z = ifelse(beta_type==1, 0.01, 1),
     log_lambda = rep(0,length(Sdims)), #Log spline penalization coefficients
     log_sigma = 0,
     delta0_c = rep(0, tmb_data$n_c),
-    x_tc = matrix(0, nrow=tmb_data$n_t, ncol=tmb_data$n_c)
+    #x_tc = matrix(0, nrow=tmb_data$n_t, ncol=tmb_data$n_c)
+    epsilon_stc = array(0, dim=c(spatial_graph$n,tmb_data$n_t,tmb_data$n_c) )
   )
   # Turn off initial conditions
   if( estimate_delta0==FALSE ){
@@ -125,7 +132,7 @@ function( data,
   tmb_map = list()
   if( spatial_graph$n==0 ){
     tmb_map$log_kappa = factor(NA)
-    tmb_map$log_tau = factor(NA)
+    #tmb_map$log_tau = factor(NA)
   }
 
   #Fit model
@@ -134,8 +141,39 @@ function( data,
     dyn.unload(dynlib("tinyVAST"))
     compile("tinyVAST.cpp")
     dyn.load(dynlib("tinyVAST"))
+
+    #
+    error_dir = R'(C:\Users\James.Thorson\Desktop\Work files\Collaborations\2024 -- tinyVAST\reproducible_example)'
+    error = readRDS( file.path(error_dir,"error.RDS") )
+    lapply( error, dim )
+
+    #
+    #tmb_par = tmb_data = NULL
+    tmb_par$epsilon_sk = error$epsilon_sk
+    tmb_data$Q_spatial = error$Q_spatial
+    tmb_data$Q_kk = error$Q_kk
+    lapply( tmb_data, dim )
+    lapply( tmb_par, dim )
   }
-  obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma","omega","x_tc"), DLL="tinyVAST" )
+  #obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma","omega","x_tc"), DLL="tinyVAST" )
+  obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma","epsilon_stc"), DLL="tinyVAST" )  #
+  # Experiment with Q_jonit
+  if( FALSE ){
+    rep = obj$report()
+    error = list( Q_spatial=rep$Q_spatial, Q_kk=rep$Q_kk, epsilon_sk=rep$epsilon_sk )
+    saveRDS( error, "error.RDS" )
+  }
+  if( FALSE ){
+    rep = obj$report()
+    Matrix::image(rep$Q_joint)
+  }
+  if( FALSE ){
+    obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, DLL="tinyVAST" )
+  }
+  if( FALSE ){
+    H = obj$env$spHess(random=TRUE)
+    Matrix::image(H)
+  }
   obj$env$beSilent()
   opt = nlminb( start=obj$par, obj=obj$fn, gr=obj$gr,
                 control=list(eval.max=1e4, iter.max=1e4, trace=ifelse(isTRUE(quiet),0,1)) )
