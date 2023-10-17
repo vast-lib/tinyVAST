@@ -2,7 +2,7 @@
 #include <TMB.hpp>   //Links in the TMB libraries
 template<class Type>
 Type objective_function<Type>::operator() (){
-  using namespace R_inla;
+  //using namespace R_inla;
   using namespace density;
   using namespace Eigen;
 
@@ -18,8 +18,9 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR(Sdims);   // Dimensions of blockwise components of S
 
   // Spatial objects
-  DATA_STRUCT(spatial_list, spde_t);
-  DATA_SPARSE_MATRIX(A_is);
+  DATA_STRUCT(spatial_list, R_inla::spde_t);
+  DATA_IMATRIX(Aistc);
+  DATA_VECTOR(Ax);
 
   // SEM objects
   DATA_IMATRIX( RAM );
@@ -30,24 +31,33 @@ Type objective_function<Type>::operator() (){
   DATA_UPDATE(Xpred);       //
   DATA_MATRIX(Zpred);       // Design matrix for splines
   DATA_UPDATE(Zpred);       //
-  DATA_MATRIX(Apred_is);       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
-  DATA_UPDATE(Apred_is);       //
+  DATA_MATRIX(Apred);       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
+  DATA_UPDATE(Apred);       //
+  DATA_IVECTOR( tpred );
+  //DATA_UPDATE( tpred );
+  DATA_IVECTOR( cpred );
+  //DATA_UPDATE( cpred );
 
   // Params
   PARAMETER(log_kappa);
-  PARAMETER(log_tau);
+  //PARAMETER(log_tau);
   PARAMETER_VECTOR(alpha); // Fixed covariate parameters
   PARAMETER_VECTOR(gamma); // Spline regression parameters
-  PARAMETER_VECTOR(omega); // SPDE random effecs
+  //PARAMETER_VECTOR(omega); // SPDE random effecs
   PARAMETER_VECTOR(beta_z); // SEM coefficients
   PARAMETER_VECTOR(log_lambda); //Penalization parameters
-  PARAMETER(log_sigma);   
+  PARAMETER(log_sigma);
   PARAMETER_VECTOR( delta0_c );
-  PARAMETER_ARRAY( x_tc );
+  //PARAMETER_ARRAY( x_tc );
+  PARAMETER_ARRAY( epsilon_stc );
 
+  Type nll = 0;
   // Assemble precision
   int n_k = n_t * n_c;      // data
+  int k;
+  int n_s = epsilon_stc.rows();
   Eigen::SparseMatrix<Type> Q_kk( n_k, n_k );
+  Type log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
   // SEM
   Eigen::SparseMatrix<Type> Linv_kk(n_k, n_k);
   Eigen::SparseMatrix<Type> Rho_kk(n_k, n_k);
@@ -77,7 +87,6 @@ Type objective_function<Type>::operator() (){
     // Compute delta_k
     matrix<Type> delta0_k1( n_k, 1 );
     delta0_k1.setZero();
-    int k;
     for(int c=0; c<n_c; c++){
       k = c * n_t;
       delta0_k1(k,0) = delta0_c(c);
@@ -98,14 +107,20 @@ Type objective_function<Type>::operator() (){
   // Transformations
   Type sigma = exp(log_sigma);
   vector<Type> lambda = exp(log_lambda);
-  Eigen::SparseMatrix<Type> Q_spatial = Q_spde(spatial_list, exp(log_kappa));
-  //Calculate the objective function
-  Type nll = 0;
-  nll += GMRF(Q_spatial)(omega);
-  nll += GMRF(Q_kk)( x_tc - delta_k );
+  array<Type> epsilon_sk( n_s, n_k );
+  for( int s=0; s<n_s; s++ ){
+  for( int t=0; t<n_t; t++ ){
+  for( int c=0; c<n_c; c++ ){
+    k = c*n_t + t;
+    epsilon_sk(s,k) = epsilon_stc(s,t,c);
+  }}}
+  Eigen::SparseMatrix<Type> Q_spatial = R_inla::Q_spde(spatial_list, exp(log_kappa));
+
+  // distributions
+  nll += SEPARABLE( GMRF(Q_kk), GMRF(Q_spatial) )( epsilon_sk );
 
   // Likelihood of spline components
-  int k=0;   // Counter
+  k = 0;   // Counter
   for(int i=0; i<Sdims.size(); i++){
     int m_i = Sdims(i);
     vector<Type> gamma_i = gamma.segment(k,m_i);       // Recover gamma_i
@@ -113,24 +128,42 @@ Type objective_function<Type>::operator() (){
     nll -= Type(0.5)*m_i*log_lambda(i) - 0.5*lambda(i)*GMRF(S_i).Quadform(gamma_i);
     k += m_i;
   }
-  
-  // Linear predictor and data
-  vector<Type> mu = X*alpha + Z*gamma + A_is*omega/exp(log_tau);
+
+  // Linear predictor
+  //vector<Type> mu = X*alpha + Z*gamma + A_is*omega/exp(log_tau);
+  vector<Type> mu = X*alpha + Z*gamma;
+  // Sparse product of matrix A and 3D array epsilon_stc
+  for( int row=0; row<Aistc.rows(); row++ ){
+    mu(Aistc(row,0)) += Ax(row) * epsilon_stc(Aistc(row,1),Aistc(row,2),Aistc(row,3)) / exp(log_tau);
+  }
   for(int i=0; i<Y.size(); i++){
-    if( (n_t>0) & (n_c>0) ){
-      mu(i) += x_tc( t_i(i), c_i(i) );
-    }
+    k = c_i(i)*n_t + t_i(i);
+    //mu(i) += x_tc( t_i(i), c_i(i) ) - delta_k(k);
+    mu(i) -= delta_k(k);
     nll -= dnorm(Y(i), mu(i), sigma, true);
   }
 
   // Predictions
- vector<Type> mu_pred = Xpred*alpha + Zpred*gamma + Apred_is*omega/exp(log_tau);
+  vector<Type> mu_pred = Xpred*alpha + Zpred*gamma;
+  //for(int i=0; i<Apred.rows(); i++){
+  //  if( (n_t>0) & (n_c>0) ){
+  //    k = cpred(i)*n_t + tpred(i);
+  //    mu_pred(i) -= delta_k(k);
+  //    for( int s=0; s<Apred.cols(); s++ ){
+  //      mu_pred(i) += Apred(i,s) * epsilon_stc(s,tpred(i),cpred(i)) / exp(log_tau);
+  //    }
+  //  }
+  //}
 
   // Reporting
+  Type range = pow(8.0, 0.5) / exp( log_kappa );
+  REPORT( range );
   ADREPORT(alpha);
   REPORT( mu );
   REPORT( mu_pred );
   REPORT( Q_kk );
+  REPORT( Q_spatial );
+  //REPORT( Q_joint );
 
   return nll;
 }
