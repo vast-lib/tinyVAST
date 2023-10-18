@@ -20,10 +20,11 @@ function( data,
           spatial_graph = NULL,
           quiet = FALSE ){
 
+  start_time = Sys.time()
   # SEM stuff
   # (I-Rho)^-1 * Gamma * (I-Rho)^-1
   if( is.null(sem) ){
-    out = list(
+    ram_output = list(
       ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
       model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
     )
@@ -39,14 +40,14 @@ function( data,
       colnames(data)[ncol(data)] = data_colnames$variable
     }
   }else{
-    out = make_ram( sem, times=times, variables=variables, quiet=quiet, covs=variables )
+    ram_output = make_ram( sem, times=times, variables=variables, quiet=quiet, covs=variables )
   }
-  ram = out$ram
+  ram = ram_output$ram
   # Error checks
-  if( any((out$model[,'direction']==2) & (out$model[,2]!=0)) ){
+  if( any((ram_output$model[,'direction']==2) & (ram_output$model[,2]!=0)) ){
     stop("All two-headed arrows should have lag=0")
   }
-  if( !all(c(out$model[,'first'],out$model[,'second']) %in% variables) ){
+  if( !all(c(ram_output$model[,'first'],ram_output$model[,'second']) %in% variables) ){
     stop("Some variable in `sem` is not in `tsdata`")
   }
 
@@ -180,6 +181,9 @@ function( data,
   sdrep = sdreport(obj)
 
   # bundle and return output
+  internal = list(
+    ram_output = ram_output
+  )
   out = structure( list(
     formula = formula,
     data = data,
@@ -191,7 +195,9 @@ function( data,
     tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par),
     call = match.call(),
     spatial_graph = spatial_graph,
-    data_colnames = data_colnames
+    data_colnames = data_colnames,
+    run_time = Sys.time() - start_time,
+    internal = internal
   ), class="tinyVAST"
   )
   return(out)
@@ -206,17 +212,5 @@ function( data,
 print.tinyVAST <-
 function( x,
           ... ){
-  print(x$opt)
-}
-
-#' @title Print fitted tinyVAST object
-#'
-#' @description Prints output from fitted tinyVAST model
-#'
-#' @method print tinyVAST
-#' @export
-print.tinyVAST <-
-function( x,
-          ... ){
-  print(x$opt)
+  print(x[c('call','opt','sdrep','run_time')])
 }
