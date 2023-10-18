@@ -23,20 +23,65 @@ knitr::opts_chunk$set(
 #  library(rmarkdown); render( "vignettes/VAST.Rmd", pdf_document())
 ```
 
-```{r setup, echo=TRUE, message=FALSE}
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
-We here explore the capacity to specify the vector-autoregressive spatio-temporal component
+We here explore the capacity to specify the vector-autoregressive spatio-temporal component.
+
+# Spatio-temporal autoregressive model
+We first explore the ability to specify a first-order autoregressive spatio-temporal process:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate settings
 theta_xy = 0.2
 n_x = n_y = 20
-n_t = 10
+n_t = 20
+rho = 0.8
+spatial_sd = 0.5
+
+# Simulate GMRFs
+R = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
+d = mvtnorm::rmvnorm(n_t, sigma=spatial_sd^2*kronecker(R,R) )
+
+# Project through time and add mean
+for( t in seq_len(n_t) ){
+  if(t>1) d[t,] = rho*d[t-1,] + d[t,]
+}
+d = d + 2
+
+# Shape into longform data-frame and add error
+Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), "var"="logn", z=as.vector(d))
+Data$n = Data$z + rnorm(nrow(Data), sd=0.2)
+
+# make mesh
+mesh = fm_mesh_2d( Data[,c('x','y')] )
+
+# fit model
+out = fit( sem = "logn -> logn, -1, rho",
+           data = Data,
+           formula = n ~ 1,
+           spatial_graph = mesh,
+           quiet = TRUE )
+out
+```
+
+The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`
+
+# Bivariate spatio-temporal autoregressive model
+
+We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Simulate settings
+theta_xy = 0.2
+n_x = n_y = 10
+n_t = 20
+B = rbind( c( 0.5, -0.25),
+           c(-0.1,  0.50) )
 
 # Simulate GMRFs
 R = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
@@ -45,9 +90,8 @@ d2 = mvtnorm::rmvnorm(n_t, sigma=0.2*kronecker(R,R) )
 d = abind::abind( d1, d2, along=3 )
 
 # Project through time and add mean
-B = matrix( c(0,0,0,0), ncol=2 )
 for( t in seq_len(n_t) ){
-  if(t>1) d[t,,] = d[t-1,,]%*%B + d[t,,]
+  if(t>1) d[t,,] = t(B%*%t(d[t-1,,])) + d[t,,]
 }
 d[,,1] = d[,,1] + 2
 d[,,2] = d[,,2] + 3
@@ -61,18 +105,21 @@ mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # Define sem
 sem = "
-  #d1 -> d1, -1, b11
-  #d2 -> d2, -1, b22
-  #d1 -> d2, -1, b12
-  #d2 -> d1, -1, b12
+  d1 -> d1, -1, b11
+  d2 -> d2, -1, b22
+  d2 -> d1, -1, b21
+  d1 -> d2, -1, b12
+  d1 <-> d1, 0, var1
+  d2 <-> d2, 0, var1
 "
 
 # fit model
 out = fit( sem = sem,
            data = Data,
-           formula = n ~ var,
+           formula = n ~ 0 + var,
            spatial_graph = mesh,
            quiet = TRUE )
 out
 ```
 
+The values for `beta_z` again correspond to the specified value for interaction-matrix `B`
