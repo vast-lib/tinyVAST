@@ -32,12 +32,10 @@ function( data,
     variables = numeric(0)
     # Allow user to avoid specifying these if is.null(sem)
     if( !(data_colnames$time %in% colnames(data)) ){
-      data = cbind(data, 1)
-      colnames(data)[ncol(data)] = data_colnames$time
+      data = cbind(data, "time"=1)
     }
     if( !(data_colnames$variable %in% colnames(data)) ){
-      data = cbind(data, 1)
-      colnames(data)[ncol(data)] = data_colnames$variable
+      data = cbind(data, "var"=1)
     }
   }else{
     ram_output = make_ram( sem, times=times, variables=variables, quiet=quiet, covs=variables )
@@ -50,6 +48,28 @@ function( data,
   if( !all(c(ram_output$model[,'first'],ram_output$model[,'second']) %in% variables) ){
     stop("Some variable in `sem` is not in `tsdata`")
   }
+
+  # Spatial domain constructor
+  if( "fm_mesh_2d" %in% class(spatial_graph) ){
+    spatial_list = fm_fem( spatial_graph )
+    spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
+    A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$spatial]) )$proj$A
+  } else if( !is.null(sem) ){
+    spatial_graph = list( "n"=1 )
+    A_is = matrix(1, nrow=nrow(data), ncol=1)    # dgCMatrix
+    A_is = as(Matrix(A_is),"dgCMatrix")
+    spatial_list = list( "M0" = as(Matrix(1,nrow=1,ncol=1),"dgCMatrix"),
+                         "M1" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix"),
+                         "M2" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix") )
+  } else {
+    spatial_graph = list( "n"=0 )
+    A_is = Matrix(nrow=nrow(data), ncol=0)    # dgCMatrix
+    A_is = as(A_is,"dgCMatrix")
+    spatial_list = list( "M0" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
+                         "M1" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
+                         "M2" = as(Matrix(nrow=0,ncol=0),"dgCMatrix") )
+  }
+  Atriplet = Matrix::mat2triplet(A_is)
 
   # Initial constructor of splines
   gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
@@ -66,22 +86,13 @@ function( data,
   X = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
   Z = gam_setup$X[,which_se,drop=FALSE]
 
-  # Spatial domain constructor
-  if( "fm_mesh_2d" %in% class(spatial_graph) ){
-    spatial_list = fm_fem( spatial_graph )
-    spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
-    A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$spatial]) )$proj$A
-  } else {
-    spatial_graph = list( "n"=0 )
-    A_is = Matrix(nrow=nrow(data), ncol=0)    # dgCMatrix
-    A_is = as(A_is,"dgCMatrix")
-    spatial_list = list( "M0" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
-                         "M1" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
-                         "M2" = as(Matrix(nrow=0,ncol=0),"dgCMatrix") )
-  }
-  Atriplet = Matrix::mat2triplet(A_is)
-  t_i = match( data[,data_colnames$time], times )
-  c_i = match( data[,data_colnames$var], variables )
+  # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
+  if( length(times>0) ){
+    t_i = match( data[,data_colnames$time], times )
+  }else{ t_i = integer(0) }
+  if( length(variables>0) ){
+    c_i = match( data[,data_colnames$var], variables )
+  }else{ c_i = integer(0) }
 
   # make dat
   tmb_data = list(
@@ -99,11 +110,12 @@ function( data,
     Ax = Atriplet$x,
     RAM = as.matrix(na.omit(ram[,1:4])),
     RAMstart = as.numeric(ram[,5]),
-    Xpred = matrix(ncol=ncol(X),nrow=0),
-    Zpred = matrix(ncol=ncol(Z),nrow=0),
-    Apred = matrix(nrow=0,ncol=ncol(A_is)),
-    tpred = integer(0),
-    cpred = integer(0)
+    predX = matrix(0,ncol=ncol(X),nrow=0),
+    predZ = matrix(0,ncol=ncol(Z),nrow=0),
+    predAistc = matrix(0,nrow=0,ncol=4),
+    predAx = numeric(0),
+    predt = integer(0),
+    predc = integer(0)
   )
 
   # Scale starting values with higher value for two-headed than one-headed arrows
@@ -131,7 +143,7 @@ function( data,
 
   #
   tmb_map = list()
-  if( spatial_graph$n==0 ){
+  if( spatial_graph$n<=1 ){
     tmb_map$log_kappa = factor(NA)
     #tmb_map$log_tau = factor(NA)
   }
@@ -182,7 +194,12 @@ function( data,
 
   # bundle and return output
   internal = list(
-    ram_output = ram_output
+    ram_output = ram_output,
+    sem = sem,
+    data_colnames = data_colnames,
+    times = times,
+    variables = variables,
+    parlist = obj$env$parList(par=obj$env$last.par.best)
   )
   out = structure( list(
     formula = formula,
@@ -192,7 +209,7 @@ function( data,
     opt = opt,
     rep = obj$report(obj$env$last.par.best),
     sdrep = sdrep,
-    tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par),
+    tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map),
     call = match.call(),
     spatial_graph = spatial_graph,
     data_colnames = data_colnames,
