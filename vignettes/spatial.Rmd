@@ -41,8 +41,11 @@ R = exp(-0.4 * abs(outer(1:10, 1:10, FUN="-")) )
 z = mvtnorm::rmvnorm(1, sigma=kronecker(R,R) )
 t = sample(1:10, replace=TRUE, size=length(z))
 Data = data.frame( expand.grid(x=1:10, y=1:10), t=t, z=as.vector(z) + cos(t/10*2*pi))
-
 Data$n = Data$z + rnorm(nrow(Data), sd=1)
+
+# Add columns for multivariate and temporal dimensions
+Data$time = 1
+Data$var = "n"
 
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
@@ -51,12 +54,13 @@ mesh = fm_mesh_2d( Data[,c('x','y')] )
 out = fit( data = Data,
            formula = n ~ s(t),
            spatial_graph = mesh,
-           quiet = TRUE )
+           quiet = TRUE,
+           sem = "" )
 ```
 
 `tinyVAST` then has a standard `predict` function:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-predict(out, newdata=data.frame(x=1, y=1, t=1) )
+predict(out, newdata=data.frame(x=1, y=1, time=1, t=1, var="n") )
 ```
 
 and this is used to compute the spatial response
@@ -64,7 +68,7 @@ and this is used to compute the spatial response
 # Prediction grid
 pred = outer( seq(1,10,len=51),
               seq(1,10,len=51),
-              FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,t=1)) )
+              FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,t=1,time=1,var="n")) )
 image( x=seq(1,10,len=51), y=seq(1,10,len=51), z=pred, main="Prediction" )
 
 # True value

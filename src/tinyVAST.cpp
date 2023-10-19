@@ -1,5 +1,12 @@
 #define TMB_LIB_INIT R_init_tinyVAST
 #include <TMB.hpp>   //Links in the TMB libraries
+
+// Function for detecting NAs
+template<class Type>
+bool isNA(Type x){
+  return R_IsNA(asDouble(x));
+}
+
 template<class Type>
 Type objective_function<Type>::operator() (){
   //using namespace R_inla;
@@ -27,15 +34,16 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( RAMstart );
 
   // Prediction options
-  DATA_MATRIX(Xpred);       // Design matrix for fixed covariates
-  DATA_UPDATE(Xpred);       //
-  DATA_MATRIX(Zpred);       // Design matrix for splines
-  DATA_UPDATE(Zpred);       //
-  DATA_MATRIX(Apred);       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
-  DATA_UPDATE(Apred);       //
-  DATA_IVECTOR( tpred );
+  DATA_MATRIX(predX);       // Design matrix for fixed covariates
+  //DATA_UPDATE(Xpred);       //
+  DATA_MATRIX(predZ);       // Design matrix for splines
+  //DATA_UPDATE(Zpred);       //
+  DATA_IMATRIX(predAistc);       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
+  DATA_VECTOR( predAx );
+  //DATA_UPDATE(Apred);       //
+  DATA_IVECTOR( predt );
   //DATA_UPDATE( tpred );
-  DATA_IVECTOR( cpred );
+  DATA_IVECTOR( predc );
   //DATA_UPDATE( cpred );
 
   // Params
@@ -117,7 +125,9 @@ Type objective_function<Type>::operator() (){
   Eigen::SparseMatrix<Type> Q_spatial = R_inla::Q_spde(spatial_list, exp(log_kappa));
 
   // distributions
-  nll += SEPARABLE( GMRF(Q_kk), GMRF(Q_spatial) )( epsilon_sk );
+  if( (n_s * n_k) > 0 ){
+    nll += SEPARABLE( GMRF(Q_kk), GMRF(Q_spatial) )( epsilon_sk );
+  }
 
   // Likelihood of spline components
   k = 0;   // Counter
@@ -134,26 +144,32 @@ Type objective_function<Type>::operator() (){
   vector<Type> mu = X*alpha + Z*gamma;
   // Sparse product of matrix A and 3D array epsilon_stc
   for( int row=0; row<Aistc.rows(); row++ ){
-    mu(Aistc(row,0)) += Ax(row) * epsilon_stc(Aistc(row,1),Aistc(row,2),Aistc(row,3)) / exp(log_tau);
+    if( (!isNA(Aistc(row,2))) & (!isNA(Aistc(row,3))) ){   // Ignoring epsilon_stc when `sem` not passed to fit(.)
+      mu(Aistc(row,0)) += Ax(row) * epsilon_stc(Aistc(row,1),Aistc(row,2),Aistc(row,3)) / exp(log_tau);
+    }
   }
   for(int i=0; i<Y.size(); i++){
-    k = c_i(i)*n_t + t_i(i);
-    //mu(i) += x_tc( t_i(i), c_i(i) ) - delta_k(k);
-    mu(i) -= delta_k(k);
+    if( (n_k>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
+      k = c_i(i)*n_t + t_i(i);
+      mu(i) -= delta_k(k);
+    }
     nll -= dnorm(Y(i), mu(i), sigma, true);
   }
 
   // Predictions
-  vector<Type> mu_pred = Xpred*alpha + Zpred*gamma;
-  //for(int i=0; i<Apred.rows(); i++){
-  //  if( (n_t>0) & (n_c>0) ){
-  //    k = cpred(i)*n_t + tpred(i);
-  //    mu_pred(i) -= delta_k(k);
-  //    for( int s=0; s<Apred.cols(); s++ ){
-  //      mu_pred(i) += Apred(i,s) * epsilon_stc(s,tpred(i),cpred(i)) / exp(log_tau);
-  //    }
-  //  }
-  //}
+  vector<Type> mu_pred = predX*alpha + predZ*gamma;
+  // Sparse product of matrix A and 3D array epsilon_stc
+  for( int row=0; row<predAistc.rows(); row++ ){
+    if( (!isNA(predAistc(row,2))) & (!isNA(predAistc(row,3))) ){   // Ignoring epsilon_stc when `sem` not passed to fit(.)
+      mu_pred(predAistc(row,0)) += predAx(row) * epsilon_stc(predAistc(row,1),predAistc(row,2),predAistc(row,3)) / exp(log_tau);
+    }
+  }
+  for( int row=0; row<predAistc.rows(); row++ ){
+    if( (n_k>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
+      k = predAistc(row,3)*n_t + predAistc(row,2);
+      mu_pred(predAistc(row,0)) -= delta_k(k);
+    }
+  }
 
   // Reporting
   Type range = pow(8.0, 0.5) / exp( log_kappa );

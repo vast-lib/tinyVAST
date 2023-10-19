@@ -46,21 +46,21 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group) )
 
 # fit model
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group)
-out = fit( data = Data,
+myfit = fit( data = Data,
            formula = Formula,
            quiet = TRUE )
 ```
 
 `tinyVAST` then has a standard `predict` function:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-predict(out, newdata=data.frame(x=0, y=1, w=0.4, group=2) )
+predict(myfit, newdata=data.frame(x=0, y=1, w=0.4, group=2) )
 ```
 
 and this is used to compute partial-dependence plots using package `pdp`
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # compute partial dependence plot
-Partial = partial( object = out,
+Partial = partial( object = myfit,
                    pred.var = c("w","group"),
                    pred.fun = \(object,newdata) predict(object,newdata),
                    train = Data,
@@ -73,9 +73,9 @@ plotPartial( Partial )
 Alternatively, we can use `visreg` to visualize output:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-visreg(out, xvar="group")
-visreg(out, xvar="x")
-visreg(out, xvar="w", by="group")
+visreg(myfit, xvar="group")
+visreg(myfit, xvar="x")
+visreg(myfit, xvar="w", by="group")
 ```
 
 Similarly, we can fit a grouped 2D spline
@@ -90,12 +90,12 @@ Data$group = factor(Data$group)
 
 # fit model
 Formula = n ~ s(x, y, by=group)
-out = fit( data = Data,
+myfit = fit( data = Data,
            formula = Formula,
            quiet = TRUE )
 
 # compute partial dependence plot
-mypartial = partial( object = out,
+mypartial = partial( object = myfit,
                    pred.var = c("x","y","group"),
                    pred.fun = \(object,newdata) predict(object,newdata),
                    train = Data,
@@ -107,4 +107,11 @@ plotPartial( mypartial )
 # Lattice plot of true values
 mypartial$yhat = Data$z
 plotPartial( mypartial )
+```
+
+We can again use `visreg` to visualize response surfaces, although it doesn't seem possible to extract a grouped spatial term, so we here show only a single term:
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+out = visreg2d( myfit, "x", "y", cond=list("group"=1), plot=FALSE )
+plot( out, main="f(x,y) for group=1")
 ```

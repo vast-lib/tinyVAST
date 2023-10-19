@@ -1,10 +1,10 @@
 ---
-title: "Comparison with mgcv"
+title: "VAST"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{Comparison with mgcv}
+  %\VignetteIndexEntry{VAST}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{pdp}
@@ -37,9 +37,9 @@ We first explore the ability to specify a first-order autoregressive spatio-temp
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate settings
-theta_xy = 0.2
-n_x = n_y = 20
-n_t = 20
+theta_xy = 0.4
+n_x = n_y = 10
+n_t = 10
 rho = 0.8
 spatial_sd = 0.5
 
@@ -63,13 +63,86 @@ mesh = fm_mesh_2d( Data[,c('x','y')] )
 # fit model
 out = fit( sem = "logn -> logn, -1, rho",
            data = Data,
-           formula = n ~ 1,
+           formula = n ~ 0 + factor(time),
            spatial_graph = mesh,
            quiet = TRUE )
 out
 ```
+The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`.
 
-The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`
+We can compare the true densities:
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+library(sf)
+data_wide = reshape( Data[,c('x','y','time','z')],
+                     direction = "wide", idvar = c('x','y'), timevar = "time")
+sf_data = st_as_sf( data_wide, coords=c("x","y"))
+sf_grid = sf::st_make_grid( sf_data )
+sf_plot = st_sf(sf_grid, st_drop_geometry(sf_data) )
+plot(sf_plot, max.plot=n_t )
+```
+
+with the estimated densities:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+Data$z_hat = predict(out)
+data_wide = reshape( Data[,c('x','y','time','z_hat')],
+                     direction = "wide", idvar = c('x','y'), timevar = "time")
+sf_data = st_as_sf( data_wide, coords=c("x","y"))
+sf_plot = st_sf(sf_grid, st_drop_geometry(sf_data) )
+plot(sf_plot, max.plot=n_t )
+```
+
+where a scatterplot shows that they are highly correlated:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+plot( x=Data$z, y=Data$z_hat )
+```
+
+Next, we compare this against the current version of VAST
+```{r, eval=requireNamespace(c("INLA","VAST")), echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+library(INLA)
+library(VAST)
+settings = make_settings( purpose="index3",
+                          n_x = n_x*n_y,
+                          Region = "Other",
+                          bias.correct = FALSE,
+                          use_anisotropy = FALSE )
+settings$FieldConfig['Epsilon','Component_2'] = 0
+settings$FieldConfig['Omega',] = 0
+settings$RhoConfig['Epsilon1'] = 4
+
+myVAST = fit_model( settings=settings,
+                 Lat_i = Data[,'y'],
+                 Lon_i = Data[,'x'],
+                 t_i = Data[,'time'],
+                 b_i = exp(Data[,'n']),
+                 a_i = rep(1,nrow(Data)),
+                 observations_LL = cbind(Lat=Data[,'y'],Lon=Data[,'x']),
+                 grid_dim_km = c(100,100),
+                 ObsModel = c(1,4),
+                 newtonsteps = 0,
+                 loopnum = 0,
+                 control = list(eval.max=100, iter.max=100, trace=0) )
+myVAST
+```
+
+Or with sdmTMB
+
+```{r, eval=requireNamespace(c("INLA","sdmTMB")), echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+library(INLA)
+library(sdmTMB)
+mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
+
+start_time = Sys.time()
+mysdmTMB = sdmTMB(
+  formula = n ~ factor(time),
+  data = Data,
+  mesh = mesh,
+  spatial = "off",
+  spatiotemporal = "ar1",
+  time = "time"
+)
+Sys.time() - start_time
+```
 
 # Bivariate spatio-temporal autoregressive model
 
