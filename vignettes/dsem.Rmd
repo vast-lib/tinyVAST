@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 # Build
 #  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/dsem.Rmd")
 # PDF
-#  library(rmarkdown); render( "vignettes/dsem.Rmd", pdf_document())
+#  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/dsem.Rmd", pdf_document())
 ```
 
 ```{r setup, echo=TRUE, message=FALSE}

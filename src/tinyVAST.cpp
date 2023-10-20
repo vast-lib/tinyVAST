@@ -142,6 +142,7 @@ Type objective_function<Type>::operator() (){
   // Linear predictor
   //vector<Type> mu = X*alpha + Z*gamma + A_is*omega/exp(log_tau);
   vector<Type> mu = X*alpha + Z*gamma;
+  vector<Type> devresid( Y.size() );
   // Sparse product of matrix A and 3D array epsilon_stc
   for( int row=0; row<Aistc.rows(); row++ ){
     if( (!isNA(Aistc(row,2))) & (!isNA(Aistc(row,3))) ){   // Ignoring epsilon_stc when `sem` not passed to fit(.)
@@ -154,6 +155,7 @@ Type objective_function<Type>::operator() (){
       mu(i) -= delta_k(k);
     }
     nll -= dnorm(Y(i), mu(i), sigma, true);
+    devresid(i) = Y(i) - mu(i);
   }
 
   // Predictions
@@ -180,6 +182,7 @@ Type objective_function<Type>::operator() (){
   REPORT( Q_kk );
   REPORT( Q_spatial );
   //REPORT( Q_joint );
+  REPORT( devresid );
 
   return nll;
 }

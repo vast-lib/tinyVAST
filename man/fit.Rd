@@ -7,10 +7,11 @@
 fit(
   data,
   formula,
-  sem,
-  times,
-  variables,
+  sem = NULL,
+  estimate_delta0 = FALSE,
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time"),
+  times = sort(unique(data[, data_colnames$time])),
+  variables = unique(data[, data_colnames$var]),
   spatial_graph = NULL,
   quiet = FALSE
 )

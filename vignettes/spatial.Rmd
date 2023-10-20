@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 # Build
 #  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/spatial.Rmd")
 # PDF
-#  library(rmarkdown); render( "vignettes/spatial.Rmd", pdf_document())
+#  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/spatial.Rmd", pdf_document())
 ```
 
 ```{r setup, echo=TRUE, message=FALSE}
@@ -57,6 +57,43 @@ out = fit( data = Data,
            quiet = TRUE,
            sem = "" )
 ```
+
+# Percent deviance explained
+
+We can compute deviance residuals and percent-deviance explained:
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+R1 = sum( residuals.tinyVAST(out, type="deviance")^2 )
+
+# tinyVAST null model with just a single intercept
+null = fit( data = Data, formula = n ~ 1 )
+R0 = sum( residuals.tinyVAST(null, type="deviance")^2 )
+
+# Percent deviance explained
+1 - R1/R0
+```
+
+We can then compare this with the PDE reported by `mgcv`
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+mygam = gam( n ~ s(t) + s(x,y), data=Data ) #
+summary(mygam)$dev.expl
+```
+
+where this comparison shows that using the SPDE method in tinyVAST results in higher percent-deviance-explained.  This reduced performance for splines relative to the SPDE method presumably arises due to the reduced rank of the spline basis expansion, and the better match for the Matern function (in the SPDE method) relative to the true (simulated) exponential semivariogram.
+
+It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when excluding the spatial term from each.
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+out_reduced = fit( data = Data, formula = n ~ s(t), quiet = TRUE, sem = "" )
+R1_reduced = sum( residuals.tinyVAST(out_reduced, type="deviance")^2 )
+1 - R1_reduced/R0
+
+#
+mygam_reduced = gam( n ~ s(t), data=Data ) #
+summary(mygam_reduced)$dev.expl
+```
+
+# Visualize spatial response
 
 `tinyVAST` then has a standard `predict` function:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
