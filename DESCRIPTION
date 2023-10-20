@@ -1,7 +1,7 @@
 Package: tinyVAST
 Type: Package
 Title: Vector Autoregressive Spatio-Temporal model using minimal feature-set
-Version: 1.0
+Version: 0.1.0
 Date: 2023-10-14
 Authors@R: 
     c(person(given = "James",
