@@ -231,3 +231,97 @@ function( x,
           ... ){
   print(x[c('call','opt','sdrep','run_time')])
 }
+
+#' Calculate residuals
+#'
+#' @title Calculate deviance or response residuals for tinyVAST
+#'
+#' @param object Output from \code{\link{fit}}
+#' @param type which type of residuals to compute (only option is \code{"deviance"} or \code{"response"} for now)
+#' @param ... Note used
+#'
+#' @method residuals dsem
+#' @export
+residuals.tinyVAST <-
+function( object,
+          type = c("deviance","response"),
+          ... ){
+
+  # https://stats.stackexchange.com/questions/1432/what-do-the-residuals-in-a-logistic-regression-mean
+  # Normal deviance residuals
+  if( FALSE ){
+    x = rnorm(10)
+    y = x + rnorm(10)
+    Glm = glm( y ~ 1 + x, family="gaussian")
+    mu = predict(Glm,type="response")
+    r1 = y - mu
+    r1 - resid(Glm)
+  }
+  # Poisson deviance residuals
+  if( FALSE ){
+    x = rnorm(10)
+    y = rpois(10, exp(x))
+    Glm = glm( y ~ 1 + x, family="poisson")
+    mu = predict(Glm,type="response")
+    # https://stats.stackexchange.com/questions/398098/formula-for-deviance-residuals-for-poisson-model-with-identity-link-function
+    r1 = sign(y - mu) * sqrt(2*(y*log((y+1e-10)/mu) - (y-mu)))
+    r1 - resid(Glm)
+  }
+  # Binomial deviance residuals
+  if( FALSE ){
+    p = 0.5
+    y = rbinom(10, prob=p, size=1)
+    Glm = glm( y ~ 1, family="binomial")
+    mu = predict(Glm, type="response")
+    r1 = sign(y - mu) * sqrt(-2*(((1-y)*log(1-mu) + y*log(mu))))
+    r1 - resid(Glm)
+  }
+  # Gamma deviance residuals
+  if( FALSE ){
+    mu = 1
+    cv = 0.8
+    y = rgamma( n=10, shape=1/cv^2, scale=mu*cv^2 )
+    Glm = glm( y ~ 1, family=Gamma(link='log'))
+    mu = predict(Glm, type="response")
+    r1 = sign(y - mu) * sqrt(2 * ( (y-mu)/mu - log(y/mu) ))
+    r1 - resid(Glm)
+  }
+
+  # Poisson: sign(y - mu) * sqrt(2*(ifelse(y==0, 0, y*log(y/mu)) - (y-mu)))
+  # Binomial:  -2 * ((1-y)*log(1-mu) + y*log(mu))
+  # Gamma: 2 * ( (y-mu)/mu - log(y/mu) )
+
+  # Easy of use
+  mu = object$rep$mu
+  Y = object$tmb_inputs$tmb_data$Y
+  #familycode_j = object$tmb_inputs$data$familycode_j
+  report = object$rep
+
+  #
+  type = match.arg(type)
+  if( type == "deviance" ){
+    resid = report$devresid
+  }
+  if( type == "response" ){
+    resid = Y - mu
+  }
+
+  return(resid)
+}
+
+# Extract the (marginal) log-likelihood of a tinyVAST model
+#
+# @return object of class \code{logLik} with attributes
+#   \item{val}{log-likelihood}
+#   \item{df}{number of parameters}
+#' @importFrom stats logLik
+#' @export
+logLik.tinyVAST <- function(object, ...) {
+  val = -1 * object$opt$objective
+  df = length( object$opt$par )
+  out = structure( val,
+             df = df,
+             class = "logLik")
+  return(out)
+}
+
