@@ -5,6 +5,9 @@
 #'
 #' @importFrom dsem make_ram classify_variables parse_path
 #'
+#' @examples
+#' methods(class="tinyVAST")
+#'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
 fit <-
@@ -323,5 +326,44 @@ logLik.tinyVAST <- function(object, ...) {
              df = df,
              class = "logLik")
   return(out)
+}
+
+#' Extract Variance-Covariance Matrix
+#'
+#' extract the covariance of fixed effects, or both fixed and random effects.
+#'
+#' @param object output from \code{fit}
+#' @param which whether to extract the covariance among fixed effects, random effects, or both
+#' @param ... ignored, for method compatibility
+#' @importFrom stats vcov
+#' @method vcov tinyVAST
+#' @export
+vcov.tinyVAST <-
+function( object,
+          which = c("fixed", "random", "both"),
+          ...) {
+
+  which = match.arg(which)
+
+  if( which=="fixed" ){
+    V = object$sdrep$cov.fixed
+    if(is.null(V)){
+      warning("Please re-run `dsem` with `getsd=TRUE`, or confirm that the model is converged")
+    }
+  }
+  if( which=="random" ){
+    V = solve(object$obj$env$spHess(random=TRUE))
+  }
+  if( which=="both" ){
+    H = object$sdrep$jointPrecision
+    if(is.null(H)){
+      warning("Please re-run `dsem` with `getsd=TRUE` and `getJointPrecision=TRUE`, or confirm that the model is converged")
+      V = NULL
+    }else{
+      V = solve(H)
+    }
+  }
+
+  return( V )
 }
 

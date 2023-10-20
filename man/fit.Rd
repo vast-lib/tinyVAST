@@ -20,3 +20,7 @@ fit(
 Fits a vector autoregressive spatio-temporal model using
  a minimal feature-set, and widely used interface for objects
 }
+\examples{
+methods(class="tinyVAST")
+
+}
