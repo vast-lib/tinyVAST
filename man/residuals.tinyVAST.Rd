@@ -4,7 +4,7 @@
 \alias{residuals.tinyVAST}
 \title{Calculate deviance or response residuals for tinyVAST}
 \usage{
-\method{residuals}{dsem}(object, type = c("deviance", "response"), ...)
+\method{residuals}{tinyVAST}(object, type = c("deviance", "response"), ...)
 }
 \arguments{
 \item{object}{Output from \code{\link{fit}}}

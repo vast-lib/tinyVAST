@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 #  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/mgcv.Rmd", pdf_document())
 ```
 
-```{r setup, echo=TRUE}
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(pdp)  # approx = TRUE gives effects for average of other covariates
 library(lattice)
