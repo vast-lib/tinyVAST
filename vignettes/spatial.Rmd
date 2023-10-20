@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 #  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/spatial.Rmd", pdf_document())
 ```
 
-```{r setup, echo=TRUE, message=FALSE}
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(pdp)  # approx = TRUE gives effects for average of other covariates
 library(lattice)
@@ -33,14 +33,16 @@ set.seed(101)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
-We here show how it can fit spatial structural equation models
+We here show how it can fit spatial autoregressive model
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate
-R = exp(-0.4 * abs(outer(1:10, 1:10, FUN="-")) )
+n_x = n_y = 25
+n_t = 10
+R = exp(-0.4 * abs(outer(1:n_x, 1:n_y, FUN="-")) )
 z = mvtnorm::rmvnorm(1, sigma=kronecker(R,R) )
-t = sample(1:10, replace=TRUE, size=length(z))
-Data = data.frame( expand.grid(x=1:10, y=1:10), t=t, z=as.vector(z) + cos(t/10*2*pi))
+t = sample(1:n_t, replace=TRUE, size=length(z))
+Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), t=t, z=as.vector(z) + cos(t/n_t*2*pi))
 Data$n = Data$z + rnorm(nrow(Data), sd=1)
 
 # Add columns for multivariate and temporal dimensions
@@ -48,7 +50,7 @@ Data$time = 1
 Data$var = "n"
 
 # make mesh
-mesh = fm_mesh_2d( Data[,c('x','y')] )
+mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
 
 # fit model
 out = fit( data = Data,
@@ -63,11 +65,11 @@ out = fit( data = Data,
 We can compute deviance residuals and percent-deviance explained:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-R1 = sum( residuals.tinyVAST(out, type="deviance")^2 )
+R1 = sum( residuals(out, type="deviance")^2 )
 
 # tinyVAST null model with just a single intercept
-null = fit( data = Data, formula = n ~ 1 )
-R0 = sum( residuals.tinyVAST(null, type="deviance")^2 )
+null = fit( data = Data, formula = n ~ 1, quiet = TRUE )
+R0 = sum( residuals(null, type="deviance")^2 )
 
 # Percent deviance explained
 1 - R1/R0
@@ -85,7 +87,7 @@ It is then easy to confirm that mgcv and tinyVAST give (essentially) identical P
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 out_reduced = fit( data = Data, formula = n ~ s(t), quiet = TRUE, sem = "" )
-R1_reduced = sum( residuals.tinyVAST(out_reduced, type="deviance")^2 )
+R1_reduced = sum( residuals(out_reduced, type="deviance")^2 )
 1 - R1_reduced/R0
 
 #
@@ -103,13 +105,13 @@ predict(out, newdata=data.frame(x=1, y=1, time=1, t=1, var="n") )
 and this is used to compute the spatial response
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Prediction grid
-pred = outer( seq(1,10,len=51),
-              seq(1,10,len=51),
+pred = outer( seq(1,n_x,len=51),
+              seq(1,n_y,len=51),
               FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,t=1,time=1,var="n")) )
-image( x=seq(1,10,len=51), y=seq(1,10,len=51), z=pred, main="Prediction" )
+image( x=seq(1,n_x,len=51), y=seq(1,n_y,len=51), z=pred, main="Predicted response" )
 
 # True value
-image( x=1:10, y=1:10, z=matrix(Data$z,ncol=10), main="Prediction" )
+image( x=1:n_x, y=1:n_y, z=matrix(Data$z,ncol=n_y), main="True response" )
 ```
 
 We can also compute the marginal time effect

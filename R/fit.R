@@ -240,7 +240,7 @@ function( x,
 #' @param type which type of residuals to compute (only option is \code{"deviance"} or \code{"response"} for now)
 #' @param ... Note used
 #'
-#' @method residuals dsem
+#' @method residuals tinyVAST
 #' @export
 residuals.tinyVAST <-
 function( object,
