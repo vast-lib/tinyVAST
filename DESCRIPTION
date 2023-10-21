@@ -17,7 +17,8 @@ Authors@R:
     )
 Imports:
     visreg,
-    dsem
+    dsem,
+    igraph
 Depends:
     R (>= 4.0.0),
     TMB,
