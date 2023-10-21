@@ -4,6 +4,7 @@
 #'  a minimal feature-set, and widely used interface for objects
 #'
 #' @importFrom dsem make_ram classify_variables parse_path
+#' @importFrom igraph as_adjacency_matrix
 #'
 #' @examples
 #' methods(class="tinyVAST")
@@ -19,7 +20,7 @@ function( data,
           #spatiotemporal_sem,
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time"),
           times = sort(unique(data[,data_colnames$time])),
-          variables = unique(data[,data_colnames$var]),
+          variables = unique(data[,data_colnames$variable]),
           spatial_graph = NULL,
           quiet = FALSE ){
 
@@ -54,18 +55,29 @@ function( data,
 
   # Spatial domain constructor
   if( "fm_mesh_2d" %in% class(spatial_graph) ){
+    n_s = spatial_graph$n
+    spatial_method_code = 1
     spatial_list = fm_fem( spatial_graph )
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
     A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$spatial]) )$proj$A
-  } else if( !is.null(sem) ){
-    spatial_graph = list( "n"=1 )
+  } else if( "igraph" %in% class(spatial_graph) ) {
+    spatial_method_code = 2
+    Adj = as_adjacency_matrix( spatial_graph, sparse=TRUE )
+    n_s = nrow(Adj)
+    Match = match( data[,data_colnames$spatial], rownames(Adj) )
+    if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
+    A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
+  }else if( !is.null(sem) ){
+    spatial_method_code = 3
+    n_s = 1
     A_is = matrix(1, nrow=nrow(data), ncol=1)    # dgCMatrix
     A_is = as(Matrix(A_is),"dgCMatrix")
     spatial_list = list( "M0" = as(Matrix(1,nrow=1,ncol=1),"dgCMatrix"),
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix") )
   } else {
-    spatial_graph = list( "n"=0 )
+    spatial_method_code = 4
+    n_s = 0
     A_is = Matrix(nrow=nrow(data), ncol=0)    # dgCMatrix
     A_is = as(A_is,"dgCMatrix")
     spatial_list = list( "M0" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
@@ -99,8 +111,7 @@ function( data,
 
   # make dat
   tmb_data = list(
-    n_t = length(times),
-    n_c = length(variables),
+    spatial_method_code = spatial_method_code,
     Y = y_i,
     X = X,
     Z = Z,
@@ -108,7 +119,6 @@ function( data,
     c_i = c_i - 1, # -1 to convert to CPP index
     S = S_combined,
     Sdims = Sdims,
-    spatial_list = spatial_list,
     Aistc = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1,     # Triplet form, i, s, t
     Ax = Atriplet$x,
     RAM = as.matrix(na.omit(ram[,1:4])),
@@ -120,6 +130,11 @@ function( data,
     predt = integer(0),
     predc = integer(0)
   )
+  if( spatial_method_code %in% c(1,3,4) ){
+    tmb_data$spatial_list = spatial_list
+  }else if( spatial_method_code %in% 2 ){
+    tmb_data$Adj = Adj
+  }
 
   # Scale starting values with higher value for two-headed than one-headed arrows
   which_nonzero = which(ram[,4]>0)
@@ -135,9 +150,9 @@ function( data,
     beta_z = ifelse(beta_type==1, 0.01, 1),
     log_lambda = rep(0,length(Sdims)), #Log spline penalization coefficients
     log_sigma = 0,
-    delta0_c = rep(0, tmb_data$n_c),
+    delta0_c = rep(0, length(variables)),
     #x_tc = matrix(0, nrow=tmb_data$n_t, ncol=tmb_data$n_c)
-    epsilon_stc = array(0, dim=c(spatial_graph$n,tmb_data$n_t,tmb_data$n_c) )
+    epsilon_stc = array(0, dim=c(n_s, length(times), length(variables)) )
   )
   # Turn off initial conditions
   if( estimate_delta0==FALSE ){
@@ -146,7 +161,7 @@ function( data,
 
   #
   tmb_map = list()
-  if( spatial_graph$n<=1 ){
+  if( tmb_data$spatial_method_code %in% c(3,4) ){
     tmb_map$log_kappa = factor(NA)
     #tmb_map$log_tau = factor(NA)
   }

@@ -11,7 +11,7 @@ fit(
   estimate_delta0 = FALSE,
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time"),
   times = sort(unique(data[, data_colnames$time])),
-  variables = unique(data[, data_colnames$var]),
+  variables = unique(data[, data_colnames$variable]),
   spatial_graph = NULL,
   quiet = FALSE
 )

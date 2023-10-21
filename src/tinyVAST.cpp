@@ -14,8 +14,6 @@ Type objective_function<Type>::operator() (){
   using namespace Eigen;
 
   // Data
-  DATA_INTEGER( n_t );
-  DATA_INTEGER( n_c );
   DATA_VECTOR(Y);        // The response
   DATA_MATRIX(X);        // Design matrix for fixed covariates
   DATA_MATRIX(Z);        // Design matrix for splines
@@ -25,7 +23,7 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR(Sdims);   // Dimensions of blockwise components of S
 
   // Spatial objects
-  DATA_STRUCT(spatial_list, R_inla::spde_t);
+  DATA_INTEGER( spatial_method_code );
   DATA_IMATRIX(Aistc);
   DATA_VECTOR(Ax);
 
@@ -60,12 +58,14 @@ Type objective_function<Type>::operator() (){
   PARAMETER_ARRAY( epsilon_stc );
 
   Type nll = 0;
+
   // Assemble precision
+  int n_c = epsilon_stc.cols();
+  int n_t = epsilon_stc.col(0).cols();
+  int n_s = epsilon_stc.rows();
   int n_k = n_t * n_c;      // data
   int k;
-  int n_s = epsilon_stc.rows();
   Eigen::SparseMatrix<Type> Q_kk( n_k, n_k );
-  Type log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
   // SEM
   Eigen::SparseMatrix<Type> Linv_kk(n_k, n_k);
   Eigen::SparseMatrix<Type> Rho_kk(n_k, n_k);
@@ -122,7 +122,23 @@ Type objective_function<Type>::operator() (){
     k = c*n_t + t;
     epsilon_sk(s,k) = epsilon_stc(s,t,c);
   }}}
-  Eigen::SparseMatrix<Type> Q_spatial = R_inla::Q_spde(spatial_list, exp(log_kappa));
+
+  // Spatial distribution
+  Type log_tau = 0;
+  Eigen::SparseMatrix<Type> Q_spatial;
+  if( (spatial_method_code==1) | (spatial_method_code==3) | (spatial_method_code==4) ){
+    log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
+    DATA_STRUCT(spatial_list, R_inla::spde_t);
+    Q_spatial = R_inla::Q_spde(spatial_list, exp(log_kappa));
+  }else if( spatial_method_code==2 ){
+    log_tau = 0.0;
+    DATA_SPARSE_MATRIX( Adj );
+    Eigen::SparseMatrix<Type> I_ss( Adj.rows(), Adj.rows() );
+    Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
+    I_ss.setIdentity();
+    Lspatial_ss = ( I_ss - exp(log_kappa)*Adj );
+    Q_spatial = Lspatial_ss.transpose() * Lspatial_ss;
+  }
 
   // distributions
   if( (n_s * n_k) > 0 ){
