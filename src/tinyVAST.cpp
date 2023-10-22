@@ -43,6 +43,7 @@ Type objective_function<Type>::operator() (){
   //DATA_UPDATE( tpred );
   DATA_IVECTOR( predc );
   //DATA_UPDATE( cpred );
+  //DATA_VECTOR( expansion );
 
   // Params
   PARAMETER(log_kappa);
