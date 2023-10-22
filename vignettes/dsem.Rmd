@@ -39,10 +39,11 @@ data$logn = unlist(log(isle_royale[2:3]))
 
 # Define cross-lagged SEM
 sem = "
-  wolves -> wolves, -1, arW
-  moose -> wolves, -1, MtoW
-  wolves -> moose, -1, WtoM
-  moose -> moose, -1, arM
+  # Link, lag, param_name
+  wolves -> wolves, 1, arW
+  moose -> wolves, 1, MtoW
+  wolves -> moose, 1, WtoM
+  moose -> moose, 1, arM
   wolves -> moose, 0, corr
 "
 
