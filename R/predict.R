@@ -45,6 +45,10 @@ function( object,
   # Assemble Apred_is
   if( "fm_mesh_2d" %in% class(object$spatial_graph) ){
     predA_is = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,object$internal$data_colnames$spatial]) )$proj$A
+  }else if( "igraph" %in% class(spatial_graph) ) {
+    Match = match( newdata[,object$internal$data_colnames$spatial], rownames(object$tmb_inputs$tmb_data$Adj) )
+    if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
+    predA_is = sparseMatrix( i=1:nrow(newdata), j=Match, x=rep(1,nrow(newdata)) )
   }else if( !is.null(object$internal$sem) ){
     predA_is = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
     predA_is = as(Matrix(predA_is),"dgCMatrix")
