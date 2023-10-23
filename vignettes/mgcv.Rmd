@@ -46,6 +46,19 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group) )
 
 # fit model
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group)
+if( FALSE ){
+  data = Data
+  formula = Formula
+  quiet = TRUE
+  sem = NULL
+  estimate_delta0 = FALSE
+  data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time")
+  #times = sort(unique(data[,data_colnames$time])),
+  #variables = unique(data[,data_colnames$variable]),
+  spatial_graph = NULL
+  source( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\R\internal.R)' )
+}
+
 myfit = fit( data = Data,
            formula = Formula,
            quiet = TRUE )
