@@ -98,8 +98,8 @@ function( data,
 
   # Get covariates
   which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
-  X = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
-  Z = gam_setup$X[,which_se,drop=FALSE]
+  X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
+  Z_ik = gam_setup$X[,which_se,drop=FALSE]
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(times>0) ){
@@ -112,23 +112,23 @@ function( data,
   # make dat
   tmb_data = list(
     spatial_method_code = spatial_method_code,
-    Y = y_i,
-    X = X,
-    Z = Z,
+    y_i = y_i,
+    X_ij = X_ij,
+    Z_ik = Z_ik,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     S = S_combined,
     Sdims = Sdims,
-    Aistc = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1,     # Triplet form, i, s, t
-    Ax = Atriplet$x,
+    Aistc_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1,     # Index form, i, s, t
+    Axi_z = Atriplet$x,
     RAM = as.matrix(na.omit(ram[,1:4])),
     RAMstart = as.numeric(ram[,5]),
-    predX = matrix(0,ncol=ncol(X),nrow=0),
-    predZ = matrix(0,ncol=ncol(Z),nrow=0),
-    predAistc = matrix(0,nrow=0,ncol=4),
-    predAx = numeric(0),
-    predt = integer(0),
-    predc = integer(0)
+    X_gj = matrix(0,ncol=ncol(X_ij),nrow=0),
+    Z_gk = matrix(0,ncol=ncol(Z_ik),nrow=0),
+    Agstc_zz = matrix(0,nrow=0,ncol=4),
+    Axg_z = numeric(0),
+    t_g = integer(0),
+    c_g = integer(0)
   )
   if( spatial_method_code %in% c(1,3,4) ){
     tmb_data$spatial_list = spatial_list
@@ -144,8 +144,8 @@ function( data,
   tmb_par = list(
     log_kappa = log(1),
     #log_tau = log(1),
-    alpha = rep(0,ncol(X)),  # Spline coefficients
-    gamma = rep(0,ncol(Z)),  # Spline coefficients
+    alpha_j = rep(0,ncol(X_ij)),  # Spline coefficients
+    gamma_k = rep(0,ncol(Z_ik)),  # Spline coefficients
     #omega = rep(0, spatial_graph$n),
     beta_z = ifelse(beta_type==1, 0.01, 1),
     log_lambda = rep(0,length(Sdims)), #Log spline penalization coefficients
@@ -172,22 +172,8 @@ function( data,
     dyn.unload(dynlib("tinyVAST"))
     compile("tinyVAST.cpp")
     dyn.load(dynlib("tinyVAST"))
-
-    #
-    error_dir = R'(C:\Users\James.Thorson\Desktop\Work files\Collaborations\2024 -- tinyVAST\reproducible_example)'
-    error = readRDS( file.path(error_dir,"error.RDS") )
-    lapply( error, dim )
-
-    #
-    #tmb_par = tmb_data = NULL
-    tmb_par$epsilon_sk = error$epsilon_sk
-    tmb_data$Q_spatial = error$Q_spatial
-    tmb_data$Q_kk = error$Q_kk
-    lapply( tmb_data, dim )
-    lapply( tmb_par, dim )
   }
-  #obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma","omega","x_tc"), DLL="tinyVAST" )
-  obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma","epsilon_stc"), DLL="tinyVAST" )  #
+  obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma_k","epsilon_stc"), DLL="tinyVAST" )  #
   # Experiment with Q_jonit
   if( FALSE ){
     rep = obj$report()

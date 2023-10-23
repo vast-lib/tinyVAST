@@ -27,10 +27,10 @@ function( object,
   }
 
   # Assemble predZ
-  predZ = lapply( seq_along(gam$smooth),
+  Z_gk = lapply( seq_along(gam$smooth),
                   FUN = \(x) PredictMat(gam$smooth[[x]], data=newdata) )
-  predZ = do.call( cbind, predZ )
-  if(is.null(predZ)) predZ = matrix(0, nrow=nrow(newdata),ncol=ncol(tmb_data$Z))
+  Z_gk = do.call( cbind, Z_gk )
+  if(is.null(Z_gk)) Z_gk = matrix(0, nrow=nrow(newdata),ncol=ncol(tmb_data$Z_ik))
 
   # Assemble predX
   formula_no_sm = remove_s_and_t2(gam$formula)
@@ -40,12 +40,12 @@ function( object,
   attr(terms2, "predvars") = attr(terms1, "predvars")
   terms2 = stats::delete.response(terms2)
   mf2 = model.frame(terms2, newdata, xlev=.getXlevels(terms1,mf1))
-  predX = model.matrix(terms2, mf2)
+  X_gj = model.matrix(terms2, mf2)
 
   # Assemble Apred_is
   if( "fm_mesh_2d" %in% class(object$spatial_graph) ){
     predA_is = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,object$internal$data_colnames$spatial]) )$proj$A
-  }else if( "igraph" %in% class(spatial_graph) ) {
+  }else if( "igraph" %in% class(object$spatial_graph) ) {
     Match = match( newdata[,object$internal$data_colnames$spatial], rownames(object$tmb_inputs$tmb_data$Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     predA_is = sparseMatrix( i=1:nrow(newdata), j=Match, x=rep(1,nrow(newdata)) )
@@ -60,11 +60,11 @@ function( object,
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(object$internal$times>0) ){
-    predt_i = match( newdata[,object$internal$data_colnames$time], object$internal$times )
-  }else{ predt_i = integer(0) }
+    t_g = match( newdata[,object$internal$data_colnames$time], object$internal$times )
+  }else{ t_g = integer(0) }
   if( length(object$internal$variables>0) ){
-    predc_i = match( newdata[,object$internal$data_colnames$var], object$internal$variables )
-  }else{ predc_i = integer(0) }
+    c_g = match( newdata[,object$internal$data_colnames$var], object$internal$variables )
+  }else{ c_g = integer(0) }
 
   #
   #object$obj$env$data$predX = predX          # object$tmb_inputs$tmb_data$X
@@ -74,24 +74,24 @@ function( object,
 
   # Error checks
   tmb_data2 = object$tmb_inputs$tmb_data
-  if( ncol(tmb_data2$X) != ncol(predX) ) stop("Check predX")
-  if( ncol(tmb_data2$Z) != ncol(predZ) ) stop("Check predZ")
+  if( ncol(tmb_data2$X_ij) != ncol(X_gj) ) stop("Check X_gj")
+  if( ncol(tmb_data2$Z_ik) != ncol(Z_gk) ) stop("Check Z_gk")
 
   # Swap in new predictive stuff
-  tmb_data2$predX = predX
-  tmb_data2$predZ = predZ
-  tmb_data2$predAistc = cbind(predAtriplet$i, predAtriplet$j, predt_i[predAtriplet$i], predc_i[predAtriplet$i]) - 1    # Triplet form, i, s, t
-  tmb_data2$predAx = predAtriplet$x
-  tmb_data2$predt_i = predt_i
-  tmb_data2$predc_i = predc_i
+  tmb_data2$X_gj = X_gj
+  tmb_data2$Z_gk = Z_gk
+  tmb_data2$Agstc_zz = cbind(predAtriplet$i, predAtriplet$j, t_g[predAtriplet$i], c_g[predAtriplet$i]) - 1    # Triplet form, i, s, t
+  tmb_data2$Axg_z = predAtriplet$x
+  tmb_data2$t_g = t_g - 1 # Convert to CPP indexing
+  tmb_data2$c_g = c_g - 1 # Convert to CPP indexing
 
   # Rebuild object
   newobj = MakeADFun( data = tmb_data2,
                       parameters = object$internal$parlist,
                       map = object$tmb_inputs$tmb_map,
-                      random = c("gamma","epsilon_stc"),
+                      random = c("gamma_k","epsilon_stc"),
                       DLL = "tinyVAST" )
-  out = newobj$report()$mu_pred
+  out = newobj$report()$p_g
 
   return(out)
 }
