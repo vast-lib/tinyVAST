@@ -46,19 +46,6 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group) )
 
 # fit model
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group)
-if( FALSE ){
-  data = Data
-  formula = Formula
-  quiet = TRUE
-  sem = NULL
-  estimate_delta0 = FALSE
-  data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time")
-  #times = sort(unique(data[,data_colnames$time])),
-  #variables = unique(data[,data_colnames$variable]),
-  spatial_graph = NULL
-  source( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\R\internal.R)' )
-}
-
 myfit = fit( data = Data,
            formula = Formula,
            quiet = TRUE )
@@ -90,6 +77,16 @@ visreg(myfit, xvar="group")
 visreg(myfit, xvar="x")
 visreg(myfit, xvar="w", by="group")
 ```
+
+Alternatively, we can calculate derived quantities via Monte Carlo integration of the estimated density function:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Predicted sample-weighted total
+integrate_output(myfit)
+
+# True (latent) sample-weighted total
+sum( Data$z )
+```
+
 
 Similarly, we can fit a grouped 2D spline
 

@@ -6,6 +6,13 @@
 \usage{
 \method{predict}{tinyVAST}(object, newdata, ...)
 }
+\arguments{
+\item{object}{Output from [fit()].}
+
+\item{newdata}{New data-frame of independent variables used to predict the response.}
+
+\item{...}{Not used.}
+}
 \description{
 Predicts values given new covariates using a tinyVAST model
 }

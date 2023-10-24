@@ -32,11 +32,11 @@ Type objective_function<Type>::operator() (){
   DATA_MATRIX( Z_ik );        // Design matrix for splines
   DATA_IVECTOR( t_i );
   DATA_IVECTOR( c_i );
-  DATA_SPARSE_MATRIX( S ); // Sparse penalization matrix
-  DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S
+  DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
+  DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
 
   // Spatial objects
-  DATA_INTEGER( spatial_method_code );
+  DATA_INTEGER( spatial_method_code );   // Switch to string: https://kaskr.github.io/adcomp/compois_8cpp-example.html#a2
   DATA_IMATRIX( Aistc_zz );
   DATA_VECTOR( Axi_z );
 
@@ -51,10 +51,17 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( Axg_z );
   DATA_IVECTOR( t_g );
   DATA_IVECTOR( c_g );
-  //DATA_VECTOR( expansion );
+
+  // Expansion options
+  DATA_MATRIX( W_gz );            // Covariates for expansion
+    // W_gz.col(0): Area
+    // W_gz.col(1): Extra covariate, e.g., coordinates
+  DATA_IMATRIX( V_gz );            // Settings for expansion
+    // E_gz.col(0) : Expansion Type ( 0=sum(D*Area);  1=weighted.mean(W_gz.col(1),w=D*Area))
+    // E_gz.col(1) : Prior row for bivariate weighting
 
   // Params
-  PARAMETER(log_kappa);
+  PARAMETER( log_kappa );
   PARAMETER_VECTOR( alpha_j ); // Fixed covariate parameters
   PARAMETER_VECTOR( gamma_k ); // Spline regression parameters
   //PARAMETER_VECTOR(omega); // SPDE random effecs
@@ -158,7 +165,7 @@ Type objective_function<Type>::operator() (){
   for(int z=0; z<Sdims.size(); z++){
     int m_z = Sdims(z);
     vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
-    SparseMatrix<Type> S_block = S.block(k,k,m_z,m_z);  // Recover S_i
+    SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
     nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*lambda(z)*GMRF(S_block).Quadform(gamma_segment);
     k += m_z;
   }
@@ -188,14 +195,50 @@ Type objective_function<Type>::operator() (){
       p_g(g) -= delta_h(h);
     }
   }
+  vector<Type> mu_g = p_g;
+
+  // Expansion
+  if( (W_gz.rows()==mu_g.size()) & (V_gz.rows()==mu_g.size()) ){
+    // First sweep
+    vector<Type> phi0_g( mu_g.size() );
+    for( int g=0; g<mu_g.size(); g++ ){
+      if( (V_gz(g,0)==0) | (V_gz(g,0)==1) | (V_gz(g,0)==2) ){
+        // Area-weighted average
+        phi0_g(g) = mu_g(g) * W_gz(g,0);
+      }
+    }
+    Type sumphi0 = sum(phi0_g);
+    REPORT( phi0_g );
+
+    // Second sweep for covariate or density-weighted averages
+    vector<Type> phi_g( mu_g.size() );
+    phi_g.setZero();
+    for( int g=0; g<mu_g.size(); g++ ){
+      if( V_gz(g,0)==0 ){
+        phi_g(g) = phi0_g(g);
+      }
+      if( V_gz(g,0)==1 ){
+        // density-weighted average of W_gz(g,1)
+        phi_g(g) = (phi0_g(g) / sumphi0) * W_gz(g,1);
+      }
+      if( (V_gz(g,0)==2) & (!isNA(V_gz(g,1))) & (V_gz(g,1)<=g) ){
+        // density-weighted average of prediction
+        phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
+      }
+    }
+    Type Metric = sum(phi_g);
+    REPORT( phi_g );
+    REPORT( Metric );
+    ADREPORT( Metric );
+  }
 
   // Reporting
   Type range = pow(8.0, 0.5) / exp( log_kappa );
   REPORT( range );
   REPORT( p_i );
-  REPORT( p_g );
-  REPORT( Q_hh );
-  REPORT( Q_ss );
+  if(p_g.size()>0){ REPORT( p_g ); }
+  //REPORT( Q_hh );
+  //REPORT( Q_ss );
   //REPORT( Q_joint );
   REPORT( devresid_i );
 
