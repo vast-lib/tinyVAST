@@ -9,12 +9,38 @@ fit(
   formula,
   sem = NULL,
   estimate_delta0 = FALSE,
+  family_link = c(0, 0),
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time"),
   times = sort(unique(data[, data_colnames$time])),
   variables = unique(data[, data_colnames$variable]),
   spatial_graph = NULL,
-  quiet = FALSE
+  quiet = FALSE,
+  ...
 )
+}
+\arguments{
+\item{data}{Data-frame of predictor and response variables.}
+
+\item{formula}{Formula with response on left-hand-side and predictors on right-hand-side,
+parsed by \code{mgcv} and hence allowing \code{s(.)} for splines}
+
+\item{sem}{Specification for time-series structural equation model structure
+including lagged or simultaneous effects.  See Details section in
+'code{\link[dsem]{make_ram}} for details}
+
+\item{estimate_delta0}{Boolean indicating whether to estimate deviations from equilibrium in initial year
+as fixed effects, or alternatively to assume that dynamics start at some stochastic draw away from
+the stationary distribution}
+
+\item{family_link}{Vector of length-two, indicating the distribution and link-function}
+
+\item{spatial_graph}{Object that represents spatial relationships, either using \code{fmesher}
+to apply the SPDE method, or \code{igraph} to apply a simultaneous autoregressive (SAR)
+process.}
+
+\item{quiet}{Boolean indicating whether to run model printing messages to terminal or not;}
+
+\item{...}{Additional parameters passed to \code{\link[dsem]{fit_tmb}}}
 }
 \description{
 Fits a vector autoregressive spatio-temporal model using

@@ -114,10 +114,10 @@ function( data,
   Z_ik = gam_setup$X[,which_se,drop=FALSE]
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
-  if( length(times>0) ){
+  if( length(times) > 0 ){
     t_i = match( data[,data_colnames$time], times )
   }else{ t_i = integer(0) }
-  if( length(variables>0) ){
+  if( length(variables) > 0 ){
     c_i = match( data[,data_colnames$var], variables )
   }else{ c_i = integer(0) }
 
