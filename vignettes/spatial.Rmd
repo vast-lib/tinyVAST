@@ -66,7 +66,7 @@ We can then calculate the area-weighted total abundance:
 integrate_output(out)
 
 # True (latent) sample-weighted total
-sum( Data$n )
+sum( Data$z )
 ```
 
 

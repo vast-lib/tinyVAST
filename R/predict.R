@@ -33,7 +33,7 @@ function( object,
                       map = object$tmb_inputs$tmb_map,
                       random = c("gamma_k","epsilon_stc"),
                       DLL = "tinyVAST" )
-  out = newobj$report()$p_g
+  out = newobj$report()$mu_g
 
   return(out)
 }
@@ -77,11 +77,13 @@ function( object,
                       map = object$tmb_inputs$tmb_map,
                       random = c("gamma_k","epsilon_stc"),
                       DLL = "tinyVAST" )
+  newobj$env$beSilent()
+
+  # Run sdreport
   newsd = sdreport( obj = newobj,
                     par.fixed = object$opt$par,
                     hessian.fixed = object$internal$Hess_fixed,
                     bias.correct = bias.correct )
-  #out = as.list(newsd, what="Estimate", report=TRUE)$Metric
   out = summary(newsd, "report")['Metric',]
 
   return(out)

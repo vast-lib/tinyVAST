@@ -3,6 +3,16 @@
 #' @description Fits a vector autoregressive spatio-temporal model using
 #'  a minimal feature-set, and widely used interface for objects
 #'
+#' @inheritParams dsem::dsem
+#'
+#' @param data Data-frame of predictor and response variables.
+#' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
+#'          parsed by \code{mgcv} and hence allowing \code{s(.)} for splines
+#' @param family_link Vector of length-two, indicating the distribution and link-function
+#' @param spatial_graph Object that represents spatial relationships, either using \code{fmesher}
+#'        to apply the SPDE method, or \code{igraph} to apply a simultaneous autoregressive (SAR)
+#'        process.
+#'
 #' @importFrom dsem make_ram classify_variables parse_path
 #' @importFrom igraph as_adjacency_matrix
 #'
@@ -16,13 +26,15 @@ function( data,
           formula,
           sem = NULL,
           estimate_delta0 = FALSE,
+          family_link = c(0,0),
           #spatial_sem,
           #spatiotemporal_sem,
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time"),
           times = sort(unique(data[,data_colnames$time])),
           variables = unique(data[,data_colnames$variable]),
           spatial_graph = NULL,
-          quiet = FALSE ){
+          quiet = FALSE,
+          ... ){
 
   start_time = Sys.time()
   # SEM stuff
@@ -117,6 +129,7 @@ function( data,
     Z_ik = Z_ik,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
+    f_z = family_link,
     S_kk = S_kk,
     Sdims = Sdims,
     Aistc_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1,     # Index form, i, s, t
@@ -142,16 +155,22 @@ function( data,
   which_nonzero = which(ram[,4]>0)
   beta_type = tapply( ram[which_nonzero,1], INDEX=ram[which_nonzero,4], max)
 
+  #
+  if( family_link[1]==0 ){
+    log_sigma = c(0)
+  }else if( family_link[1]==1 ){
+    log_sigma = c(0, 0)
+  }else{ stop("Check `family_link`")}
+
   # make params
   tmb_par = list(
     log_kappa = log(1),
-    #log_tau = log(1),
     alpha_j = rep(0,ncol(X_ij)),  # Spline coefficients
     gamma_k = rep(0,ncol(Z_ik)),  # Spline coefficients
     #omega = rep(0, spatial_graph$n),
     beta_z = ifelse(beta_type==1, 0.01, 1),
     log_lambda = rep(0,length(Sdims)), #Log spline penalization coefficients
-    log_sigma = 0,
+    log_sigma = log_sigma,
     delta0_c = rep(0, length(variables)),
     #x_tc = matrix(0, nrow=tmb_data$n_t, ncol=tmb_data$n_c)
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables)) )
@@ -176,6 +195,7 @@ function( data,
     dyn.load(dynlib("tinyVAST"))
   }
   obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma_k","epsilon_stc"), DLL="tinyVAST" )  #
+  openmp( ... , DLL="tinyVAST" )
   # Experiment with Q_jonit
   if( FALSE ){
     rep = obj$report()

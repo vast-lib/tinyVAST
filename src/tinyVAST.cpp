@@ -20,11 +20,42 @@ vector<Type> multiply_3d_sparse( matrix<int> A, vector<Type> weight, array<Type>
   return out;
 }
 
+// get sign of double, only for REPORT use
+template<class Type>
+Type sign(Type x){
+  return x / pow(pow(x,2),0.5);
+}
+
+// Deviance for the Tweedie
+// https://en.wikipedia.org/wiki/Tweedie_distribution#Properties
+template<class Type>
+Type devresid_tweedie( Type y,
+                       Type mu,
+                       Type p ){
+
+  Type c1 = pow( y, 2.0-p ) / (1.0-p) / (2.0-p);
+  Type c2 = y * pow( mu, 1.0-p ) / (1.0-p);
+  Type c3 = pow( mu, 2.0-p ) / (2.0-p);
+  Type deviance = 2 * (c1 - c2 + c3 );
+  Type devresid = sign( y - mu ) * pow( deviance, 0.5 );
+  return devresid;
+}
+
+// Coding principles
+// 1. Don't telescope model features using `map` (which is bug-prone), but
+//    instead use 0-length vectors/matrices
+// 2. Use Roman for data, Greek for parameters
+// 3. Name objects with [var]_[indices] so that number of indices indicates
+//    dimensionality
+
 template<class Type>
 Type objective_function<Type>::operator() (){
   //using namespace R_inla;  // Not loaded globally, but used below
   using namespace density;
   using namespace Eigen;
+
+  // Settings
+  DATA_IVECTOR( f_z );      // family/link
 
   // Data
   DATA_VECTOR( y_i );        // The response
@@ -157,7 +188,7 @@ Type objective_function<Type>::operator() (){
 
   // distributions
   if( (n_s>0) & (n_h>0) ){
-    nll += SEPARABLE( GMRF(Q_hh), GMRF(Q_ss) )( epsilon_sh );
+    PARALLEL_REGION nll += SEPARABLE( GMRF(Q_hh), GMRF(Q_ss) )( epsilon_sh );
   }
 
   // Likelihood of spline components
@@ -166,7 +197,7 @@ Type objective_function<Type>::operator() (){
     int m_z = Sdims(z);
     vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
     SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*lambda(z)*GMRF(S_block).Quadform(gamma_segment);
+    PARALLEL_REGION nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*lambda(z)*GMRF(S_block).Quadform(gamma_segment);
     k += m_z;
   }
 
@@ -181,13 +212,27 @@ Type objective_function<Type>::operator() (){
   }
   // Likelihood
   vector<Type> devresid_i( y_i.size() );
-  for( int i=0; i<y_i.size(); i++ ){
-    nll -= dnorm( y_i(i), p_i(i), exp(log_sigma(0)), true );
-    devresid_i(i) = y_i(i) - p_i(i);
+  vector<Type> mu_i( y_i.size() );
+  for( int i=0; i<y_i.size(); i++ ) PARALLEL_REGION{
+    switch( f_z(0) ){
+      case 0:
+        mu_i(i) = p_i(i);
+        nll -= dnorm( y_i(i), mu_i(i), exp(log_sigma(0)), true );
+        devresid_i(i) = y_i(i) - p_i(i);
+        break;
+      case 1:
+        mu_i(i) = exp(p_i(i));
+        nll -= dtweedie( y_i(i), mu_i(i), exp(log_sigma(0)), 1.0 + invlogit(log_sigma(1)), true );
+        devresid_i(i) = devresid_tweedie( y_i(i), mu_i(i), 1.0 + invlogit(log_sigma(1)) );
+        break;
+      default:
+        error("Family not implemented.");
+    }
   }
 
   // Predictions
   vector<Type> p_g = X_gj*alpha_j + Z_gk*gamma_k;
+  vector<Type> mu_g( p_g.size() );
   p_g += multiply_3d_sparse( Agstc_zz, Axg_z, epsilon_stc, p_g.size() ) / exp(log_tau);
   for( int g=0; g<p_g.size(); g++ ){
     if( (n_h>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
@@ -195,7 +240,16 @@ Type objective_function<Type>::operator() (){
       p_g(g) -= delta_h(h);
     }
   }
-  vector<Type> mu_g = p_g;
+  for( int g=0; g<p_g.size(); g++ ){
+    switch( f_z(0) ){
+      case 0:
+        mu_g(g) = p_g(g);
+        break;
+      case 1:
+        mu_g(g) = exp(p_g(g));
+        break;
+    }
+  }
 
   // Expansion
   if( (W_gz.rows()==mu_g.size()) & (V_gz.rows()==mu_g.size()) ){
@@ -236,7 +290,11 @@ Type objective_function<Type>::operator() (){
   Type range = pow(8.0, 0.5) / exp( log_kappa );
   REPORT( range );
   REPORT( p_i );
-  if(p_g.size()>0){ REPORT( p_g ); }
+  REPORT( mu_i );
+  if(p_g.size()>0){
+    REPORT( p_g );
+    REPORT( mu_g );
+  }
   //REPORT( Q_hh );
   //REPORT( Q_ss );
   //REPORT( Q_joint );
