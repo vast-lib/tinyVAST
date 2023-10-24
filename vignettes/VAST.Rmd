@@ -58,7 +58,6 @@ for( t in seq_len(n_t) ){
 #Data$n = Data$z + rnorm(nrow(Data), sd=0.2)
 Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), "var"="logn", z=exp(as.vector(d)))
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
-summary(Data)
 mean(Data$n==0)
 
 # make mesh
@@ -196,12 +195,10 @@ d = abind::abind( d1, d2, along=3 )
 for( t in seq_len(n_t) ){
   if(t>1) d[t,,] = t(B%*%t(d[t-1,,])) + d[t,,]
 }
-d[,,1] = d[,,1] + 2
-d[,,2] = d[,,2] + 3
 
 # Shape into longform data-frame and add error
-Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")), z=as.vector(d))
-Data$n = Data$z + rnorm(nrow(Data), sd=0.2)
+Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")), z=exp(as.vector(d)))
+Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
 
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
@@ -221,8 +218,39 @@ out = fit( sem = sem,
            data = Data,
            formula = n ~ 0 + var,
            spatial_graph = mesh,
-           quiet = TRUE )
+           quiet = TRUE,
+           family_link = c(1,0) )
 out
 ```
 
 The values for `beta_z` again correspond to the specified value for interaction-matrix `B`
+
+We can again calculate the area-weighted total abundance and compare it with its true value:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Predicted sample-weighted total
+integrate_output(out, newdata=subset(Data,time==1 & var=="d1") )
+
+Est1 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d1")) )
+Est2 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d2")) )
+
+# True (latent) sample-weighted total
+True = tapply( Data$z, INDEX=list("time"=Data$time,"var"=Data$var), FUN=sum )
+
+#
+Index = data.frame( expand.grid(dimnames(True)), "True"=as.vector(True) )
+Index = data.frame( Index, rbind(t(Est1), t(Est2)) )
+Index$low = Index[,'Est...bias.correct.'] - 1.96*Index[,'Std..Error']
+Index$high = Index[,'Est...bias.correct.'] + 1.96*Index[,'Std..Error']
+
+#
+library(ggplot2)
+ggplot(Index, aes( time, Estimate )) +
+  facet_grid( rows=vars(var), scales="free" ) +
+  geom_segment(aes(y = low,
+                  yend = high,
+                  x = time,
+                  xend = time) ) +
+  geom_point( aes(x=time, y=Estimate), color = "black") +
+  geom_point( aes(x=time, y=True), color = "red" )
+```
+

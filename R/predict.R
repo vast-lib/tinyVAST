@@ -150,10 +150,10 @@ function( object,
   predAtriplet = Matrix::mat2triplet(predA_is)
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
-  if( length(object$internal$times>0) ){
+  if( length(object$internal$times) > 0 ){
     t_g = match( newdata[,object$internal$data_colnames$time], object$internal$times )
   }else{ t_g = integer(0) }
-  if( length(object$internal$variables>0) ){
+  if( length(object$internal$variables) > 0 ){
     c_g = match( newdata[,object$internal$data_colnames$var], object$internal$variables )
   }else{ c_g = integer(0) }
 
