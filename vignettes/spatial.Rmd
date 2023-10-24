@@ -60,6 +60,16 @@ out = fit( data = Data,
            sem = "" )
 ```
 
+We can then calculate the area-weighted total abundance:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Predicted sample-weighted total
+integrate_output(out)
+
+# True (latent) sample-weighted total
+sum( Data$n )
+```
+
+
 # Percent deviance explained
 
 We can compute deviance residuals and percent-deviance explained:

@@ -92,7 +92,7 @@ function( data,
 
   # Extrtact and combine penelization matrices
   S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
-  S_combined = .bdiag(S_list)         # join S's in sparse matrix
+  S_kk = .bdiag(S_list)         # join S's in sparse matrix
   Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
   if(is.null(Sdims)) Sdims = vector(length=0)
 
@@ -117,7 +117,7 @@ function( data,
     Z_ik = Z_ik,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
-    S = S_combined,
+    S_kk = S_kk,
     Sdims = Sdims,
     Aistc_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1,     # Index form, i, s, t
     Axi_z = Atriplet$x,
@@ -128,7 +128,9 @@ function( data,
     Agstc_zz = matrix(0,nrow=0,ncol=4),
     Axg_z = numeric(0),
     t_g = integer(0),
-    c_g = integer(0)
+    c_g = integer(0),
+    W_gz = matrix(0,nrow=0,ncol=2),
+    V_gz = matrix(0,nrow=0,ncol=2)
   )
   if( spatial_method_code %in% c(1,3,4) ){
     tmb_data$spatial_list = spatial_list
@@ -194,7 +196,8 @@ function( data,
   obj$env$beSilent()
   opt = nlminb( start=obj$par, obj=obj$fn, gr=obj$gr,
                 control=list(eval.max=1e4, iter.max=1e4, trace=ifelse(isTRUE(quiet),0,1)) )
-  sdrep = sdreport(obj)
+  Hess_fixed = optimHess( par=opt$par, fn=obj$fn, gr=obj$gr )
+  sdrep = sdreport( obj, hessian.fixed=Hess_fixed )
 
   # bundle and return output
   internal = list(
@@ -203,7 +206,8 @@ function( data,
     data_colnames = data_colnames,
     times = times,
     variables = variables,
-    parlist = obj$env$parList(par=obj$env$last.par.best)
+    parlist = obj$env$parList(par=obj$env$last.par.best),
+    Hess_fixed = Hess_fixed
   )
   out = structure( list(
     formula = formula,
