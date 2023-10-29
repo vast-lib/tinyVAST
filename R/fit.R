@@ -4,6 +4,7 @@
 #'  a minimal feature-set, and widely used interface for objects
 #'
 #' @inheritParams dsem::dsem
+#' @inheritParams dsem::make_ram
 #'
 #' @param data Data-frame of predictor and response variables.
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
@@ -67,12 +68,14 @@ function( data,
 
   # Spatial domain constructor
   if( "fm_mesh_2d" %in% class(spatial_graph) ){
+    # SPDE
     n_s = spatial_graph$n
     spatial_method_code = 1
     spatial_list = fm_fem( spatial_graph )
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
     A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$spatial]) )$proj$A
   } else if( "igraph" %in% class(spatial_graph) ) {
+    # SAR
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_graph, sparse=TRUE )
     n_s = nrow(Adj)
@@ -80,6 +83,7 @@ function( data,
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
   }else if( !is.null(sem) ){
+    # Single-site
     spatial_method_code = 3
     n_s = 1
     A_is = matrix(1, nrow=nrow(data), ncol=1)    # dgCMatrix
@@ -88,6 +92,7 @@ function( data,
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix") )
   } else {
+    # No sites
     spatial_method_code = 4
     n_s = 0
     A_is = Matrix(nrow=nrow(data), ncol=0)    # dgCMatrix
@@ -173,7 +178,8 @@ function( data,
     log_sigma = log_sigma,
     delta0_c = rep(0, length(variables)),
     #x_tc = matrix(0, nrow=tmb_data$n_t, ncol=tmb_data$n_c)
-    epsilon_stc = array(0, dim=c(n_s, length(times), length(variables)) )
+    epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
+    eps = numeric(0)
   )
   # Turn off initial conditions
   if( estimate_delta0==FALSE ){
@@ -191,11 +197,11 @@ function( data,
   if( FALSE ){
     setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
     dyn.unload(dynlib("tinyVAST"))
-    compile("tinyVAST.cpp")
+    compile("tinyVAST.cpp" , framework = "TMBad" )
     dyn.load(dynlib("tinyVAST"))
   }
   obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma_k","epsilon_stc"), DLL="tinyVAST" )  #
-  openmp( ... , DLL="tinyVAST" )
+  #openmp( ... , DLL="tinyVAST" )
   # Experiment with Q_jonit
   if( FALSE ){
     rep = obj$report()

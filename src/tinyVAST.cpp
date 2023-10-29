@@ -187,17 +187,20 @@ Type objective_function<Type>::operator() (){
   }
 
   // distributions
-  if( (n_s>0) & (n_h>0) ){
-    PARALLEL_REGION nll += SEPARABLE( GMRF(Q_hh), GMRF(Q_ss) )( epsilon_sh );
+  if( (n_s>0) & (n_h>0) ){ // PARALLEL_REGION
+    // Including this line with Makevars below seems to cause a crash:
+    // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
+    // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
+    nll += SEPARABLE( GMRF(Q_hh), GMRF(Q_ss) )( epsilon_sh );
   }
 
   // Likelihood of spline components
   int k = 0;   // Counter
-  for(int z=0; z<Sdims.size(); z++){
+  for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
     int m_z = Sdims(z);
     vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
     SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    PARALLEL_REGION nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*lambda(z)*GMRF(S_block).Quadform(gamma_segment);
+    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*lambda(z)*GMRF(S_block).Quadform(gamma_segment);
     k += m_z;
   }
 
@@ -213,7 +216,7 @@ Type objective_function<Type>::operator() (){
   // Likelihood
   vector<Type> devresid_i( y_i.size() );
   vector<Type> mu_i( y_i.size() );
-  for( int i=0; i<y_i.size(); i++ ) PARALLEL_REGION{
+  for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     switch( f_z(0) ){
       case 0:
         mu_i(i) = p_i(i);
@@ -280,10 +283,16 @@ Type objective_function<Type>::operator() (){
         phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
       }
     }
-    Type Metric = sum(phi_g);
+    //Type Metric = sum(phi_g);
+    Type Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
     REPORT( phi_g );
     REPORT( Metric );
     ADREPORT( Metric );
+
+    PARAMETER_VECTOR( eps ); // manual epsilon bias-correction
+    if( eps.size() == 1 ){
+      nll += Metric * eps(0);
+    }
   }
 
   // Reporting

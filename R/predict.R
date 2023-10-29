@@ -53,13 +53,19 @@ integrate_output <-
 function( object,
           newdata,
           area,
-          bias.correct = TRUE ){
+          bias.correct = TRUE,
+          apply.epsilon = FALSE,
+          intern = FALSE ){
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data
-  if(missing(area)) area = rep(1, nrow(newdata))
-  if(length(area)==1) area = rep(area, nrow(newdata))
-
+  if(missing(area)){
+    area = rep(1, nrow(newdata))
+  }else if(length(area)==1){
+    area = rep(area, nrow(newdata))
+  }else if( length(area)!=nrow(newdata) ){
+    stop("Check length of `area`")
+  }
   # Build new
   tmb_data2 = add_predictions( object=object, newdata=newdata )
 
@@ -71,21 +77,37 @@ function( object,
   #tmb_data2$W_gz = cbind( 1, newdata$x )
   #tmb_data2$V_gz = matrix(1, nrow=nrow(newdata), ncol=2)
 
+  #
+  tmb_par2 = object$internal$parlist
+  if( isTRUE(apply.epsilon) ){
+    tmb_par2$eps = 0
+    inner.control = list(sparse=TRUE, lowrank=TRUE, trace=FALSE)
+  }else{
+    inner.control = list(sparse=TRUE, lowrank=FALSE, trace=FALSE)
+  }
+
   # Rebuild object
   newobj = MakeADFun( data = tmb_data2,
-                      parameters = object$internal$parlist,
+                      parameters = tmb_par2,
                       map = object$tmb_inputs$tmb_map,
                       random = c("gamma_k","epsilon_stc"),
-                      DLL = "tinyVAST" )
+                      DLL = "tinyVAST",
+                      intern = intern,
+                      inner.control = inner.control )
   newobj$env$beSilent()
 
   # Run sdreport
-  newsd = sdreport( obj = newobj,
-                    par.fixed = object$opt$par,
-                    hessian.fixed = object$internal$Hess_fixed,
-                    bias.correct = bias.correct )
-  out = summary(newsd, "report")['Metric',]
-
+  if( isTRUE(apply.epsilon) ){
+    #Metric = newobj$report()$Metric
+    grad = newobj$gr( newobj$par )[which(names(newobj$par)=="eps")]
+    out = c( "Estimate"=NA, "Std. Error"=NA, "Est. (bias.correct)"=grad, "Std. (bias.correct)"=NA )
+  }else{
+    newsd = sdreport( obj = newobj,
+                      par.fixed = object$opt$par,
+                      hessian.fixed = object$internal$Hess_fixed,
+                      bias.correct = bias.correct )
+    out = summary(newsd, "report")['Metric',]
+  }
   return(out)
 }
 
