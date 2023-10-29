@@ -18,9 +18,7 @@ knitr::opts_chunk$set(
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/spatial.Rmd")
-# PDF
-#  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/spatial.Rmd", pdf_document())
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/spatial.Rmd"); rmarkdown::render( "vignettes/spatial.Rmd", rmarkdown::pdf_document())
 ```
 
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
@@ -64,6 +62,7 @@ We can then calculate the area-weighted total abundance:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Predicted sample-weighted total
 integrate_output(out)
+# integrate_output(out, apply.epsilon=TRUE )
 
 # True (latent) sample-weighted total
 sum( Data$z )

@@ -18,9 +18,7 @@ knitr::opts_chunk$set(
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/VAST.Rmd")
-# PDF
-#  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/VAST.Rmd", pdf_document())
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/VAST.Rmd"); rmarkdown::render( "vignettes/VAST.Rmd", rmarkdown::pdf_document())
 ```
 
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
@@ -54,8 +52,6 @@ for( t in seq_len(n_t) ){
 #d = d + 0.5
 
 # Shape into longform data-frame and add error
-#Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), "var"="logn", z=as.vector(d))
-#Data$n = Data$z + rnorm(nrow(Data), sd=0.2)
 Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), "var"="logn", z=exp(as.vector(d)))
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
 mean(Data$n==0)
@@ -228,8 +224,6 @@ The values for `beta_z` again correspond to the specified value for interaction-
 We can again calculate the area-weighted total abundance and compare it with its true value:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Predicted sample-weighted total
-integrate_output(out, newdata=subset(Data,time==1 & var=="d1") )
-
 Est1 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d1")) )
 Est2 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d2")) )
 
