@@ -17,10 +17,8 @@ knitr::opts_chunk$set(
 )
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
-# Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/dsem.Rmd")
-# PDF
-#  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/dsem.Rmd", pdf_document())
+# Build and PDF
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/dsem.Rmd"); rmarkdown::render( "vignettes/dsem.Rmd", rmarkdown::pdf_document())
 ```
 
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}

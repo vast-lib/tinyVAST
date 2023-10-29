@@ -18,9 +18,7 @@ knitr::opts_chunk$set(
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/mgcv.Rmd")
-# PDF
-#  library(rmarkdown); setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); render( "vignettes/mgcv.Rmd", pdf_document())
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/mgcv.Rmd"); rmarkdown::render( "vignettes/mgcv.Rmd", rmarkdown::pdf_document())
 ```
 
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
