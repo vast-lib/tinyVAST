@@ -11,8 +11,15 @@
 #'          parsed by \code{mgcv} and hence allowing \code{s(.)} for splines
 #' @param family_link Vector of length-two, indicating the distribution and link-function
 #' @param spatial_graph Object that represents spatial relationships, either using \code{fmesher}
-#'        to apply the SPDE method, or \code{igraph} to apply a simultaneous autoregressive (SAR)
-#'        process.
+#'        to apply the SPDE method, \code{igraph} to apply a simultaneous autoregressive (SAR)
+#'        process, or \code{NULL} to specify a single site.
+#'
+#' @details
+#' the default \code{sem=NULL} turns off all multivariate and temporal indexing, such
+#' that \code{spatial_graph} is then ignored, and the model collapses
+#' to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
+#' the user must specify both \code{spatial_graph} and \code{sem=""}, where the latter
+#' is then parsed to include a single exogenous variance for the single variable
 #'
 #' @importFrom dsem make_ram classify_variables parse_path
 #' @importFrom igraph as_adjacency_matrix
@@ -82,7 +89,7 @@ function( data,
     Match = match( data[,data_colnames$spatial], rownames(Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
-  }else if( !is.null(sem) ){
+  }else {      # if( !is.null(sem) )
     # Single-site
     spatial_method_code = 3
     n_s = 1
@@ -91,16 +98,16 @@ function( data,
     spatial_list = list( "M0" = as(Matrix(1,nrow=1,ncol=1),"dgCMatrix"),
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix") )
-  } else {
-    # No sites
-    spatial_method_code = 4
-    n_s = 0
-    A_is = Matrix(nrow=nrow(data), ncol=0)    # dgCMatrix
-    A_is = as(A_is,"dgCMatrix")
-    spatial_list = list( "M0" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
-                         "M1" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
-                         "M2" = as(Matrix(nrow=0,ncol=0),"dgCMatrix") )
-  }
+  }# else {
+  #  # No sites
+  #  spatial_method_code = 4
+  #  n_s = 0
+  #  A_is = Matrix(nrow=nrow(data), ncol=0)    # dgCMatrix
+  #  A_is = as(A_is,"dgCMatrix")
+  #  spatial_list = list( "M0" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
+  #                       "M1" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
+  #                       "M2" = as(Matrix(nrow=0,ncol=0),"dgCMatrix") )
+  #}
   Atriplet = Matrix::mat2triplet(A_is)
 
   # Initial constructor of splines
@@ -202,23 +209,6 @@ function( data,
   }
   obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma_k","epsilon_stc"), DLL="tinyVAST" )  #
   #openmp( ... , DLL="tinyVAST" )
-  # Experiment with Q_jonit
-  if( FALSE ){
-    rep = obj$report()
-    error = list( Q_spatial=rep$Q_spatial, Q_kk=rep$Q_kk, epsilon_sk=rep$epsilon_sk )
-    saveRDS( error, "error.RDS" )
-  }
-  if( FALSE ){
-    rep = obj$report()
-    Matrix::image(rep$Q_joint)
-  }
-  if( FALSE ){
-    obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, DLL="tinyVAST" )
-  }
-  if( FALSE ){
-    H = obj$env$spHess(random=TRUE)
-    Matrix::image(H)
-  }
   obj$env$beSilent()
   opt = nlminb( start=obj$par, obj=obj$fn, gr=obj$gr,
                 control=list(eval.max=1e4, iter.max=1e4, trace=ifelse(isTRUE(quiet),0,1)) )

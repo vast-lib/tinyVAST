@@ -7,13 +7,15 @@ bool isNA(Type x){
   return R_IsNA(asDouble(x));
 }
 
-//
+// Sparse array * matrix
+// NAs get converted to -2147483648, so need positive check
 template<class Type>
 vector<Type> multiply_3d_sparse( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
   vector<Type> out( n_i );
   out.setZero();
   for( int z=0; z<A.rows(); z++ ){
-    if( (!isNA(A(z,0))) & (!isNA(A(z,1))) & (!isNA(A(z,2))) & (!isNA(A(z,3))) ){   // Ignoring epsilon_stc when `sem` not passed to fit(.)
+    // Ignoring epsilon_stc when `sem` not passed to fit(.), because A(z,2)=NA and A(z,3)=NA
+    if( (!isNA(A(z,0))) & (!isNA(A(z,1))) & (!isNA(A(z,2))) & (!isNA(A(z,3))) & (A(z,2)>=0) & (A(z,3)>=0) ){
       out(A(z,0)) += weight(z) * x(A(z,1),A(z,2),A(z,3));
     }
   }
@@ -68,7 +70,7 @@ Type objective_function<Type>::operator() (){
 
   // Spatial objects
   DATA_INTEGER( spatial_method_code );   // Switch to string: https://kaskr.github.io/adcomp/compois_8cpp-example.html#a2
-  DATA_IMATRIX( Aistc_zz );
+  DATA_IMATRIX( Aistc_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Axi_z );
 
   // SEM objects
@@ -101,6 +103,7 @@ Type objective_function<Type>::operator() (){
   PARAMETER_VECTOR( log_sigma );
   PARAMETER_VECTOR( delta0_c );
   PARAMETER_ARRAY( epsilon_stc );
+  PARAMETER_VECTOR( eps );     // manual epsilon bias-correction, empty to turn off
 
   Type nll = 0;
 
@@ -289,7 +292,6 @@ Type objective_function<Type>::operator() (){
     REPORT( Metric );
     ADREPORT( Metric );
 
-    PARAMETER_VECTOR( eps ); // manual epsilon bias-correction
     if( eps.size() == 1 ){
       nll += Metric * eps(0);
     }

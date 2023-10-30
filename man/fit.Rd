@@ -26,7 +26,7 @@ parsed by \code{mgcv} and hence allowing \code{s(.)} for splines}
 
 \item{sem}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects.  See Details section in
-'code{\link[dsem]{make_ram}} for details}
+\code{\link[dsem]{make_ram}} for more description}
 
 \item{estimate_delta0}{Boolean indicating whether to estimate deviations from equilibrium in initial year
 as fixed effects, or alternatively to assume that dynamics start at some stochastic draw away from
@@ -34,9 +34,13 @@ the stationary distribution}
 
 \item{family_link}{Vector of length-two, indicating the distribution and link-function}
 
+\item{times}{A character vector listing the set of times in order}
+
+\item{variables}{A character vector listing the set of variables}
+
 \item{spatial_graph}{Object that represents spatial relationships, either using \code{fmesher}
-to apply the SPDE method, or \code{igraph} to apply a simultaneous autoregressive (SAR)
-process.}
+to apply the SPDE method, \code{igraph} to apply a simultaneous autoregressive (SAR)
+process, or \code{NULL} to specify a single site.}
 
 \item{quiet}{Boolean indicating whether to run model printing messages to terminal or not;}
 
@@ -45,6 +49,13 @@ process.}
 \description{
 Fits a vector autoregressive spatio-temporal model using
  a minimal feature-set, and widely used interface for objects
+}
+\details{
+the default \code{sem=NULL} turns off all multivariate and temporal indexing, such
+that \code{spatial_graph} is then ignored, and the model collapses
+to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
+the user must specify both \code{spatial_graph} and \code{sem=""}, where the latter
+is then parsed to include a single exogenous variance for the single variable
 }
 \examples{
 methods(class="tinyVAST")
