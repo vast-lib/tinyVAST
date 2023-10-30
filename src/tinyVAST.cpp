@@ -8,16 +8,13 @@ bool isNA(Type x){
 }
 
 // Sparse array * matrix
-// NAs get converted to -2147483648, so need positive check
+// NAs in IVECTOR or IMATRIX get converted to -2147483648, so need positive check
 template<class Type>
 vector<Type> multiply_3d_sparse( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
   vector<Type> out( n_i );
   out.setZero();
   for( int z=0; z<A.rows(); z++ ){
-    // Ignoring epsilon_stc when `sem` not passed to fit(.), because A(z,2)=NA and A(z,3)=NA
-    if( (!isNA(A(z,0))) & (!isNA(A(z,1))) & (!isNA(A(z,2))) & (!isNA(A(z,3))) & (A(z,2)>=0) & (A(z,3)>=0) ){
-      out(A(z,0)) += weight(z) * x(A(z,1),A(z,2),A(z,3));
-    }
+    out(A(z,0)) += weight(z) * x(A(z,1),A(z,2),A(z,3));
   }
   return out;
 }
@@ -49,6 +46,8 @@ Type devresid_tweedie( Type y,
 // 2. Use Roman for data, Greek for parameters
 // 3. Name objects with [var]_[indices] so that number of indices indicates
 //    dimensionality
+// 4. spatial_graph always has dimension 1+, but DSEM functionality is removed if
+//    sem=NULL such that nrow(RAM)=0
 
 template<class Type>
 Type objective_function<Type>::operator() (){

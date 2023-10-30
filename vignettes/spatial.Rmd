@@ -34,13 +34,13 @@ set.seed(101)
 We here show how it can fit spatial autoregressive model
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-# Simulate
+# Simulate a 2D AR1 spatial process with a cyclic confounder w
 n_x = n_y = 25
-n_t = 10
+n_w = 10
 R = exp(-0.4 * abs(outer(1:n_x, 1:n_y, FUN="-")) )
 z = mvtnorm::rmvnorm(1, sigma=kronecker(R,R) )
-t = sample(1:n_t, replace=TRUE, size=length(z))
-Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), t=t, z=as.vector(z) + cos(t/n_t*2*pi))
+w = sample(1:n_w, replace=TRUE, size=length(z))
+Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), w=w, z=as.vector(z) + cos(w/n_w*2*pi))
 Data$n = Data$z + rnorm(nrow(Data), sd=1)
 
 # Add columns for multivariate and temporal dimensions
@@ -52,7 +52,7 @@ mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
 
 # fit model
 out = fit( data = Data,
-           formula = n ~ s(t),
+           formula = n ~ s(w),
            spatial_graph = mesh,
            quiet = TRUE,
            sem = "" )
@@ -86,7 +86,7 @@ R0 = sum( residuals(null, type="deviance")^2 )
 
 We can then compare this with the PDE reported by `mgcv`
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-mygam = gam( n ~ s(t) + s(x,y), data=Data ) #
+mygam = gam( n ~ s(w) + s(x,y), data=Data ) #
 summary(mygam)$dev.expl
 ```
 
@@ -95,12 +95,12 @@ where this comparison shows that using the SPDE method in tinyVAST results in hi
 It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when excluding the spatial term from each.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-out_reduced = fit( data = Data, formula = n ~ s(t), quiet = TRUE, sem = "" )
+out_reduced = fit( data = Data, formula = n ~ s(w), quiet = TRUE, sem = "" )
 R1_reduced = sum( residuals(out_reduced, type="deviance")^2 )
 1 - R1_reduced/R0
 
 #
-mygam_reduced = gam( n ~ s(t), data=Data ) #
+mygam_reduced = gam( n ~ s(w), data=Data ) #
 summary(mygam_reduced)$dev.expl
 ```
 
@@ -108,7 +108,7 @@ summary(mygam_reduced)$dev.expl
 
 `tinyVAST` then has a standard `predict` function:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-predict(out, newdata=data.frame(x=1, y=1, time=1, t=1, var="n") )
+predict(out, newdata=data.frame(x=1, y=1, time=1, w=1, var="n") )
 ```
 
 and this is used to compute the spatial response
@@ -116,18 +116,18 @@ and this is used to compute the spatial response
 # Prediction grid
 pred = outer( seq(1,n_x,len=51),
               seq(1,n_y,len=51),
-              FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,t=1,time=1,var="n")) )
+              FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,w=1,time=1,var="n")) )
 image( x=seq(1,n_x,len=51), y=seq(1,n_y,len=51), z=pred, main="Predicted response" )
 
 # True value
 image( x=1:n_x, y=1:n_y, z=matrix(Data$z,ncol=n_y), main="True response" )
 ```
 
-We can also compute the marginal time effect
+We can also compute the marginal effect of the cyclic confounder
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # compute partial dependence plot
 Partial = partial( object = out,
-                   pred.var = "t",
+                   pred.var = "w",
                    pred.fun = \(object,newdata) predict(object,newdata),
                    train = Data,
                    approx = TRUE )

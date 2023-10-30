@@ -45,7 +45,8 @@ function( data,
           ... ){
 
   start_time = Sys.time()
-  # SEM stuff
+
+  # SEM constructor
   # (I-Rho)^-1 * Gamma * (I-Rho)^-1
   if( is.null(sem) ){
     ram_output = list(
@@ -133,6 +134,10 @@ function( data,
     c_i = match( data[,data_colnames$var], variables )
   }else{ c_i = integer(0) }
 
+  # Drop rows from Aistc_zz and Axi_z (e.g., when times and/or variables are empty because sem=NULL)
+  Aistc_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1
+  which_Arows = which(apply( Aistc_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
+
   # make dat
   tmb_data = list(
     spatial_method_code = spatial_method_code,
@@ -144,8 +149,8 @@ function( data,
     f_z = family_link,
     S_kk = S_kk,
     Sdims = Sdims,
-    Aistc_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1,     # Index form, i, s, t
-    Axi_z = Atriplet$x,
+    Aistc_zz = Aistc_zz[which_Arows,,drop=FALSE],     # Index form, i, s, t
+    Axi_z = Atriplet$x[which_Arows],
     RAM = as.matrix(na.omit(ram[,1:4])),
     RAMstart = as.numeric(ram[,5]),
     X_gj = matrix(0,ncol=ncol(X_ij),nrow=0),
