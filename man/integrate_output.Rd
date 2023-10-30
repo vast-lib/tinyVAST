@@ -4,7 +4,14 @@
 \alias{integrate_output}
 \title{Monte Carlo integration for abundance}
 \usage{
-integrate_output(object, newdata, area, bias.correct = TRUE)
+integrate_output(
+  object,
+  newdata,
+  area,
+  bias.correct = TRUE,
+  apply.epsilon = FALSE,
+  intern = FALSE
+)
 }
 \arguments{
 \item{object}{Output from [fit()].}
