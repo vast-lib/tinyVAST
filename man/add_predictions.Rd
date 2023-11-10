@@ -7,11 +7,11 @@
 add_predictions(object, newdata)
 }
 \arguments{
-\item{object}{Output from [fit()].}
+\item{object}{Output from \code{\link[=fit]{fit()}}.}
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
 }
 \description{
-Given user-provided `newdata`, expand the object `tmb_data`
-   to include predictions corresponding to those new observations
+Given user-provided \code{newdata}, expand the object \code{tmb_data}
+to include predictions corresponding to those new observations
 }

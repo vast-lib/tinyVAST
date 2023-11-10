@@ -8,7 +8,7 @@ bool isNA(Type x){
 }
 
 // Sparse array * matrix
-// NAs in IVECTOR or IMATRIX get converted to -2147483648, so need positive check
+// NAs in IVECTOR or IMATRIX get converted to -2147483648, so isNA doesn't work as intended
 template<class Type>
 vector<Type> multiply_3d_sparse( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
   vector<Type> out( n_i );
@@ -56,7 +56,9 @@ Type objective_function<Type>::operator() (){
   using namespace Eigen;
 
   // Settings
-  DATA_IVECTOR( f_z );      // family/link
+  DATA_IMATRIX( f_ez );      // family/link
+  DATA_IVECTOR( e_i );      // Asssociate each sample with a family/link
+  DATA_IMATRIX( Edims_ez );  // Start (in C++ indexing) and Length, of log_sigma for each family/link
 
   // Data
   DATA_VECTOR( y_i );        // The response
@@ -83,6 +85,7 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( Axg_z );
   DATA_IVECTOR( t_g );
   DATA_IVECTOR( c_g );
+  DATA_IVECTOR( e_g );
 
   // Expansion options
   DATA_MATRIX( W_gz );            // Covariates for expansion
@@ -188,7 +191,7 @@ Type objective_function<Type>::operator() (){
     log_tau = 0.0;
   }
 
-  // distributions
+  // GMRF:  non-separable time-variable, with separable spatace
   if( (n_s>0) & (n_h>0) ){ // PARALLEL_REGION
     // Including this line with Makevars below seems to cause a crash:
     // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
@@ -196,7 +199,7 @@ Type objective_function<Type>::operator() (){
     nll += SEPARABLE( GMRF(Q_hh), GMRF(Q_ss) )( epsilon_sh );
   }
 
-  // Likelihood of spline components
+  // Distribution for spline components
   int k = 0;   // Counter
   for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
     int m_z = Sdims(z);
@@ -219,16 +222,18 @@ Type objective_function<Type>::operator() (){
   vector<Type> devresid_i( y_i.size() );
   vector<Type> mu_i( y_i.size() );
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
-    switch( f_z(0) ){
-      case 0:
+      //vector<int> log_sigma_segment = Edims_ez.row(e_i(i));
+    vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
+    switch( f_ez(e_i(i),0) ){
+      case 0:  // Normal distribution
         mu_i(i) = p_i(i);
-        nll -= dnorm( y_i(i), mu_i(i), exp(log_sigma(0)), true );
+        nll -= dnorm( y_i(i), mu_i(i), exp(log_sigma_segment(0)), true );
         devresid_i(i) = y_i(i) - p_i(i);
         break;
-      case 1:
+      case 1: // Tweedie
         mu_i(i) = exp(p_i(i));
-        nll -= dtweedie( y_i(i), mu_i(i), exp(log_sigma(0)), 1.0 + invlogit(log_sigma(1)), true );
-        devresid_i(i) = devresid_tweedie( y_i(i), mu_i(i), 1.0 + invlogit(log_sigma(1)) );
+        nll -= dtweedie( y_i(i), mu_i(i), exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+        devresid_i(i) = devresid_tweedie( y_i(i), mu_i(i), 1.0 + invlogit(log_sigma_segment(1)) );
         break;
       default:
         error("Family not implemented.");
@@ -246,11 +251,11 @@ Type objective_function<Type>::operator() (){
     }
   }
   for( int g=0; g<p_g.size(); g++ ){
-    switch( f_z(0) ){
-      case 0:
+    switch( f_ez(e_g(g),0) ){
+      case 0: // Normal distribution
         mu_g(g) = p_g(g);
         break;
-      case 1:
+      case 1: // Tweedie
         mu_g(g) = exp(p_g(g));
         break;
     }
@@ -261,7 +266,7 @@ Type objective_function<Type>::operator() (){
     // First sweep
     vector<Type> phi0_g( mu_g.size() );
     for( int g=0; g<mu_g.size(); g++ ){
-      if( (V_gz(g,0)==0) | (V_gz(g,0)==1) | (V_gz(g,0)==2) ){
+      if( (V_gz(g,0)==0) | (V_gz(g,0)==1) | (V_gz(g,0)==2) | (V_gz(g,0)==3) ){
         // Area-weighted average
         phi0_g(g) = mu_g(g) * W_gz(g,0);
       }
@@ -274,13 +279,18 @@ Type objective_function<Type>::operator() (){
     phi_g.setZero();
     for( int g=0; g<mu_g.size(); g++ ){
       if( V_gz(g,0)==0 ){
-        phi_g(g) = phi0_g(g);
+        // Exclude from 2nd-sweep calculation
+        phi_g(g) = 0;
       }
       if( V_gz(g,0)==1 ){
+        // Default:  equal to 1st swepp
+        phi_g(g) = phi0_g(g);
+      }
+      if( V_gz(g,0)==2 ){
         // density-weighted average of W_gz(g,1)
         phi_g(g) = (phi0_g(g) / sumphi0) * W_gz(g,1);
       }
-      if( (V_gz(g,0)==2) & (!isNA(V_gz(g,1))) & (V_gz(g,1)<=g) ){
+      if( (V_gz(g,0)==3) & (V_gz(g,1)>=0) & (V_gz(g,1)<=g) ){
         // density-weighted average of prediction
         phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
       }
@@ -307,7 +317,6 @@ Type objective_function<Type>::operator() (){
   }
   //REPORT( Q_hh );
   //REPORT( Q_ss );
-  //REPORT( Q_joint );
   REPORT( devresid_i );
 
   return nll;

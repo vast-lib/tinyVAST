@@ -8,18 +8,29 @@
 #'
 #' @param data Data-frame of predictor and response variables.
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
-#'          parsed by \code{mgcv} and hence allowing \code{s(.)} for splines
+#'        parsed by \code{mgcv} and hence allowing \code{s(.)} for splines
 #' @param family_link Vector of length-two, indicating the distribution and link-function
 #' @param spatial_graph Object that represents spatial relationships, either using \code{fmesher}
 #'        to apply the SPDE method, \code{igraph} to apply a simultaneous autoregressive (SAR)
 #'        process, or \code{NULL} to specify a single site.
+#' @param control Output from \code{\link{tinyVASTcontrol}}, used to define user
+#'        settings, and see documentation for that function for details.
 #'
 #' @details
-#' the default \code{sem=NULL} turns off all multivariate and temporal indexing, such
+#' [tinyVAST] includes four basic inputs that specify the model structure:
+#' * [formula] specifies covariates and splines in a Generalized Additive Model;
+#' * [sem] specifies interactions among variables and over time
+#' * [spatial_graph] specifies spatial correlations
+#'
+#' the default [sem=NULL] turns off all multivariate and temporal indexing, such
 #' that \code{spatial_graph} is then ignored, and the model collapses
 #' to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
 #' the user must specify both \code{spatial_graph} and \code{sem=""}, where the latter
 #' is then parsed to include a single exogenous variance for the single variable
+#'
+#' | Model type | How to specify |
+#' | --- | --- |
+#' | Spatial model | specify both \code{spatial_graph} and \code{sem=""}, where the latter is then parsed to include a single exogenous variance for the single variable |
 #'
 #' @importFrom dsem make_ram classify_variables parse_path
 #' @importFrom igraph as_adjacency_matrix
@@ -37,16 +48,22 @@ function( data,
           family_link = c(0,0),
           #spatial_sem,
           #spatiotemporal_sem,
-          data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time"),
+          data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
           times = sort(unique(data[,data_colnames$time])),
           variables = unique(data[,data_colnames$variable]),
           spatial_graph = NULL,
-          quiet = FALSE,
+          control = tinyVASTcontrol(),
           ... ){
-
+  # https://roxygen2.r-lib.org/articles/rd-formatting.html#tables for roxygen formatting
   start_time = Sys.time()
 
+  # General error checks
+  if( class(control) != "tinyVASTcontrol" ) stop("`control` must be made by `tinyVASTcontrol()`")
+
+  ##############
   # SEM constructor
+  ##############
+
   # (I-Rho)^-1 * Gamma * (I-Rho)^-1
   if( is.null(sem) ){
     ram_output = list(
@@ -57,15 +74,20 @@ function( data,
     variables = numeric(0)
     # Allow user to avoid specifying these if is.null(sem)
     if( !(data_colnames$time %in% colnames(data)) ){
-      data = cbind(data, "time"=1)
+      data = cbind( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
     }
     if( !(data_colnames$variable %in% colnames(data)) ){
-      data = cbind(data, "var"=1)
+      data = cbind(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
     }
   }else{
-    ram_output = make_ram( sem, times=times, variables=variables, quiet=quiet, covs=variables )
+    ram_output = make_ram( sem, times=times, variables=variables, quiet=control$quiet, covs=variables )
   }
   ram = ram_output$ram
+
+  # Identify arrow-type for each beta_j estimated in RAM
+  which_nonzero = which(ram[,4]>0)
+  beta_type = tapply( ram[which_nonzero,1], INDEX=ram[which_nonzero,4], max)
+
   # Error checks
   if( any((ram_output$model[,'direction']==2) & (ram_output$model[,2]!=0)) ){
     stop("All two-headed arrows should have lag=0")
@@ -74,7 +96,10 @@ function( data,
     stop("Some variable in `sem` is not in `tsdata`")
   }
 
+  ##############
   # Spatial domain constructor
+  ##############
+
   if( "fm_mesh_2d" %in% class(spatial_graph) ){
     # SPDE
     n_s = spatial_graph$n
@@ -82,7 +107,7 @@ function( data,
     spatial_list = fm_fem( spatial_graph )
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
     A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$spatial]) )$proj$A
-  } else if( "igraph" %in% class(spatial_graph) ) {
+  }else if( "igraph" %in% class(spatial_graph) ) {
     # SAR
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_graph, sparse=TRUE )
@@ -99,17 +124,12 @@ function( data,
     spatial_list = list( "M0" = as(Matrix(1,nrow=1,ncol=1),"dgCMatrix"),
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix") )
-  }# else {
-  #  # No sites
-  #  spatial_method_code = 4
-  #  n_s = 0
-  #  A_is = Matrix(nrow=nrow(data), ncol=0)    # dgCMatrix
-  #  A_is = as(A_is,"dgCMatrix")
-  #  spatial_list = list( "M0" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
-  #                       "M1" = as(Matrix(nrow=0,ncol=0),"dgCMatrix"),
-  #                       "M2" = as(Matrix(nrow=0,ncol=0),"dgCMatrix") )
-  #}
+  }
   Atriplet = Matrix::mat2triplet(A_is)
+
+  ##############
+  # Formula constructor
+  ##############
 
   # Initial constructor of splines
   gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
@@ -125,6 +145,33 @@ function( data,
   which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
   X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
   Z_ik = gam_setup$X[,which_se,drop=FALSE]
+
+  ##############
+  # distribution/link
+  ##############
+
+  # Check for errors, and telescope
+  if( !(data_colnames$distribution %in% colnames(data)) ){
+    data = cbind( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+  }
+  if( (any(data[,data_colnames$distribution]>nrow(family_link))) | (any(data[,data_colnames$distribution]<1)) ){
+    stop("`data[,data_colnames$distribution]` has some bad value")
+  }
+
+  # Telescope format
+  if( !is.matrix(family_link) ){
+    family_link = matrix( family_link, nrow=1, ncol=2 )
+  }
+
+  # Construct log_sigma based on family_link
+  remove_last = \(x) x[-length(x)]
+  Nsigma_e = sapply( as.character(family_link[,1]), "0"=1, "1"=2, FUN=switch )
+  log_sigma = rep( 0, sum(Nsigma_e) )
+  Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
+
+  ##############
+  # Build inputs
+  ##############
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(times) > 0 ){
@@ -146,7 +193,9 @@ function( data,
     Z_ik = Z_ik,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
-    f_z = family_link,
+    f_ez = family_link,
+    e_i = data[,data_colnames$distribution] - 1, # -1 to convert to CPP index
+    Edims_ez = Edims_ez,
     S_kk = S_kk,
     Sdims = Sdims,
     Aistc_zz = Aistc_zz[which_Arows,,drop=FALSE],     # Index form, i, s, t
@@ -159,6 +208,7 @@ function( data,
     Axg_z = numeric(0),
     t_g = integer(0),
     c_g = integer(0),
+    e_g = integer(0),
     W_gz = matrix(0,nrow=0,ncol=2),
     V_gz = matrix(0,nrow=0,ncol=2)
   )
@@ -167,17 +217,6 @@ function( data,
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
   }
-
-  # Scale starting values with higher value for two-headed than one-headed arrows
-  which_nonzero = which(ram[,4]>0)
-  beta_type = tapply( ram[which_nonzero,1], INDEX=ram[which_nonzero,4], max)
-
-  #
-  if( family_link[1]==0 ){
-    log_sigma = c(0)
-  }else if( family_link[1]==1 ){
-    log_sigma = c(0, 0)
-  }else{ stop("Check `family_link`")}
 
   # make params
   tmb_par = list(
@@ -193,32 +232,77 @@ function( data,
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     eps = numeric(0)
   )
+
   # Turn off initial conditions
   if( estimate_delta0==FALSE ){
     tmb_par$delta0_c = numeric(0)
   }
 
-  #
+  # Turn of log_kappa when not needed
   tmb_map = list()
   if( tmb_data$spatial_method_code %in% c(3,4) ){
     tmb_map$log_kappa = factor(NA)
-    #tmb_map$log_tau = factor(NA)
   }
 
-  #Fit model
+  # User-supplied parameters
+  if( !is.null(control$tmb_par) ){
+    # Check shape but not numeric values, and give informative error
+    attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
+    if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
+      tmb_par = control$tmb_par
+    }else{
+      stop("Not using `control$tmb_par` because it has some difference from `tmb_par` built internally")
+    }
+  }
+
+  ##############
+  # Fit model
+  ##############
+
   if( FALSE ){
     setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
     dyn.unload(dynlib("tinyVAST"))
     compile("tinyVAST.cpp" , framework = "TMBad" )
     dyn.load(dynlib("tinyVAST"))
   }
-  obj = MakeADFun( data=tmb_data, parameters=tmb_par, map=tmb_map, random=c("gamma_k","epsilon_stc"), DLL="tinyVAST" )  #
+  obj = MakeADFun( data = tmb_data,
+                   parameters = tmb_par,
+                   map = tmb_map,
+                   random = c("gamma_k","epsilon_stc"),
+                   DLL = "tinyVAST",
+                   profile = control$profile )  #
   #openmp( ... , DLL="tinyVAST" )
   obj$env$beSilent()
-  opt = nlminb( start=obj$par, obj=obj$fn, gr=obj$gr,
-                control=list(eval.max=1e4, iter.max=1e4, trace=ifelse(isTRUE(quiet),0,1)) )
-  Hess_fixed = optimHess( par=opt$par, fn=obj$fn, gr=obj$gr )
-  sdrep = sdreport( obj, hessian.fixed=Hess_fixed )
+
+  # Optimize
+  opt = list( "par"=obj$par )
+  for( i in seq_len(max(0,control$nlminb_loops)) ){
+    if( isFALSE(control$quiet) ) message("Running nlminb_loop #", i)
+    opt = nlminb( start = opt$par,
+                  obj = obj$fn,
+                  gr = obj$gr,
+                  control = list( eval.max = control$eval.max,
+                                  iter.max = control$iter.max,
+                                  trace = control$trace ) )
+  }
+
+  # Newtonsteps
+  for( i in seq_len(max(0,control$newton_loops)) ){
+    if( isFALSE(control$quiet) ) message("Running newton_loop #", i)
+    g = as.numeric( obj$gr(opt$par) )
+    h = optimHess(opt$par, fn=obj$fn, gr=obj$gr)
+    opt$par = opt$par - solve(h, g)
+    opt$objective = obj$fn(opt$par)
+  }
+
+  # Run sdreport
+  if( isTRUE(control$getsd) ){
+    if( isFALSE(control$quiet) ) message("Running sdreport")
+    Hess_fixed = optimHess( par=opt$par, fn=obj$fn, gr=obj$gr )
+    sdrep = sdreport( obj, hessian.fixed=Hess_fixed )
+  }else{
+    Hess_fixed = sdrep = NULL
+  }
 
   # bundle and return output
   internal = list(
@@ -228,7 +312,8 @@ function( data,
     times = times,
     variables = variables,
     parlist = obj$env$parList(par=obj$env$last.par.best),
-    Hess_fixed = Hess_fixed
+    Hess_fixed = Hess_fixed,
+    control = control
   )
   out = structure( list(
     formula = formula,
@@ -244,9 +329,44 @@ function( data,
     data_colnames = data_colnames,
     run_time = Sys.time() - start_time,
     internal = internal
-  ), class="tinyVAST"
-  )
+  ), class="tinyVAST" )
   return(out)
+}
+
+#' @title Control parameters for tinyVAST
+#'
+#' @inheritParams stats::nlminb
+#' @inheritParams TMB::MakeADFun
+#'
+#' @param getsd Boolean indicating whether to call \code{\link[TMB]{sdreport}}
+#' @param newton_loops Integer number of newton steps to do after running \code{nlminb}
+#' @param tmb_par list of parameters for starting values, with shape identical to
+#'        \code{fit(...)$internal$parlist}
+#'
+#' @export
+tinyVASTcontrol <-
+function( nlminb_loops = 1,
+          newton_loops = 0,
+          eval.max = 1000,
+          iter.max = 1000,
+          getsd = TRUE,
+          quiet = FALSE,
+          trace = 1,
+          profile = c(),
+          tmb_par = NULL ){
+
+  # Return
+  structure( list(
+    nlminb_loops = nlminb_loops,
+    newton_loops = newton_loops,
+    eval.max = eval.max,
+    iter.max = iter.max,
+    getsd = getsd,
+    quiet = quiet,
+    trace = trace,
+    profile = profile,
+    tmb_par = tmb_par
+  ), class = "tinyVASTcontrol" )
 }
 
 #' @title Print fitted tinyVAST object
