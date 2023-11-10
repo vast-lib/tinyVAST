@@ -7,21 +7,23 @@
 integrate_output(
   object,
   newdata,
-  area,
   bias.correct = TRUE,
   apply.epsilon = FALSE,
-  intern = FALSE
+  intern = FALSE,
+  W_gz,
+  V_gz,
+  area
 )
 }
 \arguments{
-\item{object}{Output from [fit()].}
+\item{object}{Output from \code{\link[=fit]{fit()}}.}
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
 
+\item{bias.correct}{logical indicating if bias correction should be applied}
+
 \item{area}{value used for area-weighted expansion of estimated density surface
 for each row of \code{newdata}.}
-
-\item{bias.correct}{logical indicating if bias correction should be applied}
 }
 \description{
 Applies Monte Carlo integration to approximate area-expanded abundance

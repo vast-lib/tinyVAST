@@ -7,7 +7,7 @@
 \method{predict}{tinyVAST}(object, newdata, ...)
 }
 \arguments{
-\item{object}{Output from [fit()].}
+\item{object}{Output from \code{\link[=fit]{fit()}}.}
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
 

@@ -10,11 +10,12 @@ fit(
   sem = NULL,
   estimate_delta0 = FALSE,
   family_link = c(0, 0),
-  data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time"),
+  data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time",
+    distribution = "dist"),
   times = sort(unique(data[, data_colnames$time])),
   variables = unique(data[, data_colnames$variable]),
   spatial_graph = NULL,
-  quiet = FALSE,
+  control = tinyVASTcontrol(),
   ...
 )
 }
@@ -42,20 +43,31 @@ the stationary distribution}
 to apply the SPDE method, \code{igraph} to apply a simultaneous autoregressive (SAR)
 process, or \code{NULL} to specify a single site.}
 
-\item{quiet}{Boolean indicating whether to run model printing messages to terminal or not;}
+\item{control}{Output from \code{\link{tinyVASTcontrol}}, used to define user
+settings, and see documentation for that function for details.}
 
 \item{...}{Additional parameters passed to \code{\link[dsem]{fit_tmb}}}
 }
 \description{
 Fits a vector autoregressive spatio-temporal model using
- a minimal feature-set, and widely used interface for objects
+a minimal feature-set, and widely used interface for objects
 }
 \details{
-the default \code{sem=NULL} turns off all multivariate and temporal indexing, such
+\link{tinyVAST} includes four basic inputs that specify the model structure:
+\itemize{
+\item \link{formula} specifies covariates and splines in a Generalized Additive Model;
+\item \link{sem} specifies interactions among variables and over time
+\item \link{spatial_graph} specifies spatial correlations
+}
+
+the default \link{sem=NULL} turns off all multivariate and temporal indexing, such
 that \code{spatial_graph} is then ignored, and the model collapses
 to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
 the user must specify both \code{spatial_graph} and \code{sem=""}, where the latter
-is then parsed to include a single exogenous variance for the single variable
+is then parsed to include a single exogenous variance for the single variable\tabular{ll}{
+   Model type \tab How to specify \cr
+   Spatial model \tab specify both \code{spatial_graph} and \code{sem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+}
 }
 \examples{
 methods(class="tinyVAST")

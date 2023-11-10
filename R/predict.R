@@ -52,26 +52,37 @@ function( object,
 integrate_output <-
 function( object,
           newdata,
-          area,
           bias.correct = TRUE,
           apply.epsilon = FALSE,
-          intern = FALSE ){
+          intern = FALSE,
+          W_gz,
+          V_gz,
+          area ){
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data
-  if(missing(area)){
-    area = rep(1, nrow(newdata))
-  }else if(length(area)==1){
-    area = rep(area, nrow(newdata))
-  }else if( length(area)!=nrow(newdata) ){
-    stop("Check length of `area`")
-  }
   # Build new
   tmb_data2 = add_predictions( object=object, newdata=newdata )
 
   # Area-expanded sum
-  tmb_data2$W_gz = matrix(area, nrow=nrow(newdata), ncol=2)
-  tmb_data2$V_gz = matrix(0, nrow=nrow(newdata), ncol=2)
+  if(missing(W_gz)){
+    # Default for area
+    if(missing(area)){
+      area = rep(1, nrow(newdata))
+    }else if(length(area)==1){
+      area = rep(area, nrow(newdata))
+    }else if( length(area)!=nrow(newdata) ){
+      stop("Check length of `area`")
+    }
+    tmb_data2$W_gz = cbind(area, 0)
+  }else{
+    tmb_data2$W_gz = W_gz
+  }
+  if(missing(V_gz)){
+    tmb_data2$V_gz = cbind( rep(1,nrow(newdata)), 0 )
+  }else{
+    tmb_data2$V_gz = V_gz
+  }
 
   # Abundance-weighted z
   #tmb_data2$W_gz = cbind( 1, newdata$x )
@@ -93,7 +104,8 @@ function( object,
                       random = c("gamma_k","epsilon_stc"),
                       DLL = "tinyVAST",
                       intern = intern,
-                      inner.control = inner.control )
+                      inner.control = inner.control,
+                      profile = object$internal$control$profile )
   newobj$env$beSilent()
 
   # Run sdreport
@@ -179,6 +191,11 @@ function( object,
     c_g = match( newdata[,object$internal$data_colnames$var], object$internal$variables )
   }else{ c_g = integer(0) }
 
+  #
+  if( !(object$internal$data_colnames$distribution %in% colnames(newdata)) ){
+    newdata = cbind( newdata, matrix(1, nrow=nrow(newdata), ncol=1, dimnames=list(NULL,object$internal$data_colnames$distribution)) )
+  }
+
   # Error checks
   tmb_data2 = object$tmb_inputs$tmb_data
   if( ncol(tmb_data2$X_ij) != ncol(X_gj) ) stop("Check X_gj")
@@ -191,6 +208,7 @@ function( object,
   tmb_data2$Axg_z = predAtriplet$x
   tmb_data2$t_g = t_g - 1 # Convert to CPP indexing
   tmb_data2$c_g = c_g - 1 # Convert to CPP indexing
+  tmb_data2$e_g = newdata[,object$internal$data_colnames$distribution] - 1 # -1 to convert to CPP index
 
   return( tmb_data2 )
 }
