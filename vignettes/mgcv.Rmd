@@ -34,7 +34,7 @@ We here show how it can replicate analysis using splines specified via `mgcv`
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate
-n_obs = 1000
+n_obs = 100000
 x = rnorm(n_obs)
 group = sample( x=1:5, size=n_obs, replace=TRUE )
 w = runif(n_obs, min=0, max=2)
@@ -46,7 +46,7 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group) )
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group)
 myfit = fit( data = Data,
            formula = Formula,
-           quiet = TRUE )
+           control = tinyVASTcontrol(quiet = TRUE) )
 ```
 
 `tinyVAST` then has a standard `predict` function:

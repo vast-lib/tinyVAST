@@ -19,7 +19,7 @@ tinyVASTcontrol(
 \arguments{
 \item{newton_loops}{Integer number of newton steps to do after running \code{nlminb}}
 
-\item{getsd}{Boolean indicating whether to call \code{\link[TMB]{sdreport}}}
+\item{getsd}{Boolean indicating whether to call \code{\link[TMB:sdreport]{TMB::sdreport()}}}
 
 \item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
 

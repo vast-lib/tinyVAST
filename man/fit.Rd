@@ -43,7 +43,7 @@ the stationary distribution}
 to apply the SPDE method, \code{igraph} to apply a simultaneous autoregressive (SAR)
 process, or \code{NULL} to specify a single site.}
 
-\item{control}{Output from \code{\link{tinyVASTcontrol}}, used to define user
+\item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings, and see documentation for that function for details.}
 
 \item{...}{Additional parameters passed to \code{\link[dsem]{fit_tmb}}}
@@ -53,11 +53,11 @@ Fits a vector autoregressive spatio-temporal model using
 a minimal feature-set, and widely used interface for objects
 }
 \details{
-\link{tinyVAST} includes four basic inputs that specify the model structure:
+\code{tinyVAST} includes four basic inputs that specify the model structure:
 \itemize{
-\item \link{formula} specifies covariates and splines in a Generalized Additive Model;
-\item \link{sem} specifies interactions among variables and over time
-\item \link{spatial_graph} specifies spatial correlations
+\item \code{formula} specifies covariates and splines in a Generalized Additive Model;
+\item \code{sem} specifies interactions among variables and over time
+\item \code{spatial_graph} specifies spatial correlations
 }
 
 the default \link{sem=NULL} turns off all multivariate and temporal indexing, such
@@ -65,8 +65,12 @@ that \code{spatial_graph} is then ignored, and the model collapses
 to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
 the user must specify both \code{spatial_graph} and \code{sem=""}, where the latter
 is then parsed to include a single exogenous variance for the single variable\tabular{ll}{
-   Model type \tab How to specify \cr
-   Spatial model \tab specify both \code{spatial_graph} and \code{sem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+   \strong{Model type} \tab \strong{How to specify} \cr
+   Generalized additive model \tab specify \code{spatial_graph=NULL} and \code{sem=""}, and then use \code{formula} to specify splines and covariates \cr
+   Dynamic structural equation model \tab specify \code{spatial_graph=NULL} and use \code{sem} to specify interactions among variables and over time \cr
+   Univeriate spatial model \tab specify \code{spatial_graph} and \code{sem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+   Multivariate spatial model \tab specify \code{spatial_graph} and use \code{sem} (without any lagged effects) to specify spatial interactions \cr
+   Vector autoregressive spatio-temporal model \tab specify \code{spatial_graph} and use \code{sem=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{sem} and \code{spatial_graph} \cr
 }
 }
 \examples{
