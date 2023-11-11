@@ -4,6 +4,11 @@
 #'
 #' @inheritParams add_predictions
 #'
+#' @param remove_origdata Whether to speed `predict(.)` by elminating original data
+#'        from TMB object, thereby speeding TMB object construction.  However, this
+#'        also eliminates information about random-effect variance, and is not
+#'        appropriate when requesting predictive standard errors or epsilon
+#'        bias-correction.
 #' @param ... Not used.
 #'
 #' @method predict tinyVAST
@@ -11,21 +16,16 @@
 predict.tinyVAST <-
 function( object,
           newdata,
+          remove_origdata = FALSE,
           ... ){
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data
 
   # Build new
-  tmb_data2 = add_predictions( object=object, newdata=newdata )
-
-  # Area-expanded sum
-  #tmb_data2$W_gz = matrix(1, nrow=nrow(newdata), ncol=2)
-  #tmb_data2$V_gz = matrix(0, nrow=nrow(newdata), ncol=2)
-
-  # Abundance-weighted z
-  #tmb_data2$W_gz = cbind( 1, newdata$x )
-  #tmb_data2$V_gz = matrix(1, nrow=nrow(newdata), ncol=2)
+  tmb_data2 = add_predictions( object = object,
+                               newdata = newdata,
+                               remove_origdata = remove_origdata )
 
   # Rebuild object
   newobj = MakeADFun( data = tmb_data2,
@@ -46,7 +46,7 @@ function( object,
 #' @inheritParams add_predictions
 #'
 #' @param area value used for area-weighted expansion of estimated density surface
-#'     for each row of \code{newdata}.
+#'     for each row of `newdata`.
 #'
 #' @export
 integrate_output <-
@@ -61,7 +61,7 @@ function( object,
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data
-  # Build new
+  # Build new .. object$data must be same as used for fitting
   tmb_data2 = add_predictions( object=object, newdata=newdata )
 
   # Area-expanded sum
@@ -134,7 +134,8 @@ function( object,
 #' @export
 add_predictions <-
 function( object,
-          newdata ){
+          newdata,
+          remove_origdata = FALSE ){
 
   tmb_data = object$tmb_inputs$tmb_data
   gam = object$gam_setup
@@ -209,6 +210,19 @@ function( object,
   tmb_data2$t_g = t_g - 1 # Convert to CPP indexing
   tmb_data2$c_g = c_g - 1 # Convert to CPP indexing
   tmb_data2$e_g = newdata[,object$internal$data_colnames$distribution] - 1 # -1 to convert to CPP index
+
+  # Simplify by eliminating observations ... experimental
+  if( isTRUE(remove_origdata) ){
+    warning("`remove_origdata` is experimental")
+    tmb_data2$y_i = tmb_data2$y_i[numeric(0)]
+    tmb_data2$X_ij = tmb_data2$X_ij[numeric(0),,drop=FALSE]
+    tmb_data2$Z_ik = tmb_data2$Z_ik[numeric(0),,drop=FALSE]
+    tmb_data2$t_i = tmb_data2$t_i[numeric(0)]
+    tmb_data2$c_i = tmb_data2$c_i[numeric(0)]
+    tmb_data2$e_i = tmb_data2$e_i[numeric(0)]
+    tmb_data2$Aistc_zz = tmb_data2$Aistc_zz[numeric(0),,drop=FALSE]
+    tmb_data2$Axi_z = tmb_data2$Axi_z[numeric(0)]
+  }
 
   return( tmb_data2 )
 }

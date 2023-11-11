@@ -8,29 +8,33 @@
 #'
 #' @param data Data-frame of predictor and response variables.
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
-#'        parsed by \code{mgcv} and hence allowing \code{s(.)} for splines
+#'        parsed by `mgcv` and hence allowing `s(.)` for splines
 #' @param family_link Vector of length-two, indicating the distribution and link-function
-#' @param spatial_graph Object that represents spatial relationships, either using \code{fmesher}
-#'        to apply the SPDE method, \code{igraph} to apply a simultaneous autoregressive (SAR)
-#'        process, or \code{NULL} to specify a single site.
-#' @param control Output from \code{\link{tinyVASTcontrol}}, used to define user
+#' @param spatial_graph Object that represents spatial relationships, either using `fmesher`
+#'        to apply the SPDE method, `igraph` to apply a simultaneous autoregressive (SAR)
+#'        process, or `NULL` to specify a single site.
+#' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings, and see documentation for that function for details.
 #'
 #' @details
-#' [tinyVAST] includes four basic inputs that specify the model structure:
-#' * [formula] specifies covariates and splines in a Generalized Additive Model;
-#' * [sem] specifies interactions among variables and over time
-#' * [spatial_graph] specifies spatial correlations
+#' `tinyVAST` includes four basic inputs that specify the model structure:
+#' * `formula` specifies covariates and splines in a Generalized Additive Model;
+#' * `sem` specifies interactions among variables and over time
+#' * `spatial_graph` specifies spatial correlations
 #'
-#' the default [sem=NULL] turns off all multivariate and temporal indexing, such
-#' that \code{spatial_graph} is then ignored, and the model collapses
-#' to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
-#' the user must specify both \code{spatial_graph} and \code{sem=""}, where the latter
+#' the default `sem=NULL` turns off all multivariate and temporal indexing, such
+#' that `spatial_graph` is then ignored, and the model collapses
+#' to a standard model using `mgcv::gam`.  To specify a univeriate spatial model,
+#' the user must specify both `spatial_graph` and `sem=""`, where the latter
 #' is then parsed to include a single exogenous variance for the single variable
 #'
-#' | Model type | How to specify |
+#' | \strong{Model type} | \strong{How to specify} |
 #' | --- | --- |
-#' | Spatial model | specify both \code{spatial_graph} and \code{sem=""}, where the latter is then parsed to include a single exogenous variance for the single variable |
+#' | Generalized additive model | specify `spatial_graph=NULL` and `sem=""`, and then use `formula` to specify splines and covariates |
+#' | Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_graph=NULL` and use `sem` to specify interactions among variables and over time |
+#' | Univeriate spatial model | specify `spatial_graph` and `sem=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
+#' | Multivariate spatial model | specify `spatial_graph` and use `sem` (without any lagged effects) to specify spatial interactions |
+#' | Vector autoregressive spatio-temporal model | specify `spatial_graph` and use `sem=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `sem` and `spatial_graph` |
 #'
 #' @importFrom dsem make_ram classify_variables parse_path
 #' @importFrom igraph as_adjacency_matrix
@@ -61,7 +65,7 @@ function( data,
   if( class(control) != "tinyVASTcontrol" ) stop("`control` must be made by `tinyVASTcontrol()`")
 
   ##############
-  # SEM constructor
+  # RAM constructor
   ##############
 
   # (I-Rho)^-1 * Gamma * (I-Rho)^-1
@@ -79,8 +83,10 @@ function( data,
     if( !(data_colnames$variable %in% colnames(data)) ){
       data = cbind(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
     }
-  }else{
+  }else if( isTRUE(is.character(sem)) ){
     ram_output = make_ram( sem, times=times, variables=variables, quiet=control$quiet, covs=variables )
+  }else{
+    stop("`sem` must be either `NULL` or a character-string")
   }
   ram = ram_output$ram
 
@@ -181,6 +187,9 @@ function( data,
     c_i = match( data[,data_colnames$var], variables )
   }else{ c_i = integer(0) }
 
+  # Build e_i ... always has length nrow(data)
+  e_i = match( data[,data_colnames$distribution], unique(data[,data_colnames$distribution]) )
+
   # Drop rows from Aistc_zz and Axi_z (e.g., when times and/or variables are empty because sem=NULL)
   Aistc_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1
   which_Arows = which(apply( Aistc_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
@@ -194,7 +203,7 @@ function( data,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     f_ez = family_link,
-    e_i = data[,data_colnames$distribution] - 1, # -1 to convert to CPP index
+    e_i = e_i - 1, # -1 to convert to CPP index
     Edims_ez = Edims_ez,
     S_kk = S_kk,
     Sdims = Sdims,
@@ -338,10 +347,10 @@ function( data,
 #' @inheritParams stats::nlminb
 #' @inheritParams TMB::MakeADFun
 #'
-#' @param getsd Boolean indicating whether to call \code{\link[TMB]{sdreport}}
-#' @param newton_loops Integer number of newton steps to do after running \code{nlminb}
+#' @param getsd Boolean indicating whether to call [TMB::sdreport()]
+#' @param newton_loops Integer number of newton steps to do after running `nlminb`
 #' @param tmb_par list of parameters for starting values, with shape identical to
-#'        \code{fit(...)$internal$parlist}
+#'        `fit(...)$internal$parlist`
 #'
 #' @export
 tinyVASTcontrol <-
@@ -385,8 +394,8 @@ function( x,
 #'
 #' @title Calculate deviance or response residuals for tinyVAST
 #'
-#' @param object Output from \code{\link{fit}}
-#' @param type which type of residuals to compute (only option is \code{"deviance"} or \code{"response"} for now)
+#' @param object Output from [fit()]
+#' @param type which type of residuals to compute (only option is `"deviance"` or `"response"` for now)
 #' @param ... Note used
 #'
 #' @method residuals tinyVAST
@@ -478,7 +487,7 @@ logLik.tinyVAST <- function(object, ...) {
 #'
 #' extract the covariance of fixed effects, or both fixed and random effects.
 #'
-#' @param object output from \code{fit}
+#' @param object output from `fit`
 #' @param which whether to extract the covariance among fixed effects, random effects, or both
 #' @param ... ignored, for method compatibility
 #' @importFrom stats vcov
