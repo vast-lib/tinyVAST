@@ -18,11 +18,32 @@ vector<Type> multiply_3d_sparse( matrix<int> A, vector<Type> weight, array<Type>
   }
   return out;
 }
+template<class Type>
+vector<Type> multiply_2d_sparse( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
+  vector<Type> out( n_i );
+  out.setZero();
+  for( int z=0; z<A.rows(); z++ ){
+    out(A(z,0)) += weight(z) * x(A(z,1),A(z,2));
+  }
+  return out;
+}
 
 // get sign of double, only for REPORT use
 template<class Type>
 Type sign(Type x){
   return x / pow(pow(x,2),0.5);
+}
+
+// dlnorm
+template<class Type>
+Type dlnorm( Type x,
+             Type meanlog,
+             Type sdlog,
+             int give_log=0){
+
+  //return 1/(sqrt(2*M_PI)*sd) * exp(-.5*pow((x-mean)/sd,2));
+  Type logres = dnorm( log(x), meanlog, sdlog, true) - log(x);
+  if(give_log) return logres; else return exp(logres);
 }
 
 // Deviance for the Tweedie
@@ -47,7 +68,7 @@ Type devresid_tweedie( Type y,
 // 3. Name objects with [var]_[indices] so that number of indices indicates
 //    dimensionality
 // 4. spatial_graph always has dimension 1+, but DSEM functionality is removed if
-//    sem=NULL such that nrow(RAM)=0
+//    sem=NULL such that nrow(ram_dsem)=0
 
 template<class Type>
 Type objective_function<Type>::operator() (){
@@ -66,25 +87,35 @@ Type objective_function<Type>::operator() (){
   DATA_MATRIX( Z_ik );        // Design matrix for splines
   DATA_IVECTOR( t_i );
   DATA_IVECTOR( c_i );
+  DATA_VECTOR( offset_i );
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
 
   // Spatial objects
   DATA_INTEGER( spatial_method_code );   // Switch to string: https://kaskr.github.io/adcomp/compois_8cpp-example.html#a2
-  DATA_IMATRIX( Aistc_zz );    // NAs get converted to -2147483648
-  DATA_VECTOR( Axi_z );
+  DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
+  DATA_VECTOR( Aepsilon_z );
+  DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
+  DATA_VECTOR( Aomega_z );
+
+  // DSEM objects
+  DATA_IMATRIX( ram_dsem );
+  DATA_VECTOR( ram_dsem_start );
 
   // SEM objects
-  DATA_IMATRIX( RAM );
-  DATA_VECTOR( RAMstart );
+  DATA_IMATRIX( ram_sem );
+  DATA_VECTOR( ram_sem_start );
 
   // Prediction options
   DATA_MATRIX( X_gj );       // Design matrix for fixed covariates
   DATA_MATRIX( Z_gk );       // Design matrix for splines
-  DATA_IMATRIX( Agstc_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
-  DATA_VECTOR( Axg_z );
+  DATA_IMATRIX( AepsilonG_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
+  DATA_VECTOR( AepsilonG_z );
+  DATA_IMATRIX( AomegaG_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
+  DATA_VECTOR( AomegaG_z );
   DATA_IVECTOR( t_g );
   DATA_IVECTOR( c_g );
+  DATA_VECTOR( offset_g );
   DATA_IVECTOR( e_g );
 
   // Expansion options
@@ -99,23 +130,26 @@ Type objective_function<Type>::operator() (){
   PARAMETER( log_kappa );
   PARAMETER_VECTOR( alpha_j ); // Fixed covariate parameters
   PARAMETER_VECTOR( gamma_k ); // Spline regression parameters
-  //PARAMETER_VECTOR(omega); // SPDE random effecs
-  PARAMETER_VECTOR( beta_z ); // SEM coefficients
+  PARAMETER_VECTOR( beta_z ); // DSEM coefficients
+  PARAMETER_VECTOR( theta_z ); // SEM coefficients
   PARAMETER_VECTOR( log_lambda ); //Penalization parameters
   PARAMETER_VECTOR( log_sigma );
   PARAMETER_VECTOR( delta0_c );
   PARAMETER_ARRAY( epsilon_stc );
+  PARAMETER_ARRAY( omega_sc );
   PARAMETER_VECTOR( eps );     // manual epsilon bias-correction, empty to turn off
 
   Type nll = 0;
+  Type tmp;
 
   // Assemble precision
   int n_s = epsilon_stc.dim(0);
   int n_t = epsilon_stc.dim(1);
   int n_c = epsilon_stc.dim(2);
   int n_h = n_t * n_c;      // data
+
+  // DSEM
   Eigen::SparseMatrix<Type> Q_hh( n_h, n_h );
-  // SEM
   Eigen::SparseMatrix<Type> Linv_hh(n_h, n_h);
   Eigen::SparseMatrix<Type> Rho_hh(n_h, n_h);
   Eigen::SparseMatrix<Type> Gammainv_hh(n_h, n_h);
@@ -123,20 +157,40 @@ Type objective_function<Type>::operator() (){
   Rho_hh.setZero();
   Gammainv_hh.setZero();
   I_hh.setIdentity();
-  Type tmp;
-  REPORT( n_h );
-  for(int r=0; r<RAM.rows(); r++){
+  for(int r=0; r<ram_dsem.rows(); r++){
     // Extract estimated or fixed value
-    if(RAM(r,3)>=1){
-      tmp = beta_z(RAM(r,3)-1);
+    if(ram_dsem(r,3)>=1){
+      tmp = beta_z(ram_dsem(r,3)-1);
     }else{
-      tmp = RAMstart(r);
+      tmp = ram_dsem_start(r);
     }
-    if(RAM(r,0)==1) Rho_hh.coeffRef( RAM(r,1)-1, RAM(r,2)-1 ) = tmp;
-    if(RAM(r,0)==2) Gammainv_hh.coeffRef( RAM(r,1)-1, RAM(r,2)-1 ) = 1 / tmp;
+    if(ram_dsem(r,0)==1) Rho_hh.coeffRef( ram_dsem(r,1)-1, ram_dsem(r,2)-1 ) = tmp;
+    if(ram_dsem(r,0)==2) Gammainv_hh.coeffRef( ram_dsem(r,1)-1, ram_dsem(r,2)-1 ) = 1 / tmp;
   }
   Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
   Q_hh = Linv_hh.transpose() * Linv_hh;
+
+  // SEM
+  Eigen::SparseMatrix<Type> Q_cc( n_c, n_c );
+  Eigen::SparseMatrix<Type> Linv_cc(n_c, n_c);
+  Eigen::SparseMatrix<Type> Rho_cc(n_c, n_c);
+  Eigen::SparseMatrix<Type> Gammainv_cc(n_c, n_c);
+  Eigen::SparseMatrix<Type> I_cc( n_c, n_c );
+  Rho_cc.setZero();
+  Gammainv_cc.setZero();
+  I_cc.setIdentity();
+  for(int r=0; r<ram_sem.rows(); r++){
+    // Extract estimated or fixed value
+    if(ram_sem(r,3)>=1){
+      tmp = theta_z(ram_sem(r,3)-1);
+    }else{
+      tmp = ram_sem_start(r);
+    }
+    if(ram_sem(r,0)==1) Rho_cc.coeffRef( ram_sem(r,1)-1, ram_sem(r,2)-1 ) = tmp;
+    if(ram_sem(r,0)==2) Gammainv_cc.coeffRef( ram_sem(r,1)-1, ram_sem(r,2)-1 ) = 1 / tmp;
+  }
+  Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
+  Q_cc = Linv_cc.transpose() * Linv_cc;
 
   // Calculate effect of initial condition -- SPARSE version
   vector<Type> delta_h( n_h );
@@ -191,12 +245,20 @@ Type objective_function<Type>::operator() (){
     log_tau = 0.0;
   }
 
-  // GMRF:  non-separable time-variable, with separable spatace
-  if( (n_s>0) & (n_h>0) ){ // PARALLEL_REGION
+  // GMRF for DSEM:  non-separable time-variable, with separable space
+  if( epsilon_sh.size()>0 ){ // PARALLEL_REGION
     // Including this line with Makevars below seems to cause a crash:
     // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
     // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
     nll += SEPARABLE( GMRF(Q_hh), GMRF(Q_ss) )( epsilon_sh );
+  }
+
+  // GMRF for SEM:  separable variable-space interaction
+  if( omega_sc.size()>0 ){ // PARALLEL_REGION
+    // Including this line with Makevars below seems to cause a crash:
+    // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
+    // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
+    nll += SEPARABLE( GMRF(Q_cc), GMRF(Q_ss) )( omega_sc );
   }
 
   // Distribution for spline components
@@ -210,8 +272,9 @@ Type objective_function<Type>::operator() (){
   }
 
   // Linear predictor
-  vector<Type> p_i = X_ij*alpha_j + Z_ik*gamma_k;
-  p_i += multiply_3d_sparse( Aistc_zz, Axi_z, epsilon_stc, p_i.size() ) / exp(log_tau);
+  vector<Type> p_i = X_ij*alpha_j + Z_ik*gamma_k + offset_i;
+  p_i += multiply_3d_sparse( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
+  p_i += multiply_2d_sparse( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
   for( int i=0; i<p_i.size(); i++ ){
     if( (n_h>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
       h = c_i(i)*n_t + t_i(i);
@@ -221,29 +284,46 @@ Type objective_function<Type>::operator() (){
   // Likelihood
   vector<Type> devresid_i( y_i.size() );
   vector<Type> mu_i( y_i.size() );
+  vector<Type> logmu_i( y_i.size() );
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
-      //vector<int> log_sigma_segment = Edims_ez.row(e_i(i));
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
+    // Link function
+    switch( f_ez(e_i(i),1) ){
+      case 0:  // identity-link
+        mu_i(i) = p_i(i);
+        logmu_i(i) = log( p_i(i) );
+        break;
+      case 1: // log-link
+        mu_i(i) = exp(p_i(i));
+        logmu_i(i) = p_i(i);
+        break;
+      default:
+        error("Link not implemented.");
+    }
+    // Distribution
     switch( f_ez(e_i(i),0) ){
       case 0:  // Normal distribution
-        mu_i(i) = p_i(i);
         nll -= dnorm( y_i(i), mu_i(i), exp(log_sigma_segment(0)), true );
         devresid_i(i) = y_i(i) - p_i(i);
         break;
       case 1: // Tweedie
-        mu_i(i) = exp(p_i(i));
         nll -= dtweedie( y_i(i), mu_i(i), exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
         devresid_i(i) = devresid_tweedie( y_i(i), mu_i(i), 1.0 + invlogit(log_sigma_segment(1)) );
         break;
+      case 2: // lognormal
+        nll -= dlnorm( y_i(i), logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+        devresid_i(i) = log(y_i(i)) - ( logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)) );
+        break;
       default:
-        error("Family not implemented.");
+        error("Distribution not implemented.");
     }
   }
 
   // Predictions
-  vector<Type> p_g = X_gj*alpha_j + Z_gk*gamma_k;
+  vector<Type> p_g = X_gj*alpha_j + Z_gk*gamma_k + offset_g;
   vector<Type> mu_g( p_g.size() );
-  p_g += multiply_3d_sparse( Agstc_zz, Axg_z, epsilon_stc, p_g.size() ) / exp(log_tau);
+  p_g += multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, p_g.size() ) / exp(log_tau);
+  p_g += multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, p_g.size() ) / exp(log_tau);
   for( int g=0; g<p_g.size(); g++ ){
     if( (n_h>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
       h = c_g(g)*n_t + t_g(g);
@@ -251,11 +331,11 @@ Type objective_function<Type>::operator() (){
     }
   }
   for( int g=0; g<p_g.size(); g++ ){
-    switch( f_ez(e_g(g),0) ){
-      case 0: // Normal distribution
+    switch( f_ez(e_g(g),1) ){
+      case 0: // identity-link
         mu_g(g) = p_g(g);
         break;
-      case 1: // Tweedie
+      case 1: // log-link
         mu_g(g) = exp(p_g(g));
         break;
     }
@@ -318,6 +398,7 @@ Type objective_function<Type>::operator() (){
   //REPORT( Q_hh );
   //REPORT( Q_ss );
   REPORT( devresid_i );
+  REPORT( nll );
 
   return nll;
 }

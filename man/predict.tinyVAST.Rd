@@ -4,12 +4,18 @@
 \alias{predict.tinyVAST}
 \title{Predict using vector autoregressive spatio-temporal model}
 \usage{
-\method{predict}{tinyVAST}(object, newdata, ...)
+\method{predict}{tinyVAST}(object, newdata, remove_origdata = FALSE, ...)
 }
 \arguments{
 \item{object}{Output from \code{\link[=fit]{fit()}}.}
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
+
+\item{remove_origdata}{Whether to speed \code{predict(.)} by elminating original data
+from TMB object, thereby speeding TMB object construction.  However, this
+also eliminates information about random-effect variance, and is not
+appropriate when requesting predictive standard errors or epsilon
+bias-correction.}
 
 \item{...}{Not used.}
 }

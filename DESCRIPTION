@@ -17,6 +17,7 @@ Authors@R:
     )
 Imports:
     dsem,
+    sem,
     igraph
 Depends:
     R (>= 4.0.0),

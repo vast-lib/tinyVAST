@@ -60,12 +60,12 @@ mean(Data$n==0)
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # fit model
-out = fit( sem = "logn -> logn, 1, rho",
+out = fit( dsem = "logn -> logn, 1, rho",
            data = Data,
            formula = n ~ 0 + factor(time),
            spatial_graph = mesh,
-           quiet = TRUE,
-           family_link = c(1,0) )
+           family_link = rbind("obs"=c(1,1)),
+           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 out
 ```
 The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`.
@@ -123,30 +123,30 @@ ggplot(Index, aes(time, Estimate)) +
 
 Next, we compare this against the current version of VAST
 ```{r, eval=requireNamespace(c("INLA","VAST")), echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-#library(VAST)
-#settings = make_settings( purpose="index3",
-#                          n_x = n_x*n_y,
-#                          Region = "Other",
-#                          bias.correct = FALSE,
-#                          use_anisotropy = FALSE )
-#settings$FieldConfig['Epsilon','Component_1'] = 0
-#settings$FieldConfig['Omega',] = 0
-#settings$RhoConfig['Epsilon2'] = 4
-#settings$RhoConfig['Beta1'] = 3
-#
-#myVAST = fit_model( settings=settings,
-#                 Lat_i = Data[,'y'],
-#                 Lon_i = Data[,'x'],
-#                 t_i = Data[,'time'],
-#                 b_i = exp(Data[,'n']),
-#                 a_i = rep(1,nrow(Data)),
-#                 observations_LL = cbind(Lat=Data[,'y'],Lon=Data[,'x']),
-#                 grid_dim_km = c(100,100),
-#                 ObsModel = c(10,2),
-#                 newtonsteps = 0,
-#                 loopnum = 0,
-#                 control = list(eval.max=100, iter.max=100, trace=0) )
-#myVAST
+library(VAST)
+settings = make_settings( purpose="index3",
+                          n_x = n_x*n_y,
+                          Region = "Other",
+                          bias.correct = FALSE,
+                          use_anisotropy = FALSE )
+settings$FieldConfig['Epsilon','Component_1'] = 0
+settings$FieldConfig['Omega',] = 0
+settings$RhoConfig['Epsilon2'] = 4
+settings$RhoConfig['Beta1'] = 3
+settings$ObsModel = c(10,2)
+
+myVAST = fit_model( settings=settings,
+                 Lat_i = Data[,'y'],
+                 Lon_i = Data[,'x'],
+                 t_i = Data[,'time'],
+                 b_i = Data[,'n'],
+                 a_i = rep(1,nrow(Data)),
+                 observations_LL = cbind(Lat=Data[,'y'],Lon=Data[,'x']),
+                 grid_dim_km = c(100,100),
+                 newtonsteps = 0,
+                 loopnum = 1,
+                 control = list(eval.max=100, iter.max=100, trace=0) )
+myVAST
 ```
 
 Or with sdmTMB
@@ -199,8 +199,8 @@ Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
-# Define sem
-sem = "
+# Define DSEM
+dsem = "
   d1 -> d1, 1, b11
   d2 -> d2, 1, b22
   d2 -> d1, 1, b21
@@ -210,12 +210,12 @@ sem = "
 "
 
 # fit model
-out = fit( sem = sem,
+out = fit( dsem = dsem,
            data = Data,
            formula = n ~ 0 + var,
            spatial_graph = mesh,
-           quiet = TRUE,
-           family_link = c(1,0) )
+           family_link = rbind("obs"=c(1,1)),
+           control = tinyVASTcontrol(quiet=TRUE, trace=1) )
 out
 ```
 

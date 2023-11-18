@@ -23,9 +23,6 @@ knitr::opts_chunk$set(
 
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
-library(pdp)  # approx = TRUE gives effects for average of other covariates
-library(lattice)
-library(visreg)
 library(fmesher)
 set.seed(101)
 ```
@@ -44,7 +41,6 @@ Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), w=w, z=as.vector(z) + cos(w/n_
 Data$n = Data$z + rnorm(nrow(Data), sd=1)
 
 # Add columns for multivariate and temporal dimensions
-Data$time = 1
 Data$var = "n"
 
 # make mesh
@@ -54,15 +50,16 @@ mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
 out = fit( data = Data,
            formula = n ~ s(w),
            spatial_graph = mesh,
-           quiet = TRUE,
+           control = tinyVASTcontrol(quiet=TRUE, trace=0),
            sem = "" )
 ```
 
 We can then calculate the area-weighted total abundance:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Predicted sample-weighted total
-integrate_output(out)
+integrate_output(out, newdata = out$data)
 # integrate_output(out, apply.epsilon=TRUE )
+# predict(out)
 
 # True (latent) sample-weighted total
 sum( Data$z )
@@ -77,7 +74,8 @@ We can compute deviance residuals and percent-deviance explained:
 R1 = sum( residuals(out, type="deviance")^2 )
 
 # tinyVAST null model with just a single intercept
-null = fit( data = Data, formula = n ~ 1, quiet = TRUE )
+null = fit( data = Data, formula = n ~ 1,
+            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 R0 = sum( residuals(null, type="deviance")^2 )
 
 # Percent deviance explained
@@ -95,7 +93,8 @@ where this comparison shows that using the SPDE method in tinyVAST results in hi
 It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when excluding the spatial term from each.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-out_reduced = fit( data = Data, formula = n ~ s(w), quiet = TRUE, sem = "" )
+out_reduced = fit( data = Data, formula = n ~ s(w),
+                   control = tinyVASTcontrol(quiet=TRUE, trace=0), sem = "" )
 R1_reduced = sum( residuals(out_reduced, type="deviance")^2 )
 1 - R1_reduced/R0
 
@@ -125,6 +124,10 @@ image( x=1:n_x, y=1:n_y, z=matrix(Data$z,ncol=n_y), main="True response" )
 
 We can also compute the marginal effect of the cyclic confounder
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+library(pdp)  # approx = TRUE gives effects for average of other covariates
+library(lattice)
+#library(visreg)
+
 # compute partial dependence plot
 Partial = partial( object = out,
                    pred.var = "w",

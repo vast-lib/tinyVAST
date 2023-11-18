@@ -34,16 +34,17 @@ We here show how it can replicate analysis using splines specified via `mgcv`
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate
-n_obs = 100000
+n_obs = 100
 x = rnorm(n_obs)
 group = sample( x=1:5, size=n_obs, replace=TRUE )
 w = runif(n_obs, min=0, max=2)
 z = 1 + x^2 + cos((w+group/5)*2*pi) + rnorm(5)[group]
-y = z + rnorm(n_obs, sd=0.2)
-Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group) )
+a = exp(0.1*rnorm(n_obs))
+y = z + a + rnorm(n_obs, sd=0.2)
+Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group), a=a )
 
 # fit model
-Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group)
+Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group, bs="ts") # + offset(a)
 myfit = fit( data = Data,
            formula = Formula,
            control = tinyVASTcontrol(quiet = TRUE) )
@@ -51,7 +52,7 @@ myfit = fit( data = Data,
 
 `tinyVAST` then has a standard `predict` function:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-predict(myfit, newdata=data.frame(x=0, y=1, w=0.4, group=2) )
+predict(myfit, newdata=data.frame(x=0, y=1, w=0.4, group=2, a=1) )
 ```
 
 and this is used to compute partial-dependence plots using package `pdp`
