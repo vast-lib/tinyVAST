@@ -8,11 +8,12 @@ fit(
   data,
   formula,
   sem = NULL,
+  dsem = NULL,
   estimate_delta0 = FALSE,
-  family_link = c(0, 0),
+  family_link = rbind(obs = c(0, 0)),
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time",
     distribution = "dist"),
-  times = sort(unique(data[, data_colnames$time])),
+  times = seq(min(data[, data_colnames$time]), max(data[, data_colnames$time])),
   variables = unique(data[, data_colnames$variable]),
   spatial_graph = NULL,
   control = tinyVASTcontrol(),
@@ -23,15 +24,12 @@ fit(
 \item{data}{Data-frame of predictor and response variables.}
 
 \item{formula}{Formula with response on left-hand-side and predictors on right-hand-side,
-parsed by \code{mgcv} and hence allowing \code{s(.)} for splines}
+parsed by \code{mgcv} and hence allowing \code{s(.)} for splines or \code{offset(.)} for
+an offset.}
 
 \item{sem}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects.  See Details section in
-\code{\link[dsem]{make_ram}} for more description}
-
-\item{estimate_delta0}{Boolean indicating whether to estimate deviations from equilibrium in initial year
-as fixed effects, or alternatively to assume that dynamics start at some stochastic draw away from
-the stationary distribution}
+\code{\link[dsem]{make_dsem_ram}} for more description}
 
 \item{family_link}{Vector of length-two, indicating the distribution and link-function}
 
@@ -45,8 +43,6 @@ process, or \code{NULL} to specify a single site.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings, and see documentation for that function for details.}
-
-\item{...}{Additional parameters passed to \code{\link[dsem]{fit_tmb}}}
 }
 \description{
 Fits a vector autoregressive spatio-temporal model using
@@ -56,21 +52,21 @@ a minimal feature-set, and widely used interface for objects
 \code{tinyVAST} includes four basic inputs that specify the model structure:
 \itemize{
 \item \code{formula} specifies covariates and splines in a Generalized Additive Model;
-\item \code{sem} specifies interactions among variables and over time
+\item \code{dsem} specifies interactions among variables and over time
 \item \code{spatial_graph} specifies spatial correlations
 }
 
-the default \link{sem=NULL} turns off all multivariate and temporal indexing, such
+the default \code{dsem=NULL} turns off all multivariate and temporal indexing, such
 that \code{spatial_graph} is then ignored, and the model collapses
 to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
-the user must specify both \code{spatial_graph} and \code{sem=""}, where the latter
+the user must specify both \code{spatial_graph} and \code{dsem=""}, where the latter
 is then parsed to include a single exogenous variance for the single variable\tabular{ll}{
    \strong{Model type} \tab \strong{How to specify} \cr
-   Generalized additive model \tab specify \code{spatial_graph=NULL} and \code{sem=""}, and then use \code{formula} to specify splines and covariates \cr
-   Dynamic structural equation model \tab specify \code{spatial_graph=NULL} and use \code{sem} to specify interactions among variables and over time \cr
-   Univeriate spatial model \tab specify \code{spatial_graph} and \code{sem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
-   Multivariate spatial model \tab specify \code{spatial_graph} and use \code{sem} (without any lagged effects) to specify spatial interactions \cr
-   Vector autoregressive spatio-temporal model \tab specify \code{spatial_graph} and use \code{sem=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{sem} and \code{spatial_graph} \cr
+   Generalized additive model \tab specify \code{spatial_graph=NULL} and \code{dsem=""}, and then use \code{formula} to specify splines and covariates \cr
+   Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) \tab specify \code{spatial_graph=NULL} and use \code{dsem} to specify interactions among variables and over time \cr
+   Univeriate spatial model \tab specify \code{spatial_graph} and \code{dsem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+   Multivariate spatial model \tab specify \code{spatial_graph} and use \code{dsem} (without any lagged effects) to specify spatial interactions \cr
+   Vector autoregressive spatio-temporal model \tab specify \code{spatial_graph} and use \code{dsem=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{dsem} and \code{spatial_graph} \cr
 }
 }
 \examples{

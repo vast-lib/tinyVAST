@@ -3,12 +3,15 @@
 #' @description Fits a vector autoregressive spatio-temporal model using
 #'  a minimal feature-set, and widely used interface for objects
 #'
-#' @inheritParams dsem::dsem
-#' @inheritParams dsem::make_ram
+#' @inheritParams dsem::make_dsem_ram
 #'
+#' @param sem Specification for time-series structural equation model structure
+#'        including lagged or simultaneous effects.  See Details section in
+#'        \code{\link[dsem]{make_dsem_ram}} for more description
 #' @param data Data-frame of predictor and response variables.
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
-#'        parsed by `mgcv` and hence allowing `s(.)` for splines
+#'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
+#'        an offset.
 #' @param family_link Vector of length-two, indicating the distribution and link-function
 #' @param spatial_graph Object that represents spatial relationships, either using `fmesher`
 #'        to apply the SPDE method, `igraph` to apply a simultaneous autoregressive (SAR)
@@ -19,25 +22,26 @@
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:
 #' * `formula` specifies covariates and splines in a Generalized Additive Model;
-#' * `sem` specifies interactions among variables and over time
+#' * `dsem` specifies interactions among variables and over time
 #' * `spatial_graph` specifies spatial correlations
 #'
-#' the default `sem=NULL` turns off all multivariate and temporal indexing, such
+#' the default `dsem=NULL` turns off all multivariate and temporal indexing, such
 #' that `spatial_graph` is then ignored, and the model collapses
 #' to a standard model using `mgcv::gam`.  To specify a univeriate spatial model,
-#' the user must specify both `spatial_graph` and `sem=""`, where the latter
+#' the user must specify both `spatial_graph` and `dsem=""`, where the latter
 #' is then parsed to include a single exogenous variance for the single variable
 #'
 #' | \strong{Model type} | \strong{How to specify} |
 #' | --- | --- |
-#' | Generalized additive model | specify `spatial_graph=NULL` and `sem=""`, and then use `formula` to specify splines and covariates |
-#' | Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_graph=NULL` and use `sem` to specify interactions among variables and over time |
-#' | Univeriate spatial model | specify `spatial_graph` and `sem=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
-#' | Multivariate spatial model | specify `spatial_graph` and use `sem` (without any lagged effects) to specify spatial interactions |
-#' | Vector autoregressive spatio-temporal model | specify `spatial_graph` and use `sem=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `sem` and `spatial_graph` |
+#' | Generalized additive model | specify `spatial_graph=NULL` and `dsem=""`, and then use `formula` to specify splines and covariates |
+#' | Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_graph=NULL` and use `dsem` to specify interactions among variables and over time |
+#' | Univeriate spatial model | specify `spatial_graph` and `dsem=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
+#' | Multivariate spatial model | specify `spatial_graph` and use `dsem` (without any lagged effects) to specify spatial interactions |
+#' | Vector autoregressive spatio-temporal model | specify `spatial_graph` and use `dsem=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `dsem` and `spatial_graph` |
 #'
-#' @importFrom dsem make_ram classify_variables parse_path
+#' @importFrom dsem make_dsem_ram classify_variables parse_path
 #' @importFrom igraph as_adjacency_matrix
+#' @importFrom sem specifyModel specifyEquations
 #'
 #' @examples
 #' methods(class="tinyVAST")
@@ -48,59 +52,95 @@ fit <-
 function( data,
           formula,
           sem = NULL,
+          dsem = NULL,
           estimate_delta0 = FALSE,
-          family_link = c(0,0),
-          #spatial_sem,
-          #spatiotemporal_sem,
+          family_link = rbind( "obs"=c(0,0) ),
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
-          times = sort(unique(data[,data_colnames$time])),
+          times = seq(min(data[,data_colnames$time]),max(data[,data_colnames$time])),
           variables = unique(data[,data_colnames$variable]),
           spatial_graph = NULL,
           control = tinyVASTcontrol(),
           ... ){
+
   # https://roxygen2.r-lib.org/articles/rd-formatting.html#tables for roxygen formatting
   start_time = Sys.time()
 
   # General error checks
   if( class(control) != "tinyVASTcontrol" ) stop("`control` must be made by `tinyVASTcontrol()`")
+  if( !is.data.frame(data) ) stop("`data` must be a data frame")
 
   ##############
-  # RAM constructor
+  # SEM / DSEM telescoping
+  ##############
+
+  # Allow user to avoid specifying these if is.null(dsem)
+  if( is.null(dsem) ){
+    times = numeric(0)
+    if( !(data_colnames$time %in% colnames(data)) ){
+      data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
+    }
+  }
+
+  # Allow user to avoid specifying these if is.null(dsem) AND is.null(sem)
+  if( is.null(dsem) & is.null(sem) ){
+    variables = numeric(0)
+    if( !(data_colnames$variable %in% colnames(data)) ){
+      data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
+    }
+  }
+
+  ##############
+  # DSEM RAM constructor
   ##############
 
   # (I-Rho)^-1 * Gamma * (I-Rho)^-1
-  if( is.null(sem) ){
-    ram_output = list(
+  if( is.null(dsem) ){
+    dsem_ram_output = list(
       ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
       model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
     )
-    times = numeric(0)
-    variables = numeric(0)
-    # Allow user to avoid specifying these if is.null(sem)
-    if( !(data_colnames$time %in% colnames(data)) ){
-      data = cbind( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
-    }
-    if( !(data_colnames$variable %in% colnames(data)) ){
-      data = cbind(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
-    }
-  }else if( isTRUE(is.character(sem)) ){
-    ram_output = make_ram( sem, times=times, variables=variables, quiet=control$quiet, covs=variables )
+  }else if( isTRUE(is.character(dsem)) ){
+    dsem_ram_output = make_dsem_ram( dsem, times=times, variables=variables, quiet=control$quiet, covs=variables )
+  }else if( class(dsem) %in% c("dsem_ram","eof_ram") ){
+    dsem_ram_output = dsem
   }else{
-    stop("`sem` must be either `NULL` or a character-string")
+    stop("`dsem` must be either `NULL` or a character-string")
   }
-  ram = ram_output$ram
+  ram_dsem = dsem_ram_output$ram
 
   # Identify arrow-type for each beta_j estimated in RAM
-  which_nonzero = which(ram[,4]>0)
-  beta_type = tapply( ram[which_nonzero,1], INDEX=ram[which_nonzero,4], max)
+  which_nonzero = which(ram_dsem[,4]>0)
+  beta_type = tapply( ram_dsem[which_nonzero,1], INDEX=ram_dsem[which_nonzero,4], max)
 
   # Error checks
-  if( any((ram_output$model[,'direction']==2) & (ram_output$model[,2]!=0)) ){
-    stop("All two-headed arrows should have lag=0")
+  if( class(dsem_ram_output) %in% c("dsem_ram") ){
+    if( any((dsem_ram_output$model[,'direction']==2) & (dsem_ram_output$model[,2]!=0)) ){
+      stop("All two-headed arrows should have lag=0")
+    }
+    if( !all(c(dsem_ram_output$model[,'first'],dsem_ram_output$model[,'second']) %in% variables) ){
+      stop("Some variable in `dsem` is not in `tsdata`")
+    }
   }
-  if( !all(c(ram_output$model[,'first'],ram_output$model[,'second']) %in% variables) ){
-    stop("Some variable in `sem` is not in `tsdata`")
+
+  ##############
+  # SEM RAM constructor
+  ##############
+
+  if( is.null(sem) ){
+    sem_ram_output = list(
+      ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
+      model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
+    )
+  }else if( isTRUE(is.character(sem)) ){
+    sem_ram_output = make_sem_ram( sem, variables=variables, quiet=control$quiet, covs=variables )
+  } else {
+    stop("`sem` must be either `NULL` or a character-string")
   }
+  ram_sem = sem_ram_output$ram
+
+  # Identify arrow-type for each beta_j estimated in RAM
+  which_nonzero = which(ram_sem[,4]>0)
+  theta_type = tapply( ram_sem[which_nonzero,1], INDEX=ram_sem[which_nonzero,4], max)
 
   ##############
   # Spatial domain constructor
@@ -126,10 +166,10 @@ function( data,
     spatial_method_code = 3
     n_s = 1
     A_is = matrix(1, nrow=nrow(data), ncol=1)    # dgCMatrix
-    A_is = as(Matrix(A_is),"dgCMatrix")
-    spatial_list = list( "M0" = as(Matrix(1,nrow=1,ncol=1),"dgCMatrix"),
-                         "M1" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix"),
-                         "M2" = as(Matrix(0,nrow=1,ncol=1),"dgCMatrix") )
+    A_is = as(Matrix(A_is),"CsparseMatrix")
+    spatial_list = list( "M0" = as(Matrix(1,nrow=1,ncol=1),"CsparseMatrix"),
+                         "M1" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix"),
+                         "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
   }
   Atriplet = Matrix::mat2triplet(A_is)
 
@@ -140,6 +180,7 @@ function( data,
   # Initial constructor of splines
   gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
   y_i = model.response(gam_setup$mf)  # OR USE: model.extract(gam_setup$mf, "response")
+  offset_i = gam_setup$offset
 
   # Extrtact and combine penelization matrices
   S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
@@ -156,12 +197,21 @@ function( data,
   # distribution/link
   ##############
 
-  # Check for errors, and telescope
+  # Telescope
   if( !(data_colnames$distribution %in% colnames(data)) ){
-    data = cbind( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+    if(nrow(family_link)>1) stop("Must supply `dist` if using multiple `family_link` options")
+    data = data.frame( data, matrix(rownames(family_link)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
   }
-  if( (any(data[,data_colnames$distribution]>nrow(family_link))) | (any(data[,data_colnames$distribution]<1)) ){
-    stop("`data[,data_colnames$distribution]` has some bad value")
+
+  # Build e_i ... always has length nrow(data)
+  e_i = match( data[,data_colnames$distribution], rownames(family_link) )
+
+  # Check for errors
+  if( (any(is.na(e_i))) ){
+    stop("`data[,data_colnames$distribution]` has values that don't match `rownames(family_link)`")
+  }
+  if( any( (family_link[,2]==0) & (family_link[,1] %in% c(1,2)) ) ){
+    warning("Using an identify link with a Tweedie or lognormal distribution is not advised.")
   }
 
   # Telescope format
@@ -171,7 +221,7 @@ function( data,
 
   # Construct log_sigma based on family_link
   remove_last = \(x) x[-length(x)]
-  Nsigma_e = sapply( as.character(family_link[,1]), "0"=1, "1"=2, FUN=switch )
+  Nsigma_e = sapply( as.character(family_link[,1]), "0"=1, "1"=2, "2"=1, FUN=switch )
   log_sigma = rep( 0, sum(Nsigma_e) )
   Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
@@ -187,12 +237,25 @@ function( data,
     c_i = match( data[,data_colnames$var], variables )
   }else{ c_i = integer(0) }
 
-  # Build e_i ... always has length nrow(data)
-  e_i = match( data[,data_colnames$distribution], unique(data[,data_colnames$distribution]) )
+  #
+  Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
+  which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
+  which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
+  if( nrow(ram_dsem)==0 ){
+    which_Arows = numeric(0)
+  }
+  Aepsilon_zz = Aepsilon_zz[which_Arows,,drop=FALSE]
+  Aepsilon_z = Atriplet$x[which_Arows]
 
-  # Drop rows from Aistc_zz and Axi_z (e.g., when times and/or variables are empty because sem=NULL)
-  Aistc_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i]) - 1
-  which_Arows = which(apply( Aistc_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
+  #
+  Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
+  which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
+  which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
+  if( nrow(ram_sem)==0 ){
+    which_Arows = numeric(0)
+  }
+  Aomega_zz = Aomega_zz[which_Arows,,drop=FALSE]
+  Aomega_z = Atriplet$x[which_Arows]
 
   # make dat
   tmb_data = list(
@@ -202,21 +265,29 @@ function( data,
     Z_ik = Z_ik,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
+    offset_i = offset_i,
     f_ez = family_link,
     e_i = e_i - 1, # -1 to convert to CPP index
     Edims_ez = Edims_ez,
     S_kk = S_kk,
     Sdims = Sdims,
-    Aistc_zz = Aistc_zz[which_Arows,,drop=FALSE],     # Index form, i, s, t
-    Axi_z = Atriplet$x[which_Arows],
-    RAM = as.matrix(na.omit(ram[,1:4])),
-    RAMstart = as.numeric(ram[,5]),
+    Aepsilon_zz = Aepsilon_zz - 1,     # Index form, i, s, t
+    Aepsilon_z = Aepsilon_z,
+    Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
+    Aomega_z = Aomega_z,
+    ram_sem = as.matrix(na.omit(ram_sem[,1:4])),
+    ram_sem_start = as.numeric(ram_sem[,5]),
+    ram_dsem = as.matrix(na.omit(ram_dsem[,1:4])),
+    ram_dsem_start = as.numeric(ram_dsem[,5]),
     X_gj = matrix(0,ncol=ncol(X_ij),nrow=0),
     Z_gk = matrix(0,ncol=ncol(Z_ik),nrow=0),
-    Agstc_zz = matrix(0,nrow=0,ncol=4),
-    Axg_z = numeric(0),
+    AepsilonG_zz = matrix(0,nrow=0,ncol=4),
+    AepsilonG_z = numeric(0),
+    AomegaG_zz = matrix(0,nrow=0,ncol=4),
+    AomegaG_z = numeric(0),
     t_g = integer(0),
     c_g = integer(0),
+    offset_g = integer(0),
     e_g = integer(0),
     W_gz = matrix(0,nrow=0,ncol=2),
     V_gz = matrix(0,nrow=0,ncol=2)
@@ -232,15 +303,23 @@ function( data,
     log_kappa = log(1),
     alpha_j = rep(0,ncol(X_ij)),  # Spline coefficients
     gamma_k = rep(0,ncol(Z_ik)),  # Spline coefficients
-    #omega = rep(0, spatial_graph$n),
     beta_z = ifelse(beta_type==1, 0.01, 1),
+    theta_z = ifelse(theta_type==1, 0.01, 1),
     log_lambda = rep(0,length(Sdims)), #Log spline penalization coefficients
     log_sigma = log_sigma,
     delta0_c = rep(0, length(variables)),
-    #x_tc = matrix(0, nrow=tmb_data$n_t, ncol=tmb_data$n_c)
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
+    omega_sc = array(0, dim=c(n_s, length(variables))),
     eps = numeric(0)
   )
+
+  # Telescoping
+  if( nrow(ram_dsem)==0 ){
+    tmb_par$epsilon_stc = tmb_par$epsilon_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
+  }
+  if( nrow(ram_sem)==0 ){
+    tmb_par$omega_sc = tmb_par$omega_sc[,numeric(0),drop=FALSE]
+  }
 
   # Turn off initial conditions
   if( estimate_delta0==FALSE ){
@@ -264,6 +343,11 @@ function( data,
     }
   }
 
+  # Check for obvious issues ... no NAs except in RAMstart
+  if( any(is.na(tmb_data[-match(c("ram_sem_start","ram_dsem_start"),names(tmb_data))])) ){
+    stop("Check `tmb_data` for NAs")
+  }
+
   ##############
   # Fit model
   ##############
@@ -277,7 +361,7 @@ function( data,
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
                    map = tmb_map,
-                   random = c("gamma_k","epsilon_stc"),
+                   random = c("gamma_k","epsilon_stc","omega_sc"),
                    DLL = "tinyVAST",
                    profile = control$profile )  #
   #openmp( ... , DLL="tinyVAST" )
@@ -315,14 +399,17 @@ function( data,
 
   # bundle and return output
   internal = list(
-    ram_output = ram_output,
+    dsem_ram_output = dsem_ram_output,
+    sem_ram_output = sem_ram_output,
+    dsem = dsem,
     sem = sem,
     data_colnames = data_colnames,
     times = times,
     variables = variables,
     parlist = obj$env$parList(par=obj$env$last.par.best),
     Hess_fixed = Hess_fixed,
-    control = control
+    control = control,
+    family_link = family_link
   )
   out = structure( list(
     formula = formula,
@@ -503,7 +590,7 @@ function( object,
   if( which=="fixed" ){
     V = object$sdrep$cov.fixed
     if(is.null(V)){
-      warning("Please re-run `dsem` with `getsd=TRUE`, or confirm that the model is converged")
+      warning("Please re-run `tinyVAS` with `getsd=TRUE`, or confirm that the model is converged")
     }
   }
   if( which=="random" ){
@@ -512,7 +599,7 @@ function( object,
   if( which=="both" ){
     H = object$sdrep$jointPrecision
     if(is.null(H)){
-      warning("Please re-run `dsem` with `getsd=TRUE` and `getJointPrecision=TRUE`, or confirm that the model is converged")
+      warning("Please re-run `tinyVAS` with `getsd=TRUE` and `getJointPrecision=TRUE`, or confirm that the model is converged")
       V = NULL
     }else{
       V = solve(H)

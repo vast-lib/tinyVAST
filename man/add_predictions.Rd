@@ -4,12 +4,17 @@
 \alias{add_predictions}
 \title{Add predictions to data-list}
 \usage{
-add_predictions(object, newdata)
+add_predictions(object, newdata, remove_origdata = FALSE)
 }
 \arguments{
 \item{object}{Output from \code{\link[=fit]{fit()}}.}
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
+
+\item{remove_origdata}{Whether to remove original-data to allow faster evaluation.
+\code{remove_origdata=TRUE} eliminates information about the distribution
+for random effects, and cannot be combined with epsilon bias-correction.
+WARNING:  feature is experimental and subject to change.}
 }
 \description{
 Given user-provided \code{newdata}, expand the object \code{tmb_data}
