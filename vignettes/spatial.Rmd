@@ -42,6 +42,7 @@ Data$n = Data$z + rnorm(nrow(Data), sd=1)
 
 # Add columns for multivariate and temporal dimensions
 Data$var = "n"
+Data$time = 2020
 
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
@@ -50,7 +51,7 @@ mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
 out = fit( data = Data,
            formula = n ~ s(w),
            spatial_graph = mesh,
-           control = tinyVASTcontrol(quiet=TRUE, trace=0),
+           control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj"),
            sem = "" )
 ```
 

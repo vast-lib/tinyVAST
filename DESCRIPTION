@@ -18,7 +18,8 @@ Authors@R:
 Imports:
     dsem,
     sem,
-    igraph
+    igraph,
+    corpcor
 Depends:
     R (>= 4.0.0),
     TMB,

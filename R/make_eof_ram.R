@@ -41,7 +41,7 @@ function( times,
                           "from" = c(EOF_names,as.character(variables)),
                           "parameter" = c(rep(0,n_eof),max(model[,3],na.rm=TRUE)+1:length(variables)) )
   if( standard_deviations == "equal" ){
-    variances$parameter = ifelse( variances$parameter==0, 0, min(variances$parameter) )
+    variances$parameter = ifelse( variances$parameter==0, 0, min(ifelse(variances$parameter==0,NA,variances$parameter),na.rm=TRUE) )
   }else if( is.numeric(standard_deviations) ){
     variances$parameter = ifelse( variances$parameter==0, 0, NA )
   }

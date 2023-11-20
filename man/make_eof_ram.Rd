@@ -4,7 +4,13 @@
 \alias{make_eof_ram}
 \title{Make a RAM (Reticular Action Model)}
 \usage{
-make_eof_ram(times, variables, n_eof, remove_na = TRUE)
+make_eof_ram(
+  times,
+  variables,
+  n_eof,
+  remove_na = TRUE,
+  standard_deviations = "unequal"
+)
 }
 \arguments{
 \item{times}{A character vector listing the set of times in order}

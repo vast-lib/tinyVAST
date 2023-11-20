@@ -13,7 +13,8 @@ tinyVASTcontrol(
   quiet = FALSE,
   trace = 1,
   profile = c(),
-  tmb_par = NULL
+  tmb_par = NULL,
+  gmrf_parameterization = c("separable", "projection")
 )
 }
 \arguments{

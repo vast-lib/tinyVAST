@@ -42,6 +42,7 @@
 #' @importFrom dsem make_dsem_ram classify_variables parse_path
 #' @importFrom igraph as_adjacency_matrix
 #' @importFrom sem specifyModel specifyEquations
+#' @importFrom corpcor pseudoinverse
 #'
 #' @examples
 #' methods(class="tinyVAST")
@@ -122,6 +123,17 @@ function( data,
     }
   }
 
+  # Check for rank-deficient precision from RAM
+  ram2 = subset( data.frame(dsem_ram_output$ram), heads==2 )
+  total_variance_h = tapply( as.numeric(ifelse(is.na(ram2$start), 1, ram2$start)),
+          INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
+  ram1 = subset( data.frame(dsem_ram_output$ram), heads==1 )
+  total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
+          INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
+  if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+    stop("Must use gmrf_parameterization=`projection` for the dsem RAM supplied")
+  }
+
   ##############
   # SEM RAM constructor
   ##############
@@ -141,6 +153,17 @@ function( data,
   # Identify arrow-type for each beta_j estimated in RAM
   which_nonzero = which(ram_sem[,4]>0)
   theta_type = tapply( ram_sem[which_nonzero,1], INDEX=ram_sem[which_nonzero,4], max)
+
+  # Check for rank-deficient precision from RAM
+  ram2 = subset( data.frame(sem_ram_output$ram), heads==2 )
+  total_variance_h = tapply( as.numeric(ifelse( is.na(ram2$start), 1, ram2$start)),
+          INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
+  ram1 = subset( data.frame(sem_ram_output$ram), heads==1 )
+  total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
+          INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
+  if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+    stop("Must use options$gmrf_parameterization=`projection` for the sem RAM supplied")
+  }
 
   ##############
   # Spatial domain constructor
@@ -259,7 +282,7 @@ function( data,
 
   # make dat
   tmb_data = list(
-    spatial_method_code = spatial_method_code,
+    spatial_options = c(spatial_method_code, ifelse(control$gmrf_parameterization=="separable",0,1) ),
     y_i = y_i,
     X_ij = X_ij,
     Z_ik = Z_ik,
@@ -328,7 +351,7 @@ function( data,
 
   # Turn of log_kappa when not needed
   tmb_map = list()
-  if( tmb_data$spatial_method_code %in% c(3,4) ){
+  if( spatial_method_code %in% c(3,4) ){
     tmb_map$log_kappa = factor(NA)
   }
 
@@ -366,8 +389,10 @@ function( data,
                    profile = control$profile )  #
   #openmp( ... , DLL="tinyVAST" )
   obj$env$beSilent()
+  # L = rep$IminusRho_hh %*% rep$Gamma_hh
 
   # Optimize
+  #start_time = Sys.time()
   opt = list( "par"=obj$par )
   for( i in seq_len(max(0,control$nlminb_loops)) ){
     if( isFALSE(control$quiet) ) message("Running nlminb_loop #", i)
@@ -378,6 +403,8 @@ function( data,
                                   iter.max = control$iter.max,
                                   trace = control$trace ) )
   }
+  #Sys.time() - start_time
+  #opt
 
   # Newtonsteps
   for( i in seq_len(max(0,control$newton_loops)) ){
@@ -449,7 +476,10 @@ function( nlminb_loops = 1,
           quiet = FALSE,
           trace = 1,
           profile = c(),
-          tmb_par = NULL ){
+          tmb_par = NULL,
+          gmrf_parameterization = c("separable","projection") ){
+
+  gmrf_parameterization = match.arg(gmrf_parameterization)
 
   # Return
   structure( list(
@@ -461,7 +491,8 @@ function( nlminb_loops = 1,
     quiet = quiet,
     trace = trace,
     profile = profile,
-    tmb_par = tmb_par
+    tmb_par = tmb_par,
+    gmrf_parameterization = gmrf_parameterization
   ), class = "tinyVASTcontrol" )
 }
 
