@@ -34,7 +34,7 @@ We here show how it can replicate analysis using splines specified via `mgcv`
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate
-n_obs = 100
+n_obs = 1000
 x = rnorm(n_obs)
 group = sample( x=1:5, size=n_obs, replace=TRUE )
 w = runif(n_obs, min=0, max=2)
@@ -47,7 +47,7 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group), a=a )
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group, bs="ts") # + offset(a)
 myfit = fit( data = Data,
            formula = Formula,
-           control = tinyVASTcontrol(quiet = TRUE) )
+           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 ```
 
 `tinyVAST` then has a standard `predict` function:
@@ -101,7 +101,7 @@ Data$group = factor(Data$group)
 Formula = n ~ s(x, y, by=group)
 myfit = fit( data = Data,
            formula = Formula,
-           quiet = TRUE )
+           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 
 # compute partial dependence plot
 mypartial = partial( object = myfit,

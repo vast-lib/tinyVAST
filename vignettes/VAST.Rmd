@@ -42,8 +42,9 @@ rho = 0.8
 spatial_sd = 0.5
 
 # Simulate GMRFs
-R = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
-d = mvtnorm::rmvnorm(n_t, sigma=spatial_sd^2*kronecker(R,R) )
+R_s = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
+V_ss = spatial_sd^2*kronecker(R_s, R_s)
+d = mvtnorm::rmvnorm(n_t, sigma=V_ss )
 
 # Project through time and add mean
 for( t in seq_len(n_t) ){

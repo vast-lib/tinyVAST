@@ -92,7 +92,7 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
 
   // Spatial objects
-  DATA_INTEGER( spatial_method_code );   // Switch to string: https://kaskr.github.io/adcomp/compois_8cpp-example.html#a2
+  DATA_IVECTOR( spatial_options );   // Switch to string: https://kaskr.github.io/adcomp/compois_8cpp-example.html#a2
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -139,6 +139,7 @@ Type objective_function<Type>::operator() (){
   PARAMETER_ARRAY( omega_sc );
   PARAMETER_VECTOR( eps );     // manual epsilon bias-correction, empty to turn off
 
+  // Globals
   Type nll = 0;
   Type tmp;
 
@@ -147,15 +148,18 @@ Type objective_function<Type>::operator() (){
   int n_t = epsilon_stc.dim(1);
   int n_c = epsilon_stc.dim(2);
   int n_h = n_t * n_c;      // data
+  int h;
 
   // DSEM
   Eigen::SparseMatrix<Type> Q_hh( n_h, n_h );
   Eigen::SparseMatrix<Type> Linv_hh(n_h, n_h);
   Eigen::SparseMatrix<Type> Rho_hh(n_h, n_h);
   Eigen::SparseMatrix<Type> Gammainv_hh(n_h, n_h);
+  Eigen::SparseMatrix<Type> Gamma_hh(n_h, n_h);
   Eigen::SparseMatrix<Type> I_hh( n_h, n_h );
   Rho_hh.setZero();
   Gammainv_hh.setZero();
+  Gamma_hh.setZero();
   I_hh.setIdentity();
   for(int r=0; r<ram_dsem.rows(); r++){
     // Extract estimated or fixed value
@@ -165,19 +169,22 @@ Type objective_function<Type>::operator() (){
       tmp = ram_dsem_start(r);
     }
     if(ram_dsem(r,0)==1) Rho_hh.coeffRef( ram_dsem(r,1)-1, ram_dsem(r,2)-1 ) = tmp;
-    if(ram_dsem(r,0)==2) Gammainv_hh.coeffRef( ram_dsem(r,1)-1, ram_dsem(r,2)-1 ) = 1 / tmp;
+    if(ram_dsem(r,0)==2){
+      Gammainv_hh.coeffRef( ram_dsem(r,1)-1, ram_dsem(r,2)-1 ) = 1 / tmp;
+      Gamma_hh.coeffRef( ram_dsem(r,1)-1, ram_dsem(r,2)-1 ) = tmp;
+    }
   }
-  Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
-  Q_hh = Linv_hh.transpose() * Linv_hh;
 
   // SEM
   Eigen::SparseMatrix<Type> Q_cc( n_c, n_c );
   Eigen::SparseMatrix<Type> Linv_cc(n_c, n_c);
   Eigen::SparseMatrix<Type> Rho_cc(n_c, n_c);
   Eigen::SparseMatrix<Type> Gammainv_cc(n_c, n_c);
+  Eigen::SparseMatrix<Type> Gamma_cc(n_c, n_c);
   Eigen::SparseMatrix<Type> I_cc( n_c, n_c );
   Rho_cc.setZero();
   Gammainv_cc.setZero();
+  Gamma_cc.setZero();
   I_cc.setIdentity();
   for(int r=0; r<ram_sem.rows(); r++){
     // Extract estimated or fixed value
@@ -187,54 +194,43 @@ Type objective_function<Type>::operator() (){
       tmp = ram_sem_start(r);
     }
     if(ram_sem(r,0)==1) Rho_cc.coeffRef( ram_sem(r,1)-1, ram_sem(r,2)-1 ) = tmp;
-    if(ram_sem(r,0)==2) Gammainv_cc.coeffRef( ram_sem(r,1)-1, ram_sem(r,2)-1 ) = 1 / tmp;
+    if(ram_sem(r,0)==2){
+      Gammainv_cc.coeffRef( ram_sem(r,1)-1, ram_sem(r,2)-1 ) = 1 / tmp;
+      Gamma_cc.coeffRef( ram_sem(r,1)-1, ram_sem(r,2)-1 ) = tmp;
+    }
   }
-  Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
-  Q_cc = Linv_cc.transpose() * Linv_cc;
 
   // Calculate effect of initial condition -- SPARSE version
+  // Where does x go later?
   vector<Type> delta_h( n_h );
   delta_h.setZero();
-  int h;
   if( delta0_c.size() > 0 ){
-    // Compute delta_k
-    matrix<Type> delta0_h1( n_h, 1 );
-    delta0_h1.setZero();
-    for(int c=0; c<n_c; c++){
-      h = c * n_t;
-      delta0_h1(h,0) = delta0_c(c);
-    }
-
-    // Sparse product
-    Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
-    Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > lu;
-    lu.compute(IminusRho_hh);
-    matrix<Type> x = lu.solve(delta0_h1);
-
-    // Resize
-    delta_h = delta0_h1.array();
-    REPORT( delta_h );
+    error("delta0 not currently working.");
+    //// Compute delta_k
+    //matrix<Type> delta0_h1( n_h, 1 );
+    //delta0_h1.setZero();
+    //for(int c=0; c<n_c; c++){
+    //  h = c * n_t;
+    //  delta0_h1(h,0) = delta0_c(c);
+    //}
+    //
+    //// Sparse product
+    //matrix<Type> x = inverseIminusRho_hh.solve(delta0_h1);
+    //
+    //// Resize
+    //delta_h = delta0_h1.array();
+    //REPORT( delta_h );
   }
-
-  // Transformations
-  vector<Type> lambda = exp(log_lambda);
-  array<Type> epsilon_sh( n_s, n_h );
-  for( int s=0; s<n_s; s++ ){
-  for( int t=0; t<n_t; t++ ){
-  for( int c=0; c<n_c; c++ ){
-    h = c*n_t + t;
-    epsilon_sh(s,h) = epsilon_stc(s,t,c);
-  }}}
 
   // Spatial distribution
   Type log_tau = 0;
   Eigen::SparseMatrix<Type> Q_ss;
-  if( (spatial_method_code==1) | (spatial_method_code==3) | (spatial_method_code==4) ){
+  if( (spatial_options(0)==1) | (spatial_options(0)==3) | (spatial_options(0)==4) ){
     // Using INLA
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
-  }else if( spatial_method_code==2 ){
+  }else if( spatial_options(0)==2 ){
     /// Using SAR
     DATA_SPARSE_MATRIX( Adj );
     Eigen::SparseMatrix<Type> I_ss( Adj.rows(), Adj.rows() );
@@ -245,20 +241,83 @@ Type objective_function<Type>::operator() (){
     log_tau = 0.0;
   }
 
-  // GMRF for DSEM:  non-separable time-variable, with separable space
-  if( epsilon_sh.size()>0 ){ // PARALLEL_REGION
-    // Including this line with Makevars below seems to cause a crash:
-    // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
-    // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
-    nll += SEPARABLE( GMRF(Q_hh), GMRF(Q_ss) )( epsilon_sh );
+  // Space-variable interaction
+  if( omega_sc.size()>0 ){ // PARALLEL_REGION
+    if( spatial_options(1) == 0 ){
+      // Separable precision
+      Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
+      Q_cc = Linv_cc.transpose() * Linv_cc;
+
+      // GMRF for SEM:  separable variable-space
+      nll += SEPARABLE( GMRF(Q_cc), GMRF(Q_ss) )( omega_sc );
+      // Including this line with Makevars below seems to cause a crash:
+      // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
+      // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
+    }else{
+      // Rank-deficient (projection) method
+      Eigen::SparseMatrix<Type> I_cc( n_c, n_c );
+      I_cc.setIdentity();
+      nll += SEPARABLE( GMRF(I_cc), GMRF(Q_ss) )( omega_sc );
+
+      // Sparse inverse-product
+      Eigen::SparseMatrix<Type> IminusRho_cc = I_cc - Rho_cc;
+      Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > inverseIminusRho_cc;
+      inverseIminusRho_cc.compute(IminusRho_cc);
+
+      // (I-Rho)^{-1} * Gamma * Epsilon
+      matrix<Type> omega2_cs = Gamma_cc * omega_sc.matrix().transpose();
+      matrix<Type> omega3_cs = inverseIminusRho_cc.solve(omega2_cs);
+      omega_sc = omega3_cs.transpose();
+      REPORT( omega_sc );
+    }
+    REPORT( Gamma_cc );
+    REPORT( Rho_cc );
   }
 
-  // GMRF for SEM:  separable variable-space interaction
-  if( omega_sc.size()>0 ){ // PARALLEL_REGION
-    // Including this line with Makevars below seems to cause a crash:
-    // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
-    // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
-    nll += SEPARABLE( GMRF(Q_cc), GMRF(Q_ss) )( omega_sc );
+  // Space-time-variable interaction
+  if( epsilon_stc.size()>0 ){ // PARALLEL_REGION
+    // Reshape for either spatial_options
+    array<Type> epsilon_hs( n_h, n_s );
+    for( int s=0; s<n_s; s++ ){
+    for( int t=0; t<n_t; t++ ){
+    for( int c=0; c<n_c; c++ ){
+      h = c*n_t + t;
+      epsilon_hs(h,s) = epsilon_stc(s,t,c);
+    }}}
+
+    if( spatial_options(1) == 0 ){
+      // Separable precision
+      Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
+      Q_hh = Linv_hh.transpose() * Linv_hh;
+
+      // GMRF for DSEM:  non-separable time-variable, with separable space
+      nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
+    }else{
+      // Rank-deficient (projection) method
+      Eigen::SparseMatrix<Type> I_hh( n_h, n_h );
+      I_hh.setIdentity();
+      nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
+
+      // Sparse inverse-product
+      Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
+      Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > inverseIminusRho_hh;
+      inverseIminusRho_hh.compute(IminusRho_hh);
+
+      // (I-Rho)^{-1} * Gamma * Epsilon
+      matrix<Type> e2_hs = Gamma_hh * epsilon_hs.matrix();
+      matrix<Type> e3_hs = inverseIminusRho_hh.solve(e2_hs);
+
+      // Transformations
+      for( int s=0; s<n_s; s++ ){
+      for( int t=0; t<n_t; t++ ){
+      for( int c=0; c<n_c; c++ ){
+        h = c*n_t + t;
+        epsilon_stc(s,t,c) = e3_hs(h,s);
+      }}}
+      REPORT( epsilon_stc );
+    }
+    REPORT( Gamma_hh );
+    REPORT( Rho_hh );
   }
 
   // Distribution for spline components
@@ -267,7 +326,7 @@ Type objective_function<Type>::operator() (){
     int m_z = Sdims(z);
     vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
     SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*lambda(z)*GMRF(S_block).Quadform(gamma_segment);
+    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
     k += m_z;
   }
 
@@ -395,7 +454,6 @@ Type objective_function<Type>::operator() (){
     REPORT( p_g );
     REPORT( mu_g );
   }
-  //REPORT( Q_hh );
   //REPORT( Q_ss );
   REPORT( devresid_i );
   REPORT( nll );
