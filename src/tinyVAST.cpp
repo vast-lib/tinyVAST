@@ -379,10 +379,12 @@ Type objective_function<Type>::operator() (){
   }
 
   // Predictions
-  vector<Type> p_g = X_gj*alpha_j + Z_gk*gamma_k + offset_g;
+  vector<Type> palpha_g = X_gj*alpha_j;
+  vector<Type> pgamma_g = Z_gk*gamma_k;
+  vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
+  vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
+  vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
   vector<Type> mu_g( p_g.size() );
-  p_g += multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, p_g.size() ) / exp(log_tau);
-  p_g += multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, p_g.size() ) / exp(log_tau);
   for( int g=0; g<p_g.size(); g++ ){
     if( (n_h>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
       h = c_g(g)*n_t + t_g(g);
@@ -453,6 +455,11 @@ Type objective_function<Type>::operator() (){
   if(p_g.size()>0){
     REPORT( p_g );
     REPORT( mu_g );
+    REPORT( palpha_g );
+    REPORT( pgamma_g );
+    REPORT( pepsilon_g );
+    REPORT( pomega_g );
+    ADREPORT( p_g );
   }
   //REPORT( Q_ss );
   REPORT( devresid_i );
