@@ -87,18 +87,59 @@ out = fit( dsem = dsem,
                                       gmrf_parameterization="projection") )
 ```
 
-Finally, we can extract, rotate, and plot the dominant modes of variability
+Finally, we can extract, rotate, and plot the dominant modes of variability and associated spatial responses:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-# Visualize index
+# Country shapefiles for plotting
+sf_maps = ne_countries( return="sf", scale=10, continent=c("north america","europe","asia") )
+sf_maps = st_transform( sf_maps, crs=st_crs(sf_ice) )
+sf_maps = st_union( sf_maps )
+
+# Shapefile for water
+sf_water = st_difference( st_as_sfc(st_bbox(sf_maps)), sf_maps )
+
+# Create extrapolation grid
+cellsize = 50
+sf_grid = st_make_grid( sf_pole, cellsize=cellsize )
+# Restrict to water
+grid_i = st_intersects( sf_water, sf_grid )
+sf_grid = sf_grid[ unique(unlist(grid_i)) ]
+# Restrict to 3000 km from North Pole
+grid_i = st_intersects( sf_pole, sf_grid )
+sf_grid = sf_grid[ unique(unlist(grid_i)) ]
+
+#
+newdata = data.frame( st_coordinates(st_centroid(sf_grid)),
+                      var = "Ice" )
+
+# Extract loadings
 L_tf = matrix( 0, nrow=length(unique(Data$year)), ncol=2,
                dimnames=list(unique(Data$year),c("EOF_1","EOF_2")) )
 L_tf[lower.tri(L_tf,diag=TRUE)] = out$opt$par[names(out$opt$par)=="beta_z"]
-rotated_results = rotate_pca( L_tf=L_tf, x_sf=array(dim=c(0,n_eof)), order="decreasing" )
+
+# Extract factor-responses
+EOF1_g = predict( out, cbind(newdata, year="EOF_1"), what="pepsilon_g" )
+EOF2_g = predict( out, cbind(newdata, year="EOF_2"), what="pepsilon_g" )
+omega_g = predict( out, cbind(newdata, year="EOF_2"), what="pomega_g" )
+
+# Rotate responses and loadings
+rotated_results = rotate_pca( L_tf=L_tf, x_sf=cbind(EOF1_g,EOF2_g), order="decreasing" )
+EOF1_g = rotated_results$x_sf[,1]
+EOF2_g = rotated_results$x_sf[,2]
 L_tf = rotated_results$L_tf
 
-# Line graph
+# Plot on map
+sf_plot = st_sf( sf_grid, "EOF1_g"=EOF1_g, "EOF2_g"=EOF2_g, "omega_g"=omega_g )
+par(mfrow=c(2,2), oma=c(2,2,0,0) )
+plot( sf_plot[,'EOF1_g'], reset=FALSE, key.pos=NULL, border=NA )
+  plot( st_geometry(sf_maps), add=TRUE, border=NA, col="grey" )
+plot( sf_plot[,'EOF2_g'], reset=FALSE, key.pos=NULL, border=NA )
+  plot( st_geometry(sf_maps), add=TRUE, border=NA, col="grey" )
+plot( sf_plot[,'omega_g'], reset=FALSE, key.pos=NULL, border=NA )
+  plot( st_geometry(sf_maps), add=TRUE, border=NA, col="grey" )
 matplot( y=L_tf, x=unique(Data$year), type="l",
          col=viridisLite::viridis(n_eof), lwd=2, lty="solid" )
+  legend( "top", ncol=n_eof, legend=1:n_eof, fill=viridisLite::viridis(n_eof) )
 ```
+
 

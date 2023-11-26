@@ -9,6 +9,9 @@
 #'        also eliminates information about random-effect variance, and is not
 #'        appropriate when requesting predictive standard errors or epsilon
 #'        bias-correction.
+#' @param what What REPORTed object to output, where \code{p_g} is the linear
+#'        predictor, \code{mu_g} is the inverse-linked transformed predictor.
+#'        and others are additive components of the linear predictor.
 #' @param ... Not used.
 #'
 #' @method predict tinyVAST
@@ -17,10 +20,13 @@ predict.tinyVAST <-
 function( object,
           newdata,
           remove_origdata = FALSE,
+          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g"),
+          se.fit = FALSE,
           ... ){
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data
+  what = match.arg(what)
 
   # Build new
   tmb_data2 = add_predictions( object = object,
@@ -31,11 +37,27 @@ function( object,
   newobj = MakeADFun( data = tmb_data2,
                       parameters = object$internal$parlist,
                       map = object$tmb_inputs$tmb_map,
-                      random = c("gamma_k","epsilon_stc"),
+                      random = c("gamma_k","epsilon_stc","omega_sc"),
+                      profile = object$internal$control$profile,
                       DLL = "tinyVAST" )
-  out = newobj$report()$mu_g
+  out = newobj$report()[[what]]
 
-  return(out)
+  # Add standard errors
+  if( isTRUE(se.fit) ){
+    if( what!="p_g" ) stop("se.fit=TRUE only works for what=`p_g`")
+    if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE")
+    newsd = sdreport( obj = newobj,
+                      par.fixed = object$opt$par,
+                      hessian.fixed = object$internal$Hess_fixed,
+                      bias.correct = FALSE,
+                      getReportCovariance = FALSE )
+    SD = as.list( newsd, what="Std. Error", report=TRUE )
+    out = list( fit = out,
+                se.fit = SD[[what]] )
+
+  }
+
+  return( out )
 }
 
 #' @title Monte Carlo integration for abundance
@@ -170,8 +192,10 @@ function( object,
 
   # Assemble predX
   formula_no_sm = remove_s_and_t2(gam$formula)
-  mf1 = model.frame(formula_no_sm, origdata)
+  mf1 = model.frame(formula_no_sm, origdata, drop.unused.levels=TRUE)
+  #  drop.unused.levels necessary when using formula = ~ interaction(X,Y), which otherwise creates full-factorial combination of levels
   terms1 = attr(mf1, "terms")
+  # X_ij = model.matrix(terms1, mf1)
   terms2 = stats::terms(formula_no_sm)
   attr(terms2, "predvars") = attr(terms1, "predvars")
   terms2 = stats::delete.response(terms2)
@@ -182,21 +206,16 @@ function( object,
 
   # Assemble Apred_is
   if( "fm_mesh_2d" %in% class(object$spatial_graph) ){
-    predA_is = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,data_colnames$spatial]) )$proj$A
+    A_gs = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,data_colnames$spatial]) )$proj$A
   }else if( "igraph" %in% class(object$spatial_graph) ) {
     Match = match( newdata[,data_colnames$spatial], rownames(object$tmb_inputs$tmb_data$Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
-    predA_is = sparseMatrix( i=1:nrow(newdata), j=Match, x=rep(1,nrow(newdata)) )
-  }else if( !is.null(object$internal$sem) ){
-    predA_is = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
-    #predA_is = as(Matrix(predA_is),"dgCMatrix")
-    predA_is = as(Matrix(predA_is),"CsparseMatrix")
-  } else {
-    predA_is = Matrix(nrow=nrow(newdata), ncol=0)    # dgCMatrix
-    #predA_is = as(predA_is,"dgCMatrix")
-    predA_is = as(predA_is,"CsparseMatrix")
+    A_gs = sparseMatrix( i=1:nrow(newdata), j=Match, x=rep(1,nrow(newdata)) )
+  }else{
+    A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
+    A_gs = as(Matrix(A_gs),"CsparseMatrix")
   }
-  predAtriplet = Matrix::mat2triplet(predA_is)
+  predAtriplet = Matrix::mat2triplet(A_gs)
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(object$internal$times) > 0 ){

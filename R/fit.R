@@ -144,7 +144,7 @@ function( data,
       model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
     )
   }else if( isTRUE(is.character(sem)) ){
-    sem_ram_output = make_sem_ram( sem, variables=variables, quiet=control$quiet, covs=variables )
+    sem_ram_output = make_sem_ram( sem, variables=as.character(variables), quiet=control$quiet, covs=as.character(variables) )
   } else {
     stop("`sem` must be either `NULL` or a character-string")
   }
@@ -184,7 +184,7 @@ function( data,
     Match = match( data[,data_colnames$spatial], rownames(Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
-  }else {      # if( !is.null(sem) )
+  }else{      # if( !is.null(sem) )
     # Single-site
     spatial_method_code = 3
     n_s = 1
@@ -326,8 +326,8 @@ function( data,
     log_kappa = log(1),
     alpha_j = rep(0,ncol(X_ij)),  # Spline coefficients
     gamma_k = rep(0,ncol(Z_ik)),  # Spline coefficients
-    beta_z = ifelse(beta_type==1, 0.01, 1),
-    theta_z = ifelse(theta_type==1, 0.01, 1),
+    beta_z = as.numeric(ifelse(beta_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    theta_z = as.numeric(ifelse(theta_type==1, 0.01, 1)),
     log_lambda = rep(0,length(Sdims)), #Log spline penalization coefficients
     log_sigma = log_sigma,
     delta0_c = rep(0, length(variables)),
