@@ -5,14 +5,20 @@
 #'
 #' @inheritParams dsem::make_dsem_ram
 #'
-#' @param sem Specification for time-series structural equation model structure
-#'        including lagged or simultaneous effects.  See Details section in
-#'        \code{\link[dsem]{make_dsem_ram}} for more description
+#' @param sem Specification for structural equation model structure for
+#'        constructing a space-variable interaction.
+#'        See code{\link{make_sem_ram}} for more description.
+#' @param dsem Specification for time-series structural equation model structure
+#'        including lagged or simultaneous effects for
+#'        constructing a space-variable interaction.  See
+#'        \code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
+#'        for more description
 #' @param data Data-frame of predictor and response variables.
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
 #'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
 #'        an offset.
-#' @param family_link Vector of length-two, indicating the distribution and link-function
+#' @param family_link Matrix of length-two, indicating the distribution and link-function
+#'        for each level of \code{data$dist}
 #' @param spatial_graph Object that represents spatial relationships, either using `fmesher`
 #'        to apply the SPDE method, `igraph` to apply a simultaneous autoregressive (SAR)
 #'        process, or `NULL` to specify a single site.
@@ -22,7 +28,10 @@
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:
 #' * `formula` specifies covariates and splines in a Generalized Additive Model;
-#' * `dsem` specifies interactions among variables and over time
+#' * `dsem` specifies interactions among variables and over time, constructing
+#'   the space-time-variable interaction.
+#' * `sem` specifies interactions among variables and over time, constructing
+#'   the space-variable interaction.
 #' * `spatial_graph` specifies spatial correlations
 #'
 #' the default `dsem=NULL` turns off all multivariate and temporal indexing, such
@@ -39,7 +48,6 @@
 #' | Multivariate spatial model | specify `spatial_graph` and use `dsem` (without any lagged effects) to specify spatial interactions |
 #' | Vector autoregressive spatio-temporal model | specify `spatial_graph` and use `dsem=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `dsem` and `spatial_graph` |
 #'
-#' @importFrom dsem make_dsem_ram classify_variables parse_path
 #' @importFrom igraph as_adjacency_matrix
 #' @importFrom sem specifyModel specifyEquations
 #' @importFrom corpcor pseudoinverse
@@ -315,7 +323,7 @@ function( data,
     W_gz = matrix(0,nrow=0,ncol=2),
     V_gz = matrix(0,nrow=0,ncol=2)
   )
-  if( spatial_method_code %in% c(1,3,4) ){
+  if( spatial_method_code %in% c(1,3) ){
     tmb_data$spatial_list = spatial_list
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
@@ -350,9 +358,8 @@ function( data,
   }
 
   # Turn of log_kappa when not needed
-  tmb_map = list()
-  if( spatial_method_code %in% c(3,4) ){
-    tmb_map$log_kappa = factor(NA)
+  if( spatial_method_code %in% c(3) ){
+    tmb_par = tmb_par[-match("log_kappa",names(tmb_par))]
   }
 
   # User-supplied parameters
@@ -370,6 +377,9 @@ function( data,
   if( any(is.na(tmb_data[-match(c("ram_sem_start","ram_dsem_start"),names(tmb_data))])) ){
     stop("Check `tmb_data` for NAs")
   }
+
+  # Empty map, but leaving for future needs
+  tmb_map = list()
 
   ##############
   # Fit model

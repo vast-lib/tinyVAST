@@ -63,7 +63,8 @@ Type devresid_tweedie( Type y,
 
 // Coding principles
 // 1. Don't telescope model features using `map` (which is bug-prone), but
-//    instead use 0-length vectors/matrices
+//    instead use 0-length vectors/matrices.  However, still retaining map = list()
+//    to allow future uses.
 // 2. Use Roman for data, Greek for parameters
 // 3. Name objects with [var]_[indices] so that number of indices indicates
 //    dimensionality
@@ -92,7 +93,8 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
 
   // Spatial objects
-  DATA_IVECTOR( spatial_options );   // Switch to string: https://kaskr.github.io/adcomp/compois_8cpp-example.html#a2
+  DATA_IVECTOR( spatial_options );   //
+  // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -127,7 +129,6 @@ Type objective_function<Type>::operator() (){
     // E_gz.col(1) : Prior row for bivariate weighting
 
   // Params
-  PARAMETER( log_kappa );
   PARAMETER_VECTOR( alpha_j ); // Fixed covariate parameters
   PARAMETER_VECTOR( gamma_k ); // Spline regression parameters
   PARAMETER_VECTOR( beta_z ); // DSEM coefficients
@@ -174,6 +175,8 @@ Type objective_function<Type>::operator() (){
       Gamma_hh.coeffRef( ram_dsem(r,1)-1, ram_dsem(r,2)-1 ) = tmp;
     }
   }
+  REPORT( Gamma_hh );
+  REPORT( Rho_hh );
 
   // SEM
   Eigen::SparseMatrix<Type> Q_cc( n_c, n_c );
@@ -199,6 +202,8 @@ Type objective_function<Type>::operator() (){
       Gamma_cc.coeffRef( ram_sem(r,1)-1, ram_sem(r,2)-1 ) = tmp;
     }
   }
+  REPORT( Gamma_cc );
+  REPORT( Rho_cc );
 
   // Calculate effect of initial condition -- SPARSE version
   // Where does x go later?
@@ -225,13 +230,17 @@ Type objective_function<Type>::operator() (){
   // Spatial distribution
   Type log_tau = 0;
   Eigen::SparseMatrix<Type> Q_ss;
-  if( (spatial_options(0)==1) | (spatial_options(0)==3) | (spatial_options(0)==4) ){
+  if( (spatial_options(0)==1) ){
     // Using INLA
+    PARAMETER( log_kappa );
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
+    Type range = pow(8.0, 0.5) / exp( log_kappa );
+    REPORT( range );
   }else if( spatial_options(0)==2 ){
     /// Using SAR
+    PARAMETER( log_kappa );
     DATA_SPARSE_MATRIX( Adj );
     Eigen::SparseMatrix<Type> I_ss( Adj.rows(), Adj.rows() );
     Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
@@ -239,6 +248,11 @@ Type objective_function<Type>::operator() (){
     Lspatial_ss = ( I_ss - exp(log_kappa)*Adj );
     Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
     log_tau = 0.0;
+  }else if( spatial_options(0)==3 ){
+    // Off, but using INLA inputs
+    DATA_STRUCT(spatial_list, R_inla::spde_t);
+    Q_ss = R_inla::Q_spde(spatial_list, Type(1.0));
+    log_tau = Type(0.0);
   }
 
   // Space-variable interaction
@@ -247,6 +261,7 @@ Type objective_function<Type>::operator() (){
       // Separable precision
       Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
       Q_cc = Linv_cc.transpose() * Linv_cc;
+      REPORT( Q_cc );
 
       // GMRF for SEM:  separable variable-space
       nll += SEPARABLE( GMRF(Q_cc), GMRF(Q_ss) )( omega_sc );
@@ -270,8 +285,6 @@ Type objective_function<Type>::operator() (){
       omega_sc = omega3_cs.transpose();
       REPORT( omega_sc );
     }
-    REPORT( Gamma_cc );
-    REPORT( Rho_cc );
   }
 
   // Space-time-variable interaction
@@ -292,6 +305,7 @@ Type objective_function<Type>::operator() (){
 
       // GMRF for DSEM:  non-separable time-variable, with separable space
       nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
+      REPORT( Q_hh );
     }else{
       // Rank-deficient (projection) method
       Eigen::SparseMatrix<Type> I_hh( n_h, n_h );
@@ -316,8 +330,6 @@ Type objective_function<Type>::operator() (){
       }}}
       REPORT( epsilon_stc );
     }
-    REPORT( Gamma_hh );
-    REPORT( Rho_hh );
   }
 
   // Distribution for spline components
@@ -359,22 +371,24 @@ Type objective_function<Type>::operator() (){
       default:
         error("Link not implemented.");
     }
-    // Distribution
-    switch( f_ez(e_i(i),0) ){
-      case 0:  // Normal distribution
-        nll -= dnorm( y_i(i), mu_i(i), exp(log_sigma_segment(0)), true );
-        devresid_i(i) = y_i(i) - p_i(i);
-        break;
-      case 1: // Tweedie
-        nll -= dtweedie( y_i(i), mu_i(i), exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
-        devresid_i(i) = devresid_tweedie( y_i(i), mu_i(i), 1.0 + invlogit(log_sigma_segment(1)) );
-        break;
-      case 2: // lognormal
-        nll -= dlnorm( y_i(i), logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
-        devresid_i(i) = log(y_i(i)) - ( logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)) );
-        break;
-      default:
-        error("Distribution not implemented.");
+    if( !R_IsNA(asDouble(y_i(i))) ){
+      // Distribution
+      switch( f_ez(e_i(i),0) ){
+        case 0:  // Normal distribution
+          nll -= dnorm( y_i(i), mu_i(i), exp(log_sigma_segment(0)), true );
+          devresid_i(i) = y_i(i) - p_i(i);
+          break;
+        case 1: // Tweedie
+          nll -= dtweedie( y_i(i), mu_i(i), exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+          devresid_i(i) = devresid_tweedie( y_i(i), mu_i(i), 1.0 + invlogit(log_sigma_segment(1)) );
+          break;
+        case 2: // lognormal
+          nll -= dlnorm( y_i(i), logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+          devresid_i(i) = log(y_i(i)) - ( logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)) );
+          break;
+        default:
+          error("Distribution not implemented.");
+      }
     }
   }
 
@@ -448,8 +462,6 @@ Type objective_function<Type>::operator() (){
   }
 
   // Reporting
-  Type range = pow(8.0, 0.5) / exp( log_kappa );
-  REPORT( range );
   REPORT( p_i );
   REPORT( mu_i );
   if(p_g.size()>0){

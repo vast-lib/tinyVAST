@@ -4,7 +4,14 @@
 \alias{predict.tinyVAST}
 \title{Predict using vector autoregressive spatio-temporal model}
 \usage{
-\method{predict}{tinyVAST}(object, newdata, remove_origdata = FALSE, ...)
+\method{predict}{tinyVAST}(
+  object,
+  newdata,
+  remove_origdata = FALSE,
+  what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g"),
+  se.fit = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{Output from \code{\link[=fit]{fit()}}.}
@@ -16,6 +23,10 @@ from TMB object, thereby speeding TMB object construction.  However, this
 also eliminates information about random-effect variance, and is not
 appropriate when requesting predictive standard errors or epsilon
 bias-correction.}
+
+\item{what}{What REPORTed object to output, where \code{p_g} is the linear
+predictor, \code{mu_g} is the inverse-linked transformed predictor.
+and others are additive components of the linear predictor.}
 
 \item{...}{Not used.}
 }

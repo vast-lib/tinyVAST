@@ -69,3 +69,73 @@ function( L_tf,
   out = list( "L_tf"=L_tf_rot, "x_sf"=x_sf, "H"=H)
   return(out)
 }
+
+
+#' @title Parse path
+#'
+#' @description \code{parse_path} is copied from \code{sem::parse.path}
+#'
+#' @details
+#' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
+#'
+#' @return Tagged-list defining variables and direction for a specified path coefficient
+#'
+#' @param path text to parse
+parse_path <-
+function( path ){
+  path.1 <- gsub("-", "", gsub(" ", "", path))
+  direction <- if(regexpr("<>", path.1) > 0){
+    2
+  }else if(regexpr("<", path.1) > 0){
+    -1
+  }else if(regexpr(">", path.1) > 0){
+    1
+  }else{
+    stop(paste("ill-formed path:", path))
+  }
+  path.1 <- strsplit(path.1, "[<>]")[[1]]
+  out = list(first = path.1[1], second = path.1[length(path.1)], direction = direction)
+  return(out)
+}
+
+
+#' @title Classify variables path
+#'
+#' @description \code{classify_variables} is copied from \code{sem:::classifyVariables}
+#'
+#' @details
+#' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
+#'
+#' @param model SEM model
+#'
+#' @return Tagged-list defining exogenous and endogenous variables
+classify_variables <-
+function( model ){
+
+    variables <- logical(0)
+    for (paths in model[, 1]) {
+        vars <- gsub(pattern=" ", replacement="", x=paths)
+        vars <- sub("-*>", "->", sub("<-*", "<-", vars))
+        if (grepl("<->", vars)) {
+            vars <- strsplit(vars, "<->")[[1]]
+            if (is.na(variables[vars[1]]))
+                variables[vars[1]] <- FALSE
+            if (is.na(variables[vars[2]]))
+                variables[vars[2]] <- FALSE
+        }
+        else if (grepl("->", vars)) {
+            vars <- strsplit(vars, "->")[[1]]
+            if (is.na(variables[vars[1]]))
+                variables[vars[1]] <- FALSE
+            variables[vars[2]] <- TRUE
+        }
+        else if (grepl("<-", vars)) {
+            vars <- strsplit(vars, "<-")[[1]]
+            if (is.na(variables[vars[2]]))
+                variables[vars[2]] <- FALSE
+            variables[vars[1]] <- TRUE
+        }
+        else stop("incorrectly specified model")
+    }
+    list(endogenous = names(variables[variables]), exogenous = names(variables[!variables]))
+}
