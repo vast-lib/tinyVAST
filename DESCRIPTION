@@ -2,27 +2,21 @@ Package: tinyVAST
 Type: Package
 Title: Vector Autoregressive Spatio-Temporal model using minimal feature-set
 Version: 0.1.0
-Date: 2023-10-14
+Date: 2023-11-26
 Authors@R: 
     c(person(given = "James",
              family = "Thorson",
              role = c("aut", "cre"),
              email = "James.Thorson@noaa.gov",
-             comment = c(ORCID = "0000-0001-7415-1010")),
-      person(given = "Wouter",
-             family = "van der Bijl",
-             role = c("ctb"),
-             email = "wouter@zoology.ubc.ca",
-             comment = c(ORCID = "0000-0002-7366-1868"))
+             comment = c(ORCID = "0000-0001-7415-1010"))
     )
 Imports:
-    dsem,
     sem,
     igraph,
     corpcor
 Depends:
     R (>= 4.0.0),
-    TMB,
+    TMB (>= 1.9.7),
     mgcv,
     Matrix,
 Suggests:

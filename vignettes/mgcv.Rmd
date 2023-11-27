@@ -72,9 +72,9 @@ plotPartial( Partial )
 Alternatively, we can use `visreg` to visualize output:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-visreg(myfit, xvar="group")
-visreg(myfit, xvar="x")
-visreg(myfit, xvar="w", by="group")
+visreg(myfit, xvar="group", what="p_g")
+visreg(myfit, xvar="x", what="p_g")
+visreg(myfit, xvar="w", by="group", what="p_g")
 ```
 
 Alternatively, we can calculate derived quantities via Monte Carlo integration of the estimated density function:

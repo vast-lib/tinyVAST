@@ -27,11 +27,18 @@ fit(
 parsed by \code{mgcv} and hence allowing \code{s(.)} for splines or \code{offset(.)} for
 an offset.}
 
-\item{sem}{Specification for time-series structural equation model structure
-including lagged or simultaneous effects.  See Details section in
-\code{\link[dsem]{make_dsem_ram}} for more description}
+\item{sem}{Specification for structural equation model structure for
+constructing a space-variable interaction.
+See code{\link{make_sem_ram}} for more description.}
 
-\item{family_link}{Vector of length-two, indicating the distribution and link-function}
+\item{dsem}{Specification for time-series structural equation model structure
+including lagged or simultaneous effects for
+constructing a space-variable interaction.  See
+\code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
+for more description}
+
+\item{family_link}{Matrix of length-two, indicating the distribution and link-function
+for each level of \code{data$dist}}
 
 \item{times}{A character vector listing the set of times in order}
 
@@ -52,7 +59,10 @@ a minimal feature-set, and widely used interface for objects
 \code{tinyVAST} includes four basic inputs that specify the model structure:
 \itemize{
 \item \code{formula} specifies covariates and splines in a Generalized Additive Model;
-\item \code{dsem} specifies interactions among variables and over time
+\item \code{dsem} specifies interactions among variables and over time, constructing
+the space-time-variable interaction.
+\item \code{sem} specifies interactions among variables and over time, constructing
+the space-variable interaction.
 \item \code{spatial_graph} specifies spatial correlations
 }
 
