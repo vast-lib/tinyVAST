@@ -26,7 +26,7 @@ library(tinyVAST)
 set.seed(101)
 ```
 
-`tinyVAST` includes features to fit a dynamic structural equation model
+`tinyVAST` includes features to fit a dynamic structural equation model.  We here show this using a bivariate vector autoregressive model for wolf and moose abundance on Isle Royale.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 data(isle_royale, package="dsem")
@@ -51,8 +51,16 @@ mytiny = fit( dsem = dsem,
                  times = isle_royale[,1],
                  variables = colnames(isle_royale[,2:3]),
                  formula = logn ~ 0 + var,
-                 quiet = TRUE )
+                 control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 mytiny
+```
+
+And we can specifically inspect the estimated interaction matrix:
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, fig.width=6, fig.height=6}
+B = matrix( mytiny$internal$parlist$beta_z[1:4], nrow=2,
+            dimnames=list(colnames(isle_royale[,2:3]),colnames(isle_royale[,2:3])) )
+knitr::kable( B, digits=3)
 ```
 
 We can then compare this with package `dsem`
@@ -73,4 +81,11 @@ mydsem = dsem::dsem( sem = dsem,
 mydsem
 ```
 
+where we again inspect the estimated interaction matrix:
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, fig.width=6, fig.height=6}
+B = matrix( mydsem$obj$env$parList()$beta_z[1:4], nrow=2,
+            dimnames=list(colnames(isle_royale[,2:3]),colnames(isle_royale[,2:3])) )
+knitr::kable( B, digits=3)
+```
 
