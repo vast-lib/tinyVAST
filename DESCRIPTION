@@ -23,7 +23,16 @@ Suggests:
     pdp,
     visreg,
     tweedie,
-    fmesher
+    fmesher,
+    mvtnorm,
+    pdp,
+    visreg,
+    lattice,
+    ggplot2,
+    rnaturalearth,
+    rnaturalearthhires,
+    sf, 
+    sdmTMB
 LinkingTo:
     TMB,
     RcppEigen,

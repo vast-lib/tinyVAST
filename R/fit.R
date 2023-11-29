@@ -662,7 +662,10 @@ function( object,
 #' @export
 logLik.tinyVAST <- function(object, ...) {
   val = -1 * object$opt$objective
-  df = length( object$opt$par )
+  # Get df including profiled parameters
+  df = length( object$opt$par ) +
+       sum(names(object$obj$env$last.par) %in% object$internal$control$profile)
+  # S3 object "logLik"
   out = structure( val,
              df = df,
              class = "logLik")

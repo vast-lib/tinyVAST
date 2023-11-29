@@ -216,7 +216,7 @@ out = fit( dsem = dsem,
            formula = n ~ 0 + var,
            spatial_graph = mesh,
            family_link = rbind("obs"=c(1,1)),
-           control = tinyVASTcontrol(quiet=TRUE, trace=1) )
+           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 out
 ```
 
