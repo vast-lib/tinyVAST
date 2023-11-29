@@ -173,8 +173,8 @@ sem = "
   factor -> X, 0, loadings1
   factor -> Y, 0, loadings2
   factor -> factor, 1, NA, 1
-  X <-> X, 0, NA, 0.01        # or use SD=0 for package:tinyVAST
-  Y <-> Y, 0, NA, 0.01        # or use SD=0 for package:tinyVAST
+  X <-> X, 0, NA, 0           # No additional variance
+  Y <-> Y, 0, NA, 0           # No additional variance
 "
 make_dsem_ram( sem=sem, variables=c("X","Y","factor"), times=1:4 )
 
@@ -183,7 +183,7 @@ sem = "
   factor -> factor, 1, rho1 # AR1 component
   X -> X, 1, NA, 1          # Integrated component
   factor -> X, 0, NA, 1
-  X <-> X, 0, NA, 0.01      # or use SD=0 for package:tinyVAST
+  X <-> X, 0, NA, 0         # No additional variance
 "
 make_dsem_ram( sem=sem, variables=c("X","factor"), times=1:4 )
 
@@ -191,7 +191,7 @@ make_dsem_ram( sem=sem, variables=c("X","factor"), times=1:4 )
 sem = "
   factor -> X, 0, NA, 1
   factor -> X, 1, rho1     # MA1 component
-  X <-> X, 0, NA, 0.01     # or use SD=0 for package:tinyVAST
+  X <-> X, 0, NA, 0        # No additional variance
 "
 make_dsem_ram( sem=sem, variables=c("X","factor"), times=1:4 )
 

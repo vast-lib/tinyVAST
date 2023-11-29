@@ -50,7 +50,6 @@ mytiny = fit( dsem = dsem,
                  data = data,
                  times = isle_royale[,1],
                  variables = colnames(isle_royale[,2:3]),
-                 estimate_delta0 = FALSE,
                  formula = logn ~ 0 + var,
                  quiet = TRUE )
 mytiny
@@ -68,7 +67,6 @@ family = c("normal","normal")
 # initial first without delta0 (to improve starting values)
 mydsem = dsem::dsem( sem = dsem,
              tsdata = dsem_data,
-             estimate_delta0 = FALSE,
              quiet = TRUE,
              getsd = FALSE,
              family = family )

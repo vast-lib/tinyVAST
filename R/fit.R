@@ -62,7 +62,6 @@ function( data,
           formula,
           sem = NULL,
           dsem = NULL,
-          estimate_delta0 = FALSE,
           family_link = rbind( "obs"=c(0,0) ),
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
           times = seq(min(data[,data_colnames$time]),max(data[,data_colnames$time])),
@@ -331,7 +330,6 @@ function( data,
 
   # make params
   tmb_par = list(
-    log_kappa = log(1),
     alpha_j = rep(0,ncol(X_ij)),  # Spline coefficients
     gamma_k = rep(0,ncol(Z_ik)),  # Spline coefficients
     beta_z = as.numeric(ifelse(beta_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
@@ -341,7 +339,8 @@ function( data,
     delta0_c = rep(0, length(variables)),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
-    eps = numeric(0)
+    eps = numeric(0),
+    log_kappa = log(1)
   )
 
   # Telescoping
@@ -353,7 +352,7 @@ function( data,
   }
 
   # Turn off initial conditions
-  if( estimate_delta0==FALSE ){
+  if( control$estimate_delta0==FALSE ){
     tmb_par$delta0_c = numeric(0)
   }
 
@@ -487,7 +486,8 @@ function( nlminb_loops = 1,
           trace = 1,
           profile = c(),
           tmb_par = NULL,
-          gmrf_parameterization = c("separable","projection") ){
+          gmrf_parameterization = c("separable","projection"),
+          estimate_delta0 = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -502,7 +502,8 @@ function( nlminb_loops = 1,
     trace = trace,
     profile = profile,
     tmb_par = tmb_par,
-    gmrf_parameterization = gmrf_parameterization
+    gmrf_parameterization = gmrf_parameterization,
+    estimate_delta0 = estimate_delta0
   ), class = "tinyVASTcontrol" )
 }
 
@@ -516,6 +517,63 @@ print.tinyVAST <-
 function( x,
           ... ){
   print(x[c('call','opt','sdrep','run_time')])
+}
+
+
+#' @title summarize tinyVAST
+#'
+#' @description summarize parameters from a fitted tinyVAST
+#'
+#' @details
+#' tinyVAST includes an "arrow and lag" notation, which specifies the set of
+#' path coefficients and exogenous variance parameters to be estimated. Function \code{fit}
+#' then estimates the maximum likelihood value for those coefficients and parameters
+#' by maximizing the log-marginal likelihood.
+#'
+#' However, many users will want to associate individual parameters and standard errors
+#' with the path coefficients that were specified using the "arrow and lag" notation.
+#' This task is complicated in
+#' models where some path coefficients or variance parameters are specified to share a single value a priori,
+#' or were assigned a name of NA and hence assumed to have a fixed value a priori (such that
+#' these coefficients or parameters have an assigned value but no standard error).
+#' The \code{summary} function therefore compiles the MLE for coefficients (including duplicating
+#' values for any path coefficients that assigned the same value) and standard error
+#' estimates, and outputs those in a table that associates them with the user-supplied path and parameter names.
+#' It also outputs the z-score and a p-value arising from a two-sided Wald test (i.e.
+#' comparing the estimate divided by standard error against a standard normal distribution).
+#'
+#' @param object Output from \code{\link{fit}}
+#' @param what What component to summarize
+#' @param ... Not used
+#'
+#' @method summary tinyVAST
+#' @export
+summary.tinyVAST <-
+function( object,
+          what = c("sem"),
+          ... ){
+
+  # Easy of use
+  what = match.arg(what)
+  if( what=="sem" ){
+    model = object$internal$sem_ram_output$ram
+    model$to = as.character(object$internal$variables)[model$to]
+    model$from = as.character(object$internal$variables)[model$from]
+    ParHat = object$obj$env$parList()
+
+    #
+    coefs = data.frame( model, "Estimate"=c(NA,ParHat$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+    coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,5]), coefs$Estimate )
+    if( "sdrep" %in% names(object) ){
+      SE = as.list( object$sdrep, report=FALSE, what="Std. Error")
+      coefs = data.frame( coefs, "Std_Error"=c(NA,SE$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+      coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
+      coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
+    }
+    #coefs
+  }
+
+  return(coefs)
 }
 
 #' Calculate residuals

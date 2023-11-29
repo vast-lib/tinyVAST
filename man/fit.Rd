@@ -9,7 +9,6 @@ fit(
   formula,
   sem = NULL,
   dsem = NULL,
-  estimate_delta0 = FALSE,
   family_link = rbind(obs = c(0, 0)),
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time",
     distribution = "dist"),

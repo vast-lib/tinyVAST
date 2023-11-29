@@ -14,7 +14,8 @@ tinyVASTcontrol(
   trace = 1,
   profile = c(),
   tmb_par = NULL,
-  gmrf_parameterization = c("separable", "projection")
+  gmrf_parameterization = c("separable", "projection"),
+  estimate_delta0 = FALSE
 )
 }
 \arguments{
