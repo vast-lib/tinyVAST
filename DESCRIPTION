@@ -22,7 +22,8 @@ Depends:
 Suggests:
     pdp,
     visreg,
-    tweedie
+    tweedie,
+    fmesher
 LinkingTo:
     TMB,
     RcppEigen,
