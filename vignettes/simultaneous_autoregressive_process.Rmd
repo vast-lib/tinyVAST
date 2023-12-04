@@ -1,0 +1,130 @@
+---
+title: "Simultaneous autoregressive process"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Simultaneous autoregressive process}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{ggraph2}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/simultaneous_autoregressive_process.Rmd"); rmarkdown::render( "vignettes/simultaneous_autoregressive_process.Rmd", rmarkdown::pdf_document())
+```
+
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+library(tinyVAST)
+library(igraph)
+```
+
+`tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
+We here show how it can fit a multivariate second-order autoregressive (AR2) model including spatial correlations using
+a simultaneous autoregressive (SAR) process specified using _igraph_.
+
+To do so, we first load salmong returns, and remove 0s to allow comparison between Tweedie and lognormal distributions.
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+data( salmon_returns )
+
+# Transform data
+salmon_returns$Biomass_nozeros = ifelse( salmon_returns$Biomass==0,
+                                         NA, salmon_returns$Biomass )
+Data = na.omit(salmon_returns)
+```
+
+We first explore an AR2 process, with independent variation among regions.
+This model shows a substantial first-order autocorrelation for sockeye and chum,
+and substantial second-order autocorrelation for pink salmon.  An AR(2) process is
+stationary if $\phi_1 + \phi_2 < 1$ and $\phi_2 - \phi_1 < 1$, and this
+stationarity criterion suggests that each time-series is close to (but not quite) nonstationary.
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Define graph for SAR process
+unconnected_graph = make_empty_graph( nlevels(Data$Region) )
+V(unconnected_graph)$name = levels(Data$Region)
+plot(unconnected_graph)
+
+# Define SEM for AR2 process
+dsem = "
+  sockeye -> sockeye, -1, lag1_sockeye
+  sockeye -> sockeye, -2, lag2_sockeye
+
+  pink -> pink, -1, lag1_pink
+  pink -> pink, -2, lag2_pink
+
+  chum -> chum, -1, lag1_chum
+  chum -> chum, -2, lag2_chum
+"
+
+# Fit tinyVAST model
+mytiny0 = fit(
+     formula = Biomass_nozeros ~ 0 + Species + Region,
+     data = Data,
+     dsem = dsem,
+     data_colnames = list(variable="Species", time="Year", spatial="Region", distribution="Species"),
+     family_link = rbind( "chum" = c(1,1),
+                          "pink" = c(1,1),
+                          "sockeye" = c(1,1) ),
+     spatial_graph = unconnected_graph,
+     control = tinyVASTcontrol( trace=0, profile="alpha_j", getsd=FALSE ) )
+
+# Summarize output
+Summary = summary(mytiny0, what="dsem")
+knitr::kable( Summary, digits=3)
+```
+
+We also explore an SAR process for adjacency among regions
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Define graph for SAR process
+adjacency_graph = make_graph( ~ Korea - Japan - M.I - WKam - EKam -
+                                WAK - SPen - Kod - CI - PWS -
+                                SEAK - NBC - SBC - WA )
+plot(adjacency_graph)
+
+# Fit tinyVAST model
+mytiny = fit(
+     formula = Biomass_nozeros ~ 0 + Species + Region,
+     data = Data,
+     dsem = dsem,
+     data_colnames = list(variable="Species", time="Year", spatial="Region", distribution="Species"),
+     family_link = rbind( "chum" = c(1,1),
+                          "pink" = c(1,1),
+                          "sockeye" = c(1,1) ),
+     spatial_graph = adjacency_graph,
+     control = tinyVASTcontrol( trace=0, profile="alpha_j", getsd=FALSE ) )
+
+# Summarize output
+Summary = summary(mytiny, what="dsem")
+knitr::kable( Summary, digits=3)
+```
+
+We can use AIC to compare these two models.  This comparison suggests that spatial adjancency
+is not a parsimonious way to describe correlations among time-series.
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# AIC for unconnected time-series
+AIC(mytiny0)
+# AIC for SAR spatial variation
+AIC(mytiny)
+```
+
+Finally, we can plot observations and predictions for the selected model
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Compile long-form dataframe of observations and predictions
+Resid = rbind( cbind(Data[,c('Species','Year','Region','Biomass_nozeros')], "Which"="Obs"),
+               cbind(Data[,c('Species','Year','Region')], "Biomass_nozeros"=predict(mytiny0,Data), "Which"="Pred") )
+
+# plot using ggplot
+library(ggplot2)
+ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat.id
+  geom_line() +
+  facet_grid( rows=vars(Region), cols=vars(Species), scales="free" ) +
+  scale_y_continuous(trans='log')  #
+```

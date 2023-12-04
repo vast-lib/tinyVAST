@@ -14,7 +14,12 @@ the set of path coefficients and variance-covariance parameters}
 \item{variables}{A character vector listing the set of variables}
 }
 \value{
-A reticular action module (RAM) describing dependencies
+An S3-class \code{"sem_ram"} containing:
+\describe{
+\item{\code{model}}{Output from \code{\link[sem]{specifyEquations}} or \code{\link[sem]{specifyModel}}
+that defines paths and parameters}
+\item{\code{ram}}{reticular action module (RAM) describing dependencies}
+}
 }
 \description{
 \code{make_sem_ram} converts SEM arrow notation to \code{ram} describing SEM parameters

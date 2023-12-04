@@ -4,7 +4,7 @@
 \alias{summary.tinyVAST}
 \title{summarize tinyVAST}
 \usage{
-\method{summary}{tinyVAST}(object, what = c("sem"), ...)
+\method{summary}{tinyVAST}(object, what = c("sem", "dsem"), ...)
 }
 \arguments{
 \item{object}{Output from \code{\link{fit}}}
