@@ -550,27 +550,65 @@ function( x,
 #' @export
 summary.tinyVAST <-
 function( object,
-          what = c("sem"),
+          what = c("sem","dsem"),
           ... ){
 
-  # Easy of use
+  #
   what = match.arg(what)
+
+  # SEM component
   if( what=="sem" ){
     model = object$internal$sem_ram_output$ram
-    model$to = as.character(object$internal$variables)[model$to]
-    model$from = as.character(object$internal$variables)[model$from]
+    if(nrow(model)>0){
+      model$to = as.character(object$internal$variables)[model$to]
+      model$from = as.character(object$internal$variables)[model$from]
+    }
     ParHat = object$obj$env$parList()
 
     #
     coefs = data.frame( model, "Estimate"=c(NA,ParHat$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
-    coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,5]), coefs$Estimate )
+    coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,'start']), coefs$Estimate )
     if( "sdrep" %in% names(object) ){
       SE = as.list( object$sdrep, report=FALSE, what="Std. Error")
       coefs = data.frame( coefs, "Std_Error"=c(NA,SE$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
     }
-    #coefs
+  }
+
+  # DSEM component
+  if( what=="dsem" ){
+    if( class(object$internal$dsem_ram_output) == "dsem_ram" ){
+      model = object$internal$dsem_ram_output$model
+      model = data.frame( heads = model[,'direction'],
+                          to = model[,'second'],
+                          from = model[,'first'],
+                          parameter = model[,'parameter'],
+                          start = model[,'start'],
+                          lag = model[,'lag'] )
+    }else if(class(object$internal$dsem_ram_output) == "eof_ram"){
+      model = object$internal$dsem_ram_output$model
+      vars = object$internal$dsem_ram_output$variances
+      model = data.frame( heads = c( rep(1,nrow(model)), rep(2,nrow(vars)) ),
+                          to = c( as.character(model$to), as.character(vars$to) ),
+                          from = c( as.character(model$from), as.character(vars$from) ),
+                          parameter = c( model$parameter, vars$parameter ),
+                          start = NA,
+                          lag = NA )
+    }else{
+      stop("Class for what=`dsem` not implemented for `summary(.)`")
+    }
+    ParHat = object$obj$env$parList()
+
+    #
+    coefs = data.frame( model, "Estimate"=c(NA,ParHat$beta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+    coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,'start']), coefs$Estimate )
+    if( "sdrep" %in% names(object) ){
+      SE = as.list( object$sdrep, report=FALSE, what="Std. Error")
+      coefs = data.frame( coefs, "Std_Error"=c(NA,SE$beta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+      coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
+      coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
+    }
   }
 
   return(coefs)

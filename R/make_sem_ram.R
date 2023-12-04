@@ -7,7 +7,12 @@
 #'        the set of path coefficients and variance-covariance parameters
 #' @param variables A character vector listing the set of variables
 #'
-#' @return A reticular action module (RAM) describing dependencies
+#' @return An S3-class \code{"sem_ram"} containing:
+#' \describe{
+#'   \item{\code{model}}{Output from \code{\link[sem]{specifyEquations}} or \code{\link[sem]{specifyModel}}
+#'                       that defines paths and parameters}
+#'   \item{\code{ram}}{reticular action module (RAM) describing dependencies}
+#' }
 #'
 #' @export
 make_sem_ram <-
