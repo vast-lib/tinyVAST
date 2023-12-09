@@ -20,8 +20,8 @@ function( n,
   L = Matrix::Cholesky(Q, super=TRUE)
 
   # Calcualte t(P) * solve(t(L)) * z0 in two steps
-  z = solve(L, z0, system = "Lt") # z = Lt^-1 * z
-  z = solve(L, z, system = "Pt") # z = Pt    * z
+  z = Matrix::solve(L, z0, system = "Lt") # z = Lt^-1 * z
+  z = Matrix::solve(L, z, system = "Pt") # z = Pt    * z
   return(mean + as.matrix(z))
 }
 

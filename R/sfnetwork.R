@@ -91,6 +91,14 @@ function( stream ){
   return(out)
 }
 
+#' @title Simulate GMRF for stream network
+#'
+#' @param sfnetwork_mesh Output from \code{\link{sfnetwork_mesh}}
+#' @param theta Decorrelation rate
+#' @param n number of simulated GMRFs
+#' @param what Whether to return the simulated GMRF or its precision matrix
+#'
+#' @export
 simulate_sfnetwork <-
 function( sfnetwork_mesh,
           theta,
@@ -108,7 +116,7 @@ function( sfnetwork_mesh,
   Q2 = sparseMatrix( i=table$from, j=table$from, x=exp(-2*theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
   Q3 = sparseMatrix( i=table$to, j=table$to, x=exp(-2*theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
   I = Diagonal( n=nrow(Q1) )
-  Q = I + Q1 + t(Q1) + Q2 + Q3
+  Q = I + Q1 + Matrix::t(Q1) + Q2 + Q3
 
   #
   if(what=="samples") out = rmvnorm_prec( n=n, mean=rep(0,nrow(Q)), Q=Q )
