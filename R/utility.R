@@ -13,12 +13,11 @@ rmvnorm_prec <-
 function( n,
           mean,
           Q ) {
-
   # Simulate values
   z0 = matrix( rnorm(length(mean) * n), ncol=n)
 
   # Q = t(P) * L * t(L) * P
-  L = Cholesky(Q, super=TRUE)
+  L = Matrix::Cholesky(Q, super=TRUE)
 
   # Calcualte t(P) * solve(t(L)) * z0 in two steps
   z = solve(L, z0, system = "Lt") # z = Lt^-1 * z

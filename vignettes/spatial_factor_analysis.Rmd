@@ -56,6 +56,14 @@ L_cf = L_cf + resid_sd * diag(n_c)
 d_cs = L_cf %*% delta_fs
 ```
 
+Where we can inspect the simulated loadings matrix
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+dimnames(L_cf) = list( paste0("Var ", 1:nrow(L_cf)),
+                       paste0("Factor ", 1:ncol(L_cf)) )
+knitr::kable( L_cf,
+              digits=2, caption="True loadings")
+```
+
 We then specify the model as expected by _tinyVAST_:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
@@ -102,7 +110,11 @@ out
 We can compare the true loadings (rotated to optimize comparison):
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-rotate_pca( L_cf )$L_tf
+Lrot_cf = rotate_pca( L_cf )$L_tf
+dimnames(Lrot_cf) = list( paste0("Var ", 1:nrow(Lrot_cf)),
+                       paste0("Factor ", 1:ncol(Lrot_cf)) )
+knitr::kable( Lrot_cf,
+              digits=2, caption="Rotated true loadings")
 ```
 
 with the estimated loadings
@@ -112,10 +124,16 @@ with the estimated loadings
 Lhat_cf = matrix( 0, nrow=n_c, ncol=2 )
 Lhat_cf[lower.tri(Lhat_cf,diag=TRUE)] = as.list(out$sdrep, what="Estimate")$theta_z
 Lhat_cf = rotate_pca( L_tf=Lhat_cf, order="decreasing" )$L_tf
-
-# Print
-Lhat_cf
 ```
+
+Where we can compared the estimated and true loadings matrices:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+dimnames(Lhat_cf) = list( paste0("Var ", 1:nrow(Lhat_cf)),
+                       paste0("Factor ", 1:ncol(Lhat_cf)) )
+knitr::kable( Lhat_cf,
+              digits=2, caption="Rotated estimated loadings" )
+```
+
 
 Or we can specify the model while ensuring that residual spatial variation is also captured:
 
@@ -154,7 +172,13 @@ out = fit( sem = sem,
 Lhat_cf = matrix( 0, nrow=n_c, ncol=2 )
 Lhat_cf[lower.tri(Lhat_cf,diag=TRUE)] = as.list(out$sdrep, what="Estimate")$theta_z
 Lhat_cf = rotate_pca( L_tf=Lhat_cf, order="decreasing" )$L_tf
-
-# Print
-Lhat_cf
 ```
+
+Where we can again compared the estimated and true loadings matrices:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+dimnames(Lhat_cf) = list( paste0("Var ", 1:nrow(Lhat_cf)),
+                       paste0("Factor ", 1:ncol(Lhat_cf)) )
+knitr::kable( Lhat_cf,
+              digits=2, caption="Rotated estimated loadings with full rank" )
+```
+
