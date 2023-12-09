@@ -1,6 +1,30 @@
 #define TMB_LIB_INIT R_init_tinyVAST
 #include <TMB.hpp>   //Links in the TMB libraries
 
+// Needed for returning SparseMatrix for Ornstein-Uhlenbeck network correlations
+template<class Type>
+Eigen::SparseMatrix<Type> Q_network( Type log_theta,
+                                     int n_s,
+                                     vector<int> parent_s,
+                                     vector<int> child_s,
+                                     vector<Type> dist_s ){
+
+  Eigen::SparseMatrix<Type> Q( n_s, n_s );
+  Type theta = exp( log_theta );
+  for(int s=0; s<n_s; s++){
+    Q.coeffRef( s, s ) = Type(1.0);
+  }
+  for(int s=1; s<parent_s.size(); s++){
+    if( exp(-dist_s(s))!=0 ){
+      Q.coeffRef( parent_s(s), child_s(s) ) = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+      Q.coeffRef( child_s(s), parent_s(s) ) = Q.coeffRef( parent_s(s), child_s(s) );
+      Q.coeffRef( parent_s(s), parent_s(s) ) += exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+      Q.coeffRef( child_s(s), child_s(s) ) += exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+    }
+  }
+  return Q;
+}
+
 // Function for detecting NAs
 template<class Type>
 bool isNA(Type x){
@@ -94,7 +118,7 @@ Type objective_function<Type>::operator() (){
 
   // Spatial objects
   DATA_IVECTOR( spatial_options );   //
-  // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off
+  // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off;  spatial_options(0)==4: stream-network
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -253,6 +277,14 @@ Type objective_function<Type>::operator() (){
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, Type(1.0));
     log_tau = Type(0.0);
+  }else if( spatial_options(0)==4 ){
+    // stream-network
+    PARAMETER( log_kappa );
+    DATA_IMATRIX( graph_sz );
+    DATA_VECTOR( dist_s );
+    Q_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
+    log_tau = 0.0;
+    REPORT( Q_ss );
   }
 
   // Space-variable interaction
@@ -385,6 +417,11 @@ Type objective_function<Type>::operator() (){
         case 2: // lognormal
           nll -= dlnorm( y_i(i), logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
           devresid_i(i) = log(y_i(i)) - ( logmu_i(i) - 0.5*exp(2.0*log_sigma_segment(0)) );
+          break;
+          break;
+        case 3: // Poisson
+          nll -= dpois( y_i(i), mu_i(i), true );
+          // devresid_i(i) = MUST ADD;
           break;
         default:
           error("Distribution not implemented.");

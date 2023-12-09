@@ -51,6 +51,7 @@
 #' @importFrom igraph as_adjacency_matrix
 #' @importFrom sem specifyModel specifyEquations
 #' @importFrom corpcor pseudoinverse
+#' @importFrom methods is
 #'
 #' @examples
 #' methods(class="tinyVAST")
@@ -74,7 +75,7 @@ function( data,
   start_time = Sys.time()
 
   # General error checks
-  if( class(control) != "tinyVASTcontrol" ) stop("`control` must be made by `tinyVASTcontrol()`")
+  if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`")
   if( !is.data.frame(data) ) stop("`data` must be a data frame")
 
   ##############
@@ -109,7 +110,7 @@ function( data,
     )
   }else if( isTRUE(is.character(dsem)) ){
     dsem_ram_output = make_dsem_ram( dsem, times=times, variables=variables, quiet=control$quiet, covs=variables )
-  }else if( class(dsem) %in% c("dsem_ram","eof_ram") ){
+  }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
     dsem_ram_output = dsem
   }else{
     stop("`dsem` must be either `NULL` or a character-string")
@@ -121,7 +122,7 @@ function( data,
   beta_type = tapply( ram_dsem[which_nonzero,1], INDEX=ram_dsem[which_nonzero,4], max)
 
   # Error checks
-  if( class(dsem_ram_output) %in% c("dsem_ram") ){
+  if( is(dsem_ram_output, "dsem_ram") ){
     if( any((dsem_ram_output$model[,'direction']==2) & (dsem_ram_output$model[,2]!=0)) ){
       stop("All two-headed arrows should have lag=0")
     }
@@ -176,14 +177,14 @@ function( data,
   # Spatial domain constructor
   ##############
 
-  if( "fm_mesh_2d" %in% class(spatial_graph) ){
+  if( is(spatial_graph,"fm_mesh_2d") ){
     # SPDE
     n_s = spatial_graph$n
     spatial_method_code = 1
     spatial_list = fm_fem( spatial_graph )
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
     A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$spatial]) )$proj$A
-  }else if( "igraph" %in% class(spatial_graph) ) {
+  }else if( is(spatial_graph,"igraph") ) {
     # SAR
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_graph, sparse=TRUE )
@@ -191,7 +192,14 @@ function( data,
     Match = match( data[,data_colnames$spatial], rownames(Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
-  }else{      # if( !is.null(sem) )
+  }else if( is(spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
+    # stream network
+    spatial_method_code = 4
+    n_s = spatial_graph$n
+    spatial_list = spatial_graph$table
+    A_is = sfnetwork_evaluator( stream = spatial_graph$stream,
+                                loc = as.matrix(data[,data_colnames$spatial]) )
+  }else{
     # Single-site
     spatial_method_code = 3
     n_s = 1
@@ -240,7 +248,7 @@ function( data,
   if( (any(is.na(e_i))) ){
     stop("`data[,data_colnames$distribution]` has values that don't match `rownames(family_link)`")
   }
-  if( any( (family_link[,2]==0) & (family_link[,1] %in% c(1,2)) ) ){
+  if( any( (family_link[,2]==0) & (family_link[,1] %in% c(1,2,3)) ) ){
     warning("Using an identify link with a Tweedie or lognormal distribution is not advised.")
   }
 
@@ -251,7 +259,7 @@ function( data,
 
   # Construct log_sigma based on family_link
   remove_last = \(x) x[-length(x)]
-  Nsigma_e = sapply( as.character(family_link[,1]), "0"=1, "1"=2, "2"=1, FUN=switch )
+  Nsigma_e = sapply( as.character(family_link[,1]), "0"=1, "1"=2, "2"=1, "3"=0, FUN=switch )
   log_sigma = rep( 0, sum(Nsigma_e) )
   Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
@@ -326,6 +334,9 @@ function( data,
     tmb_data$spatial_list = spatial_list
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
+  }else if( spatial_method_code %in% 4 ){
+    tmb_data$graph_sz = as.matrix(spatial_list[,c('from','to')]) - 1
+    tmb_data$dist_s = spatial_list[,c('dist')]
   }
 
   # make params
@@ -578,7 +589,7 @@ function( object,
 
   # DSEM component
   if( what=="dsem" ){
-    if( class(object$internal$dsem_ram_output) == "dsem_ram" ){
+    if( is(object$internal$dsem_ram_output,"dsem_ram") ){
       model = object$internal$dsem_ram_output$model
       model = data.frame( heads = model[,'direction'],
                           to = model[,'second'],
@@ -586,7 +597,7 @@ function( object,
                           parameter = model[,'parameter'],
                           start = model[,'start'],
                           lag = model[,'lag'] )
-    }else if(class(object$internal$dsem_ram_output) == "eof_ram"){
+    }else if( is(object$internal$dsem_ram_output,"eof_ram") ){
       model = object$internal$dsem_ram_output$model
       vars = object$internal$dsem_ram_output$variances
       model = data.frame( heads = c( rep(1,nrow(model)), rep(2,nrow(vars)) ),

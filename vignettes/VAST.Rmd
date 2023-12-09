@@ -61,13 +61,13 @@ mean(Data$n==0)
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # fit model
-out = fit( dsem = "logn -> logn, 1, rho",
+mytinyVAST = fit( dsem = "logn -> logn, 1, rho",
            data = Data,
            formula = n ~ 0 + factor(time),
            spatial_graph = mesh,
            family_link = rbind("obs"=c(1,1)),
            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
-out
+mytinyVAST
 ```
 The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`.
 
@@ -85,7 +85,7 @@ plot(sf_plot, max.plot=n_t )
 
 with the estimated densities:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-Data$z_hat = predict(out)
+Data$z_hat = predict(mytinyVAST)
 data_wide = reshape( Data[,c('x','y','time','z_hat')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
 sf_data = st_as_sf( data_wide, coords=c("x","y"))
@@ -101,7 +101,8 @@ plot( x=Data$z, y=Data$z_hat )
 We can then calculate the area-weighted total abundance and compare it with its true value:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Predicted sample-weighted total
-(Est = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t)) ))
+(Est = sapply( seq_len(n_t),
+   FUN=\(t) integrate_output(mytinyVAST, newdata=subset(Data,time==t)) ))
 
 # True (latent) sample-weighted total
 (True = tapply( Data$z, INDEX=Data$time, FUN=sum ))
@@ -167,7 +168,15 @@ mysdmTMB = sdmTMB(
   time = "time",
   family = tweedie()
 )
-Sys.time() - start_time
+sdmTMBtime = Sys.time() - start_time
+```
+
+The models all have similar runtimes
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+Times = c( "tinyVAST" = mytinyVAST$run_time,
+           "VAST" = myVAST$total_time,
+           "sdmTMB" = sdmTMBtime )
+knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 ```
 
 # Bivariate spatio-temporal autoregressive model
