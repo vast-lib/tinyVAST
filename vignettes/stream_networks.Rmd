@@ -1,0 +1,114 @@
+---
+title: "Stream network models"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Stream network models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{ggraph2}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/stream_networks.Rmd"); rmarkdown::render( "vignettes/stream_networks.Rmd", rmarkdown::pdf_document())
+```
+
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+library(sf)
+library(sfnetworks)
+library(tinyVAST)
+set.seed(101)
+```
+
+`tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
+We here show how it can fit a stream network model, where spatial correlations arise from stream distances along a network.
+
+First, we load a shapefile representing a stream network, and convert it to _sfnetwork_ format
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
+stream <- st_read( file.path(system.file("stream_network",package="tinyVAST"),
+                   "East_Fork_Lewis_basin.shp"), quiet=TRUE )
+stream = as_sfnetwork(stream)
+plot(stream)
+```
+
+We then convert it to an S3 class defined by _tinyVAST_ for stream networks,
+and rescale distances to 1000 ft (to ensure that distances are 0.01 to 100, avoiding
+issues of numerical under or overflow).
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Rescale
+graph = sfnetwork_mesh( stream )
+graph$table$dist = graph$table$dist / 1000  # Convert distance scale
+```
+
+Next, we'll simulate data at stream vertices, project to evenly spaced locations,
+and simulate data at those locations:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Parameters
+alpha = 2
+kappa = 1
+
+# simulate
+omega_s = simulate_sfnetwork( n=1, sfnetwork_mesh=graph, theta=kappa)[,1]
+
+# sample locations along network
+extrap = st_union( st_line_sample( activate(stream,"edges"), density=1/10000))
+extrap = st_cast( extrap, "POINT" )
+
+# Project to sampled locations
+A_is = sfnetwork_evaluator( stream = graph$stream,
+                                loc = st_coordinates(extrap) )
+omega_i = (A_is %*% omega_s)[,1]
+
+# Simulate sampling
+#Count = rpois( n=graph$n, lambda=exp(alpha + omega) )
+Count_i = rnorm( n=length(omega_i), mean=alpha + omega_i, sd=0.5 )
+
+# Format into long-form data frame
+Data = data.frame( Count = Count_i,
+                   st_coordinates(extrap),
+                   var = "species",
+                   time = "2020",
+                   dist = "obs" )
+```
+
+We can visualize the GMRF at those locations using _sfnetwork_
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+Nodes = st_as_sf(activate(stream,"nodes"))
+Nodes$omega = omega_s
+stream = sfnetwork( nodes = Nodes,
+                    edges = st_as_sf(activate(stream,"edges")),
+                    directed = FALSE )
+plot(stream)
+plot(Nodes, add=TRUE, pch=19, cex=2)
+```
+
+Finally, we can fit the model and plot output
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# fit model
+out = fit( data = Data,
+           formula = Count ~ 1,
+           spatial_graph = graph,
+           #family_link = rbind( "obs"=c(3,1) ),
+           family_link = rbind( "obs"=c(0,0) ),
+           data_colnames = list("spatial"=c("X","Y"), "variable"="var", "time"="time", "distribution"="dist"),
+           control = tinyVASTcontrol(trace=0, quiet=TRUE),
+           sem = "" )
+
+# Plot true GMRF at sampled locations
+plot(stream, main="omega_i")
+plot( st_sf(extrap,"omega"=omega_i), add=TRUE, pch=19, cex=2 )
+
+# Plot estimated GMRF at sampled locations
+parhat = out$obj$env$parList()
+omegahat_i = (A_is %*% parhat$omega_sc[,1])[,1]
+plot(stream, main="omegahat_i")
+plot( st_sf(extrap,"omega"=omegahat_i), add=TRUE, pch=19, cex=2 )
+```
