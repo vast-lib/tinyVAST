@@ -8,6 +8,10 @@
 #' @param loc sf object representing points to which are being projected
 #' @param tolerance error-check tolerance
 #'
+#' @importFrom units drop_units
+#' @importFrom sf st_as_sf st_nearest_feature st_distance st_geometry st_length
+#' @importFrom sfnetworks activate
+#'
 #' @export
 sfnetwork_evaluator <-
 function( stream,
@@ -15,10 +19,10 @@ function( stream,
           tolerance = 0.01 ){
 
   # error checks
-  require(sfnetworks)
-  require(Matrix)
-  require(units)
-  require(sf)
+  #require(sfnetworks)
+  #require(Matrix)
+  #require(units)
+  #require(sf)
   if(!inherits(loc,"sfc")){
     #stop("Must provide `loc` with class `sf`")
     loc = st_as_sf( as.data.frame(loc), coords=colnames(loc), crs=st_crs(stream) )
@@ -38,7 +42,7 @@ function( stream,
   dist_to = drop_units(st_distance(loc, nodes[edges$to[closest_edge],], by_element=TRUE))
 
   # Make sparse matrix
-  A_is = sparseMatrix(
+  A_is = Matrix::sparseMatrix(
     dims = c( length(st_geometry(loc)), length(st_geometry(nodes)) ),
     i = rep(seq_along(st_geometry(loc)),2),
     j = c( edges$from[closest_edge], edges$to[closest_edge] ),
@@ -61,9 +65,9 @@ function( stream,
 sfnetwork_mesh <-
 function( stream ){
 
-  require(sfnetworks)
-  require(units)
-  require(Matrix)
+  #require(sfnetworks)
+  #require(units)
+  #require(Matrix)
 
   # from, to, dist
   edges = st_as_sf(activate(stream,"edges"))

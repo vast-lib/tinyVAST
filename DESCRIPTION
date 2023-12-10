@@ -13,7 +13,10 @@ Authors@R:
 Imports:
     sem,
     igraph,
-    corpcor
+    corpcor,
+    sfnetworks,
+    units,
+    sf
 Depends:
     R (>= 4.0.0),
     TMB (>= 1.9.7),
@@ -32,7 +35,8 @@ Suggests:
     rnaturalearth,
     rnaturalearthhires,
     sf, 
-    sdmTMB
+    sdmTMB,
+    viridisLite
 LinkingTo:
     TMB,
     RcppEigen,
