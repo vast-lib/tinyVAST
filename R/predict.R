@@ -204,13 +204,17 @@ function( object,
   offset_g = model.offset(mf2)
   if(is.null(offset_g)) offset_g = rep(0,nrow(newdata))
 
-  # Assemble Apred_is
-  if( "fm_mesh_2d" %in% class(object$spatial_graph) ){
+  # Assemble A_gs
+  if( is(object$spatial_graph, "fm_mesh_2d") ){
     A_gs = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,data_colnames$spatial]) )$proj$A
-  }else if( "igraph" %in% class(object$spatial_graph) ) {
+  }else if( is(object$spatial_graph, "igraph") ) {
     Match = match( newdata[,data_colnames$spatial], rownames(object$tmb_inputs$tmb_data$Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_gs = sparseMatrix( i=1:nrow(newdata), j=Match, x=rep(1,nrow(newdata)) )
+  }else if( is(object$spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
+    # stream network
+    A_gs = sfnetwork_evaluator( stream = object$spatial_graph$stream,
+                                loc = as.matrix(newdata[,data_colnames$spatial]) )
   }else{
     A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
     A_gs = as(Matrix(A_gs),"CsparseMatrix")
