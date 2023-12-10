@@ -7,7 +7,7 @@
 classify_variables(model)
 }
 \arguments{
-\item{model}{SEM model}
+\item{model}{syntax for structural equation model}
 }
 \value{
 Tagged-list defining exogenous and endogenous variables

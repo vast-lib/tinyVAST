@@ -18,6 +18,11 @@ rotate_pca(
 \item{order}{Options for resolving label-switching via reflecting
 each factor to achieve a given order across dimension \eqn{T}.}
 }
+\value{
+List containg the rotated loadings \code{L_tf},
+the inverse-rotated response matrix \code{x_sf},
+and the rotation \code{H}
+}
 \description{
 Rotate lower-triangle loadings matrix
 to order factors from largest to smallest variance.

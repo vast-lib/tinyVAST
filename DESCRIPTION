@@ -18,7 +18,7 @@ Imports:
     units,
     sf
 Depends:
-    R (>= 4.0.0),
+    R (>= 4.1.0),
     TMB (>= 1.9.7),
     mgcv,
     Matrix,
@@ -29,14 +29,14 @@ Suggests:
     fmesher,
     mvtnorm,
     pdp,
-    visreg,
     lattice,
     ggplot2,
     rnaturalearth,
     rnaturalearthhires,
     sf, 
     sdmTMB,
-    viridisLite
+    viridisLite,
+    dsem
 LinkingTo:
     TMB,
     RcppEigen,

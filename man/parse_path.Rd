@@ -7,7 +7,8 @@
 parse_path(path)
 }
 \arguments{
-\item{path}{text to parse}
+\item{path}{character string indicating a one-headed or two-headed path
+in a structural equation model}
 }
 \value{
 Tagged-list defining variables and direction for a specified path coefficient
