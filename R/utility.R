@@ -6,13 +6,18 @@
 #'
 #' @param n number of observations.
 #' @param mean mean vector.
-#' @param Q sparse precision matrix.
+#' @param Q sparse precision (inverse-covariance) matrix.
+#'
+#' @return a matrix with dimension \code{length(mean)} by
+#'         \code{n}, containing realized draws from the specified
+#'         mean and precision
 #'
 #' @export
 rmvnorm_prec <-
 function( n,
           mean,
           Q ) {
+
   # Simulate values
   z0 = matrix( rnorm(length(mean) * n), ncol=n)
 
@@ -34,6 +39,10 @@ function( n,
 #' @param x_sf Spatial response with dimensions \eqn{S \times F}.
 #' @param order Options for resolving label-switching via reflecting
 #'        each factor to achieve a given order across dimension \eqn{T}.
+#'
+#' @return List containg the rotated loadings \code{L_tf},
+#'         the inverse-rotated response matrix \code{x_sf},
+#'         and the rotation \code{H}
 #'
 #' @export
 rotate_pca <-
@@ -74,12 +83,13 @@ function( L_tf,
 #'
 #' @description \code{parse_path} is copied from \code{sem::parse.path}
 #'
+#' @param path character string indicating a one-headed or two-headed path
+#'        in a structural equation model
+#'
 #' @details
 #' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
 #'
 #' @return Tagged-list defining variables and direction for a specified path coefficient
-#'
-#' @param path text to parse
 parse_path <-
 function( path ){
   path.1 <- gsub("-", "", gsub(" ", "", path))
@@ -102,10 +112,10 @@ function( path ){
 #'
 #' @description \code{classify_variables} is copied from \code{sem:::classifyVariables}
 #'
+#' @param model syntax for structural equation model
+#'
 #' @details
 #' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
-#'
-#' @param model SEM model
 #'
 #' @return Tagged-list defining exogenous and endogenous variables
 classify_variables <-

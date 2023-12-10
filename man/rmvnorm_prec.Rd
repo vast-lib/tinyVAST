@@ -11,7 +11,12 @@ rmvnorm_prec(n, mean, Q)
 
 \item{mean}{mean vector.}
 
-\item{Q}{sparse precision matrix.}
+\item{Q}{sparse precision (inverse-covariance) matrix.}
+}
+\value{
+a matrix with dimension \code{length(mean)} by
+\code{n}, containing realized draws from the specified
+mean and precision
 }
 \description{
 This function provide a random number generator for
