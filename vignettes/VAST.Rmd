@@ -11,6 +11,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+updated_vast = isTRUE( packageVersion("VAST") >= package_version("3.11.0") )
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -124,7 +125,7 @@ ggplot(Index, aes(time, Estimate)) +
 ```
 
 Next, we compare this against the current version of VAST
-```{r, eval=requireNamespace(c("INLA","VAST")), echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r, eval=updated_vast, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 library(VAST)
 settings = make_settings( purpose="index3",
                           n_x = n_x*n_y,
@@ -150,7 +151,9 @@ myVAST = fit_model( settings=settings,
                  control = list(eval.max=100, iter.max=100, trace=0) )
 myVAST
 ```
-
+```{r, eval=!updated_vast, echo=FALSE, message=FALSE}
+myVAST = list("total_time"=NA)
+```
 Or with sdmTMB
 
 ```{r, eval=requireNamespace(c("INLA","sdmTMB")), echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
