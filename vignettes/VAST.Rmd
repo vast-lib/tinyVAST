@@ -11,13 +11,13 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-has_vast = requireNamespace(VAST)
+has_vast = requireNamespace("VAST")
 if( isTRUE(has_vast) ){
   updated_vast = isTRUE( packageVersion("VAST") >= package_version("3.11.0") )
 }else{
   updated_vast = FALSE
 }
-has_sdmTMB = requireNamespace(sdmTMB)
+has_sdmTMB = requireNamespace("sdmTMB")
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
