@@ -32,7 +32,6 @@ Suggests:
     lattice,
     ggplot2,
     rnaturalearth,
-    rnaturalearthhires,
     sf, 
     sdmTMB,
     viridisLite,
