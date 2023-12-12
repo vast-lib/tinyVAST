@@ -91,7 +91,7 @@ Finally, we can extract, rotate, and plot the dominant modes of variability and 
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Country shapefiles for plotting
-sf_maps = ne_countries( return="sf", scale=10, continent=c("north america","europe","asia") )
+sf_maps = ne_countries( return="sf", scale="medium", continent=c("north america","europe","asia") )
 sf_maps = st_transform( sf_maps, crs=st_crs(sf_ice) )
 sf_maps = st_union( sf_maps )
 
