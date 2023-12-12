@@ -35,7 +35,7 @@ We here show how it can fit spatial autoregressive model
 n_x = n_y = 25
 n_w = 10
 R_xx = exp(-0.4 * abs(outer(1:n_x, 1:n_x, FUN="-")) )
-R_xx = exp(-0.4 * abs(outer(1:n_y, 1:n_y, FUN="-")) )
+R_yy = exp(-0.4 * abs(outer(1:n_y, 1:n_y, FUN="-")) )
 z = mvtnorm::rmvnorm(1, sigma=kronecker(R_xx,R_yy) )
 
 # Simulate nuissance parameter z from oscillatory (day-night) process
