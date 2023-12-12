@@ -11,7 +11,13 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-updated_vast = isTRUE( packageVersion("VAST") >= package_version("3.11.0") )
+has_vast = requireNamespace(VAST)
+if( isTRUE(has_vast) ){
+  updated_vast = isTRUE( packageVersion("VAST") >= package_version("3.11.0") )
+}else{
+  updated_vast = FALSE
+}
+has_sdmTMB = requireNamespace(sdmTMB)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -151,13 +157,12 @@ myVAST = fit_model( settings=settings,
                  control = list(eval.max=100, iter.max=100, trace=0) )
 myVAST
 ```
-```{r, eval=!updated_vast, echo=FALSE, message=FALSE}
+```{r, eval=!updated_vast, echo=FALSE, message=FALSE, include=FALSE}
 myVAST = list("total_time"=NA)
 ```
 Or with sdmTMB
 
-```{r, eval=requireNamespace(c("INLA","sdmTMB")), echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-#library(INLA)
+```{r, eval=has_sdmTMB, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 library(sdmTMB)
 mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
@@ -172,6 +177,9 @@ mysdmTMB = sdmTMB(
   family = tweedie()
 )
 sdmTMBtime = Sys.time() - start_time
+```
+```{r, eval=!has_sdmTMB, echo=FALSE, message=FALSE, include=FALSE}
+sdmTMBtime = NA
 ```
 
 The models all have similar runtimes
