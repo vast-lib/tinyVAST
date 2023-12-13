@@ -70,9 +70,9 @@ mytiny0 = fit(
      data = Data,
      dsem = dsem,
      data_colnames = list(variable="Species", time="Year", spatial="Region", distribution="Species"),
-     family_link = rbind( "chum" = c(1,1),
-                          "pink" = c(1,1),
-                          "sockeye" = c(1,1) ),
+     family = list( "chum" = lognormal(),
+                          "pink" = lognormal(),
+                          "sockeye" = lognormal() ),
      spatial_graph = unconnected_graph,
      control = tinyVASTcontrol( trace=0, profile="alpha_j", getsd=FALSE ) )
 
@@ -95,9 +95,9 @@ mytiny = fit(
      data = Data,
      dsem = dsem,
      data_colnames = list(variable="Species", time="Year", spatial="Region", distribution="Species"),
-     family_link = rbind( "chum" = c(1,1),
-                          "pink" = c(1,1),
-                          "sockeye" = c(1,1) ),
+     family = list( "chum" = lognormal(),
+                          "pink" = lognormal(),
+                          "sockeye" = lognormal() ),
      spatial_graph = adjacency_graph,
      control = tinyVASTcontrol( trace=0, profile="alpha_j", getsd=FALSE ) )
 
