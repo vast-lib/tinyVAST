@@ -127,76 +127,94 @@ function( data,
   # DSEM RAM constructor
   ##############
 
-  # (I-Rho)^-1 * Gamma * (I-Rho)^-1
-  if( is.null(dsem) ){
-    dsem_ram_output = list(
-      ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
-      model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
-    )
-  }else if( isTRUE(is.character(dsem)) ){
-    dsem_ram_output = make_dsem_ram( dsem, times=times, variables=variables, quiet=control$quiet, covs=variables )
-  }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
-    dsem_ram_output = dsem
-  }else{
-    stop("`dsem` must be either `NULL` or a character-string")
-  }
-  ram_dsem = dsem_ram_output$ram
-
-  # Identify arrow-type for each beta_j estimated in RAM
-  which_nonzero = which(ram_dsem[,4]>0)
-  beta_type = tapply( ram_dsem[which_nonzero,1], INDEX=ram_dsem[which_nonzero,4], max)
-
-  # Error checks
-  if( is(dsem_ram_output, "dsem_ram") ){
-    if( any((dsem_ram_output$model[,'direction']==2) & (dsem_ram_output$model[,2]!=0)) ){
-      stop("All two-headed arrows should have lag=0")
+  build_dsem <-
+  function( dsem ){
+    # (I-Rho)^-1 * Gamma * (I-Rho)^-1
+    if( is.null(dsem) ){
+      dsem_ram_output = list(
+        ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
+        model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
+      )
+    }else if( isTRUE(is.character(dsem)) ){
+      dsem_ram_output = make_dsem_ram( dsem, times=times, variables=variables, quiet=control$quiet, covs=variables )
+    }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
+      dsem_ram_output = dsem
+    }else{
+      stop("`dsem` must be either `NULL` or a character-string")
     }
-    if( !all(c(dsem_ram_output$model[,'first'],dsem_ram_output$model[,'second']) %in% variables) ){
-      stop("Some variable in `dsem` is not in `tsdata`")
-    }
-  }
 
-  # Check for rank-deficient precision from RAM
-  ram2 = subset( data.frame(dsem_ram_output$ram), heads==2 )
-  total_variance_h = tapply( as.numeric(ifelse(is.na(ram2$start), 1, ram2$start)),
-          INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
-  ram1 = subset( data.frame(dsem_ram_output$ram), heads==1 )
-  total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
-          INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
-  if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
-    stop("Must use gmrf_parameterization=`projection` for the dsem RAM supplied")
+    # Identify arrow-type for each beta_j estimated in RAM
+    which_nonzero = which(dsem_ram_output$ram[,4]>0)
+    beta_type = tapply( dsem_ram_output$ram[which_nonzero,1],
+                        INDEX=dsem_ram_output$ram[which_nonzero,4], FUN=max)
+
+    # Error checks
+    if( is(dsem_ram_output, "dsem_ram") ){
+      if( any((dsem_ram_output$model[,'direction']==2) & (dsem_ram_output$model[,2]!=0)) ){
+        stop("All two-headed arrows should have lag=0")
+      }
+      if( !all(c(dsem_ram_output$model[,'first'],dsem_ram_output$model[,'second']) %in% variables) ){
+        stop("Some variable in `dsem` is not in `tsdata`")
+      }
+    }
+
+    # Check for rank-deficient precision from RAM
+    ram_gamma = subset( data.frame(dsem_ram_output$ram), heads==2 )
+    total_variance_h = tapply( as.numeric(ifelse(is.na(ram_gamma$start), 1, ram_gamma$start)),
+            INDEX = ram_gamma$from, FUN=\(x)sum(abs(x)) )
+    ram_rho = subset( data.frame(dsem_ram_output$ram), heads==1 )
+    total_effect_h = tapply( as.numeric(ifelse(is.na(ram_rho$start), 1, ram_rho$start)),
+            INDEX = ram_rho$from, FUN=\(x)sum(abs(x)) )
+    if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+      stop("Must use gmrf_parameterization=`projection` for the dsem RAM supplied")
+    }
+
+    # out
+    out = list("dsem_ram_output"=dsem_ram_output, "beta_type"=beta_type)
   }
+  out = build_dsem(dsem)
+  dsem_ram_output = out$dsem_ram_output
+  beta_type = out$beta_type
 
   ##############
   # SEM RAM constructor
   ##############
 
-  if( is.null(sem) ){
-    sem_ram_output = list(
-      ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
-      model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
-    )
-  }else if( isTRUE(is.character(sem)) ){
-    sem_ram_output = make_sem_ram( sem, variables=as.character(variables), quiet=control$quiet, covs=as.character(variables) )
-  } else {
-    stop("`sem` must be either `NULL` or a character-string")
-  }
-  ram_sem = sem_ram_output$ram
+  build_sem <-
+  function( sem ){
+    if( is.null(sem) ){
+      sem_ram_output = list(
+        ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
+        model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
+      )
+    }else if( isTRUE(is.character(sem)) ){
+      sem_ram_output = make_sem_ram( sem, variables=as.character(variables), quiet=control$quiet, covs=as.character(variables) )
+    } else {
+      stop("`sem` must be either `NULL` or a character-string")
+    }
 
-  # Identify arrow-type for each beta_j estimated in RAM
-  which_nonzero = which(ram_sem[,4]>0)
-  theta_type = tapply( ram_sem[which_nonzero,1], INDEX=ram_sem[which_nonzero,4], max)
+    # Identify arrow-type for each beta_j estimated in RAM
+    which_nonzero = which(sem_ram_output$ram[,4]>0)
+    theta_type = tapply( sem_ram_output$ram[which_nonzero,1],
+                         INDEX=sem_ram_output$ram[which_nonzero,4], FUN=max)
 
-  # Check for rank-deficient precision from RAM
-  ram2 = subset( data.frame(sem_ram_output$ram), heads==2 )
-  total_variance_h = tapply( as.numeric(ifelse( is.na(ram2$start), 1, ram2$start)),
-          INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
-  ram1 = subset( data.frame(sem_ram_output$ram), heads==1 )
-  total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
-          INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
-  if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
-    stop("Must use options$gmrf_parameterization=`projection` for the sem RAM supplied")
+    # Check for rank-deficient precision from RAM
+    ram2 = subset( data.frame(sem_ram_output$ram), heads==2 )
+    total_variance_h = tapply( as.numeric(ifelse( is.na(ram2$start), 1, ram2$start)),
+            INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
+    ram1 = subset( data.frame(sem_ram_output$ram), heads==1 )
+    total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
+            INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
+    if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+      stop("Must use options$gmrf_parameterization=`projection` for the sem RAM supplied")
+    }
+
+    # out
+    out = list("sem_ram_output"=sem_ram_output, "theta_type"=theta_type)
   }
+  out = build_sem(sem)
+  sem_ram_output = out$sem_ram_output
+  theta_type = out$theta_type
 
   ##############
   # Spatial domain constructor
@@ -241,20 +259,36 @@ function( data,
   ##############
 
   # Initial constructor of splines
-  gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
-  y_i = model.response(gam_setup$mf)  # OR USE: model.extract(gam_setup$mf, "response")
-  offset_i = gam_setup$offset
+  build_gam <-
+  function( formula ){
+    gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
+    y_i = model.response(gam_setup$mf)  # OR USE: model.extract(gam_setup$mf, "response")
+    offset_i = gam_setup$offset
 
-  # Extrtact and combine penelization matrices
-  S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
-  S_kk = .bdiag(S_list)         # join S's in sparse matrix
-  Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
-  if(is.null(Sdims)) Sdims = vector(length=0)
+    # Extrtact and combine penelization matrices
+    S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
+    S_kk = .bdiag(S_list)         # join S's in sparse matrix
+    Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
+    if(is.null(Sdims)) Sdims = vector(length=0)
 
-  # Get covariates
-  which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
-  X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
-  Z_ik = gam_setup$X[,which_se,drop=FALSE]
+    # Get covariates
+    which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
+    X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
+    Z_ik = gam_setup$X[,which_se,drop=FALSE]
+
+    #
+    out = list( "X_ij"=X_ij, "Z_ik"=Z_ik, "S_kk"=S_kk, "Sdims"=Sdims, "y_i"=y_i,
+                "offset_i"=offset_i, "gam_setup"=gam_setup )
+    return(out)
+  }
+  out = build_gam( formula )
+  X_ij = out$X_ij
+  Z_ik = out$Z_ik
+  S_kk = out$S_kk
+  Sdims = out$Sdims
+  y_i = out$y_i
+  offset_i = out$offset_i
+  gam_setup = out$gam_setup
 
   ##############
   # distribution/link
@@ -304,7 +338,7 @@ function( data,
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
   which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( nrow(ram_dsem)==0 ){
+  if( nrow(dsem_ram_output$ram)==0 ){
     which_Arows = numeric(0)
   }
   Aepsilon_zz = Aepsilon_zz[which_Arows,,drop=FALSE]
@@ -314,7 +348,7 @@ function( data,
   Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
   which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( nrow(ram_sem)==0 ){
+  if( nrow(sem_ram_output$ram)==0 ){
     which_Arows = numeric(0)
   }
   Aomega_zz = Aomega_zz[which_Arows,,drop=FALSE]
@@ -338,10 +372,10 @@ function( data,
     Aepsilon_z = Aepsilon_z,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
     Aomega_z = Aomega_z,
-    ram_sem = as.matrix(na.omit(ram_sem[,1:4])),
-    ram_sem_start = as.numeric(ram_sem[,5]),
-    ram_dsem = as.matrix(na.omit(ram_dsem[,1:4])),
-    ram_dsem_start = as.numeric(ram_dsem[,5]),
+    ram_sem = as.matrix(na.omit(sem_ram_output$ram[,1:4])),
+    ram_sem_start = as.numeric(sem_ram_output$ram[,5]),
+    ram_dsem = as.matrix(na.omit(dsem_ram_output$ram[,1:4])),
+    ram_dsem_start = as.numeric(dsem_ram_output$ram[,5]),
     X_gj = matrix(0,ncol=ncol(X_ij),nrow=0),
     Z_gk = matrix(0,ncol=ncol(Z_ik),nrow=0),
     AepsilonG_zz = matrix(0,nrow=0,ncol=4),
@@ -380,10 +414,10 @@ function( data,
   )
 
   # Telescoping
-  if( nrow(ram_dsem)==0 ){
+  if( nrow(dsem_ram_output$ram)==0 ){
     tmb_par$epsilon_stc = tmb_par$epsilon_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
   }
-  if( nrow(ram_sem)==0 ){
+  if( nrow(sem_ram_output$ram)==0 ){
     tmb_par$omega_sc = tmb_par$omega_sc[,numeric(0),drop=FALSE]
   }
 
