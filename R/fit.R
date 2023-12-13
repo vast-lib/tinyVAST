@@ -17,8 +17,8 @@
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
 #'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
 #'        an offset.
-#' @param family_link Matrix of length-two, indicating the distribution and link-function
-#'        for each level of \code{data$dist}
+#' @param family named list of family and link functions, with names corresponding to levels
+#'        of \code{data$dist}
 #' @param spatial_graph Object that represents spatial relationships, either using `fmesher`
 #'        to apply the SPDE method, `igraph` to apply a simultaneous autoregressive (SAR)
 #'        process, or `NULL` to specify a single site.
@@ -88,7 +88,7 @@ function( data,
           formula,
           sem = NULL,
           dsem = NULL,
-          family_link = rbind( "obs"=c(0,0) ),
+          family = list( "obs"=gaussian() ),
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
           times = seq(min(data[,data_colnames$time]),max(data[,data_colnames$time])),
           variables = unique(data[,data_colnames$variable]),
@@ -104,7 +104,7 @@ function( data,
   if( !is.data.frame(data) ) stop("`data` must be a data frame")
 
   ##############
-  # SEM / DSEM telescoping
+  # input telescoping
   ##############
 
   # Allow user to avoid specifying these if is.null(dsem)
@@ -123,6 +123,25 @@ function( data,
     }
   }
 
+  # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
+  if( length(times) > 0 ){
+    t_i = match( data[,data_colnames$time], times )
+  }else{ t_i = integer(0) }
+  if( length(variables) > 0 ){
+    c_i = match( data[,data_colnames$var], variables )
+  }else{ c_i = integer(0) }
+
+  # Telescope format
+  if( !is.list(family) ){
+    family = list( "obs"=family )
+  }
+
+  # Telescope
+  if( !(data_colnames$distribution %in% colnames(data)) ){
+    if( length(family)>1 ) stop("Must supply `dist` if using multiple `family` options")
+    data = data.frame( data, matrix(names(family)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+  }
+
   ##############
   # DSEM RAM constructor
   ##############
@@ -131,38 +150,38 @@ function( data,
   function( dsem ){
     # (I-Rho)^-1 * Gamma * (I-Rho)^-1
     if( is.null(dsem) ){
-      dsem_ram_output = list(
+      output = list(
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
     }else if( isTRUE(is.character(dsem)) ){
-      dsem_ram_output = make_dsem_ram( dsem, times=times, variables=variables, quiet=control$quiet, covs=variables )
+      output = make_dsem_ram( dsem, times=times, variables=variables, quiet=control$quiet, covs=variables )
     }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
-      dsem_ram_output = dsem
+      output = dsem
     }else{
       stop("`dsem` must be either `NULL` or a character-string")
     }
 
     # Identify arrow-type for each beta_j estimated in RAM
-    which_nonzero = which(dsem_ram_output$ram[,4]>0)
-    beta_type = tapply( dsem_ram_output$ram[which_nonzero,1],
-                        INDEX=dsem_ram_output$ram[which_nonzero,4], FUN=max)
+    which_nonzero = which(output$ram[,4]>0)
+    param_type = tapply( output$ram[which_nonzero,1],
+                        INDEX=output$ram[which_nonzero,4], FUN=max)
 
     # Error checks
-    if( is(dsem_ram_output, "dsem_ram") ){
-      if( any((dsem_ram_output$model[,'direction']==2) & (dsem_ram_output$model[,2]!=0)) ){
+    if( is(output, "dsem_ram") ){
+      if( any((output$model[,'direction']==2) & (output$model[,2]!=0)) ){
         stop("All two-headed arrows should have lag=0")
       }
-      if( !all(c(dsem_ram_output$model[,'first'],dsem_ram_output$model[,'second']) %in% variables) ){
+      if( !all(c(output$model[,'first'],output$model[,'second']) %in% variables) ){
         stop("Some variable in `dsem` is not in `tsdata`")
       }
     }
 
     # Check for rank-deficient precision from RAM
-    ram_gamma = subset( data.frame(dsem_ram_output$ram), heads==2 )
+    ram_gamma = subset( data.frame(output$ram), heads==2 )
     total_variance_h = tapply( as.numeric(ifelse(is.na(ram_gamma$start), 1, ram_gamma$start)),
             INDEX = ram_gamma$from, FUN=\(x)sum(abs(x)) )
-    ram_rho = subset( data.frame(dsem_ram_output$ram), heads==1 )
+    ram_rho = subset( data.frame(output$ram), heads==1 )
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram_rho$start), 1, ram_rho$start)),
             INDEX = ram_rho$from, FUN=\(x)sum(abs(x)) )
     if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
@@ -170,11 +189,10 @@ function( data,
     }
 
     # out
-    out = list("dsem_ram_output"=dsem_ram_output, "beta_type"=beta_type)
+    out = list("output"=output, "param_type"=param_type)
+    return(out)
   }
-  out = build_dsem(dsem)
-  dsem_ram_output = out$dsem_ram_output
-  beta_type = out$beta_type
+  dsem_ram = build_dsem(dsem)
 
   ##############
   # SEM RAM constructor
@@ -183,26 +201,26 @@ function( data,
   build_sem <-
   function( sem ){
     if( is.null(sem) ){
-      sem_ram_output = list(
+      output = list(
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
     }else if( isTRUE(is.character(sem)) ){
-      sem_ram_output = make_sem_ram( sem, variables=as.character(variables), quiet=control$quiet, covs=as.character(variables) )
+      output = make_sem_ram( sem, variables=as.character(variables), quiet=control$quiet, covs=as.character(variables) )
     } else {
       stop("`sem` must be either `NULL` or a character-string")
     }
 
     # Identify arrow-type for each beta_j estimated in RAM
-    which_nonzero = which(sem_ram_output$ram[,4]>0)
-    theta_type = tapply( sem_ram_output$ram[which_nonzero,1],
-                         INDEX=sem_ram_output$ram[which_nonzero,4], FUN=max)
+    which_nonzero = which(output$ram[,4]>0)
+    param_type = tapply( output$ram[which_nonzero,1],
+                         INDEX=output$ram[which_nonzero,4], FUN=max)
 
     # Check for rank-deficient precision from RAM
-    ram2 = subset( data.frame(sem_ram_output$ram), heads==2 )
+    ram2 = subset( data.frame(output$ram), heads==2 )
     total_variance_h = tapply( as.numeric(ifelse( is.na(ram2$start), 1, ram2$start)),
             INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
-    ram1 = subset( data.frame(sem_ram_output$ram), heads==1 )
+    ram1 = subset( data.frame(output$ram), heads==1 )
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
             INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
     if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
@@ -210,11 +228,10 @@ function( data,
     }
 
     # out
-    out = list("sem_ram_output"=sem_ram_output, "theta_type"=theta_type)
+    out = list("output"=output, "param_type"=param_type)
+    return(out)
   }
-  out = build_sem(sem)
-  sem_ram_output = out$sem_ram_output
-  theta_type = out$theta_type
+  sem_ram = build_sem(sem)
 
   ##############
   # Spatial domain constructor
@@ -254,12 +271,32 @@ function( data,
   }
   Atriplet = Matrix::mat2triplet(A_is)
 
+  #
+  Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
+  which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
+  which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
+  if( nrow(dsem_ram$output$ram)==0 ){
+    which_Arows = numeric(0)
+  }
+  Aepsilon_zz = Aepsilon_zz[which_Arows,,drop=FALSE]
+  Aepsilon_z = Atriplet$x[which_Arows]
+
+  #
+  Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
+  which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
+  which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
+  if( nrow(sem_ram$output$ram)==0 ){
+    which_Arows = numeric(0)
+  }
+  Aomega_zz = Aomega_zz[which_Arows,,drop=FALSE]
+  Aomega_z = Atriplet$x[which_Arows]
+
   ##############
   # Formula constructor
   ##############
 
   # Initial constructor of splines
-  build_gam <-
+  build_gam_basis <-
   function( formula ){
     gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
     y_i = model.response(gam_setup$mf)  # OR USE: model.extract(gam_setup$mf, "response")
@@ -281,103 +318,81 @@ function( data,
                 "offset_i"=offset_i, "gam_setup"=gam_setup )
     return(out)
   }
-  out = build_gam( formula )
-  X_ij = out$X_ij
-  Z_ik = out$Z_ik
-  S_kk = out$S_kk
-  Sdims = out$Sdims
-  y_i = out$y_i
-  offset_i = out$offset_i
-  gam_setup = out$gam_setup
+  gam_basis = build_gam_basis( formula )
 
   ##############
   # distribution/link
   ##############
 
-  # Telescope
-  if( !(data_colnames$distribution %in% colnames(data)) ){
-    if(nrow(family_link)>1) stop("Must supply `dist` if using multiple `family_link` options")
-    data = data.frame( data, matrix(rownames(family_link)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
-  }
+  build_distributions <-
+  function( family ){
+    e_i = match( data[,data_colnames$distribution], names(family) )
 
-  # Build e_i ... always has length nrow(data)
-  e_i = match( data[,data_colnames$distribution], rownames(family_link) )
+    # Check for errors
+    if( (any(is.na(e_i))) ){
+      stop("`data[,data_colnames$distribution]` has values that don't match `names(family)`")
+    }
 
-  # Check for errors
-  if( (any(is.na(e_i))) ){
-    stop("`data[,data_colnames$distribution]` has values that don't match `rownames(family_link)`")
-  }
-  if( any( (family_link[,2]==0) & (family_link[,1] %in% c(1,2,3)) ) ){
-    warning("Using an identify link with a Tweedie or lognormal distribution is not advised.")
-  }
+    # Construct log_sigma based on family
+    remove_last = \(x) x[-length(x)]
+    Nsigma_e = sapply( family, FUN=\(x){
+                       switch(x$family,
+                         "gaussian" = 1,
+                         "tweedie" = 2,
+                         "lognormal" = 1,
+                         "poisson" = 0
+                       )} )
+    Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
-  # Telescope format
-  if( !is.matrix(family_link) ){
-    family_link = matrix( family_link, nrow=1, ncol=2 )
+    #
+    family_code = sapply( family, FUN=\(x){
+                       switch(x$family,
+                         "gaussian" = 0,
+                         "tweedie" = 1,
+                         "lognormal" = 2,
+                         "poisson" = 3
+                       )} )
+    link_code = sapply( family, FUN=\(x){
+                       switch(x$link,
+                         "identity" = 0,
+                         "log" = 1
+                       )} )
+    out = list( "family_link" = cbind(family_code, link_code),
+                "e_i" = e_i,
+                "Nsigma_e" = Nsigma_e,
+                "Edims_ez" = Edims_ez )
+    return(out)
   }
-
-  # Construct log_sigma based on family_link
-  remove_last = \(x) x[-length(x)]
-  Nsigma_e = sapply( as.character(family_link[,1]), "0"=1, "1"=2, "2"=1, "3"=0, FUN=switch )
-  log_sigma = rep( 0, sum(Nsigma_e) )
-  Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
+  distributions = build_distributions( family )
 
   ##############
   # Build inputs
   ##############
 
-  # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
-  if( length(times) > 0 ){
-    t_i = match( data[,data_colnames$time], times )
-  }else{ t_i = integer(0) }
-  if( length(variables) > 0 ){
-    c_i = match( data[,data_colnames$var], variables )
-  }else{ c_i = integer(0) }
-
-  #
-  Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
-  which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
-  which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( nrow(dsem_ram_output$ram)==0 ){
-    which_Arows = numeric(0)
-  }
-  Aepsilon_zz = Aepsilon_zz[which_Arows,,drop=FALSE]
-  Aepsilon_z = Atriplet$x[which_Arows]
-
-  #
-  Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
-  which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
-  which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( nrow(sem_ram_output$ram)==0 ){
-    which_Arows = numeric(0)
-  }
-  Aomega_zz = Aomega_zz[which_Arows,,drop=FALSE]
-  Aomega_z = Atriplet$x[which_Arows]
-
   # make dat
   tmb_data = list(
     spatial_options = c(spatial_method_code, ifelse(control$gmrf_parameterization=="separable",0,1) ),
-    y_i = y_i,
-    X_ij = X_ij,
-    Z_ik = Z_ik,
+    y_i = gam_basis$y_i,
+    X_ij = gam_basis$X_ij,
+    Z_ik = gam_basis$Z_ik,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
-    offset_i = offset_i,
-    f_ez = family_link,
-    e_i = e_i - 1, # -1 to convert to CPP index
-    Edims_ez = Edims_ez,
-    S_kk = S_kk,
-    Sdims = Sdims,
+    offset_i = gam_basis$offset_i,
+    f_ez = distributions$family_link,
+    e_i = distributions$e_i - 1, # -1 to convert to CPP index
+    Edims_ez = distributions$Edims_ez,
+    S_kk = gam_basis$S_kk,
+    Sdims = gam_basis$Sdims,
     Aepsilon_zz = Aepsilon_zz - 1,     # Index form, i, s, t
     Aepsilon_z = Aepsilon_z,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
     Aomega_z = Aomega_z,
-    ram_sem = as.matrix(na.omit(sem_ram_output$ram[,1:4])),
-    ram_sem_start = as.numeric(sem_ram_output$ram[,5]),
-    ram_dsem = as.matrix(na.omit(dsem_ram_output$ram[,1:4])),
-    ram_dsem_start = as.numeric(dsem_ram_output$ram[,5]),
-    X_gj = matrix(0,ncol=ncol(X_ij),nrow=0),
-    Z_gk = matrix(0,ncol=ncol(Z_ik),nrow=0),
+    ram_sem = as.matrix(na.omit(sem_ram$output$ram[,1:4])),
+    ram_sem_start = as.numeric(sem_ram$output$ram[,5]),
+    ram_dsem = as.matrix(na.omit(dsem_ram$output$ram[,1:4])),
+    ram_dsem_start = as.numeric(dsem_ram$output$ram[,5]),
+    X_gj = matrix(0,ncol=ncol(gam_basis$X_ij),nrow=0),
+    Z_gk = matrix(0,ncol=ncol(gam_basis$Z_ik),nrow=0),
     AepsilonG_zz = matrix(0,nrow=0,ncol=4),
     AepsilonG_z = numeric(0),
     AomegaG_zz = matrix(0,nrow=0,ncol=4),
@@ -400,12 +415,15 @@ function( data,
 
   # make params
   tmb_par = list(
-    alpha_j = rep(0,ncol(X_ij)),  # Spline coefficients
-    gamma_k = rep(0,ncol(Z_ik)),  # Spline coefficients
-    beta_z = as.numeric(ifelse(beta_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
-    theta_z = as.numeric(ifelse(theta_type==1, 0.01, 1)),
-    log_lambda = rep(0,length(Sdims)), #Log spline penalization coefficients
-    log_sigma = log_sigma,
+    alpha_j = rep(0,ncol(tmb_data$X_ij)),  # Spline coefficients
+    gamma_k = rep(0,ncol(tmb_data$Z_ik)),  # Spline coefficients
+    beta_z = as.numeric(ifelse(dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    theta_z = as.numeric(ifelse(sem_ram$param_type==1, 0.01, 1)),
+    log_lambda = rep(0,length(tmb_data$Sdims)), #Log spline penalization coefficients
+    #
+    # Duplicate for 2nd linear predictor
+    #
+    log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
     delta0_c = rep(0, length(variables)),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
@@ -414,10 +432,10 @@ function( data,
   )
 
   # Telescoping
-  if( nrow(dsem_ram_output$ram)==0 ){
+  if( nrow(dsem_ram$output$ram)==0 ){
     tmb_par$epsilon_stc = tmb_par$epsilon_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
   }
-  if( nrow(sem_ram_output$ram)==0 ){
+  if( nrow(sem_ram$output$ram)==0 ){
     tmb_par$omega_sc = tmb_par$omega_sc[,numeric(0),drop=FALSE]
   }
 
@@ -505,8 +523,8 @@ function( data,
 
   # bundle and return output
   internal = list(
-    dsem_ram_output = dsem_ram_output,
-    sem_ram_output = sem_ram_output,
+    dsem_ram_output = dsem_ram$output,
+    sem_ram_output = sem_ram$output,
     dsem = dsem,
     sem = sem,
     data_colnames = data_colnames,
@@ -515,12 +533,12 @@ function( data,
     parlist = obj$env$parList(par=obj$env$last.par.best),
     Hess_fixed = Hess_fixed,
     control = control,
-    family_link = family_link
+    family_link = tmb_data$f_ez
   )
   out = structure( list(
     formula = formula,
     data = data,
-    gam_setup = gam_setup,
+    gam_setup = gam_basis$gam_setup,
     obj = obj,
     opt = opt,
     rep = obj$report(obj$env$last.par.best),
