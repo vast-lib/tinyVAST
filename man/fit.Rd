@@ -9,7 +9,7 @@ fit(
   formula,
   sem = NULL,
   dsem = NULL,
-  family_link = rbind(obs = c(0, 0)),
+  family = list(obs = gaussian()),
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time",
     distribution = "dist"),
   times = seq(min(data[, data_colnames$time]), max(data[, data_colnames$time])),
@@ -36,8 +36,8 @@ constructing a space-variable interaction.  See
 \code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
 for more description}
 
-\item{family_link}{Matrix of length-two, indicating the distribution and link-function
-for each level of \code{data$dist}}
+\item{family}{named list of family and link functions, with names corresponding to levels
+of \code{data$dist}}
 
 \item{times}{A character vector listing the set of times in order}
 
@@ -96,7 +96,7 @@ Data$var = "n"
 Data$time = 2020
 
 # make mesh
-mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
+mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 
 # fit model
 out = fit( data = Data,
