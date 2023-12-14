@@ -66,19 +66,13 @@ dsem = make_eof_ram( variables = "Ice",
                      standard_deviations = 0 )
 mesh = fm_mesh_2d( Data[,c('X','Y')], cutoff=1.5 )
 
-#
-family_link = matrix( 0,
-                      nrow = length(unique(Data[,'var'])),
-                      ncol = 2,
-                      dimnames = list(unique(Data[,'var']),NULL) )
-
 # fit model
 out = fit( dsem = dsem,
            sem = "",
            data = as.data.frame(Data),
            formula = ice_concentration ~ 1,
            spatial_graph = mesh,
-           family_link = family_link,
+           family = list("Ice"=gaussian() ),
            data_colnames = list( "spatial"=c("X","Y"), "variable"="var",
                                  "time"="year", "distribution"="var"),
            times = c(paste0("EOF_",seq_len(n_eof)), sort(unique(Data[,'year']))),
