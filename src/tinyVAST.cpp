@@ -245,7 +245,8 @@ Type objective_function<Type>::operator() (){
   using namespace Eigen;
 
   // Settings
-  DATA_IMATRIX( f_ez );      // family/link
+  DATA_IMATRIX( family_ez );      // family
+  DATA_IMATRIX( link_ez );      // family
   DATA_IVECTOR( e_i );      // Asssociate each sample with a family/link
   DATA_IMATRIX( Edims_ez );  // Start (in C++ indexing) and Length, of log_sigma for each family/link
 
@@ -456,7 +457,7 @@ Type objective_function<Type>::operator() (){
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
-    switch( f_ez(e_i(i),1) ){
+    switch( link_ez(e_i(i),0) ){
       case 0:  // identity-link
         mu_i(i) = p_i(i);
         logmu_i(i) = log( p_i(i) );
@@ -470,7 +471,7 @@ Type objective_function<Type>::operator() (){
     }
     if( !R_IsNA(asDouble(y_i(i))) ){
       // Distribution
-      switch( f_ez(e_i(i),0) ){
+      switch( family_ez(e_i(i),0) ){
         case 0:  // Normal distribution
           nll -= dnorm( y_i(i), mu_i(i), exp(log_sigma_segment(0)), true );
           devresid_i(i) = y_i(i) - p_i(i);
@@ -508,7 +509,7 @@ Type objective_function<Type>::operator() (){
     }
   }
   for( int g=0; g<p_g.size(); g++ ){
-    switch( f_ez(e_g(g),1) ){
+    switch( link_ez(e_g(g),0) ){
       case 0: // identity-link
         mu_g(g) = p_g(g);
         break;
