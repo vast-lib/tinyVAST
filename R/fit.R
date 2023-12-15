@@ -345,20 +345,27 @@ function( data,
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
     #
-    family_code = sapply( family, FUN=\(x){
-                       switch(x$family,
-                         "gaussian" = 0,
+    # family = list("obs"=gaussian(),"y"=poisson())
+    # family = list("obs"=independent_delta(),"y"=independent_delta())
+    # family = list("obs"=gaussian(),"y"=independent_delta())
+    pad_length = function(x){if(length(x)==1) c(x,NA) else x}
+    family_code = t(rbind(sapply( family, FUN=\(x){
+                       pad_length(c("gaussian" = 0,
                          "tweedie" = 1,
                          "lognormal" = 2,
-                         "poisson" = 3 )
-                       } )
-    link_code = sapply( family, FUN=\(x){
-                       switch(x$link,
-                         "identity" = 0,
-                         "log" = 1
-                       )} )
+                         "poisson" = 3,
+                         "bernoulli" = 4 )[x$family])
+                       } )))
+    link_code = t(rbind(sapply( family, FUN=\(x){
+                       pad_length(c("identity" = 0,
+                         "log" = 1,
+                         "logit" = 2 )[x$link])
+                       } )))
+    components = apply( family_code, MARGIN=1,
+                                  FUN=\(x)sum(!is.na(x)) )
     out = list( "family_code" = cbind(family_code),
                 "link_code" = cbind(link_code),
+                "components" = components,
                 "e_i" = e_i,
                 "Nsigma_e" = Nsigma_e,
                 "Edims_ez" = Edims_ez )
@@ -381,6 +388,7 @@ function( data,
     offset_i = gam_basis$offset_i,
     family_ez = distributions$family_code,
     link_ez = distributions$link_code,
+    components_e = distributions$components,
     e_i = distributions$e_i - 1, # -1 to convert to CPP index
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,

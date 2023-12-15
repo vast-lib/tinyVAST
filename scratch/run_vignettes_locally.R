@@ -1,4 +1,8 @@
 
+setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
+library(TMB)
+compile("tinyVAST.cpp", framework="TMBad")
+
 devtools::document( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
 devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)',
                          force=TRUE, dep=FALSE )
