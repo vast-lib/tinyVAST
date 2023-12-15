@@ -280,74 +280,66 @@ Type one_predictor_likelihood( Type y,
 }
 
 // distribution/projection for epsilon
-//template<class Type>
-//Type two_predictor_likelihood( Type y,
-//                               Type p1,
-//                               Type p2,
-//                               vector<int> link,
-//                               vector<int> family,
-//                               vector<Type> log_sigma_segment,
-//                               Type &nll ){
-//  Type mu1, logmu1, mu2, logmu2;
-//  //Type devresid = 0;
-//
-//  switch( link(0) ){
-//    case 0:  // identity-link
-//      mu1 = p1;
-//      logmu1 = log( p1 );
-//      break;
-//    case 1: // log-link
-//      mu1 = exp(p1);
-//      logmu1 = p1;
-//      break;
-//    default:
-//      error("Link not implemented.");
-//  }
-//  switch( link(1) ){
-//    case 0:  // identity-link
-//      mu2 = p2;
-//      logmu2 = log( p2 );
-//      break;
-//    case 1: // log-link
-//      mu2 = exp(p2);
-//      logmu2 = p2;
-//      break;
-//    default:
-//      error("Link not implemented.");
-//  }
-//  if( !R_IsNA(asDouble(y)) ){
-//    // Distribution
-//    if( y > 0 ){
-//      LogProb1_i(i) = log_mu1(i);
-//      deviance1_i(i) = -2 * log_R1_i(i);
-//    }else{
-//      LogProb1_i(i) = log_one_minus_R1_i(i);
-//      deviance1_i(i) = -2 * log_one_minus_R1_i(i);
-//    }
-//    switch( family(1) ){
-//      case 0:  // Normal distribution
-//        nll -= dnorm( y, mu, exp(log_sigma_segment(0)), true );
-//        //devresid = y - p;
-//        break;
-//      case 1: // Tweedie
-//        nll -= dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
-//        //devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
-//        break;
-//      case 2: // lognormal
-//        nll -= dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
-//        //devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
-//        break;
-//      case 3: // Poisson
-//        nll -= dpois( y, mu, true );
-//        // devresid = MUST ADD;
-//        break;
-//      default:
-//        error("Distribution not implemented.");
-//    }
-//  }
-//
-//  return mu;
-//}
+template<class Type>
+Type two_predictor_likelihood( Type y,
+                               Type p1,
+                               Type p2,
+                               vector<int> link,
+                               vector<int> family,
+                               vector<Type> log_sigma_segment,
+                               Type &nll ){
+  Type mu1, logmu1, mu2, logmu2;
+  //Type devresid = 0;
+
+  // First link
+  mu1 = invlogit( p1 );
+  logmu1 = log( mu1 );
+  // second link
+  switch( link(1) ){
+    case 0:  // identity-link
+      mu2 = p2;
+      logmu2 = log( p2 );
+      break;
+    case 1: // log-link
+      mu2 = exp(p2);
+      logmu2 = p2;
+      break;
+    default:
+      error("Link not implemented.");
+  }
+  if( !R_IsNA(asDouble(y)) ){
+    // Distribution
+    if( y == 0 ){
+      nll -= log( Type(1.0) - mu1 );
+      //deviance1_i(i) = -2 * log_one_minus_R1_i(i);
+    }else{
+      nll -= logmu1;
+      //deviance1_i(i) = -2 * log_mu1(i);
+      switch( family(1) ){
+        case 0:  // Normal distribution
+          nll -= dnorm( y, mu2, exp(log_sigma_segment(0)), true );
+          //devresid = y - p;
+          break;
+        case 1: // Tweedie
+          nll -= dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+          //devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
+          break;
+        case 2: // lognormal
+          nll -= dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+          //devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
+          break;
+        case 3: // Poisson
+          nll -= dpois( y, mu2, true );
+          // devresid = MUST ADD;
+          break;
+        default:
+          error("Distribution not implemented.");
+      }
+    }
+  }
+
+  return mu1 * mu2;
+}
 
 // Coding principles
 // 1. Don't telescope model features using `map` (which is bug-prone), but
@@ -367,7 +359,8 @@ Type objective_function<Type>::operator() (){
 
   // Settings
   DATA_IMATRIX( family_ez );      // family
-  DATA_IMATRIX( link_ez );      // family
+  DATA_IMATRIX( link_ez );        // family
+  DATA_IVECTOR( components_e );   // family
   DATA_IVECTOR( e_i );      // Asssociate each sample with a family/link
   DATA_IMATRIX( Edims_ez );  // Start (in C++ indexing) and Length, of log_sigma for each family/link
 
@@ -578,7 +571,7 @@ Type objective_function<Type>::operator() (){
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
-    if( link_ez.cols()==1 ){
+    if( components_e(e_i(i))==1 ){
       mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll );
     }
   }
@@ -590,9 +583,8 @@ Type objective_function<Type>::operator() (){
   vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
   vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
   vector<Type> mu_g( p_g.size() );
-  Type trash;
   for( int g=0; g<p_g.size(); g++ ){
-    if( (n_h>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
+    if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
       h = c_g(g)*n_t + t_g(g);
       p_g(g) -= delta_h(h);
     }
