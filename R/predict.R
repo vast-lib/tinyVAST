@@ -233,7 +233,7 @@ function( object,
   AepsilonG_zz = cbind(predAtriplet$i, predAtriplet$j, t_g[predAtriplet$i], c_g[predAtriplet$i])
   which_Arows = which(apply( AepsilonG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( nrow(object$internal$dsem_ram_output$ram)==0 ){
+  if( nrow(object$internal$dsem_ram$output$ram)==0 ){
     which_Arows = numeric(0)
   }
   AepsilonG_zz = AepsilonG_zz[which_Arows,,drop=FALSE]
@@ -243,7 +243,7 @@ function( object,
   AomegaG_zz = cbind(predAtriplet$i, predAtriplet$j, c_g[predAtriplet$i])
   which_Arows = which(apply( AomegaG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( nrow(object$internal$sem_ram_output$ram)==0 ){
+  if( nrow(object$internal$sem_ram$output$ram)==0 ){
     which_Arows = numeric(0)
   }
   AomegaG_zz = AomegaG_zz[which_Arows,,drop=FALSE]
@@ -251,12 +251,12 @@ function( object,
 
   # Telescope
   if( !(data_colnames$distribution %in% colnames(newdata)) ){
-    if(nrow(object$internal$family_link)>1) stop("Must supply `dist` if using multiple `family_link` options")
-    newdata = data.frame( newdata, matrix(rownames(object$internal$family_link)[1], nrow=nrow(newdata), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+    if( length(object$internal$family)>1 ) stop("Must supply `dist` if using multiple `family_link` options")
+    newdata = data.frame( newdata, matrix(names(object$internal$family)[1], nrow=nrow(newdata), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
   }
 
   # Build e_i ... always has length nrow(data)
-  e_g = match( newdata[,data_colnames$distribution], rownames(object$internal$family_link) )
+  e_g = match( newdata[,data_colnames$distribution], names(object$internal$family) )
 
   #
   if( !(data_colnames$distribution %in% colnames(newdata)) ){
