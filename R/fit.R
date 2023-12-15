@@ -350,15 +350,15 @@ function( data,
                          "gaussian" = 0,
                          "tweedie" = 1,
                          "lognormal" = 2,
-                         "poisson" = 3
-                       )} )
+                         "poisson" = 3 )
+                       } )
     link_code = sapply( family, FUN=\(x){
                        switch(x$link,
                          "identity" = 0,
                          "log" = 1
                        )} )
-    out = list( "family_code" = matrix(family_code, ncol=1),
-                "link_code" = matrix(link_code, ncol=1),
+    out = list( "family_code" = cbind(family_code),
+                "link_code" = cbind(link_code),
                 "e_i" = e_i,
                 "Nsigma_e" = Nsigma_e,
                 "Edims_ez" = Edims_ez )
@@ -525,8 +525,8 @@ function( data,
 
   # bundle and return output
   internal = list(
-    dsem_ram_output = dsem_ram$output,
-    sem_ram_output = sem_ram$output,
+    dsem_ram = dsem_ram,                                  # for `add_predictions`
+    sem_ram = sem_ram,                                    # for `add_predictions`
     dsem = dsem,
     sem = sem,
     data_colnames = data_colnames,
@@ -534,7 +534,8 @@ function( data,
     variables = variables,
     parlist = obj$env$parList(par=obj$env$last.par.best),
     Hess_fixed = Hess_fixed,
-    control = control
+    control = control,
+    family = family                                       # for `add_predictions`
   )
   out = structure( list(
     formula = formula,
@@ -647,7 +648,7 @@ function( object,
 
   # SEM component
   if( what=="sem" ){
-    model = object$internal$sem_ram_output$ram
+    model = object$internal$sem_ram$output$ram
     if(nrow(model)>0){
       model$to = as.character(object$internal$variables)[model$to]
       model$from = as.character(object$internal$variables)[model$from]
@@ -667,17 +668,17 @@ function( object,
 
   # DSEM component
   if( what=="dsem" ){
-    if( is(object$internal$dsem_ram_output,"dsem_ram") ){
-      model = object$internal$dsem_ram_output$model
+    if( is(object$internal$dsem_ram$output,"dsem_ram") ){
+      model = object$internal$dsem_ram$output$model
       model = data.frame( heads = model[,'direction'],
                           to = model[,'second'],
                           from = model[,'first'],
                           parameter = model[,'parameter'],
                           start = model[,'start'],
                           lag = model[,'lag'] )
-    }else if( is(object$internal$dsem_ram_output,"eof_ram") ){
-      model = object$internal$dsem_ram_output$model
-      vars = object$internal$dsem_ram_output$variances
+    }else if( is(object$internal$dsem_ram$output,"eof_ram") ){
+      model = object$internal$dsem_ram$output$model
+      vars = object$internal$dsem_ram$output$variances
       model = data.frame( heads = c( rep(1,nrow(model)), rep(2,nrow(vars)) ),
                           to = c( as.character(model$to), as.character(vars$to) ),
                           from = c( as.character(model$from), as.character(vars$from) ),
