@@ -357,8 +357,7 @@ function( data,
                          "identity" = 0,
                          "log" = 1
                        )} )
-    out = list( "family_code" = matrix(family_code, ncol=1),
-                "link_code" = matrix(link_code, ncol=1),
+    out = list( "family_link" = cbind(family_code, link_code),
                 "e_i" = e_i,
                 "Nsigma_e" = Nsigma_e,
                 "Edims_ez" = Edims_ez )
@@ -379,8 +378,7 @@ function( data,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     offset_i = gam_basis$offset_i,
-    family_ez = distributions$family_code,
-    link_ez = distributions$link_code,
+    f_ez = distributions$family_link,
     e_i = distributions$e_i - 1, # -1 to convert to CPP index
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,
@@ -534,7 +532,8 @@ function( data,
     variables = variables,
     parlist = obj$env$parList(par=obj$env$last.par.best),
     Hess_fixed = Hess_fixed,
-    control = control
+    control = control,
+    family_link = tmb_data$f_ez
   )
   out = structure( list(
     formula = formula,
