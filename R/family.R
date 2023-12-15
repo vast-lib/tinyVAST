@@ -70,10 +70,8 @@ tweedie <- function(link = "log") {
   add_to_family(x)
 }
 
-# Copied from sdmTMB
+# Delta model with independent terms
 #' @export
-#' @examples
-#' tweedie(link = "log")
 #' @rdname families
 independent_delta <-
 function( family2 = c("lognormal"),

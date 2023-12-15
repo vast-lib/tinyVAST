@@ -64,6 +64,27 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
 
 // distribution/projection for omega
 template<class Type>
+Type gamma_distribution( vector<int> Sdims,
+                         vector<Type> gamma_k,
+                         Eigen::SparseMatrix<Type> S_kk,
+                         vector<Type> log_lambda ){
+
+  using namespace density;
+  Type nll = 0;
+  int k = 0;   // Counter
+  for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
+    int m_z = Sdims(z);
+    vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
+    SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
+    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
+    k += m_z;
+  }
+
+  return( nll );
+}
+
+// distribution/projection for omega
+template<class Type>
 array<Type> omega_distribution( int n_c,
                                  array<Type> omega_sc,
                                  vector<int> spatial_options,
@@ -304,6 +325,7 @@ Type two_predictor_likelihood( Type y,
       mu2 = exp(p2);
       logmu2 = p2;
       break;
+    // case 2: // Logit
     default:
       error("Link not implemented.");
   }
@@ -332,6 +354,7 @@ Type two_predictor_likelihood( Type y,
           nll -= dpois( y, mu2, true );
           // devresid = MUST ADD;
           break;
+        // case 4:  // Bernoulli
         default:
           error("Distribution not implemented.");
       }
@@ -369,8 +392,8 @@ Type objective_function<Type>::operator() (){
   DATA_MATRIX( X_ij );        // Design matrix for fixed covariates
   DATA_MATRIX( Z_ik );        // Design matrix for splines
 
-  //DATA_MATRIX( X2_ij );        // Design matrix for fixed covariates
-  //DATA_MATRIX( Z2_ik );        // Design matrix for splines
+  DATA_MATRIX( X2_ij );        // Design matrix for fixed covariates
+  DATA_MATRIX( Z2_ik );        // Design matrix for splines
 
   DATA_IVECTOR( t_i );
   DATA_IVECTOR( c_i );
@@ -378,8 +401,8 @@ Type objective_function<Type>::operator() (){
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
 
-  //DATA_SPARSE_MATRIX( S2_kk ); // Sparse penalization matrix
-  //DATA_IVECTOR( S2dims );   // Dimensions of blockwise components of S_kk
+  DATA_SPARSE_MATRIX( S2_kk ); // Sparse penalization matrix
+  DATA_IVECTOR( S2dims );   // Dimensions of blockwise components of S_kk
 
   // Spatial objects
   DATA_IVECTOR( spatial_options );   //
@@ -402,15 +425,15 @@ Type objective_function<Type>::operator() (){
   //DATA_VECTOR( delta_ram_dsem_start );
 
   // SEM objects
-  //DATA_IMATRIX( delta_ram_sem );
-  //DATA_VECTOR( delta_ram_sem_start );
+  //DATA_IMATRIX( ram2_sem );
+  //DATA_VECTOR( sem2_start );
 
   // Prediction options
   DATA_MATRIX( X_gj );       // Design matrix for fixed covariates
   DATA_MATRIX( Z_gk );       // Design matrix for splines
 
-  //DATA_MATRIX( X2_gj );       // Design matrix for fixed covariates
-  //DATA_MATRIX( Z2_gk );       // Design matrix for splines
+  DATA_MATRIX( X2_gj );       // Design matrix for fixed covariates
+  DATA_MATRIX( Z2_gk );       // Design matrix for splines
 
   DATA_IMATRIX( AepsilonG_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
   DATA_VECTOR( AepsilonG_z );
@@ -436,11 +459,11 @@ Type objective_function<Type>::operator() (){
   PARAMETER_VECTOR( theta_z ); // SEM coefficients
   PARAMETER_VECTOR( log_lambda ); //Penalization parameters
 
-  //PARAMETER_VECTOR( alpha2_j ); // Fixed covariate parameters
-  //PARAMETER_VECTOR( gamma2_k ); // Spline regression parameters
+  PARAMETER_VECTOR( alpha2_j ); // Fixed covariate parameters
+  PARAMETER_VECTOR( gamma2_k ); // Spline regression parameters
   //PARAMETER_VECTOR( beta2_z ); // DSEM coefficients
   //PARAMETER_VECTOR( theta2_z ); // SEM coefficients
-  //PARAMETER_VECTOR( log_lambda2 ); //Penalization parameters
+  PARAMETER_VECTOR( log_lambda2 ); //Penalization parameters
 
   PARAMETER_VECTOR( log_sigma );
   PARAMETER_VECTOR( delta0_c );
@@ -513,6 +536,13 @@ Type objective_function<Type>::operator() (){
   REPORT( Gamma_cc );
   REPORT( Rho_cc );
 
+  // Delta SEM
+  //Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n_c, int(0) );
+  //Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n_c, int(1) );
+  //Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_sem, ram2_sem_start, theta_z, n_c, int(2) );
+  //REPORT( Gamma_cc );
+  //REPORT( Rho_cc );
+
   // Calculate effect of initial condition -- SPARSE version
   // Where does x go later?
   vector<Type> delta_h( n_h );
@@ -545,14 +575,8 @@ Type objective_function<Type>::operator() (){
                                     Gammainv_hh, Q_ss, nll );
 
   // Distribution for spline components
-  int k = 0;   // Counter
-  for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
-    int m_z = Sdims(z);
-    vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
-    SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
-    k += m_z;
-  }
+  nll += gamma_distribution( Sdims, gamma_k, S_kk, log_lambda );
+  nll += gamma_distribution( S2dims, gamma2_k, S2_kk, log_lambda2 );
 
   // Linear predictor
   vector<Type> p_i = X_ij*alpha_j + Z_ik*gamma_k + offset_i;
@@ -564,15 +588,19 @@ Type objective_function<Type>::operator() (){
       p_i(i) -= delta_h(h);
     }
   }
+  vector<Type> p2_i = X2_ij*alpha2_j + Z2_ik*gamma2_k;
+
   // Likelihood
-  vector<Type> devresid_i( y_i.size() );
   vector<Type> mu_i( y_i.size() );
-  vector<Type> logmu_i( y_i.size() );
+  vector<Type> devresid_i( y_i.size() );
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
     if( components_e(e_i(i))==1 ){
       mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll );
+    }
+    if( components_e(e_i(i))==2 ){
+      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, nll );
     }
   }
 
@@ -646,7 +674,8 @@ Type objective_function<Type>::operator() (){
   }
 
   // Reporting
-  //REPORT( p_i );
+  REPORT( p_i );
+  REPORT( p2_i );
   REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
   if(p_g.size()>0){
     REPORT( p_g );

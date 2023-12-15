@@ -88,6 +88,9 @@ function( data,
           formula,
           sem = NULL,
           dsem = NULL,
+          delta_formula = ~ 1,
+          #delta_sem,
+          #delta_dsem,
           family = list( "obs"=gaussian() ),
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
           times = seq(min(data[,data_colnames$time]),max(data[,data_colnames$time])),
@@ -193,6 +196,7 @@ function( data,
     return(out)
   }
   dsem_ram = build_dsem(dsem)
+  #delta_dsem_ram = build_dsem( delta_dsem )
 
   ##############
   # SEM RAM constructor
@@ -232,6 +236,7 @@ function( data,
     return(out)
   }
   sem_ram = build_sem(sem)
+  #delta_sem_ram = build_sem( delta_sem )
 
   ##############
   # Spatial domain constructor
@@ -319,6 +324,9 @@ function( data,
     return(out)
   }
   gam_basis = build_gam_basis( formula )
+  delta_formula_with_response = update.formula( formula,
+                                  paste(".", paste0(as.character(delta_formula),collapse="")) )
+  delta_gam_basis = build_gam_basis( delta_formula_with_response )
 
   ##############
   # distribution/link
@@ -334,9 +342,10 @@ function( data,
     }
 
     # Construct log_sigma based on family
+    pad_length = function(x){if(length(x)==1) c(x,NA) else x}
     remove_last = \(x) x[-length(x)]
     Nsigma_e = sapply( family, FUN=\(x){
-                       switch(x$family,
+                       switch( x$family[length(x$family)],
                          "gaussian" = 1,
                          "tweedie" = 2,
                          "lognormal" = 1,
@@ -348,7 +357,6 @@ function( data,
     # family = list("obs"=gaussian(),"y"=poisson())
     # family = list("obs"=independent_delta(),"y"=independent_delta())
     # family = list("obs"=gaussian(),"y"=independent_delta())
-    pad_length = function(x){if(length(x)==1) c(x,NA) else x}
     family_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("gaussian" = 0,
                          "tweedie" = 1,
@@ -375,6 +383,7 @@ function( data,
 
   ##############
   # Build inputs
+  # All interactions among features should come here
   ##############
 
   # make dat
@@ -383,6 +392,10 @@ function( data,
     y_i = gam_basis$y_i,
     X_ij = gam_basis$X_ij,
     Z_ik = gam_basis$Z_ik,
+
+    X2_ij = delta_gam_basis$X_ij,
+    Z2_ik = delta_gam_basis$Z_ik,
+
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     offset_i = gam_basis$offset_i,
@@ -393,6 +406,10 @@ function( data,
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,
     Sdims = gam_basis$Sdims,
+
+    S2_kk = delta_gam_basis$S_kk,
+    S2dims = delta_gam_basis$Sdims,
+
     Aepsilon_zz = Aepsilon_zz - 1,     # Index form, i, s, t
     Aepsilon_z = Aepsilon_z,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
@@ -401,6 +418,14 @@ function( data,
     ram_sem_start = as.numeric(sem_ram$output$ram[,5]),
     ram_dsem = as.matrix(na.omit(dsem_ram$output$ram[,1:4])),
     ram_dsem_start = as.numeric(dsem_ram$output$ram[,5]),
+
+    #ram2_sem = as.matrix(na.omit(delta_sem_ram$output$ram[,1:4])),
+    #ram2_sem_start = as.numeric(delta_sem_ram$output$ram[,5]),
+    #ram2_dsem = as.matrix(na.omit(delta_dsem_ram$output$ram[,1:4])),
+    #ram2_dsem_start = as.numeric(delta_dsem_ram$output$ram[,5]),
+    X2_gj = matrix(0,ncol=ncol(delta_gam_basis$X_ij),nrow=0),
+    Z2_gk = matrix(0,ncol=ncol(delta_gam_basis$Z_ik),nrow=0),
+
     X_gj = matrix(0,ncol=ncol(gam_basis$X_ij),nrow=0),
     Z_gk = matrix(0,ncol=ncol(gam_basis$Z_ik),nrow=0),
     AepsilonG_zz = matrix(0,nrow=0,ncol=4),
@@ -430,13 +455,21 @@ function( data,
     beta_z = as.numeric(ifelse(dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta_z = as.numeric(ifelse(sem_ram$param_type==1, 0.01, 1)),
     log_lambda = rep(0,length(tmb_data$Sdims)), #Log spline penalization coefficients
-    #
-    # Duplicate for 2nd linear predictor
-    #
+
+    alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
+    gamma2_k = rep(0,ncol(tmb_data$Z2_ik)),  # Spline coefficients
+    #beta2_z = as.numeric(ifelse(delta_dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    #theta2_z = as.numeric(ifelse(delta_sem_ram$param_type==1, 0.01, 1)),
+    log_lambda2 = rep(0,length(tmb_data$S2dims)), #Log spline penalization coefficients
+
     log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
     delta0_c = rep(0, length(variables)),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
+
+    #epsilon2_stc = array(0, dim=c(n_s, length(times), length(variables))),
+    #omega2_sc = array(0, dim=c(n_s, length(variables))),
+
     eps = numeric(0),
     log_kappa = log(1)
   )
@@ -448,6 +481,12 @@ function( data,
   if( nrow(sem_ram$output$ram)==0 ){
     tmb_par$omega_sc = tmb_par$omega_sc[,numeric(0),drop=FALSE]
   }
+  #if( nrow(delta_dsem_ram$output$ram)==0 ){
+  #  tmb_par$epsilon2_stc = tmb_par$epsilon2_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
+  #}
+  #if( nrow(delta_sem_ram$output$ram)==0 ){
+  #  tmb_par$omega2_sc = tmb_par$omega2_sc[,numeric(0),drop=FALSE]
+  #}
 
   # Turn off initial conditions
   if( control$estimate_delta0==FALSE ){
@@ -475,8 +514,11 @@ function( data,
     stop("Check `tmb_data` for NAs")
   }
 
-  # Empty map, but leaving for future needs
+  # Map off alpha2_j if no delta-models
   tmb_map = list()
+  if( all(distributions$components==1) ){
+    tmb_map$alpha2_j = factor( rep(NA,length(tmb_par$alpha2_j)) )
+  }
 
   ##############
   # Fit model
@@ -491,7 +533,7 @@ function( data,
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
                    map = tmb_map,
-                   random = c("gamma_k","epsilon_stc","omega_sc"),
+                   random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k"),
                    DLL = "tinyVAST",
                    profile = control$profile )  #
   #openmp( ... , DLL="tinyVAST" )
