@@ -7,12 +7,10 @@
 #'
 #' @param sem Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
-#'        \code{sem=NULL} disables the space-variable interaction, and
-#'        see code{\link{make_sem_ram}} for more description.
+#'        See code{\link{make_sem_ram}} for more description.
 #' @param dsem Specification for time-series structural equation model structure
 #'        including lagged or simultaneous effects for
-#'        constructing a space-variable interaction.
-#'        \code{dsem=NULL} disables the space-variable interaction, and see
+#'        constructing a space-variable interaction.  See
 #'        \code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
 #'        for more description
 #' @param data Data-frame of predictor and response variables.
@@ -90,9 +88,6 @@ function( data,
           formula,
           sem = NULL,
           dsem = NULL,
-          delta_formula = ~ 1,
-          delta_sem = NULL,
-          delta_dsem = NULL,
           family = list( "obs"=gaussian() ),
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
           times = seq(min(data[,data_colnames$time]),max(data[,data_colnames$time])),
@@ -113,7 +108,7 @@ function( data,
   ##############
 
   # Allow user to avoid specifying these if is.null(dsem)
-  if( is.null(dsem) & is.null(delta_dsem) ){
+  if( is.null(dsem) ){
     times = numeric(0)
     if( !(data_colnames$time %in% colnames(data)) ){
       data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
@@ -121,7 +116,7 @@ function( data,
   }
 
   # Allow user to avoid specifying these if is.null(dsem) AND is.null(sem)
-  if( is.null(dsem) & is.null(sem) & is.null(delta_dsem) & is.null(delta_sem) ){
+  if( is.null(dsem) & is.null(sem) ){
     variables = numeric(0)
     if( !(data_colnames$variable %in% colnames(data)) ){
       data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
@@ -198,7 +193,6 @@ function( data,
     return(out)
   }
   dsem_ram = build_dsem(dsem)
-  delta_dsem_ram = build_dsem( delta_dsem )
 
   ##############
   # SEM RAM constructor
@@ -238,7 +232,6 @@ function( data,
     return(out)
   }
   sem_ram = build_sem(sem)
-  delta_sem_ram = build_sem( delta_sem )
 
   ##############
   # Spatial domain constructor
@@ -282,7 +275,7 @@ function( data,
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
   which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( (nrow(dsem_ram$output$ram)==0) & (nrow(delta_dsem_ram$output$ram)==0) ){
+  if( nrow(dsem_ram$output$ram)==0 ){
     which_Arows = numeric(0)
   }
   Aepsilon_zz = Aepsilon_zz[which_Arows,,drop=FALSE]
@@ -292,7 +285,7 @@ function( data,
   Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
   which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( (nrow(sem_ram$output$ram)==0) & (nrow(delta_sem_ram$output$ram)==0) ){
+  if( nrow(sem_ram$output$ram)==0 ){
     which_Arows = numeric(0)
   }
   Aomega_zz = Aomega_zz[which_Arows,,drop=FALSE]
@@ -326,9 +319,6 @@ function( data,
     return(out)
   }
   gam_basis = build_gam_basis( formula )
-  delta_formula_with_response = update.formula( formula,
-                                  paste(".", paste0(as.character(delta_formula),collapse="")) )
-  delta_gam_basis = build_gam_basis( delta_formula_with_response )
 
   ##############
   # distribution/link
@@ -344,10 +334,9 @@ function( data,
     }
 
     # Construct log_sigma based on family
-    pad_length = function(x){if(length(x)==1) c(x,NA) else x}
     remove_last = \(x) x[-length(x)]
     Nsigma_e = sapply( family, FUN=\(x){
-                       switch( x$family[length(x$family)],
+                       switch(x$family,
                          "gaussian" = 1,
                          "tweedie" = 2,
                          "lognormal" = 1,
@@ -356,26 +345,19 @@ function( data,
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
     #
-    # family = list("obs"=gaussian(),"y"=poisson())
-    # family = list("obs"=independent_delta(),"y"=independent_delta())
-    # family = list("obs"=gaussian(),"y"=independent_delta())
-    family_code = t(rbind(sapply( family, FUN=\(x){
-                       pad_length(c("gaussian" = 0,
+    family_code = sapply( family, FUN=\(x){
+                       switch(x$family,
+                         "gaussian" = 0,
                          "tweedie" = 1,
                          "lognormal" = 2,
-                         "poisson" = 3,
-                         "bernoulli" = 4 )[x$family])
-                       } )))
-    link_code = t(rbind(sapply( family, FUN=\(x){
-                       pad_length(c("identity" = 0,
-                         "log" = 1,
-                         "logit" = 2 )[x$link])
-                       } )))
-    components = apply( family_code, MARGIN=1,
-                                  FUN=\(x)sum(!is.na(x)) )
-    out = list( "family_code" = cbind(family_code),
-                "link_code" = cbind(link_code),
-                "components" = components,
+                         "poisson" = 3
+                       )} )
+    link_code = sapply( family, FUN=\(x){
+                       switch(x$link,
+                         "identity" = 0,
+                         "log" = 1
+                       )} )
+    out = list( "family_link" = cbind(family_code, link_code),
                 "e_i" = e_i,
                 "Nsigma_e" = Nsigma_e,
                 "Edims_ez" = Edims_ez )
@@ -385,7 +367,6 @@ function( data,
 
   ##############
   # Build inputs
-  # All interactions among features should come here
   ##############
 
   # make dat
@@ -394,24 +375,14 @@ function( data,
     y_i = gam_basis$y_i,
     X_ij = gam_basis$X_ij,
     Z_ik = gam_basis$Z_ik,
-
-    X2_ij = delta_gam_basis$X_ij,
-    Z2_ik = delta_gam_basis$Z_ik,
-
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     offset_i = gam_basis$offset_i,
-    family_ez = distributions$family_code,
-    link_ez = distributions$link_code,
-    components_e = distributions$components,
+    f_ez = distributions$family_link,
     e_i = distributions$e_i - 1, # -1 to convert to CPP index
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,
     Sdims = gam_basis$Sdims,
-
-    S2_kk = delta_gam_basis$S_kk,
-    S2dims = delta_gam_basis$Sdims,
-
     Aepsilon_zz = Aepsilon_zz - 1,     # Index form, i, s, t
     Aepsilon_z = Aepsilon_z,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
@@ -420,14 +391,6 @@ function( data,
     ram_sem_start = as.numeric(sem_ram$output$ram[,5]),
     ram_dsem = as.matrix(na.omit(dsem_ram$output$ram[,1:4])),
     ram_dsem_start = as.numeric(dsem_ram$output$ram[,5]),
-
-    ram2_sem = as.matrix(na.omit(delta_sem_ram$output$ram[,1:4])),
-    ram2_sem_start = as.numeric(delta_sem_ram$output$ram[,5]),
-    ram2_dsem = as.matrix(na.omit(delta_dsem_ram$output$ram[,1:4])),
-    ram2_dsem_start = as.numeric(delta_dsem_ram$output$ram[,5]),
-    X2_gj = matrix(0,ncol=ncol(delta_gam_basis$X_ij),nrow=0),
-    Z2_gk = matrix(0,ncol=ncol(delta_gam_basis$Z_ik),nrow=0),
-
     X_gj = matrix(0,ncol=ncol(gam_basis$X_ij),nrow=0),
     Z_gk = matrix(0,ncol=ncol(gam_basis$Z_ik),nrow=0),
     AepsilonG_zz = matrix(0,nrow=0,ncol=4),
@@ -457,21 +420,13 @@ function( data,
     beta_z = as.numeric(ifelse(dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta_z = as.numeric(ifelse(sem_ram$param_type==1, 0.01, 1)),
     log_lambda = rep(0,length(tmb_data$Sdims)), #Log spline penalization coefficients
-
-    alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
-    gamma2_k = rep(0,ncol(tmb_data$Z2_ik)),  # Spline coefficients
-    beta2_z = as.numeric(ifelse(delta_dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
-    theta2_z = as.numeric(ifelse(delta_sem_ram$param_type==1, 0.01, 1)),
-    log_lambda2 = rep(0,length(tmb_data$S2dims)), #Log spline penalization coefficients
-
+    #
+    # Duplicate for 2nd linear predictor
+    #
     log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
     delta0_c = rep(0, length(variables)),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
-
-    epsilon2_stc = array(0, dim=c(n_s, length(times), length(variables))),
-    omega2_sc = array(0, dim=c(n_s, length(variables))),
-
     eps = numeric(0),
     log_kappa = log(1)
   )
@@ -482,12 +437,6 @@ function( data,
   }
   if( nrow(sem_ram$output$ram)==0 ){
     tmb_par$omega_sc = tmb_par$omega_sc[,numeric(0),drop=FALSE]
-  }
-  if( nrow(delta_dsem_ram$output$ram)==0 ){
-    tmb_par$epsilon2_stc = tmb_par$epsilon2_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
-  }
-  if( nrow(delta_sem_ram$output$ram)==0 ){
-    tmb_par$omega2_sc = tmb_par$omega2_sc[,numeric(0),drop=FALSE]
   }
 
   # Turn off initial conditions
@@ -516,11 +465,8 @@ function( data,
     stop("Check `tmb_data` for NAs")
   }
 
-  # Map off alpha2_j if no delta-models
+  # Empty map, but leaving for future needs
   tmb_map = list()
-  if( all(distributions$components==1) ){
-    tmb_map$alpha2_j = factor( rep(NA,length(tmb_par$alpha2_j)) )
-  }
 
   ##############
   # Fit model
@@ -535,7 +481,7 @@ function( data,
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
                    map = tmb_map,
-                   random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
+                   random = c("gamma_k","epsilon_stc","omega_sc"),
                    DLL = "tinyVAST",
                    profile = control$profile )  #
   #openmp( ... , DLL="tinyVAST" )
@@ -577,8 +523,8 @@ function( data,
 
   # bundle and return output
   internal = list(
-    dsem_ram = dsem_ram,                                  # for `add_predictions`
-    sem_ram = sem_ram,                                    # for `add_predictions`
+    dsem_ram_output = dsem_ram$output,
+    sem_ram_output = sem_ram$output,
     dsem = dsem,
     sem = sem,
     data_colnames = data_colnames,
@@ -587,7 +533,7 @@ function( data,
     parlist = obj$env$parList(par=obj$env$last.par.best),
     Hess_fixed = Hess_fixed,
     control = control,
-    family = family                                       # for `add_predictions`
+    family_link = tmb_data$f_ez
   )
   out = structure( list(
     formula = formula,
@@ -700,7 +646,7 @@ function( object,
 
   # SEM component
   if( what=="sem" ){
-    model = object$internal$sem_ram$output$ram
+    model = object$internal$sem_ram_output$ram
     if(nrow(model)>0){
       model$to = as.character(object$internal$variables)[model$to]
       model$from = as.character(object$internal$variables)[model$from]
@@ -720,17 +666,17 @@ function( object,
 
   # DSEM component
   if( what=="dsem" ){
-    if( is(object$internal$dsem_ram$output,"dsem_ram") ){
-      model = object$internal$dsem_ram$output$model
+    if( is(object$internal$dsem_ram_output,"dsem_ram") ){
+      model = object$internal$dsem_ram_output$model
       model = data.frame( heads = model[,'direction'],
                           to = model[,'second'],
                           from = model[,'first'],
                           parameter = model[,'parameter'],
                           start = model[,'start'],
                           lag = model[,'lag'] )
-    }else if( is(object$internal$dsem_ram$output,"eof_ram") ){
-      model = object$internal$dsem_ram$output$model
-      vars = object$internal$dsem_ram$output$variances
+    }else if( is(object$internal$dsem_ram_output,"eof_ram") ){
+      model = object$internal$dsem_ram_output$model
+      vars = object$internal$dsem_ram_output$variances
       model = data.frame( heads = c( rep(1,nrow(model)), rep(2,nrow(vars)) ),
                           to = c( as.character(model$to), as.character(vars$to) ),
                           from = c( as.character(model$from), as.character(vars$from) ),
