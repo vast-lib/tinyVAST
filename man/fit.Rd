@@ -9,6 +9,7 @@ fit(
   formula,
   sem = NULL,
   dsem = NULL,
+  delta_formula = ~1,
   family = list(obs = gaussian()),
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time",
     distribution = "dist"),

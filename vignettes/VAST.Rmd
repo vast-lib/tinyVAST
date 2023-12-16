@@ -184,10 +184,26 @@ sdmTMBtime = NA
 
 The models all have similar runtimes
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-#Times = c( "tinyVAST" = mytinyVAST$run_time,
-#           "VAST" = myVAST$total_time,
-#           "sdmTMB" = sdmTMBtime )
-#knitr::kable( cbind("run times (sec.)"=Times), digits=1)
+Times = c( "tinyVAST" = mytinyVAST$run_time,
+           "VAST" = myVAST$total_time,
+           "sdmTMB" = sdmTMBtime )
+knitr::kable( cbind("run times (sec.)"=Times), digits=1)
+```
+
+# Delta models
+
+We can also fit these data using a delta model
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# fit model
+mydelta = fit( data = Data,
+               formula = n ~ 1,
+               delta_formula = ~ 0 + factor(time),
+               delta_dsem = "logn -> logn, 1, rho",
+               family = list( "obs"=independent_delta() ),
+               spatial_graph = mesh,
+               control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+mydelta
 ```
 
 # Bivariate spatio-temporal autoregressive model
