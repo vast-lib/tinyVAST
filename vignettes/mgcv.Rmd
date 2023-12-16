@@ -47,6 +47,7 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group), a=a )
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group, bs="ts") # + offset(a)
 myfit = fit( data = Data,
            formula = Formula,
+           delta_formula = ~ 1,
            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 ```
 

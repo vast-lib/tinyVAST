@@ -7,10 +7,12 @@
 #'
 #' @param sem Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
-#'        See code{\link{make_sem_ram}} for more description.
+#'        \code{sem=NULL} disables the space-variable interaction, and
+#'        see code{\link{make_sem_ram}} for more description.
 #' @param dsem Specification for time-series structural equation model structure
 #'        including lagged or simultaneous effects for
-#'        constructing a space-variable interaction.  See
+#'        constructing a space-variable interaction.
+#'        \code{dsem=NULL} disables the space-variable interaction, and see
 #'        \code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
 #'        for more description
 #' @param data Data-frame of predictor and response variables.
@@ -89,8 +91,8 @@ function( data,
           sem = NULL,
           dsem = NULL,
           delta_formula = ~ 1,
-          #delta_sem,
-          #delta_dsem,
+          delta_sem = NULL,
+          delta_dsem = NULL,
           family = list( "obs"=gaussian() ),
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
           times = seq(min(data[,data_colnames$time]),max(data[,data_colnames$time])),
@@ -111,7 +113,7 @@ function( data,
   ##############
 
   # Allow user to avoid specifying these if is.null(dsem)
-  if( is.null(dsem) ){
+  if( is.null(dsem) & is.null(delta_dsem) ){
     times = numeric(0)
     if( !(data_colnames$time %in% colnames(data)) ){
       data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
@@ -119,7 +121,7 @@ function( data,
   }
 
   # Allow user to avoid specifying these if is.null(dsem) AND is.null(sem)
-  if( is.null(dsem) & is.null(sem) ){
+  if( is.null(dsem) & is.null(sem) & is.null(delta_dsem) & is.null(delta_sem) ){
     variables = numeric(0)
     if( !(data_colnames$variable %in% colnames(data)) ){
       data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
@@ -196,7 +198,7 @@ function( data,
     return(out)
   }
   dsem_ram = build_dsem(dsem)
-  #delta_dsem_ram = build_dsem( delta_dsem )
+  delta_dsem_ram = build_dsem( delta_dsem )
 
   ##############
   # SEM RAM constructor
@@ -236,7 +238,7 @@ function( data,
     return(out)
   }
   sem_ram = build_sem(sem)
-  #delta_sem_ram = build_sem( delta_sem )
+  delta_sem_ram = build_sem( delta_sem )
 
   ##############
   # Spatial domain constructor
@@ -280,7 +282,7 @@ function( data,
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
   which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( nrow(dsem_ram$output$ram)==0 ){
+  if( (nrow(dsem_ram$output$ram)==0) & (nrow(delta_dsem_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   Aepsilon_zz = Aepsilon_zz[which_Arows,,drop=FALSE]
@@ -290,7 +292,7 @@ function( data,
   Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
   which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( nrow(sem_ram$output$ram)==0 ){
+  if( (nrow(sem_ram$output$ram)==0) & (nrow(delta_sem_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   Aomega_zz = Aomega_zz[which_Arows,,drop=FALSE]
@@ -419,10 +421,10 @@ function( data,
     ram_dsem = as.matrix(na.omit(dsem_ram$output$ram[,1:4])),
     ram_dsem_start = as.numeric(dsem_ram$output$ram[,5]),
 
-    #ram2_sem = as.matrix(na.omit(delta_sem_ram$output$ram[,1:4])),
-    #ram2_sem_start = as.numeric(delta_sem_ram$output$ram[,5]),
-    #ram2_dsem = as.matrix(na.omit(delta_dsem_ram$output$ram[,1:4])),
-    #ram2_dsem_start = as.numeric(delta_dsem_ram$output$ram[,5]),
+    ram2_sem = as.matrix(na.omit(delta_sem_ram$output$ram[,1:4])),
+    ram2_sem_start = as.numeric(delta_sem_ram$output$ram[,5]),
+    ram2_dsem = as.matrix(na.omit(delta_dsem_ram$output$ram[,1:4])),
+    ram2_dsem_start = as.numeric(delta_dsem_ram$output$ram[,5]),
     X2_gj = matrix(0,ncol=ncol(delta_gam_basis$X_ij),nrow=0),
     Z2_gk = matrix(0,ncol=ncol(delta_gam_basis$Z_ik),nrow=0),
 
@@ -458,8 +460,8 @@ function( data,
 
     alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
     gamma2_k = rep(0,ncol(tmb_data$Z2_ik)),  # Spline coefficients
-    #beta2_z = as.numeric(ifelse(delta_dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
-    #theta2_z = as.numeric(ifelse(delta_sem_ram$param_type==1, 0.01, 1)),
+    beta2_z = as.numeric(ifelse(delta_dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    theta2_z = as.numeric(ifelse(delta_sem_ram$param_type==1, 0.01, 1)),
     log_lambda2 = rep(0,length(tmb_data$S2dims)), #Log spline penalization coefficients
 
     log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
@@ -467,8 +469,8 @@ function( data,
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
 
-    #epsilon2_stc = array(0, dim=c(n_s, length(times), length(variables))),
-    #omega2_sc = array(0, dim=c(n_s, length(variables))),
+    epsilon2_stc = array(0, dim=c(n_s, length(times), length(variables))),
+    omega2_sc = array(0, dim=c(n_s, length(variables))),
 
     eps = numeric(0),
     log_kappa = log(1)
@@ -481,12 +483,12 @@ function( data,
   if( nrow(sem_ram$output$ram)==0 ){
     tmb_par$omega_sc = tmb_par$omega_sc[,numeric(0),drop=FALSE]
   }
-  #if( nrow(delta_dsem_ram$output$ram)==0 ){
-  #  tmb_par$epsilon2_stc = tmb_par$epsilon2_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
-  #}
-  #if( nrow(delta_sem_ram$output$ram)==0 ){
-  #  tmb_par$omega2_sc = tmb_par$omega2_sc[,numeric(0),drop=FALSE]
-  #}
+  if( nrow(delta_dsem_ram$output$ram)==0 ){
+    tmb_par$epsilon2_stc = tmb_par$epsilon2_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
+  }
+  if( nrow(delta_sem_ram$output$ram)==0 ){
+    tmb_par$omega2_sc = tmb_par$omega2_sc[,numeric(0),drop=FALSE]
+  }
 
   # Turn off initial conditions
   if( control$estimate_delta0==FALSE ){
@@ -533,7 +535,7 @@ function( data,
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
                    map = tmb_map,
-                   random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k"),
+                   random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
                    DLL = "tinyVAST",
                    profile = control$profile )  #
   #openmp( ... , DLL="tinyVAST" )

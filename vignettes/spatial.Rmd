@@ -142,4 +142,3 @@ Partial = partial( object = out,
 # Lattice plots as default option
 plotPartial( Partial )
 ```
-
