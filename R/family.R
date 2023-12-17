@@ -82,6 +82,8 @@ function( family2 = c("lognormal"),
   link1 = match.arg(link1)
   link2 = match.arg(link2)
 
-  list( family = c("bernoulli",family2),
+  out = list( family = c("bernoulli",family2),
         link = c(link1,link2) )
+  class(out) = "family"
+  return(out)
 }

@@ -68,7 +68,8 @@ We then specify the model as expected by _tinyVAST_:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Shape into longform data-frame and add error
-Data = data.frame( expand.grid(species=1:n_c, x=1:n_x, y=1:n_y), "var"="logn", z=exp(as.vector(d_cs)) )
+Data = data.frame( expand.grid(species=1:n_c, x=1:n_x, y=1:n_y),
+                   "var"="logn", "z"=exp(as.vector(d_cs)) )
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
 mean(Data$n==0)
 
@@ -100,7 +101,7 @@ out = fit( sem = sem,
            data = Data,
            formula = n ~ 0 + factor(species),
            spatial_graph = mesh,
-           family = list( "obs"=tweedie() ),
+           family = tweedie(),
            variables = c( "f1", "f2", 1:n_c ),
            data_colnames = list(spatial = c("x","y"), variable = "species", time = "time", distribution = "dist"),
            control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj") )

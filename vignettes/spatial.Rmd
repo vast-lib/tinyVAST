@@ -24,6 +24,7 @@ knitr::opts_chunk$set(
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(fmesher)
+library(Matrix)
 set.seed(101)
 ```
 

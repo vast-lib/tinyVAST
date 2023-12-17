@@ -64,8 +64,8 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
 
 // distribution/projection for omega
 template<class Type>
-Type gamma_distribution( vector<int> Sdims,
-                         vector<Type> gamma_k,
+Type gamma_distribution( vector<Type> gamma_k,
+                         vector<int> Sdims,
                          Eigen::SparseMatrix<Type> S_kk,
                          vector<Type> log_lambda ){
 
@@ -85,8 +85,7 @@ Type gamma_distribution( vector<int> Sdims,
 
 // distribution/projection for omega
 template<class Type>
-array<Type> omega_distribution( int n_c,
-                                 array<Type> omega_sc,
+array<Type> omega_distribution( array<Type> omega_sc,
                                  vector<int> spatial_options,
                                  Eigen::SparseMatrix<Type> Rho_cc,
                                  Eigen::SparseMatrix<Type> Gamma_cc,
@@ -95,6 +94,7 @@ array<Type> omega_distribution( int n_c,
                                  Type &nll ){
 
   if( omega_sc.size() > 0 ){
+    int n_c = omega_sc.dim(1);
     using namespace density;
     Eigen::SparseMatrix<Type> I_cc( n_c, n_c );
     I_cc.setIdentity();
@@ -131,11 +131,7 @@ array<Type> omega_distribution( int n_c,
 
 // distribution/projection for epsilon
 template<class Type>
-array<Type> epsilon_distribution( int n_h,
-                                  int n_s,
-                                  int n_t,
-                                  int n_c,
-                                  array<Type> epsilon_stc,
+array<Type> epsilon_distribution( array<Type> epsilon_stc,
                                   vector<int> spatial_options,
                                   Eigen::SparseMatrix<Type> Rho_hh,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
@@ -144,6 +140,10 @@ array<Type> epsilon_distribution( int n_h,
                                   Type &nll ){
 
   if( epsilon_stc.size() > 0 ){
+    int n_s = epsilon_stc.dim(0);
+    int n_t = epsilon_stc.dim(1);
+    int n_c = epsilon_stc.dim(2);
+    int n_h = n_t * n_c;
     using namespace density;
     Eigen::SparseMatrix<Type> I_hh( n_h, n_h );
     I_hh.setIdentity();
@@ -264,7 +264,8 @@ Type one_predictor_likelihood( Type y,
                         int link,
                         int family,
                         vector<Type> log_sigma_segment,
-                        Type &nll ){
+                        Type &nll,
+                        Type &devresid ){
   Type mu;
   Type logmu;
   //Type devresid = 0;
@@ -286,19 +287,19 @@ Type one_predictor_likelihood( Type y,
     switch( family ){
       case 0:  // Normal distribution
         nll -= dnorm( y, mu, exp(log_sigma_segment(0)), true );
-        //devresid = y - p;
+        devresid = y - p;
         break;
       case 1: // Tweedie
         nll -= dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
-        //devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
+        devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
         break;
       case 2: // lognormal
         nll -= dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
-        //devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
+        devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
         break;
       case 3: // Poisson
         nll -= dpois( y, mu, true );
-        // devresid = MUST ADD;
+        //devresid = MUST ADD;
         break;
       default:
         error("Distribution not implemented.");
@@ -316,7 +317,8 @@ Type two_predictor_likelihood( Type y,
                                vector<int> link,
                                vector<int> family,
                                vector<Type> log_sigma_segment,
-                               Type &nll ){
+                               Type &nll,
+                               Type &devresid ){
   Type mu1, logmu1, mu2, logmu2;
   //Type devresid = 0;
 
@@ -497,7 +499,6 @@ Type objective_function<Type>::operator() (){
   int n2_t = epsilon2_stc.dim(1);
   int n2_c = epsilon2_stc.dim(2);
   int n2_h = n2_t * n2_c;      // data
-  int h;
 
   // Spatial distribution
   Type log_tau = 0;
@@ -557,9 +558,9 @@ Type objective_function<Type>::operator() (){
 
   // Calculate effect of initial condition -- SPARSE version
   // Where does x go later?
-  vector<Type> delta_h( n_h );
-  delta_h.setZero();
   if( delta0_c.size() > 0 ){
+    //vector<Type> delta_h( n_h );
+    //delta_h.setZero();
     error("delta0 not currently working.");
     //// Compute delta_k
     //matrix<Type> delta0_h1( n_h, 1 );
@@ -578,22 +579,20 @@ Type objective_function<Type>::operator() (){
   }
 
   // Space-variable interaction
-  omega_sc = omega_distribution( n_c, omega_sc, spatial_options, Rho_cc,
+  omega_sc = omega_distribution( omega_sc, spatial_options, Rho_cc,
                                    Gamma_cc, Gammainv_cc, Q_ss, nll );
-  omega2_sc = omega_distribution( n2_c, omega2_sc, spatial_options, Rho2_cc,
+  omega2_sc = omega_distribution( omega2_sc, spatial_options, Rho2_cc,
                                    Gamma2_cc, Gammainv2_cc, Q_ss, nll );
 
   // Space-time-variable interaction
-  epsilon_stc = epsilon_distribution( n_h, n_s, n_t, n_c, epsilon_stc,
-                                    spatial_options, Rho_hh, Gamma_hh,
-                                    Gammainv_hh, Q_ss, nll );
-  epsilon2_stc = epsilon_distribution( n2_h, n2_s, n2_t, n2_c, epsilon2_stc,
-                                    spatial_options, Rho2_hh, Gamma2_hh,
-                                    Gammainv2_hh, Q_ss, nll );
+  epsilon_stc = epsilon_distribution( epsilon_stc, spatial_options, Rho_hh,
+                                     Gamma_hh, Gammainv_hh, Q_ss, nll );
+  epsilon2_stc = epsilon_distribution( epsilon2_stc, spatial_options, Rho2_hh,
+                                       Gamma2_hh, Gammainv2_hh, Q_ss, nll );
 
   // Distribution for spline components
-  nll += gamma_distribution( Sdims, gamma_k, S_kk, log_lambda );
-  nll += gamma_distribution( S2dims, gamma2_k, S2_kk, log_lambda2 );
+  nll += gamma_distribution( gamma_k, Sdims, S_kk, log_lambda );
+  nll += gamma_distribution( gamma2_k, S2dims, S2_kk, log_lambda2 );
 
   // Linear predictor
   vector<Type> p_i( y_i.size() );
@@ -614,15 +613,17 @@ Type objective_function<Type>::operator() (){
   // Likelihood
   vector<Type> mu_i( y_i.size() );
   vector<Type> devresid_i( y_i.size() );
+  Type devresid = 0;
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
     if( components_e(e_i(i))==1 ){
-      mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll );
+      mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll, devresid );
     }
     if( components_e(e_i(i))==2 ){
-      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, nll );
+      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, nll, devresid );
     }
+    devresid_i(i) = devresid;
   }
 
   // Predictions
@@ -631,6 +632,12 @@ Type objective_function<Type>::operator() (){
   vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
   vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
   vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
+  // Second linear predictor
+  vector<Type> palpha2_g = X2_gj*alpha2_j;
+  vector<Type> pgamma2_g = Z2_gk*gamma2_k;
+  vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
+  vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
+  vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g;
   vector<Type> mu_g( p_g.size() );
   //for( int g=0; g<p_g.size(); g++ ){
   //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
@@ -639,13 +646,30 @@ Type objective_function<Type>::operator() (){
   //  }
   //}
   for( int g=0; g<p_g.size(); g++ ){
-    switch( link_ez(e_g(g),0) ){
-      case 0: // identity-link
-        mu_g(g) = p_g(g);
-        break;
-      case 1: // log-link
-        mu_g(g) = exp(p_g(g));
-        break;
+    if( components_e(e_g(g))==1 ){
+      switch( link_ez(e_g(g),0) ){
+        case 0: // identity-link
+          mu_g(g) = p_g(g);
+          break;
+        case 1: // log-link
+          mu_g(g) = exp(p_g(g));
+          break;
+      }
+    }
+    if( components_e(e_g(g))==2 ){
+      mu_g(g) = invlogit( p_g(g) );
+      // second link
+      switch( link_ez(e_g(g),1) ){
+        case 0:  // identity-link
+          mu_g(g) *= p2_g(g);
+          break;
+        case 1: // log-link
+          mu_g(g) *= exp(p2_g(g));
+          break;
+        // case 2: // Logit
+        default:
+          error("Link not implemented.");
+      }
     }
   }
 
@@ -700,11 +724,16 @@ Type objective_function<Type>::operator() (){
   REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
   if(p_g.size()>0){
     REPORT( p_g );
-    REPORT( mu_g );
     REPORT( palpha_g );
     REPORT( pgamma_g );
     REPORT( pepsilon_g );
     REPORT( pomega_g );
+    REPORT( p2_g );
+    REPORT( palpha2_g );
+    REPORT( pgamma2_g );
+    REPORT( pepsilon2_g );
+    REPORT( pomega2_g );
+    REPORT( mu_g );
     ADREPORT( p_g );
   }
   //REPORT( Q_ss );
