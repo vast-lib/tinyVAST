@@ -169,12 +169,12 @@ function( object,
           remove_origdata = FALSE ){
 
   tmb_data = object$tmb_inputs$tmb_data
-  gam = object$gam_setup
   origdata = object$data
   data_colnames = object$internal$data_colnames
 
   # Check newdata for missing variables and/or factors
-  pred_set = all.vars( object$gam_setup$pred.formula )
+  pred_set = unique(unlist(sapply( object$internal[c('gam_setup','delta_gam_setup')],
+                            FUN=\(x) all.vars(x$pred.formula) ) ))
   for(pred in pred_set ){
     if( !(pred %in% colnames(newdata)) ){
       stop("Missing ", pred, " in newdata")
@@ -184,25 +184,35 @@ function( object,
     }
   }
 
-  # Assemble predZ
-  Z_gk = lapply( seq_along(gam$smooth),
-                  FUN = \(x) PredictMat(gam$smooth[[x]], data=newdata) )
-  Z_gk = do.call( cbind, Z_gk )
-  if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=ncol(tmb_data$Z_ik) )
+  make_covariates <-
+  function( gam ){
 
-  # Assemble predX
-  formula_no_sm = remove_s_and_t2(gam$formula)
-  mf1 = model.frame(formula_no_sm, origdata, drop.unused.levels=TRUE)
-  #  drop.unused.levels necessary when using formula = ~ interaction(X,Y), which otherwise creates full-factorial combination of levels
-  terms1 = attr(mf1, "terms")
-  # X_ij = model.matrix(terms1, mf1)
-  terms2 = stats::terms(formula_no_sm)
-  attr(terms2, "predvars") = attr(terms1, "predvars")
-  terms2 = stats::delete.response(terms2)
-  mf2 = model.frame(terms2, newdata, xlev=.getXlevels(terms1,mf1))
-  X_gj = model.matrix(terms2, mf2)
-  offset_g = model.offset(mf2)
-  if(is.null(offset_g)) offset_g = rep(0,nrow(newdata))
+    # Assemble predZ
+    Z_gk = lapply( seq_along(gam$smooth),
+                    FUN = \(x) PredictMat(gam$smooth[[x]], data=newdata) )
+    Z_gk = do.call( cbind, Z_gk )
+    #if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=ncol(tmb_data$Z_ik) )
+    if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=0 )
+
+    # Assemble predX
+    formula_no_sm = remove_s_and_t2(gam$formula)
+    mf1 = model.frame(formula_no_sm, origdata, drop.unused.levels=TRUE)
+    #  drop.unused.levels necessary when using formula = ~ interaction(X,Y), which otherwise creates full-factorial combination of levels
+    terms1 = attr(mf1, "terms")
+    # X_ij = model.matrix(terms1, mf1)
+    terms2 = stats::terms(formula_no_sm)
+    attr(terms2, "predvars") = attr(terms1, "predvars")
+    terms2 = stats::delete.response(terms2)
+    mf2 = model.frame(terms2, newdata, xlev=.getXlevels(terms1,mf1))
+    X_gj = model.matrix(terms2, mf2)
+    offset_g = model.offset(mf2)
+    if(is.null(offset_g)) offset_g = rep(0,nrow(newdata))
+
+    # out
+    list( "X_gj"=X_gj, "Z_gk"=Z_gk, "offset_g"=offset_g)
+  }
+  covariates = make_covariates( object$internal$gam_setup )
+  covariates2 = make_covariates( object$internal$delta_gam_setup )
 
   # Assemble A_gs
   if( is(object$spatial_graph, "fm_mesh_2d") ){
@@ -233,7 +243,7 @@ function( object,
   AepsilonG_zz = cbind(predAtriplet$i, predAtriplet$j, t_g[predAtriplet$i], c_g[predAtriplet$i])
   which_Arows = which(apply( AepsilonG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( nrow(object$internal$dsem_ram$output$ram)==0 ){
+  if( (nrow(object$internal$dsem_ram$output$ram)==0) & (nrow(object$internal$delta_dsem_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   AepsilonG_zz = AepsilonG_zz[which_Arows,,drop=FALSE]
@@ -243,7 +253,7 @@ function( object,
   AomegaG_zz = cbind(predAtriplet$i, predAtriplet$j, c_g[predAtriplet$i])
   which_Arows = which(apply( AomegaG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( nrow(object$internal$sem_ram$output$ram)==0 ){
+  if( (nrow(object$internal$sem_ram$output$ram)==0) & (nrow(object$internal$delta_sem_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   AomegaG_zz = AomegaG_zz[which_Arows,,drop=FALSE]
@@ -265,19 +275,23 @@ function( object,
 
   # Error checks
   tmb_data2 = object$tmb_inputs$tmb_data
-  if( ncol(tmb_data2$X_ij) != ncol(X_gj) ) stop("Check X_gj")
-  if( ncol(tmb_data2$Z_ik) != ncol(Z_gk) ) stop("Check Z_gk")
+  if( ncol(tmb_data2$X_ij) != ncol(covariates$X_gj) ) stop("Check X_gj")
+  if( ncol(tmb_data2$Z_ik) != ncol(covariates$Z_gk) ) stop("Check Z_gk")
+  if( ncol(tmb_data2$X2_ij) != ncol(covariates2$X_gj) ) stop("Check X2_gj")
+  if( ncol(tmb_data2$Z2_ik) != ncol(covariates2$Z_gk) ) stop("Check Z2_gk")
 
   # Swap in new predictive stuff
-  tmb_data2$X_gj = X_gj
-  tmb_data2$Z_gk = Z_gk
+  tmb_data2$X_gj = covariates$X_gj
+  tmb_data2$Z_gk = covariates$Z_gk
+  tmb_data2$X2_gj = covariates2$X_gj
+  tmb_data2$Z2_gk = covariates2$Z_gk
   tmb_data2$AepsilonG_zz = AepsilonG_zz - 1    # Triplet form, i, s, t
   tmb_data2$AepsilonG_z = AepsilonG_z
   tmb_data2$AomegaG_zz = AomegaG_zz - 1    # Triplet form, i, s, t
   tmb_data2$AomegaG_z = AomegaG_z
   tmb_data2$t_g = t_g - 1 # Convert to CPP indexing
   tmb_data2$c_g = c_g - 1 # Convert to CPP indexing
-  tmb_data2$offset_g = offset_g
+  tmb_data2$offset_g = covariates$offset_g
   tmb_data2$e_g = e_g - 1 # -1 to convert to CPP index
 
   # Simplify by eliminating observations ... experimental
@@ -296,14 +310,15 @@ function( object,
   }
 
   # Check for obvious issues ... no NAs except in RAMstart
-  if( any(is.na(tmb_data2[-match("RAMstart",names(tmb_data2))])) ){
+  index_drop = match(c("ram_sem_start","ram_dsem_start","ram2_sem_start","ram2_dsem_start"),names(tmb_data2))
+  if( any(is.na(tmb_data2[-index_drop])) ){
     stop("Check output of `add_predictions` for NAs")
   }
   # Check for obvious issues ... length of inputs
   if( !all( sapply(tmb_data2[c('t_g','c_g','e_g','offset_g')],FUN=length) %in% c(0,nrow(newdata)) ) ){
     stop("Check output of `add_predictions` for variables with unexpected length")
   }
-  if( any( sapply(tmb_data2[c('X_gj','Z_gk')],FUN=nrow) != nrow(newdata) ) ){
+  if( any( sapply(tmb_data2[c('X_gj','Z_gk','X2_gj','Z2_gk')],FUN=nrow) != nrow(newdata) ) ){
     stop("Check output of `add_predictions` for NAs")
   }
 

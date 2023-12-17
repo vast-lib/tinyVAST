@@ -10,11 +10,13 @@ fit(
   sem = NULL,
   dsem = NULL,
   delta_formula = ~1,
-  family = list(obs = gaussian()),
+  delta_sem = NULL,
+  delta_dsem = NULL,
+  family = gaussian(),
   data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time",
     distribution = "dist"),
-  times = seq(min(data[, data_colnames$time]), max(data[, data_colnames$time])),
-  variables = unique(data[, data_colnames$variable]),
+  times = NULL,
+  variables = NULL,
   spatial_graph = NULL,
   control = tinyVASTcontrol(),
   ...
@@ -29,11 +31,13 @@ an offset.}
 
 \item{sem}{Specification for structural equation model structure for
 constructing a space-variable interaction.
-See code{\link{make_sem_ram}} for more description.}
+\code{sem=NULL} disables the space-variable interaction, and
+see code{\link{make_sem_ram}} for more description.}
 
 \item{dsem}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects for
-constructing a space-variable interaction.  See
+constructing a space-variable interaction.
+\code{dsem=NULL} disables the space-variable interaction, and see
 \code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
 for more description}
 
@@ -94,7 +98,6 @@ Data$n = Data$z + rnorm(nrow(Data), sd=1)
 
 # Add columns for multivariate and temporal dimensions
 Data$var = "n"
-Data$time = 2020
 
 # make mesh
 mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
@@ -104,6 +107,6 @@ out = fit( data = Data,
            formula = n ~ s(w),
            spatial_graph = mesh,
            control = tinyVASTcontrol(quiet=TRUE, trace=0),
-           sem = "" )
+           sem = "n <-> n, sd_n" )
 
 }

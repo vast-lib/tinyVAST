@@ -71,7 +71,6 @@
 #'
 #' # Add columns for multivariate and temporal dimensions
 #' Data$var = "n"
-#' Data$time = 2020
 #'
 #' # make mesh
 #' mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
@@ -81,7 +80,7 @@
 #'            formula = n ~ s(w),
 #'            spatial_graph = mesh,
 #'            control = tinyVASTcontrol(quiet=TRUE, trace=0),
-#'            sem = "" )
+#'            sem = "n <-> n, sd_n" )
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
@@ -93,10 +92,10 @@ function( data,
           delta_formula = ~ 1,
           delta_sem = NULL,
           delta_dsem = NULL,
-          family = list( "obs"=gaussian() ),
+          family = gaussian(),
           data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
-          times = seq(min(data[,data_colnames$time]),max(data[,data_colnames$time])),
-          variables = unique(data[,data_colnames$variable]),
+          times = NULL,
+          variables = NULL,
           spatial_graph = NULL,
           control = tinyVASTcontrol(),
           ... ){
@@ -112,21 +111,35 @@ function( data,
   # input telescoping
   ##############
 
-  # Allow user to avoid specifying these if is.null(dsem)
-  if( is.null(dsem) & is.null(delta_dsem) ){
-    times = numeric(0)
-    if( !(data_colnames$time %in% colnames(data)) ){
-      data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
-    }
+  # Telescope family ... comes before adding `data_colnames$distribution` to `data`
+  if( inherits(family,"family") ){
+    family = list( "obs"=family )
   }
 
-  # Allow user to avoid specifying these if is.null(dsem) AND is.null(sem)
+  # Defaults for missing columns of data
+  if( !(data_colnames$variable %in% colnames(data)) ){
+    data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
+  }
+  if( !(data_colnames$time %in% colnames(data)) ){
+    data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
+  }
+  if( !(data_colnames$distribution %in% colnames(data)) ){
+    if( length(family)>1 ) stop("Must supply `dist` if using multiple `family` options")
+    data = data.frame( data, matrix(names(family)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+  }
+
+  # Defaults for times
+  if( is.null(dsem) & is.null(delta_dsem) ){
+    times = numeric(0)
+  }
+  if(is.null(times)) times = seq( min(data[,data_colnames$time]), max(data[,data_colnames$time]) )
+
+  # Defaults for variables
   if( is.null(dsem) & is.null(sem) & is.null(delta_dsem) & is.null(delta_sem) ){
     variables = numeric(0)
-    if( !(data_colnames$variable %in% colnames(data)) ){
-      data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
-    }
   }
+  if(is.null(variables)) variables = unique( data[,data_colnames$variable] )
+
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(times) > 0 ){
@@ -135,17 +148,6 @@ function( data,
   if( length(variables) > 0 ){
     c_i = match( data[,data_colnames$var], variables )
   }else{ c_i = integer(0) }
-
-  # Telescope format
-  if( !is.list(family) ){
-    family = list( "obs"=family )
-  }
-
-  # Telescope
-  if( !(data_colnames$distribution %in% colnames(data)) ){
-    if( length(family)>1 ) stop("Must supply `dist` if using multiple `family` options")
-    data = data.frame( data, matrix(names(family)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
-  }
 
   ##############
   # DSEM RAM constructor
@@ -581,7 +583,13 @@ function( data,
     sem_ram = sem_ram,                                    # for `add_predictions`
     dsem = dsem,
     sem = sem,
+    gam_setup = gam_basis$gam_setup,
+    delta_dsem_ram = delta_dsem_ram,                                  # for `add_predictions`
+    delta_sem_ram = delta_sem_ram,                                    # for `add_predictions`
+    delta_dsem = delta_dsem,
+    delta_sem = delta_sem,
     data_colnames = data_colnames,
+    delta_gam_setup = delta_gam_basis$gam_setup,
     times = times,
     variables = variables,
     parlist = obj$env$parList(par=obj$env$last.par.best),
@@ -592,7 +600,6 @@ function( data,
   out = structure( list(
     formula = formula,
     data = data,
-    gam_setup = gam_basis$gam_setup,
     obj = obj,
     opt = opt,
     rep = obj$report(obj$env$last.par.best),

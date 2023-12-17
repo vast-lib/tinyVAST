@@ -72,9 +72,8 @@ out = fit( dsem = dsem,
            data = as.data.frame(Data),
            formula = ice_concentration ~ 1,
            spatial_graph = mesh,
-           family = list("Ice"=gaussian() ),
            data_colnames = list( "spatial"=c("X","Y"), "variable"="var",
-                                 "time"="year", "distribution"="var"),
+                                 "time"="year", "distribution"="dist"),
            times = c(paste0("EOF_",seq_len(n_eof)), sort(unique(Data[,'year']))),
            control = tinyVASTcontrol( quiet=TRUE, trace=0, profile="alpha_j",
                                       nlminb_loops=1, getsd=TRUE,
@@ -133,7 +132,8 @@ plot( sf_plot[,'omega_g'], reset=FALSE, key.pos=NULL, border=NA )
   plot( st_geometry(sf_maps), add=TRUE, border=NA, col="grey" )
 matplot( y=L_tf, x=unique(Data$year), type="l",
          col=viridisLite::viridis(n_eof), lwd=2, lty="solid" )
-  legend( "top", ncol=n_eof, legend=1:n_eof, fill=viridisLite::viridis(n_eof) )
+  legend( "top", ncol=n_eof, legend=paste0("EOF",1:n_eof),
+          fill=viridisLite::viridis(n_eof) )
 ```
 
 

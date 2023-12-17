@@ -15,8 +15,8 @@
 #' @export
 rmvnorm_prec <-
 function( n,
-          mean,
-          Q ) {
+          Q,
+          mean = rep(0,nrow(Q)) ) {
 
   # Simulate values
   z0 = matrix( rnorm(length(mean) * n), ncol=n)
