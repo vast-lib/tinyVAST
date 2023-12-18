@@ -103,7 +103,8 @@ out = fit( sem = sem,
            spatial_graph = mesh,
            family = tweedie(),
            variables = c( "f1", "f2", 1:n_c ),
-           data_colnames = list(spatial = c("x","y"), variable = "species", time = "time", distribution = "dist"),
+           data_colnames = list( space = c("x","y"), variable = "species",
+                                 time = "time", distribution = "dist"),
            control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj") )
 out
 ```
@@ -166,7 +167,8 @@ out = fit( sem = sem,
            spatial_graph = mesh,
            family = list( "obs"=tweedie() ),
            variables = c( "f1", "f2", 1:n_c ),
-           data_colnames = list(spatial = c("x","y"), variable = "species", time = "time", distribution = "dist"),
+           data_colnames = list( space = c("x","y"), variable = "species",
+                                 time = "time", distribution = "dist"),
            control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj") )
 
 # Extract and rotate estimated loadings

@@ -9,12 +9,10 @@ fit(
   formula,
   sem = NULL,
   dsem = NULL,
-  delta_formula = ~1,
-  delta_sem = NULL,
-  delta_dsem = NULL,
   family = gaussian(),
-  data_colnames = list(spatial = c("x", "y"), variable = "var", time = "time",
-    distribution = "dist"),
+  delta_options = list(delta_formula = ~1),
+  data_colnames = list(space = c("x", "y"), variable = "var", time = "time", distribution
+    = "dist"),
   times = NULL,
   variables = NULL,
   spatial_graph = NULL,
@@ -23,7 +21,9 @@ fit(
 )
 }
 \arguments{
-\item{data}{Data-frame of predictor and response variables.}
+\item{data}{Data-frame of predictor, response, and offset variables.  Also includes
+variables that specify space, time, variables, and the distribution for samples,
+as identified by argument \code{data_colnames}}
 
 \item{formula}{Formula with response on left-hand-side and predictors on right-hand-side,
 parsed by \code{mgcv} and hence allowing \code{s(.)} for splines or \code{offset(.)} for
@@ -32,25 +32,47 @@ an offset.}
 \item{sem}{Specification for structural equation model structure for
 constructing a space-variable interaction.
 \code{sem=NULL} disables the space-variable interaction, and
-see code{\link{make_sem_ram}} for more description.}
+see \code{\link[=make_sem_ram]{make_sem_ram()}} for more description.}
 
 \item{dsem}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects for
 constructing a space-variable interaction.
 \code{dsem=NULL} disables the space-variable interaction, and see
-\code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
+\code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}
 for more description}
 
-\item{family}{named list of family and link functions, with names corresponding to levels
-of \code{data$dist}}
+\item{family}{a function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
+\code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}.  Alternatively, it can be a named list of
+these functions, with names that match levels of
+\code{data$data_colnames$distribution}.  Finally, the user can specify
+\code{\link[=independent_delta]{independent_delta()}} to specify a delta model.}
 
-\item{times}{A character vector listing the set of times in order}
+\item{delta_options}{a named list with slots for \code{delta_formula},
+\code{delta_sem}, and \code{delta_dsem}.  These follow the same format as
+\code{family}, \code{sem}, and \code{dsem}, but specify options for the
+second linear predictor of a delta model, and are only used (or estimable)
+when \code{\link[=independent_delta]{independent_delta()}} for some samples.}
 
-\item{variables}{A character vector listing the set of variables}
+\item{data_colnames}{A list that indicates what columns of \code{data} are used
+to indicate different space, time, variables, and distributions.
+Space and variable are then used to interpret argument \code{sem},
+space, time, and variables are used to interpret argument \code{dsem}, and
+distribution is used to interpret argument \code{family}.}
 
-\item{spatial_graph}{Object that represents spatial relationships, either using \code{fmesher}
-to apply the SPDE method, \code{igraph} to apply a simultaneous autoregressive (SAR)
-process, or \code{NULL} to specify a single site.}
+\item{times}{A integer vector listing the set of times in order.
+If \code{times=NULL}, then it is filled in as the vector of integers
+from the minimum to maximum value of \code{data$data_colnames$time}}
+
+\item{variables}{A character vector listing the set of variables.
+if \code{variables=NULL}, then it is filled in as the unique values
+from \code{data$data_colnames$variables}}
+
+\item{spatial_graph}{Object that represents spatial relationships, either using
+\emph{fmesher} \code{\link[=fm_mesh_2d]{fm_mesh_2d()}} to apply the SPDE method,
+\emph{igraph} \code{\link[=make_empty_graph]{make_empty_graph()}} for independent time-series,
+\emph{igraph} \code{\link[=make_graph]{make_graph()}} to apply a simultaneous autoregressive (SAR)
+process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
+or \code{NULL} to specify a single site.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings, and see documentation for that function for details.}
@@ -72,7 +94,7 @@ the space-variable interaction.
 
 the default \code{dsem=NULL} turns off all multivariate and temporal indexing, such
 that \code{spatial_graph} is then ignored, and the model collapses
-to a standard model using \code{mgcv::gam}.  To specify a univeriate spatial model,
+to a standard model using \code{\link[mgcv]{gam}}.  To specify a univeriate spatial model,
 the user must specify both \code{spatial_graph} and \code{dsem=""}, where the latter
 is then parsed to include a single exogenous variance for the single variable\tabular{ll}{
    \strong{Model type} \tab \strong{How to specify} \cr

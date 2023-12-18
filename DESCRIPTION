@@ -16,7 +16,8 @@ Imports:
     corpcor,
     sfnetworks,
     units,
-    sf
+    sf,
+    fmesher,
 Depends:
     R (>= 4.1.0),
     TMB (>= 1.9.7),
@@ -28,7 +29,6 @@ Suggests:
     pdp,
     visreg,
     tweedie,
-    fmesher,
     mvtnorm,
     pdp,
     lattice,
