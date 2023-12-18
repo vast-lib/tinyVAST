@@ -8,24 +8,48 @@
 #' @param sem Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
 #'        \code{sem=NULL} disables the space-variable interaction, and
-#'        see code{\link{make_sem_ram}} for more description.
+#'        see [make_sem_ram()] for more description.
 #' @param dsem Specification for time-series structural equation model structure
 #'        including lagged or simultaneous effects for
 #'        constructing a space-variable interaction.
 #'        \code{dsem=NULL} disables the space-variable interaction, and see
-#'        \code{\link{make_dsem_ram}}  or \code{\link{make_eof_ram}}
+#'        [make_dsem_ram()]  or [make_eof_ram()]
 #'        for more description
-#' @param data Data-frame of predictor and response variables.
+#' @param data Data-frame of predictor, response, and offset variables.  Also includes
+#'        variables that specify space, time, variables, and the distribution for samples,
+#'        as identified by argument \code{data_colnames}
+#' @param data_colnames A list that indicates what columns of `data` are used
+#'        to indicate different space, time, variables, and distributions.
+#'        Space and variable are then used to interpret argument `sem`,
+#'        space, time, and variables are used to interpret argument `dsem`, and
+#'        distribution is used to interpret argument `family`.
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
 #'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
 #'        an offset.
-#' @param family named list of family and link functions, with names corresponding to levels
-#'        of \code{data$dist}
-#' @param spatial_graph Object that represents spatial relationships, either using `fmesher`
-#'        to apply the SPDE method, `igraph` to apply a simultaneous autoregressive (SAR)
-#'        process, or `NULL` to specify a single site.
+#' @param family a function returning a class \code{family}, including [gaussian()],
+#'        [lognormal()], or [tweedie()].  Alternatively, it can be a named list of
+#'        these functions, with names that match levels of
+#'        \code{data$data_colnames$distribution}.  Finally, the user can specify
+#'        [independent_delta()] to specify a delta model.
+#' @param delta_options a named list with slots for \code{delta_formula},
+#'        \code{delta_sem}, and \code{delta_dsem}.  These follow the same format as
+#'        \code{family}, \code{sem}, and \code{dsem}, but specify options for the
+#'        second linear predictor of a delta model, and are only used (or estimable)
+#'        when [independent_delta()] for some samples.
+#' @param spatial_graph Object that represents spatial relationships, either using
+#'        _fmesher_ [fm_mesh_2d()] to apply the SPDE method,
+#'        _igraph_ [make_empty_graph()] for independent time-series,
+#'        _igraph_ [make_graph()] to apply a simultaneous autoregressive (SAR)
+#'        process, [sfnetwork_mesh()] for stream networks,
+#'        or `NULL` to specify a single site.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings, and see documentation for that function for details.
+#' @param times A integer vector listing the set of times in order.
+#'        If \code{times=NULL}, then it is filled in as the vector of integers
+#'        from the minimum to maximum value of \code{data$data_colnames$time}
+#' @param variables A character vector listing the set of variables.
+#'        if \code{variables=NULL}, then it is filled in as the unique values
+#'        from \code{data$data_colnames$variables}
 #'
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:
@@ -38,7 +62,7 @@
 #'
 #' the default `dsem=NULL` turns off all multivariate and temporal indexing, such
 #' that `spatial_graph` is then ignored, and the model collapses
-#' to a standard model using `mgcv::gam`.  To specify a univeriate spatial model,
+#' to a standard model using \code{\link[mgcv]{gam}}.  To specify a univeriate spatial model,
 #' the user must specify both `spatial_graph` and `dsem=""`, where the latter
 #' is then parsed to include a single exogenous variance for the single variable
 #'
@@ -50,7 +74,7 @@
 #' | Multivariate spatial model | specify `spatial_graph` and use `dsem` (without any lagged effects) to specify spatial interactions |
 #' | Vector autoregressive spatio-temporal model | specify `spatial_graph` and use `dsem=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `dsem` and `spatial_graph` |
 #'
-#' @importFrom igraph as_adjacency_matrix
+#' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations
 #' @importFrom corpcor pseudoinverse
 #' @importFrom methods is
@@ -89,11 +113,9 @@ function( data,
           formula,
           sem = NULL,
           dsem = NULL,
-          delta_formula = ~ 1,
-          delta_sem = NULL,
-          delta_dsem = NULL,
           family = gaussian(),
-          data_colnames = list("spatial"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
+          delta_options = list(delta_formula = ~ 1),
+          data_colnames = list("space"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
           times = NULL,
           variables = NULL,
           spatial_graph = NULL,
@@ -129,13 +151,13 @@ function( data,
   }
 
   # Defaults for times
-  if( is.null(dsem) & is.null(delta_dsem) ){
+  if( is.null(dsem) & is.null(delta_options$delta_dsem) ){
     times = numeric(0)
   }
   if(is.null(times)) times = seq( min(data[,data_colnames$time]), max(data[,data_colnames$time]) )
 
   # Defaults for variables
-  if( is.null(dsem) & is.null(sem) & is.null(delta_dsem) & is.null(delta_sem) ){
+  if( is.null(dsem) & is.null(sem) & is.null(delta_options$delta_dsem) & is.null(delta_options$delta_sem) ){
     variables = numeric(0)
   }
   if(is.null(variables)) variables = unique( data[,data_colnames$variable] )
@@ -200,7 +222,7 @@ function( data,
     return(out)
   }
   dsem_ram = build_dsem(dsem)
-  delta_dsem_ram = build_dsem( delta_dsem )
+  delta_dsem_ram = build_dsem( delta_options$delta_dsem )
 
   ##############
   # SEM RAM constructor
@@ -240,7 +262,7 @@ function( data,
     return(out)
   }
   sem_ram = build_sem(sem)
-  delta_sem_ram = build_sem( delta_sem )
+  delta_sem_ram = build_sem( delta_options$delta_sem )
 
   ##############
   # Spatial domain constructor
@@ -252,22 +274,26 @@ function( data,
     spatial_method_code = 1
     spatial_list = fm_fem( spatial_graph )
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
-    A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$spatial]) )$proj$A
+    A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$space]) )$proj$A
+    estimate_kappa = TRUE
   }else if( is(spatial_graph,"igraph") ) {
     # SAR
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_graph, sparse=TRUE )
     n_s = nrow(Adj)
-    Match = match( data[,data_colnames$spatial], rownames(Adj) )
+    Match = match( data[,data_colnames$space], rownames(Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
+    # Turn off log_kappa if no edges (i.e., unconnected graph)
+    estimate_kappa = ifelse( ecount(spatial_graph)>0, TRUE, FALSE )
   }else if( is(spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
     # stream network
     spatial_method_code = 4
     n_s = spatial_graph$n
     spatial_list = spatial_graph$table
     A_is = sfnetwork_evaluator( stream = spatial_graph$stream,
-                                loc = as.matrix(data[,data_colnames$spatial]) )
+                                loc = as.matrix(data[,data_colnames$space]) )
+    estimate_kappa = TRUE
   }else{
     # Single-site
     spatial_method_code = 3
@@ -277,6 +303,7 @@ function( data,
     spatial_list = list( "M0" = as(Matrix(1,nrow=1,ncol=1),"CsparseMatrix"),
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
+    estimate_kappa = FALSE
   }
   Atriplet = Matrix::mat2triplet(A_is)
 
@@ -329,7 +356,7 @@ function( data,
   }
   gam_basis = build_gam_basis( formula )
   delta_formula_with_response = update.formula( formula,
-                                  paste(".", paste0(as.character(delta_formula),collapse="")) )
+                                  paste(".", paste0(as.character(delta_options$delta_formula),collapse="")) )
   delta_gam_basis = build_gam_basis( delta_formula_with_response )
 
   ##############
@@ -498,9 +525,10 @@ function( data,
   }
 
   # Turn of log_kappa when not needed
-  if( spatial_method_code %in% c(3) ){
-    tmb_par = tmb_par[-match("log_kappa",names(tmb_par))]
-  }
+  #  Now mapping it off, because inclusion for igraph depends on number of edges
+  #if( isFALSE(estimate_kappa) ){
+  #  tmb_par = tmb_par[-match("log_kappa",names(tmb_par))]
+  #}
 
   # User-supplied parameters
   if( !is.null(control$tmb_par) ){
@@ -522,6 +550,9 @@ function( data,
   tmb_map = list()
   if( all(distributions$components==1) ){
     tmb_map$alpha2_j = factor( rep(NA,length(tmb_par$alpha2_j)) )
+  }
+  if( isFALSE(estimate_kappa) ){
+    tmb_map$log_kappa = factor(NA)
   }
 
   ##############
@@ -586,8 +617,8 @@ function( data,
     gam_setup = gam_basis$gam_setup,
     delta_dsem_ram = delta_dsem_ram,                                  # for `add_predictions`
     delta_sem_ram = delta_sem_ram,                                    # for `add_predictions`
-    delta_dsem = delta_dsem,
-    delta_sem = delta_sem,
+    delta_dsem = delta_options$delta_dsem,
+    delta_sem = delta_options$delta_sem,
     data_colnames = data_colnames,
     delta_gam_setup = delta_gam_basis$gam_setup,
     times = times,

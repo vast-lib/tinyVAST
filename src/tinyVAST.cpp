@@ -501,11 +501,11 @@ Type objective_function<Type>::operator() (){
   int n2_h = n2_t * n2_c;      // data
 
   // Spatial distribution
+  PARAMETER( log_kappa );
   Type log_tau = 0;
   Eigen::SparseMatrix<Type> Q_ss;
   if( (spatial_options(0)==1) ){
     // Using INLA
-    PARAMETER( log_kappa );
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
@@ -513,7 +513,6 @@ Type objective_function<Type>::operator() (){
     REPORT( range );
   }else if( spatial_options(0)==2 ){
     /// Using SAR
-    PARAMETER( log_kappa );
     DATA_SPARSE_MATRIX( Adj );
     Eigen::SparseMatrix<Type> I_ss( Adj.rows(), Adj.rows() );
     Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
@@ -528,7 +527,6 @@ Type objective_function<Type>::operator() (){
     log_tau = Type(0.0);
   }else if( spatial_options(0)==4 ){
     // stream-network
-    PARAMETER( log_kappa );
     DATA_IMATRIX( graph_sz );
     DATA_VECTOR( dist_s );
     Q_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )

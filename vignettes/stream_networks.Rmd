@@ -101,7 +101,7 @@ location of simulated samples.
 out = fit( data = Data,
            formula = Count ~ 1,
            spatial_graph = graph,
-           data_colnames = list( "spatial"=c("X","Y"),
+           data_colnames = list( "space"=c("X","Y"),
                                  "variable"="var",
                                  "time"="time",
                                  "distribution"="dist"),
