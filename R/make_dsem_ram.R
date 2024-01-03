@@ -71,7 +71,7 @@
 #' \strong{Example: univariate and first-order autoregressive model}
 #'
 #' This simultaneous autoregressive (SAR) process across variables and times
-#' allows the user to specify both simutanous effects (effects among variables within
+#' allows the user to specify both simultaneous effects (effects among variables within
 #' year \eqn{T}) and lagged effects (effects among variables among years \eqn{T}).
 #' As one example, consider a univariate and first-order autoregressive process where \eqn{T=4}.
 #' with independent errors.  This is specified by passing \code{ sem = X -> X, 1, rho; X <-> X, 0, sigma } to \code{make_dsem_ram}.
