@@ -7,7 +7,7 @@
 sfnetwork_mesh(stream)
 }
 \arguments{
-\item{stream}{sfnetworks object representing stream network}
+\item{stream}{\pkg{sfnetworks} object representing stream network}
 }
 \description{
 Make mesh for stream network

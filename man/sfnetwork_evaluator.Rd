@@ -7,9 +7,9 @@
 sfnetwork_evaluator(stream, loc, tolerance = 0.01)
 }
 \arguments{
-\item{stream}{sfnetworks object representing stream network}
+\item{stream}{\pkg{sfnetworks} object representing stream network}
 
-\item{loc}{sf object representing points to which are being projected}
+\item{loc}{\pkg{sf} object representing points to which are being projected}
 
 \item{tolerance}{error-check tolerance}
 }

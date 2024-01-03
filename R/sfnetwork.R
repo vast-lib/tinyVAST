@@ -4,8 +4,8 @@
 #' @description Make sparse matrix to project from stream-network nodes
 #'   to user-supplied points
 #'
-#' @param stream sfnetworks object representing stream network
-#' @param loc sf object representing points to which are being projected
+#' @param stream \pkg{sfnetworks} object representing stream network
+#' @param loc \pkg{sf} object representing points to which are being projected
 #' @param tolerance error-check tolerance
 #'
 #' @importFrom units drop_units
