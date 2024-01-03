@@ -71,6 +71,9 @@ tweedie <- function(link = "log") {
 }
 
 # Delta model with independent terms
+#' @param family2 Delta model second linear predictor family
+#' @param link1 First linear predictor link
+#' @param link2 Second linear predictor link
 #' @export
 #' @rdname families
 independent_delta <-
