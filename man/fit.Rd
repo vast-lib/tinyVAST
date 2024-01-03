@@ -102,7 +102,7 @@ is then parsed to include a single exogenous variance for the single variable\ta
    \strong{Model type} \tab \strong{How to specify} \cr
    Generalized additive model \tab specify \code{spatial_graph=NULL} and \code{dsem=""}, and then use \code{formula} to specify splines and covariates \cr
    Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) \tab specify \code{spatial_graph=NULL} and use \code{dsem} to specify interactions among variables and over time \cr
-   Univeriate spatial model \tab specify \code{spatial_graph} and \code{dsem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+   Univariate spatial model \tab specify \code{spatial_graph} and \code{dsem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
    Multivariate spatial model \tab specify \code{spatial_graph} and use \code{dsem} (without any lagged effects) to specify spatial interactions \cr
    Vector autoregressive spatio-temporal model \tab specify \code{spatial_graph} and use \code{dsem=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{dsem} and \code{spatial_graph} \cr
 }
