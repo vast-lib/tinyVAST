@@ -10,7 +10,9 @@
 #'
 #' @importFrom units drop_units
 #' @importFrom sf st_as_sf st_nearest_feature st_distance st_geometry st_length
+#'   st_crs
 #' @importFrom sfnetworks activate
+#' @importFrom Matrix Diagonal
 #'
 #' @export
 sfnetwork_evaluator <-
