@@ -71,17 +71,22 @@ function( object,
 #'
 #' @param area value used for area-weighted expansion of estimated density surface
 #'     for each row of `newdata`.
+#' @param V_gz Settings for expansion.
+#' @param W_gz Covariates for expansion.
+#' @param intern Do Laplace approximation on C++ side? Passed to [TMB::MakeADFun()].
+#' @param apply.epsilon Apply epsilon bias correction?
 #'
 #' @export
 integrate_output <-
 function( object,
           newdata,
+          V_gz,
+          area,
+          W_gz,
           bias.correct = TRUE,
           apply.epsilon = FALSE,
-          intern = FALSE,
-          W_gz,
-          V_gz,
-          area ){
+          intern = FALSE
+  ){
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data

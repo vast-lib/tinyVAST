@@ -7,12 +7,12 @@
 integrate_output(
   object,
   newdata,
+  V_gz,
+  area,
+  W_gz,
   bias.correct = TRUE,
   apply.epsilon = FALSE,
-  intern = FALSE,
-  W_gz,
-  V_gz,
-  area
+  intern = FALSE
 )
 }
 \arguments{
@@ -20,10 +20,18 @@ integrate_output(
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
 
-\item{bias.correct}{logical indicating if bias correction should be applied}
+\item{V_gz}{Settings for expansion.}
 
 \item{area}{value used for area-weighted expansion of estimated density surface
 for each row of \code{newdata}.}
+
+\item{W_gz}{Covariates for expansion.}
+
+\item{bias.correct}{logical indicating if bias correction should be applied}
+
+\item{apply.epsilon}{Apply epsilon bias correction?}
+
+\item{intern}{Do Laplace approximation on C++ side? Passed to \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \description{
 Applies Monte Carlo integration to approximate area-expanded abundance
