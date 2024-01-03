@@ -36,6 +36,7 @@ Suggests:
     rnaturalearth,
     rnaturalearthdata,
     sdmTMB,
+    testthat,
     tweedie,
     viridisLite,
     visreg
