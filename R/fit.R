@@ -192,7 +192,7 @@ function( data,
     }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
       output = dsem
     }else{
-      stop("`dsem` must be either `NULL` or a character-string")
+      stop("`dsem` must be either `NULL` or a character-string", call. = FALSE)
     }
 
     # Identify arrow-type for each beta_j estimated in RAM
