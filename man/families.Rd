@@ -19,6 +19,12 @@ independent_delta(
 }
 \arguments{
 \item{link}{Link.}
+
+\item{family2}{Delta model second linear predictor family}
+
+\item{link1}{First linear predictor link}
+
+\item{link2}{Second linear predictor link}
 }
 \value{
 A list with elements common to standard R family objects including \code{family},
