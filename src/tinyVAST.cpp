@@ -672,11 +672,11 @@ Type objective_function<Type>::operator() (){
   }
 
   // Expansion
-  if( (W_gz.rows()==mu_g.size()) & (V_gz.rows()==mu_g.size()) ){
+  if( (W_gz.rows()==mu_g.size()) && (V_gz.rows()==mu_g.size()) ){
     // First sweep
     vector<Type> phi0_g( mu_g.size() );
     for( int g=0; g<mu_g.size(); g++ ){
-      if( (V_gz(g,0)==0) | (V_gz(g,0)==1) | (V_gz(g,0)==2) | (V_gz(g,0)==3) ){
+      if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) ){
         // Area-weighted average
         phi0_g(g) = mu_g(g) * W_gz(g,0);
       }
@@ -700,7 +700,7 @@ Type objective_function<Type>::operator() (){
         // density-weighted average of W_gz(g,1)
         phi_g(g) = (phi0_g(g) / sumphi0) * W_gz(g,1);
       }
-      if( (V_gz(g,0)==3) & (V_gz(g,1)>=0) & (V_gz(g,1)<=g) ){
+      if( (V_gz(g,0)==3) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
         // density-weighted average of prediction
         phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
       }
