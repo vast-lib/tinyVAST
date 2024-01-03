@@ -656,10 +656,21 @@ function( data,
 #' @inheritParams stats::nlminb
 #' @inheritParams TMB::MakeADFun
 #'
+#' @param nlminb_loops Integer number of times to call [stats::nlminb()].
+#' @param newton_loops Integer number of Newton steps to do after running
+#'   [stats::nlminb()].
 #' @param getsd Boolean indicating whether to call [TMB::sdreport()]
-#' @param newton_loops Integer number of newton steps to do after running `nlminb`
-#' @param tmb_par list of parameters for starting values, with shape identical to
-#'        `fit(...)$internal$parlist`
+#' @param tmb_par list of parameters for starting values, with shape identical
+#'   to `fit(...)$internal$parlist`
+#' @param eval.max Maximum number of evaluations of the objective function
+#'   allowed. Passed to `control` in [stats::nlminb()].
+#' @param iter.max Maximum number of iterations allowed. Passed to `control` in
+#'   [stats::nlminb()].
+#' @param quiet Silence optimization details?
+#' @param trace Parameter values are printed every `trace` iteration. Passed to
+#'   `control` in [stats::nlminb()].
+#' @param gmrf_parameterization Gaussian Markov Random Fields parameterization.
+#' @param estimate_delta0 Estimate a delta model?
 #'
 #' @export
 tinyVASTcontrol <-
