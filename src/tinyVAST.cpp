@@ -672,7 +672,7 @@ Type objective_function<Type>::operator() (){
   }
 
   // Expansion
-  if( (W_gz.rows()==mu_g.size()) && (V_gz.rows()==mu_g.size()) ){
+  if( (W_gz.rows()==mu_g.size()) & (V_gz.rows()==mu_g.size()) ){
     // First sweep
     vector<Type> phi0_g( mu_g.size() );
     for( int g=0; g<mu_g.size(); g++ ){
