@@ -3,8 +3,6 @@
 #' @description Fits a vector autoregressive spatio-temporal model using
 #'  a minimal feature-set and a widely used interface.
 #'
-#' @inheritParams dsem::make_dsem_ram
-#'
 #' @param sem Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
 #'        \code{sem=NULL} disables the space-variable interaction, and
@@ -50,6 +48,7 @@
 #' @param variables A character vector listing the set of variables.
 #'        if \code{variables=NULL}, then it is filled in as the unique values
 #'        from \code{data$data_colnames$variables}
+#' @param ... Not used.
 #'
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:

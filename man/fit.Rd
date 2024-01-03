@@ -76,6 +76,8 @@ or \code{NULL} to specify a single site.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings, and see documentation for that function for details.}
+
+\item{...}{Not used.}
 }
 \description{
 Fits a vector autoregressive spatio-temporal model using
