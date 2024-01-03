@@ -1,5 +1,7 @@
 #' @title Make a RAM (Reticular Action Model)
 #'
+#' @inheritParams fit
+#'
 #' @description \code{make_dsem_ram} converts SEM arrow notation to \code{ram} describing SEM parameters
 #'
 #' @param times A character vector listing the set of times in order
