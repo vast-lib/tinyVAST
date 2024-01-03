@@ -56,7 +56,7 @@ function( L_tf,
   Eigen = eigen(Cov_tmp)
 
   # Desired loadings matrix
-  L_tf_rot = (Eigen$vectors%*%diag(sqrt(Eigen$values)))[,1:ncol(L_tf),drop=FALSE]
+  L_tf_rot = (Eigen$vectors%*%diag(sqrt(Eigen$values)))[,seq_len(ncol(L_tf)),drop=FALSE]
 
   # My new factors
   H = pseudoinverse(L_tf_rot) %*% L_tf
@@ -65,8 +65,8 @@ function( L_tf,
   # Get all loadings matrices to be increasing or decreasing
   order = match.arg(order)
   if( !is.null(order) ){
-    for( f in 1:ncol(L_tf) ){
-      Lm = lm( L_tf_rot[,f] ~ 1 + I(1:nrow(L_tf)) )
+    for( f in seq_len(ncol(L_tf)) ){
+      Lm = lm( L_tf_rot[,f] ~ 1 + I(seq_len(nrow(L_tf))) )
       Sign = sign(Lm$coef[2]) * ifelse(order=="decreasing", -1, 1)
       L_tf_rot[,f] = L_tf_rot[,f] * Sign
       x_sf[,f] = x_sf[,f] * Sign
