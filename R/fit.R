@@ -337,7 +337,7 @@ function( data,
   # Initial constructor of splines
   build_gam_basis <-
   function( formula ){
-    gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
+    gam_setup = mgcv::gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
     y_i = model.response(gam_setup$mf)  # OR USE: model.extract(gam_setup$mf, "response")
     offset_i = gam_setup$offset
 
