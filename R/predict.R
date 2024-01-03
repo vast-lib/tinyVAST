@@ -12,6 +12,7 @@
 #' @param what What REPORTed object to output, where \code{p_g} is the linear
 #'        predictor, \code{mu_g} is the inverse-linked transformed predictor.
 #'        and others are additive components of the linear predictor.
+#' @param se.fit Calculate standard errors?
 #' @param ... Not used.
 #' @importFrom Matrix Matrix sparseMatrix
 #'

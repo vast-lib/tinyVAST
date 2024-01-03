@@ -28,6 +28,8 @@ bias-correction.}
 predictor, \code{mu_g} is the inverse-linked transformed predictor.
 and others are additive components of the linear predictor.}
 
+\item{se.fit}{Calculate standard errors?}
+
 \item{...}{Not used.}
 }
 \description{
