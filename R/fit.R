@@ -77,8 +77,11 @@
 #' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations
 #' @importFrom corpcor pseudoinverse
-#' @importFrom methods is
+#' @importFrom methods is as
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
+#' @importFrom stats .getXlevels gaussian lm model.frame model.matrix
+#'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
+#'   update.formula
 #'
 #' @examples
 #' # Simulate a 2D AR1 spatial process with a cyclic confounder w
