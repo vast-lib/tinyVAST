@@ -703,11 +703,8 @@ function( nlminb_loops = 1,
   ), class = "tinyVASTcontrol" )
 }
 
-#' @title Print fitted tinyVAST object
-#'
-#' @description Prints output from fitted tinyVAST model
-#'
 #' @method print tinyVAST
+#' @import methods
 #' @export
 print.tinyVAST <-
 function( x,
