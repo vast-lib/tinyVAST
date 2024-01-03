@@ -1,7 +1,4 @@
-
-
-context("Testing cross platform and R version compatibility")
-
+# context("Testing cross platform and R version compatibility")
 # platform test
 test_that("tinyVAST example is working ", {
   # Simulate a 2D AR1 spatial process with a cyclic confounder w
@@ -11,7 +8,7 @@ test_that("tinyVAST example is working ", {
   R_yy = exp(-0.4 * abs(outer(1:n_y, 1:n_y, FUN="-")) )
   z = mvtnorm::rmvnorm(1, sigma=kronecker(R_xx,R_yy) )
 
-  # Simulate nuissance parameter z from oscillatory (day-night) process
+  # Simulate nuisance parameter z from oscillatory (day-night) process
   w = sample(1:n_w, replace=TRUE, size=length(z))
   Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), w=w, z=as.vector(z) + cos(w/n_w*2*pi))
   Data$n = Data$z + rnorm(nrow(Data), sd=1)
