@@ -30,7 +30,7 @@ test_that("Basic fit works", {
   expect_true(sum(is.na(s[,2])) == 0L)
 })
 
-# test_that("data_colnames are robust", {
+test_that("data_colnames are robust", {
 #
 #   expect_error({out <- fit(
 #     data = dat,
@@ -46,19 +46,18 @@ test_that("Basic fit works", {
 #     sem = ""
 #   )
 #   }, regexp = "variable")
-#
-#   expect_error({out <- fit(
-#     data = dat,
-#     formula = n ~ s(w),
-#     spatial_graph = mesh,
-#     control = tinyVASTcontrol(quiet = TRUE, trace = 0),
-#     data_colnames = list(
-#       space = c("x", "y"),
-#       banana = "var",
-#       time = "time",
-#       distribution = "dist"
-#     ),
-#     sem = ""
-#   )
-#   }, regexp = "variable")
-# })
+  #
+  expect_error({out <- fit(
+    data = dat,
+    formula = n ~ s(w),
+    spatial_graph = mesh,
+    data_colnames = list(
+      space = c("x", "y"),
+      banana = "var",
+      time = "time",
+      distribution = "dist"
+    ),
+    sem = ""
+  )
+  }, regexp = "data_colnames")
+})

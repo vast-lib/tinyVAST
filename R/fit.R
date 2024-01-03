@@ -118,7 +118,7 @@ function( data,
           dsem = NULL,
           family = gaussian(),
           delta_options = list(delta_formula = ~ 1),
-          data_colnames = list("space"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
+          data_colnames = list(space=c("x","y"), variable="var", time="time", distribution="dist"),
           times = NULL,
           variables = NULL,
           spatial_graph = NULL,
@@ -129,8 +129,11 @@ function( data,
   start_time = Sys.time()
 
   # General error checks
-  if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`")
-  if( !is.data.frame(data) ) stop("`data` must be a data frame")
+  if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`", call. = FALSE)
+  if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
+  if (!identical(sort(names(data_colnames)), sort(c("space", "variable", "time", "distribution")))) {
+    stop("`data_colnames` must be a list with names `space`, `variable`, `time`, and `distribution`.", call. = FALSE)
+  }
 
   ##############
   # input telescoping
