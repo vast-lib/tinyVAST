@@ -1,6 +1,7 @@
 #' @title Make a RAM (Reticular Action Model)
 #'
 #' @inheritParams fit
+#' @inheritParams sem::specifyModel
 #'
 #' @description \code{make_dsem_ram} converts SEM arrow notation to \code{ram} describing SEM parameters
 #'
