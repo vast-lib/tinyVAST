@@ -1,8 +1,7 @@
 Package: tinyVAST
 Type: Package
-Title: Vector Autoregressive Spatio-Temporal model using minimal feature-set
+Title: Vector Autoregressive Spatio-Temporal Model Using Minimal Feature-Set
 Version: 0.1.0
-Date: 2023-11-26
 Authors@R: 
     c(person(given = "James",
              family = "Thorson",
@@ -43,12 +42,14 @@ LinkingTo:
     TMB,
     RcppEigen,
 Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
-	using a minimal feature-set, including using dynamic 
-	structural equation model (DSEM) to specify the space-time-variable interactions
-	and the mgcv package to specify splines via the formula interface.
+	using a minimal feature-set, including using dynamic structural equation model
+	(DSEM) to specify the space-time-variable interactions and the mgcv package to
+	specify splines via the formula interface.
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 LazyData: true
+Config/testthat/edition: 3
+Config/testthat/parallel: true
