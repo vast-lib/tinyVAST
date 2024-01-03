@@ -12,18 +12,18 @@ Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
     and the mgcv package to specify splines via the formula interface.
 License: GPL-3
 Depends:
-    Matrix (>= 1.3.0),
-    mgcv,
-    R (>= 4.1.0),
-    TMB (>= 1.9.7)
+    R (>= 4.1.0)
 Imports:
     corpcor,
     fmesher,
     igraph,
+    Matrix (>= 1.3.0),
     methods,
+    mgcv,
     sem,
     sf,
     sfnetworks,
+    TMB (>= 1.9.7),
     units
 Suggests:
     dsem,
