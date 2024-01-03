@@ -23,7 +23,7 @@ add_to_family <- function(x) {
 
 #' Additional families
 #'
-#' Additional families compatible with [tinyVAST()].
+#' Additional families compatible with \pkg{tinyVAST}.
 #'
 #' @param link Link.
 #' @export
