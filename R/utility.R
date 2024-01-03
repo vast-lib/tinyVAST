@@ -144,7 +144,7 @@ function( model ){
                 variables[vars[2]] <- FALSE
             variables[vars[1]] <- TRUE
         }
-        else stop("incorrectly specified model")
+        else stop("incorrectly specified model", call. = FALSE)
     }
     list(endogenous = names(variables[variables]), exogenous = names(variables[!variables]))
 }
