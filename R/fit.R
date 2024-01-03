@@ -82,6 +82,7 @@
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula
+#' @importFrom TMB MakeADFun
 #'
 #' @examples
 #' # Simulate a 2D AR1 spatial process with a cyclic confounder w
