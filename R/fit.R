@@ -251,13 +251,14 @@ function( data,
                          INDEX=output$ram[which_nonzero,4], FUN=max)
 
     # Check for rank-deficient precision from RAM
-    ram2 = subset( data.frame(output$ram), heads==2 )
+    df_ram = data.frame(output$ram)
+    ram2 = df_ram[df_ram$heads == 2,,drop=FALSE]
     total_variance_h = tapply( as.numeric(ifelse( is.na(ram2$start), 1, ram2$start)),
             INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
-    ram1 = subset( data.frame(output$ram), heads==1 )
+    ram1 = df_ram[df_ram$heads == 1,,drop=FALSE]
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
             INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
-    if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+    if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
       stop("Must use options$gmrf_parameterization=`projection` for the sem RAM supplied")
     }
 
