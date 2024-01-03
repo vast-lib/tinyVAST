@@ -22,6 +22,9 @@ make_eof_ram(
 \item{remove_na}{Boolean indicating whether to remove NA values from RAM (default) or not.
 \code{remove_NA=FALSE} might be useful for exploration and diagnostics for
 advanced users}
+
+\item{standard_deviations}{One of \code{"equal"}, \code{"unequal"}, or a numeric vector
+indicating fixed values.}
 }
 \value{
 A reticular action module (RAM) describing dependencies
