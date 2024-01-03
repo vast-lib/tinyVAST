@@ -25,7 +25,7 @@ A list with elements common to standard R family objects including \code{family}
 \code{link}, \code{linkfun}, and \code{linkinv}.
 }
 \description{
-Additional families compatible with \code{\link[=tinyVAST]{tinyVAST()}}.
+Additional families compatible with \pkg{tinyVAST}.
 }
 \details{
 Copied from sdmTMB

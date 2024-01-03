@@ -19,7 +19,7 @@ rotate_pca(
 each factor to achieve a given order across dimension \eqn{T}.}
 }
 \value{
-List containg the rotated loadings \code{L_tf},
+List containing the rotated loadings \code{L_tf},
 the inverse-rotated response matrix \code{x_sf},
 and the rotation \code{H}
 }

@@ -1,11 +1,11 @@
 #' @title Predict using vector autoregressive spatio-temporal model
 #'
-#' @description Predicts values given new covariates using a tinyVAST model
+#' @description Predicts values given new covariates using a \pkg{tinyVAST} model
 #'
 #' @inheritParams add_predictions
 #'
-#' @param remove_origdata Whether to speed `predict(.)` by elminating original data
-#'        from TMB object, thereby speeding TMB object construction.  However, this
+#' @param remove_origdata Whether to eliminate the original data
+#'        from the TMB object, thereby speeding up the TMB object construction.  However, this
 #'        also eliminates information about random-effect variance, and is not
 #'        appropriate when requesting predictive standard errors or epsilon
 #'        bias-correction.

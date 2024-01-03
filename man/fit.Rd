@@ -23,7 +23,7 @@ fit(
 \arguments{
 \item{data}{Data-frame of predictor, response, and offset variables.  Also includes
 variables that specify space, time, variables, and the distribution for samples,
-as identified by argument \code{data_colnames}}
+as identified by argument \code{data_colnames}.}
 
 \item{formula}{Formula with response on left-hand-side and predictors on right-hand-side,
 parsed by \code{mgcv} and hence allowing \code{s(.)} for splines or \code{offset(.)} for
@@ -39,7 +39,7 @@ including lagged or simultaneous effects for
 constructing a space-variable interaction.
 \code{dsem=NULL} disables the space-variable interaction, and see
 \code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}
-for more description}
+for more description.}
 
 \item{family}{a function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
 \code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}.  Alternatively, it can be a named list of
@@ -79,7 +79,7 @@ settings, and see documentation for that function for details.}
 }
 \description{
 Fits a vector autoregressive spatio-temporal model using
-a minimal feature-set, and widely used interface for objects
+a minimal feature-set and a widely used interface.
 }
 \details{
 \code{tinyVAST} includes four basic inputs that specify the model structure:

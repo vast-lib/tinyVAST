@@ -1,8 +1,8 @@
 #' @title Multivariate Normal Random Deviates using Sparse Precision
 #'
-#' @description This function provide a random number generator for
+#' @description This function provides a random number generator for
 #'              the multivariate normal distribution with mean equal
-#'              to mean and sparse precision matrix Q.
+#'              to `mean` and sparse precision matrix `Q`.
 #'
 #' @param n number of observations.
 #' @param mean mean vector.
@@ -40,7 +40,7 @@ function( n,
 #' @param order Options for resolving label-switching via reflecting
 #'        each factor to achieve a given order across dimension \eqn{T}.
 #'
-#' @return List containg the rotated loadings \code{L_tf},
+#' @return List containing the rotated loadings \code{L_tf},
 #'         the inverse-rotated response matrix \code{x_sf},
 #'         and the rotation \code{H}
 #'
