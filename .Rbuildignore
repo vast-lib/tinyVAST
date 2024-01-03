@@ -3,3 +3,5 @@
 ^docs$
 ^pkgdown$
 ^scratch$
+^.*\.Rproj$
+^\.Rproj\.user$
