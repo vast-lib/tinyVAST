@@ -44,8 +44,8 @@ function( object,
 
   # Add standard errors
   if( isTRUE(se.fit) ){
-    if( what!="p_g" ) stop("se.fit=TRUE only works for what=`p_g`")
-    if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE")
+    if( what!="p_g" ) stop("se.fit=TRUE only works for what=`p_g`", call. = FALSE)
+    if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE", call. = FALSE)
     newsd = sdreport( obj = newobj,
                       par.fixed = object$opt$par,
                       hessian.fixed = object$internal$Hess_fixed,
