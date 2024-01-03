@@ -32,12 +32,10 @@ Suggests:
     lattice,
     mvtnorm,
     pdp,
-    pdp,
     rmarkdown,
     rnaturalearth,
     rnaturalearthdata,
     sdmTMB,
-    sf,
     tweedie,
     viridisLite,
     visreg
