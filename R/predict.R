@@ -13,6 +13,7 @@
 #'        predictor, \code{mu_g} is the inverse-linked transformed predictor.
 #'        and others are additive components of the linear predictor.
 #' @param ... Not used.
+#' @importFrom Matrix Matrix sparseMatrix
 #'
 #' @method predict tinyVAST
 #' @export
@@ -189,7 +190,7 @@ function( object,
 
     # Assemble predZ
     Z_gk = lapply( seq_along(gam$smooth),
-                    FUN = \(x) PredictMat(gam$smooth[[x]], data=newdata) )
+                    FUN = \(x) mgcv::PredictMat(gam$smooth[[x]], data=newdata) )
     Z_gk = do.call( cbind, Z_gk )
     #if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=ncol(tmb_data$Z_ik) )
     if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=0 )
@@ -220,7 +221,7 @@ function( object,
   }else if( is(object$spatial_graph, "igraph") ) {
     Match = match( newdata[,data_colnames$space], rownames(object$tmb_inputs$tmb_data$Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
-    A_gs = sparseMatrix( i=1:nrow(newdata), j=Match, x=rep(1,nrow(newdata)) )
+    A_gs = sparseMatrix( i=seq_len(nrow(newdata)), j=Match, x=rep(1,nrow(newdata)) )
   }else if( is(object$spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
     # stream network
     A_gs = sfnetwork_evaluator( stream = object$spatial_graph$stream,
