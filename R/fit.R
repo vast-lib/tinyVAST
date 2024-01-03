@@ -211,13 +211,14 @@ function( data,
     }
 
     # Check for rank-deficient precision from RAM
-    ram_gamma = subset( data.frame(output$ram), heads==2 )
+    df_ram = data.frame(output$ram)
+    ram_gamma = df_ram[df_ram$heads==2,,drop=FALSE]
     total_variance_h = tapply( as.numeric(ifelse(is.na(ram_gamma$start), 1, ram_gamma$start)),
             INDEX = ram_gamma$from, FUN=\(x)sum(abs(x)) )
-    ram_rho = subset( data.frame(output$ram), heads==1 )
+    ram_rho = df_ram[df_ram$heads==1,,drop=FALSE]
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram_rho$start), 1, ram_rho$start)),
             INDEX = ram_rho$from, FUN=\(x)sum(abs(x)) )
-    if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+    if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
       stop("Must use gmrf_parameterization=`projection` for the dsem RAM supplied")
     }
 
