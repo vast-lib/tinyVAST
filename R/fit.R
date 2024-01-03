@@ -585,8 +585,8 @@ function( data,
   for( i in seq_len(max(0,control$nlminb_loops)) ){
     if( isFALSE(control$quiet) ) message("Running nlminb_loop #", i)
     opt = nlminb( start = opt$par,
-                  obj = obj$fn,
-                  gr = obj$gr,
+                  objective = obj$fn,
+                  gradient = obj$gr,
                   control = list( eval.max = control$eval.max,
                                   iter.max = control$iter.max,
                                   trace = control$trace ) )
