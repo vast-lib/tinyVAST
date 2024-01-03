@@ -343,7 +343,7 @@ function( data,
 
     # Extract and combine penalization matrices
     S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
-    S_kk = .bdiag(S_list)         # join S's in sparse matrix
+    S_kk = Matrix::.bdiag(S_list)       # join S's in sparse matrix
     Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
     if(is.null(Sdims)) Sdims = vector(length=0)
 
