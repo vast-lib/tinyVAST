@@ -1,7 +1,7 @@
 #' @title Fit vector autoregressive spatio-temporal model
 #'
 #' @description Fits a vector autoregressive spatio-temporal model using
-#'  a minimal feature-set, and widely used interface for objects
+#'  a minimal feature-set and a widely used interface.
 #'
 #' @inheritParams dsem::make_dsem_ram
 #'
@@ -14,10 +14,10 @@
 #'        constructing a space-variable interaction.
 #'        \code{dsem=NULL} disables the space-variable interaction, and see
 #'        [make_dsem_ram()]  or [make_eof_ram()]
-#'        for more description
+#'        for more description.
 #' @param data Data-frame of predictor, response, and offset variables.  Also includes
 #'        variables that specify space, time, variables, and the distribution for samples,
-#'        as identified by argument \code{data_colnames}
+#'        as identified by argument \code{data_colnames}.
 #' @param data_colnames A list that indicates what columns of `data` are used
 #'        to indicate different space, time, variables, and distributions.
 #'        Space and variable are then used to interpret argument `sem`,
@@ -341,7 +341,7 @@ function( data,
     y_i = model.response(gam_setup$mf)  # OR USE: model.extract(gam_setup$mf, "response")
     offset_i = gam_setup$offset
 
-    # Extrtact and combine penelization matrices
+    # Extract and combine penalization matrices
     S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
     S_kk = .bdiag(S_list)         # join S's in sparse matrix
     Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
@@ -913,7 +913,7 @@ function( object,
   if( which=="fixed" ){
     V = object$sdrep$cov.fixed
     if(is.null(V)){
-      warning("Please re-run `tinyVAS` with `getsd=TRUE`, or confirm that the model is converged")
+      warning("Please re-run `tinyVAST` with `getsd=TRUE`, or confirm that the model is converged")
     }
   }
   if( which=="random" ){
@@ -922,7 +922,7 @@ function( object,
   if( which=="both" ){
     H = object$sdrep$jointPrecision
     if(is.null(H)){
-      warning("Please re-run `tinyVAS` with `getsd=TRUE` and `getJointPrecision=TRUE`, or confirm that the model is converged")
+      warning("Please re-run `tinyVAST` with `getsd=TRUE` and `getJointPrecision=TRUE`, or confirm that the model is converged")
       V = NULL
     }else{
       V = solve(H)
