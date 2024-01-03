@@ -8,6 +8,8 @@
 #' @param remove_na Boolean indicating whether to remove NA values from RAM (default) or not.
 #'            \code{remove_NA=FALSE} might be useful for exploration and diagnostics for
 #'            advanced users
+#' @param standard_deviations One of `"equal"`, `"unequal"`, or a numeric vector
+#'   indicating fixed values.
 #'
 #' @return A reticular action module (RAM) describing dependencies
 #'
@@ -26,7 +28,7 @@ function( times,
 
   ####### Error checks
 
-  if( isFALSE((standard_deviations %in% c("equal","unequal")) | is.numeric(standard_deviations)) ){
+  if( isFALSE((standard_deviations %in% c("equal","unequal")) || is.numeric(standard_deviations)) ){
     stop("Check `standard_deviations` in `make_eof_ram`")
   }
 
