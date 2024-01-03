@@ -350,6 +350,12 @@ function( data,
     if(is.null(Sdims)) Sdims = vector(length=0)
 
     # Get covariates
+    not_allowed <- vapply(c("t2(", "te("), \(.x)
+      length(grep(.x, x=gam_setup$term.names, fixed=TRUE)) > 0, FUN.VALUE = logical(1L)
+    )
+    if (any(not_allowed)) {
+      stop("Found t2() or te() smoothers. These are not yet implemented.", call. = FALSE)
+    }
     which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
     X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
     Z_ik = gam_setup$X[,which_se,drop=FALSE]
