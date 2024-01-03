@@ -12,6 +12,7 @@ Authors@R:
 Imports:
     sem,
     igraph,
+    methods,
     corpcor,
     sfnetworks,
     units,
