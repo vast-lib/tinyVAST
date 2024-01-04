@@ -45,7 +45,7 @@ constructing a space-variable interaction.
 these functions, with names that match levels of
 \code{data$data_colnames$distribution} to allow different
 families by row of data. Delta model families are possible.
-See \code{\link[tidyVAST:families]{Families}},}
+See \code{\link[tinyVAST:families]{Families}},}
 
 \item{data_colnames}{A named list that indicates what columns of \code{data} are used
 to indicate different space, time, variables, and distributions.
@@ -61,7 +61,7 @@ from the minimum to maximum value of \code{data$data_colnames$time}.}
 \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
 \code{family}, \code{sem}, and \code{dsem}, but specify options for the
 second linear predictor of a delta model, and are only used (or estimable)
-when a \code{\link[tidyVAST:families]{delta family}} is used for some samples.}
+when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
 
 \item{variables}{A character vector listing the set of variables.
 if \code{variables=NULL}, then it is filled in as the unique values
