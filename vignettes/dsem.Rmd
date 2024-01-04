@@ -11,9 +11,13 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+has_dsem = requireNamespace("dsem", quietly = TRUE)
+EVAL <- has_dsem
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = EVAL,
+  purl = EVAL
 )
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
