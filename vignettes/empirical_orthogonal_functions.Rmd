@@ -10,9 +10,8 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-has_fmesher = requireNamespace("fmesher", quietly = TRUE)
 has_rnaturalearth = requireNamespace("rnaturalearth", quietly = TRUE)
-EVAL <- has_rnaturalearth && has_fmesher
+EVAL <- has_rnaturalearth
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -80,7 +79,7 @@ out = fit( dsem = dsem,
            data_colnames = list( "space"=c("X","Y"), "variable"="var",
                                  "time"="year", "distribution"="dist"),
            times = c(paste0("EOF_",seq_len(n_eof)), sort(unique(Data[,'year']))),
-           control = tinyVASTcontrol( quiet=TRUE, trace=0, profile="alpha_j",
+           control = tinyVASTcontrol( quiet=F, trace=1, profile="alpha_j",
                                       nlminb_loops=1, getsd=TRUE,
                                       gmrf_parameterization="projection") )
 ```
