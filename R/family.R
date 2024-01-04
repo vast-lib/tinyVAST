@@ -74,6 +74,7 @@ tweedie <- function(link = "log") {
 #' @param link1 First linear predictor link
 #' @param link2 Second linear predictor link
 #' @export
+#' @importFrom stats binomial
 #' @examples
 #' delta_lognormal()
 #' @rdname families
