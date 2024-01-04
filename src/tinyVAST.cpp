@@ -1,6 +1,20 @@
 #define TMB_LIB_INIT R_init_tinyVAST
 #include <TMB.hpp>   //Links in the TMB libraries
 
+enum valid_family {
+  gaussian_family  = 0,
+  tweedie_family   = 1,
+  lognormal_family = 2,
+  poisson_family   = 3,
+  bernoulli_family = 4,
+};
+
+enum valid_link {
+  identity_link = 0,
+  log_link      = 1,
+  logit_link    = 2
+};
+
 // Needed for returning SparseMatrix for Ornstein-Uhlenbeck network correlations
 template<class Type>
 Eigen::SparseMatrix<Type> Q_network( Type log_theta,
@@ -271,11 +285,11 @@ Type one_predictor_likelihood( Type y,
   //Type devresid = 0;
 
   switch( link ){
-    case 0:  // identity-link
+    case identity_link:
       mu = p;
       logmu = log( p );
       break;
-    case 1: // log-link
+    case log_link:
       mu = exp(p);
       logmu = p;
       break;
@@ -285,19 +299,19 @@ Type one_predictor_likelihood( Type y,
   if( !R_IsNA(asDouble(y)) ){
     // Distribution
     switch( family ){
-      case 0:  // Normal distribution
+      case gaussian_family:
         nll -= dnorm( y, mu, exp(log_sigma_segment(0)), true );
         devresid = y - p;
         break;
-      case 1: // Tweedie
+      case tweedie_family:
         nll -= dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
         devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
         break;
-      case 2: // lognormal
+      case lognormal_family:
         nll -= dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
         devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
         break;
-      case 3: // Poisson
+      case poisson_family:
         nll -= dpois( y, mu, true );
         //devresid = MUST ADD;
         break;
@@ -327,15 +341,15 @@ Type two_predictor_likelihood( Type y,
   logmu1 = log( mu1 );
   // second link
   switch( link(1) ){
-    case 0:  // identity-link
+    case identity_link:
       mu2 = p2;
       logmu2 = log( p2 );
       break;
-    case 1: // log-link
+    case identity_link:
       mu2 = exp(p2);
       logmu2 = p2;
       break;
-    // case 2: // Logit
+    // case logit_link: // Logit
     default:
       error("Link not implemented.");
   }
@@ -348,19 +362,19 @@ Type two_predictor_likelihood( Type y,
       nll -= logmu1;
       //deviance1_i(i) = -2 * log_mu1(i);
       switch( family(1) ){
-        case 0:  // Normal distribution
+        case gaussian_family:
           nll -= dnorm( y, mu2, exp(log_sigma_segment(0)), true );
           //devresid = y - p;
           break;
-        case 1: // Tweedie
+        case tweedie_family:
           nll -= dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
           //devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
           break;
-        case 2: // lognormal
+        case lognormal_family:
           nll -= dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
           //devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
           break;
-        case 3: // Poisson
+        case poisson_family:
           nll -= dpois( y, mu2, true );
           // devresid = MUST ADD;
           break;
@@ -646,10 +660,10 @@ Type objective_function<Type>::operator() (){
   for( int g=0; g<p_g.size(); g++ ){
     if( components_e(e_g(g))==1 ){
       switch( link_ez(e_g(g),0) ){
-        case 0: // identity-link
+        case identity_link:
           mu_g(g) = p_g(g);
           break;
-        case 1: // log-link
+        case log_link:
           mu_g(g) = exp(p_g(g));
           break;
       }
@@ -658,13 +672,13 @@ Type objective_function<Type>::operator() (){
       mu_g(g) = invlogit( p_g(g) );
       // second link
       switch( link_ez(e_g(g),1) ){
-        case 0:  // identity-link
+        case identity_link:
           mu_g(g) *= p2_g(g);
           break;
-        case 1: // log-link
+        case log_link:
           mu_g(g) *= exp(p2_g(g));
           break;
-        // case 2: // Logit
+        // case logit_link: // Logit
         default:
           error("Link not implemented.");
       }
