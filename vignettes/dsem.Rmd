@@ -1,10 +1,10 @@
 ---
-title: "Dynamic structural equation model"
+title: "Dynamic structural equation models"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{Dynamic structural equation model}
+  %\VignetteIndexEntry{Dynamic structural equation models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{dsem}
