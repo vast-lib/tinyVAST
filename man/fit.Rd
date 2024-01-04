@@ -10,10 +10,10 @@ fit(
   sem = NULL,
   dsem = NULL,
   family = gaussian(),
-  delta_options = list(delta_formula = ~1),
   data_colnames = list(space = c("x", "y"), variable = "var", time = "time", distribution
     = "dist"),
   times = NULL,
+  delta_options = list(delta_formula = ~1),
   variables = NULL,
   spatial_graph = NULL,
   control = tinyVASTcontrol(),
