@@ -1,54 +1,53 @@
-Package: tinyVAST
 Type: Package
-Title: Vector Autoregressive Spatio-Temporal model using minimal feature-set
+Package: tinyVAST
+Title: Vector Autoregressive Spatio-Temporal Model Using Minimal
+    Feature-Set
 Version: 0.1.0
-Date: 2023-11-26
 Authors@R: 
-    c(person(given = "James",
-             family = "Thorson",
-             role = c("aut", "cre"),
-             email = "James.Thorson@noaa.gov",
-             comment = c(ORCID = "0000-0001-7415-1010"))
-    )
-Imports:
-    sem,
-    igraph,
-    corpcor,
-    sfnetworks,
-    units,
-    sf,
-    fmesher,
+    person("James", "Thorson", , "James.Thorson@noaa.gov", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7415-1010"))
+Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
+    using a minimal feature-set, including using dynamic structural
+    equation model (DSEM) to specify the space-time-variable interactions
+    and the mgcv package to specify splines via the formula interface.
+License: GPL-3
 Depends:
-    R (>= 4.1.0),
-    TMB (>= 1.9.7),
-    mgcv,
+    R (>= 4.1.0)
+Imports:
+    corpcor,
+    fmesher,
+    igraph,
     Matrix (>= 1.3.0),
+    methods,
+    mgcv,
+    sem,
+    sf,
+    sfnetworks,
+    TMB (>= 1.9.7),
+    units
 Suggests:
+    dsem,
+    ggplot2,
     knitr,
-    rmarkdown,
-    pdp,
-    visreg,
-    tweedie,
+    lattice,
     mvtnorm,
     pdp,
-    lattice,
-    ggplot2,
+    rmarkdown,
     rnaturalearth,
     rnaturalearthdata,
-    sf, 
     sdmTMB,
+    testthat,
+    tweedie,
     viridisLite,
-    dsem
+    visreg
 LinkingTo:
-    TMB,
     RcppEigen,
-Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
-	using a minimal feature-set, including using dynamic 
-	structural equation model (DSEM) to specify the space-time-variable interactions
-	and the mgcv package to specify splines via the formula interface.
-License: GPL-3
+    TMB
+VignetteBuilder: 
+    knitr
+Config/testthat/edition: 3
+Config/testthat/parallel: true
 Encoding: UTF-8
-RoxygenNote: 7.2.3
-VignetteBuilder: knitr
-Roxygen: list(markdown = TRUE)
 LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

@@ -18,8 +18,8 @@
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
 
-\item{remove_origdata}{Whether to speed \code{predict(.)} by elminating original data
-from TMB object, thereby speeding TMB object construction.  However, this
+\item{remove_origdata}{Whether to eliminate the original data
+from the TMB object, thereby speeding up the TMB object construction.  However, this
 also eliminates information about random-effect variance, and is not
 appropriate when requesting predictive standard errors or epsilon
 bias-correction.}
@@ -28,8 +28,10 @@ bias-correction.}
 predictor, \code{mu_g} is the inverse-linked transformed predictor.
 and others are additive components of the linear predictor.}
 
+\item{se.fit}{Calculate standard errors?}
+
 \item{...}{Not used.}
 }
 \description{
-Predicts values given new covariates using a tinyVAST model
+Predicts values given new covariates using a \pkg{tinyVAST} model
 }

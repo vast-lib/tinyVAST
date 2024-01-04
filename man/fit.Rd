@@ -10,10 +10,10 @@ fit(
   sem = NULL,
   dsem = NULL,
   family = gaussian(),
-  delta_options = list(delta_formula = ~1),
   data_colnames = list(space = c("x", "y"), variable = "var", time = "time", distribution
     = "dist"),
   times = NULL,
+  delta_options = list(delta_formula = ~1),
   variables = NULL,
   spatial_graph = NULL,
   control = tinyVASTcontrol(),
@@ -23,7 +23,7 @@ fit(
 \arguments{
 \item{data}{Data-frame of predictor, response, and offset variables.  Also includes
 variables that specify space, time, variables, and the distribution for samples,
-as identified by argument \code{data_colnames}}
+as identified by argument \code{data_colnames}.}
 
 \item{formula}{Formula with response on left-hand-side and predictors on right-hand-side,
 parsed by \code{mgcv} and hence allowing \code{s(.)} for splines or \code{offset(.)} for
@@ -31,29 +31,23 @@ an offset.}
 
 \item{sem}{Specification for structural equation model structure for
 constructing a space-variable interaction.
-\code{sem=NULL} disables the space-variable interaction, and
-see \code{\link[=make_sem_ram]{make_sem_ram()}} for more description.}
+\code{sem=NULL} disables the space-variable interaction;
+see \code{\link[=make_sem_ram]{make_sem_ram()}}.}
 
 \item{dsem}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects for
 constructing a space-variable interaction.
-\code{dsem=NULL} disables the space-variable interaction, and see
-\code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}
-for more description}
+\code{dsem=NULL} disables the space-variable interaction; see
+\code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}.}
 
-\item{family}{a function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
-\code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}.  Alternatively, it can be a named list of
+\item{family}{A function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
+\code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}. Alternatively, can be a named list of
 these functions, with names that match levels of
-\code{data$data_colnames$distribution}.  Finally, the user can specify
-\code{\link[=independent_delta]{independent_delta()}} to specify a delta model.}
+\code{data$data_colnames$distribution} to allow different
+families by row of data. Delta model families are possible.
+See \code{\link[tinyVAST:families]{Families}},}
 
-\item{delta_options}{a named list with slots for \code{delta_formula},
-\code{delta_sem}, and \code{delta_dsem}.  These follow the same format as
-\code{family}, \code{sem}, and \code{dsem}, but specify options for the
-second linear predictor of a delta model, and are only used (or estimable)
-when \code{\link[=independent_delta]{independent_delta()}} for some samples.}
-
-\item{data_colnames}{A list that indicates what columns of \code{data} are used
+\item{data_colnames}{A named list that indicates what columns of \code{data} are used
 to indicate different space, time, variables, and distributions.
 Space and variable are then used to interpret argument \code{sem},
 space, time, and variables are used to interpret argument \code{dsem}, and
@@ -61,25 +55,33 @@ distribution is used to interpret argument \code{family}.}
 
 \item{times}{A integer vector listing the set of times in order.
 If \code{times=NULL}, then it is filled in as the vector of integers
-from the minimum to maximum value of \code{data$data_colnames$time}}
+from the minimum to maximum value of \code{data$data_colnames$time}.}
+
+\item{delta_options}{a named list with slots for \code{delta_formula},
+\code{delta_sem}, and \code{delta_dsem}. These follow the same format as
+\code{family}, \code{sem}, and \code{dsem}, but specify options for the
+second linear predictor of a delta model, and are only used (or estimable)
+when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
 
 \item{variables}{A character vector listing the set of variables.
 if \code{variables=NULL}, then it is filled in as the unique values
-from \code{data$data_colnames$variables}}
+from \code{data$data_colnames$variables}.}
 
 \item{spatial_graph}{Object that represents spatial relationships, either using
-\emph{fmesher} \code{\link[=fm_mesh_2d]{fm_mesh_2d()}} to apply the SPDE method,
-\emph{igraph} \code{\link[=make_empty_graph]{make_empty_graph()}} for independent time-series,
-\emph{igraph} \code{\link[=make_graph]{make_graph()}} to apply a simultaneous autoregressive (SAR)
+\code{\link[fmesher:fm_mesh_2d]{fmesher::fm_mesh_2d()}} to apply the SPDE method,
+\code{\link[igraph:make_empty_graph]{igraph::make_empty_graph()}} for independent time-series,
+\code{\link[igraph:make_graph]{igraph::make_graph()}} to apply a simultaneous autoregressive (SAR)
 process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
 or \code{NULL} to specify a single site.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
-settings, and see documentation for that function for details.}
+settings.}
+
+\item{...}{Not used.}
 }
 \description{
 Fits a vector autoregressive spatio-temporal model using
-a minimal feature-set, and widely used interface for objects
+a minimal feature-set and a widely used interface.
 }
 \details{
 \code{tinyVAST} includes four basic inputs that specify the model structure:
@@ -100,7 +102,7 @@ is then parsed to include a single exogenous variance for the single variable\ta
    \strong{Model type} \tab \strong{How to specify} \cr
    Generalized additive model \tab specify \code{spatial_graph=NULL} and \code{dsem=""}, and then use \code{formula} to specify splines and covariates \cr
    Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) \tab specify \code{spatial_graph=NULL} and use \code{dsem} to specify interactions among variables and over time \cr
-   Univeriate spatial model \tab specify \code{spatial_graph} and \code{dsem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+   Univariate spatial model \tab specify \code{spatial_graph} and \code{dsem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
    Multivariate spatial model \tab specify \code{spatial_graph} and use \code{dsem} (without any lagged effects) to specify spatial interactions \cr
    Vector autoregressive spatio-temporal model \tab specify \code{spatial_graph} and use \code{dsem=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{dsem} and \code{spatial_graph} \cr
 }

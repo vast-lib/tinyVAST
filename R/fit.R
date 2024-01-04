@@ -1,24 +1,21 @@
 #' @title Fit vector autoregressive spatio-temporal model
 #'
 #' @description Fits a vector autoregressive spatio-temporal model using
-#'  a minimal feature-set, and widely used interface for objects
-#'
-#' @inheritParams dsem::make_dsem_ram
+#'  a minimal feature-set and a widely used interface.
 #'
 #' @param sem Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
-#'        \code{sem=NULL} disables the space-variable interaction, and
-#'        see [make_sem_ram()] for more description.
+#'        \code{sem=NULL} disables the space-variable interaction;
+#'        see [make_sem_ram()].
 #' @param dsem Specification for time-series structural equation model structure
 #'        including lagged or simultaneous effects for
 #'        constructing a space-variable interaction.
-#'        \code{dsem=NULL} disables the space-variable interaction, and see
-#'        [make_dsem_ram()]  or [make_eof_ram()]
-#'        for more description
+#'        `dsem=NULL` disables the space-variable interaction; see
+#'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param data Data-frame of predictor, response, and offset variables.  Also includes
 #'        variables that specify space, time, variables, and the distribution for samples,
-#'        as identified by argument \code{data_colnames}
-#' @param data_colnames A list that indicates what columns of `data` are used
+#'        as identified by argument `data_colnames`.
+#' @param data_colnames A named list that indicates what columns of `data` are used
 #'        to indicate different space, time, variables, and distributions.
 #'        Space and variable are then used to interpret argument `sem`,
 #'        space, time, and variables are used to interpret argument `dsem`, and
@@ -26,30 +23,32 @@
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
 #'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
 #'        an offset.
-#' @param family a function returning a class \code{family}, including [gaussian()],
-#'        [lognormal()], or [tweedie()].  Alternatively, it can be a named list of
+#' @param family A function returning a class \code{family}, including [gaussian()],
+#'        [lognormal()], or [tweedie()]. Alternatively, can be a named list of
 #'        these functions, with names that match levels of
-#'        \code{data$data_colnames$distribution}.  Finally, the user can specify
-#'        [independent_delta()] to specify a delta model.
+#'        \code{data$data_colnames$distribution} to allow different
+#'        families by row of data. Delta model families are possible.
+#'        See \code{\link[tinyVAST:families]{Families}},
 #' @param delta_options a named list with slots for \code{delta_formula},
-#'        \code{delta_sem}, and \code{delta_dsem}.  These follow the same format as
+#'        \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
 #'        \code{family}, \code{sem}, and \code{dsem}, but specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
-#'        when [independent_delta()] for some samples.
+#'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_graph Object that represents spatial relationships, either using
-#'        _fmesher_ [fm_mesh_2d()] to apply the SPDE method,
-#'        _igraph_ [make_empty_graph()] for independent time-series,
-#'        _igraph_ [make_graph()] to apply a simultaneous autoregressive (SAR)
+#'        [fmesher::fm_mesh_2d()] to apply the SPDE method,
+#'        [igraph::make_empty_graph()] for independent time-series,
+#'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
 #'        process, [sfnetwork_mesh()] for stream networks,
 #'        or `NULL` to specify a single site.
 #' @param control Output from [tinyVASTcontrol()], used to define user
-#'        settings, and see documentation for that function for details.
+#'        settings.
 #' @param times A integer vector listing the set of times in order.
-#'        If \code{times=NULL}, then it is filled in as the vector of integers
-#'        from the minimum to maximum value of \code{data$data_colnames$time}
+#'        If `times=NULL`, then it is filled in as the vector of integers
+#'        from the minimum to maximum value of `data$data_colnames$time`.
 #' @param variables A character vector listing the set of variables.
-#'        if \code{variables=NULL}, then it is filled in as the unique values
-#'        from \code{data$data_colnames$variables}
+#'        if `variables=NULL`, then it is filled in as the unique values
+#'        from `data$data_colnames$variables`.
+#' @param ... Not used.
 #'
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:
@@ -70,15 +69,19 @@
 #' | --- | --- |
 #' | Generalized additive model | specify `spatial_graph=NULL` and `dsem=""`, and then use `formula` to specify splines and covariates |
 #' | Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_graph=NULL` and use `dsem` to specify interactions among variables and over time |
-#' | Univeriate spatial model | specify `spatial_graph` and `dsem=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
+#' | Univariate spatial model | specify `spatial_graph` and `dsem=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
 #' | Multivariate spatial model | specify `spatial_graph` and use `dsem` (without any lagged effects) to specify spatial interactions |
 #' | Vector autoregressive spatio-temporal model | specify `spatial_graph` and use `dsem=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `dsem` and `spatial_graph` |
 #'
 #' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations
 #' @importFrom corpcor pseudoinverse
-#' @importFrom methods is
+#' @importFrom methods is as
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
+#' @importFrom stats .getXlevels gaussian lm model.frame model.matrix
+#'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
+#'   update.formula
+#' @importFrom TMB MakeADFun sdreport
 #'
 #' @examples
 #' # Simulate a 2D AR1 spatial process with a cyclic confounder w
@@ -114,9 +117,9 @@ function( data,
           sem = NULL,
           dsem = NULL,
           family = gaussian(),
-          delta_options = list(delta_formula = ~ 1),
-          data_colnames = list("space"=c("x","y"), "variable"="var", "time"="time", "distribution"="dist"),
+          data_colnames = list(space=c("x","y"), variable="var", time="time", distribution="dist"),
           times = NULL,
+          delta_options = list(delta_formula = ~ 1),
           variables = NULL,
           spatial_graph = NULL,
           control = tinyVASTcontrol(),
@@ -126,8 +129,11 @@ function( data,
   start_time = Sys.time()
 
   # General error checks
-  if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`")
-  if( !is.data.frame(data) ) stop("`data` must be a data frame")
+  if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`", call. = FALSE)
+  if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
+  if (!identical(sort(names(data_colnames)), sort(c("space", "variable", "time", "distribution")))) {
+    stop("`data_colnames` must be a list with names `space`, `variable`, `time`, and `distribution`.", call. = FALSE)
+  }
 
   ##############
   # input telescoping
@@ -188,7 +194,7 @@ function( data,
     }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
       output = dsem
     }else{
-      stop("`dsem` must be either `NULL` or a character-string")
+      stop("`dsem` must be either `NULL` or a character-string", call. = FALSE)
     }
 
     # Identify arrow-type for each beta_j estimated in RAM
@@ -207,13 +213,14 @@ function( data,
     }
 
     # Check for rank-deficient precision from RAM
-    ram_gamma = subset( data.frame(output$ram), heads==2 )
+    df_ram = data.frame(output$ram)
+    ram_gamma = df_ram[df_ram$heads==2,,drop=FALSE]
     total_variance_h = tapply( as.numeric(ifelse(is.na(ram_gamma$start), 1, ram_gamma$start)),
             INDEX = ram_gamma$from, FUN=\(x)sum(abs(x)) )
-    ram_rho = subset( data.frame(output$ram), heads==1 )
+    ram_rho = df_ram[df_ram$heads==1,,drop=FALSE]
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram_rho$start), 1, ram_rho$start)),
             INDEX = ram_rho$from, FUN=\(x)sum(abs(x)) )
-    if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+    if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
       stop("Must use gmrf_parameterization=`projection` for the dsem RAM supplied")
     }
 
@@ -247,13 +254,14 @@ function( data,
                          INDEX=output$ram[which_nonzero,4], FUN=max)
 
     # Check for rank-deficient precision from RAM
-    ram2 = subset( data.frame(output$ram), heads==2 )
+    df_ram = data.frame(output$ram)
+    ram2 = df_ram[df_ram$heads == 2,,drop=FALSE]
     total_variance_h = tapply( as.numeric(ifelse( is.na(ram2$start), 1, ram2$start)),
             INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
-    ram1 = subset( data.frame(output$ram), heads==1 )
+    ram1 = df_ram[df_ram$heads == 1,,drop=FALSE]
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
             INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
-    if( any(total_variance_h==0) & control$gmrf_parameterization=="separable" ){
+    if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
       stop("Must use options$gmrf_parameterization=`projection` for the sem RAM supplied")
     }
 
@@ -334,17 +342,23 @@ function( data,
   # Initial constructor of splines
   build_gam_basis <-
   function( formula ){
-    gam_setup = gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
+    gam_setup = mgcv::gam( formula, data = data, fit=FALSE ) # select doesn't do anything in this setup
     y_i = model.response(gam_setup$mf)  # OR USE: model.extract(gam_setup$mf, "response")
     offset_i = gam_setup$offset
 
-    # Extrtact and combine penelization matrices
+    # Extract and combine penalization matrices
     S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
-    S_kk = .bdiag(S_list)         # join S's in sparse matrix
+    S_kk = Matrix::.bdiag(S_list)       # join S's in sparse matrix
     Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
     if(is.null(Sdims)) Sdims = vector(length=0)
 
     # Get covariates
+    not_allowed <- vapply(c("t2(", "te("), \(.x)
+      length(grep(.x, x=gam_setup$term.names, fixed=TRUE)) > 0, FUN.VALUE = logical(1L)
+    )
+    if (any(not_allowed)) {
+      stop("Found t2() or te() smoothers. These are not yet implemented.", call. = FALSE)
+    }
     which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
     X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
     Z_ik = gam_setup$X[,which_se,drop=FALSE]
@@ -393,7 +407,8 @@ function( data,
                          "tweedie" = 1,
                          "lognormal" = 2,
                          "poisson" = 3,
-                         "bernoulli" = 4 )[x$family])
+                         "bernoulli" = 4,
+                         "binomial" = 4)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("identity" = 0,
@@ -581,8 +596,8 @@ function( data,
   for( i in seq_len(max(0,control$nlminb_loops)) ){
     if( isFALSE(control$quiet) ) message("Running nlminb_loop #", i)
     opt = nlminb( start = opt$par,
-                  obj = obj$fn,
-                  gr = obj$gr,
+                  objective = obj$fn,
+                  gradient = obj$gr,
                   control = list( eval.max = control$eval.max,
                                   iter.max = control$iter.max,
                                   trace = control$trace ) )
@@ -650,10 +665,21 @@ function( data,
 #' @inheritParams stats::nlminb
 #' @inheritParams TMB::MakeADFun
 #'
+#' @param nlminb_loops Integer number of times to call [stats::nlminb()].
+#' @param newton_loops Integer number of Newton steps to do after running
+#'   [stats::nlminb()].
 #' @param getsd Boolean indicating whether to call [TMB::sdreport()]
-#' @param newton_loops Integer number of newton steps to do after running `nlminb`
-#' @param tmb_par list of parameters for starting values, with shape identical to
-#'        `fit(...)$internal$parlist`
+#' @param tmb_par list of parameters for starting values, with shape identical
+#'   to `fit(...)$internal$parlist`
+#' @param eval.max Maximum number of evaluations of the objective function
+#'   allowed. Passed to `control` in [stats::nlminb()].
+#' @param iter.max Maximum number of iterations allowed. Passed to `control` in
+#'   [stats::nlminb()].
+#' @param quiet Silence optimization details?
+#' @param trace Parameter values are printed every `trace` iteration. Passed to
+#'   `control` in [stats::nlminb()].
+#' @param gmrf_parameterization Gaussian Markov Random Fields parameterization.
+#' @param estimate_delta0 Estimate a delta model?
 #'
 #' @export
 tinyVASTcontrol <-
@@ -687,11 +713,8 @@ function( nlminb_loops = 1,
   ), class = "tinyVASTcontrol" )
 }
 
-#' @title Print fitted tinyVAST object
-#'
-#' @description Prints output from fitted tinyVAST model
-#'
 #' @method print tinyVAST
+#' @import methods
 #' @export
 print.tinyVAST <-
 function( x,
@@ -910,7 +933,7 @@ function( object,
   if( which=="fixed" ){
     V = object$sdrep$cov.fixed
     if(is.null(V)){
-      warning("Please re-run `tinyVAS` with `getsd=TRUE`, or confirm that the model is converged")
+      warning("Please re-run `tinyVAST` with `getsd=TRUE`, or confirm that the model is converged")
     }
   }
   if( which=="random" ){
@@ -919,7 +942,7 @@ function( object,
   if( which=="both" ){
     H = object$sdrep$jointPrecision
     if(is.null(H)){
-      warning("Please re-run `tinyVAS` with `getsd=TRUE` and `getJointPrecision=TRUE`, or confirm that the model is converged")
+      warning("Please re-run `tinyVAST` with `getsd=TRUE` and `getJointPrecision=TRUE`, or confirm that the model is converged")
       V = NULL
     }else{
       V = solve(H)

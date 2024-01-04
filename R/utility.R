@@ -1,8 +1,8 @@
 #' @title Multivariate Normal Random Deviates using Sparse Precision
 #'
-#' @description This function provide a random number generator for
+#' @description This function provides a random number generator for
 #'              the multivariate normal distribution with mean equal
-#'              to mean and sparse precision matrix Q.
+#'              to `mean` and sparse precision matrix `Q`.
 #'
 #' @param n number of observations.
 #' @param mean mean vector.
@@ -24,7 +24,7 @@ function( n,
   # Q = t(P) * L * t(L) * P
   L = Matrix::Cholesky(Q, super=TRUE)
 
-  # Calcualte t(P) * solve(t(L)) * z0 in two steps
+  # Calculate t(P) * solve(t(L)) * z0 in two steps
   z = Matrix::solve(L, z0, system = "Lt") # z = Lt^-1 * z
   z = Matrix::solve(L, z, system = "Pt") # z = Pt    * z
   return(mean + as.matrix(z))
@@ -40,7 +40,7 @@ function( n,
 #' @param order Options for resolving label-switching via reflecting
 #'        each factor to achieve a given order across dimension \eqn{T}.
 #'
-#' @return List containg the rotated loadings \code{L_tf},
+#' @return List containing the rotated loadings \code{L_tf},
 #'         the inverse-rotated response matrix \code{x_sf},
 #'         and the rotation \code{H}
 #'
@@ -56,7 +56,7 @@ function( L_tf,
   Eigen = eigen(Cov_tmp)
 
   # Desired loadings matrix
-  L_tf_rot = (Eigen$vectors%*%diag(sqrt(Eigen$values)))[,1:ncol(L_tf),drop=FALSE]
+  L_tf_rot = (Eigen$vectors%*%diag(sqrt(Eigen$values)))[,seq_len(ncol(L_tf)),drop=FALSE]
 
   # My new factors
   H = pseudoinverse(L_tf_rot) %*% L_tf
@@ -65,8 +65,8 @@ function( L_tf,
   # Get all loadings matrices to be increasing or decreasing
   order = match.arg(order)
   if( !is.null(order) ){
-    for( f in 1:ncol(L_tf) ){
-      Lm = lm( L_tf_rot[,f] ~ 1 + I(1:nrow(L_tf)) )
+    for( f in seq_len(ncol(L_tf)) ){
+      Lm = lm( L_tf_rot[,f] ~ 1 + I(seq_len(nrow(L_tf))) )
       Sign = sign(Lm$coef[2]) * ifelse(order=="decreasing", -1, 1)
       L_tf_rot[,f] = L_tf_rot[,f] * Sign
       x_sf[,f] = x_sf[,f] * Sign
@@ -144,7 +144,7 @@ function( model ){
                 variables[vars[2]] <- FALSE
             variables[vars[1]] <- TRUE
         }
-        else stop("incorrectly specified model")
+        else stop("incorrectly specified model", call. = FALSE)
     }
     list(endogenous = names(variables[variables]), exogenous = names(variables[!variables]))
 }

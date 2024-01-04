@@ -19,7 +19,7 @@ a matrix with dimension \code{length(mean)} by
 mean and precision
 }
 \description{
-This function provide a random number generator for
+This function provides a random number generator for
 the multivariate normal distribution with mean equal
-to mean and sparse precision matrix Q.
+to \code{mean} and sparse precision matrix \code{Q}.
 }

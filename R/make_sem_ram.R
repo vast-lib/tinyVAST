@@ -7,6 +7,8 @@
 #'        the set of path coefficients and variance-covariance parameters
 #' @param variables A character vector listing the set of variables
 #'
+#' @inheritParams sem::specifyModel
+#'
 #' @return An S3-class \code{"sem_ram"} containing:
 #' \describe{
 #'   \item{\code{model}}{Output from \code{\link[sem]{specifyEquations}} or \code{\link[sem]{specifyModel}}

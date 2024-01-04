@@ -14,9 +14,24 @@ make_dsem_ram(
 )
 }
 \arguments{
+\item{sem}{Specification for structural equation model structure for
+constructing a space-variable interaction.
+\code{sem=NULL} disables the space-variable interaction;
+see \code{\link[=make_sem_ram]{make_sem_ram()}}.}
+
 \item{times}{A character vector listing the set of times in order}
 
 \item{variables}{A character vector listing the set of variables}
+
+\item{covs}{optional: a character vector of one or more elements, with each element
+  	giving a string of variable names, separated by commas. Variances and covariances
+  	among all variables in each such string are added to the model. For confirmatory
+  	factor analysis models specified via \code{cfa}, \code{covs} defaults to all of
+  	the factors in the model, thus specifying all variances and covariances among these factors.
+  	\emph{Warning}: \code{covs="x1, x2"} and \code{covs=c("x1", "x2")} are \emph{not}
+  	equivalent: \code{covs="x1, x2"} specifies the variance of \code{x1}, the variance
+  	of \code{x2}, \emph{and} their covariance, while \code{covs=c("x1", "x2")} specifies
+  	the variance of \code{x1} and the variance of \code{x2} \emph{but not} their covariance.}
 
 \item{quiet}{Boolean indicating whether to print messages to terminal}
 
@@ -89,7 +104,7 @@ Usefully, it is also easy to compute the inverse-covariance (precision) matrix \
 \strong{Example: univariate and first-order autoregressive model}
 
 This simultaneous autoregressive (SAR) process across variables and times
-allows the user to specify both simutanous effects (effects among variables within
+allows the user to specify both simultaneous effects (effects among variables within
 year \eqn{T}) and lagged effects (effects among variables among years \eqn{T}).
 As one example, consider a univariate and first-order autoregressive process where \eqn{T=4}.
 with independent errors.  This is specified by passing \code{ sem = X -> X, 1, rho; X <-> X, 0, sigma } to \code{make_dsem_ram}.

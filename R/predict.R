@@ -1,18 +1,20 @@
 #' @title Predict using vector autoregressive spatio-temporal model
 #'
-#' @description Predicts values given new covariates using a tinyVAST model
+#' @description Predicts values given new covariates using a \pkg{tinyVAST} model
 #'
 #' @inheritParams add_predictions
 #'
-#' @param remove_origdata Whether to speed `predict(.)` by elminating original data
-#'        from TMB object, thereby speeding TMB object construction.  However, this
+#' @param remove_origdata Whether to eliminate the original data
+#'        from the TMB object, thereby speeding up the TMB object construction.  However, this
 #'        also eliminates information about random-effect variance, and is not
 #'        appropriate when requesting predictive standard errors or epsilon
 #'        bias-correction.
 #' @param what What REPORTed object to output, where \code{p_g} is the linear
 #'        predictor, \code{mu_g} is the inverse-linked transformed predictor.
 #'        and others are additive components of the linear predictor.
+#' @param se.fit Calculate standard errors?
 #' @param ... Not used.
+#' @importFrom Matrix Matrix sparseMatrix
 #'
 #' @method predict tinyVAST
 #' @export
@@ -44,8 +46,8 @@ function( object,
 
   # Add standard errors
   if( isTRUE(se.fit) ){
-    if( what!="p_g" ) stop("se.fit=TRUE only works for what=`p_g`")
-    if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE")
+    if( what!="p_g" ) stop("se.fit=TRUE only works for what=`p_g`", call. = FALSE)
+    if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE", call. = FALSE)
     newsd = sdreport( obj = newobj,
                       par.fixed = object$opt$par,
                       hessian.fixed = object$internal$Hess_fixed,
@@ -69,17 +71,22 @@ function( object,
 #'
 #' @param area value used for area-weighted expansion of estimated density surface
 #'     for each row of `newdata`.
+#' @param V_gz Settings for expansion.
+#' @param W_gz Covariates for expansion.
+#' @param intern Do Laplace approximation on C++ side? Passed to [TMB::MakeADFun()].
+#' @param apply.epsilon Apply epsilon bias correction?
 #'
 #' @export
 integrate_output <-
 function( object,
           newdata,
+          V_gz,
+          area,
+          W_gz,
           bias.correct = TRUE,
           apply.epsilon = FALSE,
-          intern = FALSE,
-          W_gz,
-          V_gz,
-          area ){
+          intern = FALSE
+  ){
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data
@@ -189,7 +196,7 @@ function( object,
 
     # Assemble predZ
     Z_gk = lapply( seq_along(gam$smooth),
-                    FUN = \(x) PredictMat(gam$smooth[[x]], data=newdata) )
+                    FUN = \(x) mgcv::PredictMat(gam$smooth[[x]], data=newdata) )
     Z_gk = do.call( cbind, Z_gk )
     #if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=ncol(tmb_data$Z_ik) )
     if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=0 )
@@ -220,7 +227,7 @@ function( object,
   }else if( is(object$spatial_graph, "igraph") ) {
     Match = match( newdata[,data_colnames$space], rownames(object$tmb_inputs$tmb_data$Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
-    A_gs = sparseMatrix( i=1:nrow(newdata), j=Match, x=rep(1,nrow(newdata)) )
+    A_gs = sparseMatrix( i=seq_len(nrow(newdata)), j=Match, x=rep(1,nrow(newdata)) )
   }else if( is(object$spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
     # stream network
     A_gs = sfnetwork_evaluator( stream = object$spatial_graph$stream,

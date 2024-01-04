@@ -3,3 +3,10 @@
 ^docs$
 ^pkgdown$
 ^scratch$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^CRAN-SUBMISSION$
+^CRAN-RELEASE$
+^cran-comments\.md$
+^LICENSE$

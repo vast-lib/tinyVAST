@@ -19,14 +19,32 @@ tinyVASTcontrol(
 )
 }
 \arguments{
-\item{newton_loops}{Integer number of newton steps to do after running \code{nlminb}}
+\item{nlminb_loops}{Integer number of times to call \code{\link[stats:nlminb]{stats::nlminb()}}.}
+
+\item{newton_loops}{Integer number of Newton steps to do after running
+\code{\link[stats:nlminb]{stats::nlminb()}}.}
+
+\item{eval.max}{Maximum number of evaluations of the objective function
+allowed. Passed to \code{control} in \code{\link[stats:nlminb]{stats::nlminb()}}.}
+
+\item{iter.max}{Maximum number of iterations allowed. Passed to \code{control} in
+\code{\link[stats:nlminb]{stats::nlminb()}}.}
 
 \item{getsd}{Boolean indicating whether to call \code{\link[TMB:sdreport]{TMB::sdreport()}}}
 
+\item{quiet}{Silence optimization details?}
+
+\item{trace}{Parameter values are printed every \code{trace} iteration. Passed to
+\code{control} in \code{\link[stats:nlminb]{stats::nlminb()}}.}
+
 \item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
 
-\item{tmb_par}{list of parameters for starting values, with shape identical to
-\code{fit(...)$internal$parlist}}
+\item{tmb_par}{list of parameters for starting values, with shape identical
+to \code{fit(...)$internal$parlist}}
+
+\item{gmrf_parameterization}{Gaussian Markov Random Fields parameterization.}
+
+\item{estimate_delta0}{Estimate a delta model?}
 }
 \description{
 Control parameters for tinyVAST

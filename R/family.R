@@ -23,7 +23,7 @@ add_to_family <- function(x) {
 
 #' Additional families
 #'
-#' Additional families compatible with [tinyVAST()].
+#' Additional families compatible with \pkg{tinyVAST}.
 #'
 #' @param link Link.
 #' @export
@@ -70,20 +70,23 @@ tweedie <- function(link = "log") {
   add_to_family(x)
 }
 
-# Delta model with independent terms
+# Copied from sdmTMB
+#' @param link1 First linear predictor link
+#' @param link2 Second linear predictor link
 #' @export
+#' @importFrom stats binomial
+#' @examples
+#' delta_lognormal()
 #' @rdname families
-independent_delta <-
-function( family2 = c("lognormal"),
-          link1 = c("logit"),
-          link2 = c("log") ) {
-
-  family2 = match.arg(family2)
-  link1 = match.arg(link1)
-  link2 = match.arg(link2)
-
-  out = list( family = c("bernoulli",family2),
-        link = c(link1,link2) )
-  class(out) = "family"
-  return(out)
+delta_lognormal <- function(link1 = "logit", link2 = "log") {
+  link1 <- match.arg(link1)
+  link2 <- match.arg(link2)
+  f1 <- binomial(link = "logit")
+  f2 <- lognormal(link = "log")
+  structure(
+    list(f1, f2, delta = TRUE,
+      link = c("logit", "log"),
+      family = c("binomial", "lognormal"),
+      clean_name = "delta_lognormal(link1 = 'logit', link2 = 'log')"),
+    class = "family")
 }

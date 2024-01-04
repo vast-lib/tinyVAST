@@ -4,28 +4,28 @@
 \alias{Families}
 \alias{lognormal}
 \alias{tweedie}
-\alias{independent_delta}
+\alias{delta_lognormal}
 \title{Additional families}
 \usage{
 lognormal(link = "log")
 
 tweedie(link = "log")
 
-independent_delta(
-  family2 = c("lognormal"),
-  link1 = c("logit"),
-  link2 = c("log")
-)
+delta_lognormal(link1 = "logit", link2 = "log")
 }
 \arguments{
 \item{link}{Link.}
+
+\item{link1}{First linear predictor link}
+
+\item{link2}{Second linear predictor link}
 }
 \value{
 A list with elements common to standard R family objects including \code{family},
 \code{link}, \code{linkfun}, and \code{linkinv}.
 }
 \description{
-Additional families compatible with \code{\link[=tinyVAST]{tinyVAST()}}.
+Additional families compatible with \pkg{tinyVAST}.
 }
 \details{
 Copied from sdmTMB
@@ -33,4 +33,5 @@ Copied from sdmTMB
 \examples{
 lognormal(link = "log")
 tweedie(link = "log")
+delta_lognormal()
 }

@@ -1,19 +1,23 @@
 ---
-title: "Dynamic structural equation model"
+title: "Dynamic structural equation models"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{Dynamic structural equation model}
+  %\VignetteIndexEntry{Dynamic structural equation models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{dsem}
 ---
 
 ```{r, include = FALSE}
+has_dsem = requireNamespace("dsem", quietly = TRUE)
+EVAL <- has_dsem
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = EVAL,
+  purl = EVAL
 )
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
