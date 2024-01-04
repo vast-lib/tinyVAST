@@ -18,9 +18,8 @@ if( isTRUE(has_vast) ){
   updated_vast = FALSE
 }
 has_sdmTMB = requireNamespace("sdmTMB", quietly = TRUE)
-has_fmesher = requireNamespace("fmesher", quietly = TRUE)
 has_ggplot = requireNamespace("ggplot2", quietly = TRUE)
-EVAL <- identical(Sys.getenv("NOT_CRAN"), "true") && has_sdmTMB && has_vast && has_fmesher && has_ggplot
+EVAL <- identical(Sys.getenv("NOT_CRAN"), "true") && has_sdmTMB && has_vast && has_ggplot
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",

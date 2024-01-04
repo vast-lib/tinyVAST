@@ -27,7 +27,6 @@ Imports:
     units
 Suggests:
     dsem,
-    fmesher,
     ggplot2,
     knitr,
     lattice,
