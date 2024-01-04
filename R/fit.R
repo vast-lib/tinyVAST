@@ -27,13 +27,14 @@
 #' @param family a function returning a class \code{family}, including [gaussian()],
 #'        [lognormal()], or [tweedie()].  Alternatively, it can be a named list of
 #'        these functions, with names that match levels of
-#'        \code{data$data_colnames$distribution}.  Finally, the user can specify
-#'        [independent_delta()] to specify a delta model.
+#'        \code{data$data_colnames$distribution} to allow different
+#'        families by row of data. Delta model families are possible.
+#'        See \code{\link[tidyVAST:families]{Families}},
 #' @param delta_options a named list with slots for \code{delta_formula},
 #'        \code{delta_sem}, and \code{delta_dsem}.  These follow the same format as
 #'        \code{family}, \code{sem}, and \code{dsem}, but specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
-#'        when [independent_delta()] for some samples.
+#'        when a \code{\link[tidyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_graph Object that represents spatial relationships, either using
 #'        _fmesher_ [fm_mesh_2d()] to apply the SPDE method,
 #'        _igraph_ [make_empty_graph()] for independent time-series,
@@ -407,7 +408,8 @@ function( data,
                          "tweedie" = 1,
                          "lognormal" = 2,
                          "poisson" = 3,
-                         "bernoulli" = 4 )[x$family])
+                         "bernoulli" = 4,
+                         "binomial" = 4)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("identity" = 0,

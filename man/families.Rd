@@ -4,23 +4,17 @@
 \alias{Families}
 \alias{lognormal}
 \alias{tweedie}
-\alias{independent_delta}
+\alias{delta_lognormal}
 \title{Additional families}
 \usage{
 lognormal(link = "log")
 
 tweedie(link = "log")
 
-independent_delta(
-  family2 = c("lognormal"),
-  link1 = c("logit"),
-  link2 = c("log")
-)
+delta_lognormal(link1 = "logit", link2 = "log")
 }
 \arguments{
 \item{link}{Link.}
-
-\item{family2}{Delta model second linear predictor family}
 
 \item{link1}{First linear predictor link}
 
@@ -39,4 +33,5 @@ Copied from sdmTMB
 \examples{
 lognormal(link = "log")
 tweedie(link = "log")
+delta_lognormal()
 }
