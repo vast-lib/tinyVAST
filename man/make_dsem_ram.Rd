@@ -16,8 +16,8 @@ make_dsem_ram(
 \arguments{
 \item{sem}{Specification for structural equation model structure for
 constructing a space-variable interaction.
-\code{sem=NULL} disables the space-variable interaction, and
-see \code{\link[=make_sem_ram]{make_sem_ram()}} for more description.}
+\code{sem=NULL} disables the space-variable interaction;
+see \code{\link[=make_sem_ram]{make_sem_ram()}}.}
 
 \item{times}{A character vector listing the set of times in order}
 

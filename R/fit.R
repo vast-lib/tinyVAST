@@ -5,18 +5,17 @@
 #'
 #' @param sem Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
-#'        \code{sem=NULL} disables the space-variable interaction, and
-#'        see [make_sem_ram()] for more description.
+#'        \code{sem=NULL} disables the space-variable interaction;
+#'        see [make_sem_ram()].
 #' @param dsem Specification for time-series structural equation model structure
 #'        including lagged or simultaneous effects for
 #'        constructing a space-variable interaction.
-#'        \code{dsem=NULL} disables the space-variable interaction, and see
-#'        [make_dsem_ram()]  or [make_eof_ram()]
-#'        for more description.
+#'        `dsem=NULL` disables the space-variable interaction; see
+#'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param data Data-frame of predictor, response, and offset variables.  Also includes
 #'        variables that specify space, time, variables, and the distribution for samples,
-#'        as identified by argument \code{data_colnames}.
-#' @param data_colnames A list that indicates what columns of `data` are used
+#'        as identified by argument `data_colnames`.
+#' @param data_colnames A named list that indicates what columns of `data` are used
 #'        to indicate different space, time, variables, and distributions.
 #'        Space and variable are then used to interpret argument `sem`,
 #'        space, time, and variables are used to interpret argument `dsem`, and
@@ -24,31 +23,31 @@
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
 #'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
 #'        an offset.
-#' @param family a function returning a class \code{family}, including [gaussian()],
-#'        [lognormal()], or [tweedie()].  Alternatively, it can be a named list of
+#' @param family A function returning a class \code{family}, including [gaussian()],
+#'        [lognormal()], or [tweedie()]. Alternatively, can be a named list of
 #'        these functions, with names that match levels of
 #'        \code{data$data_colnames$distribution} to allow different
 #'        families by row of data. Delta model families are possible.
 #'        See \code{\link[tidyVAST:families]{Families}},
 #' @param delta_options a named list with slots for \code{delta_formula},
-#'        \code{delta_sem}, and \code{delta_dsem}.  These follow the same format as
+#'        \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
 #'        \code{family}, \code{sem}, and \code{dsem}, but specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tidyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_graph Object that represents spatial relationships, either using
-#'        _fmesher_ [fm_mesh_2d()] to apply the SPDE method,
-#'        _igraph_ [make_empty_graph()] for independent time-series,
-#'        _igraph_ [make_graph()] to apply a simultaneous autoregressive (SAR)
+#'        [fmesher::fm_mesh_2d()] to apply the SPDE method,
+#'        [igraph::make_empty_graph()] for independent time-series,
+#'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
 #'        process, [sfnetwork_mesh()] for stream networks,
 #'        or `NULL` to specify a single site.
 #' @param control Output from [tinyVASTcontrol()], used to define user
-#'        settings, and see documentation for that function for details.
+#'        settings.
 #' @param times A integer vector listing the set of times in order.
-#'        If \code{times=NULL}, then it is filled in as the vector of integers
-#'        from the minimum to maximum value of \code{data$data_colnames$time}
+#'        If `times=NULL`, then it is filled in as the vector of integers
+#'        from the minimum to maximum value of `data$data_colnames$time`.
 #' @param variables A character vector listing the set of variables.
-#'        if \code{variables=NULL}, then it is filled in as the unique values
-#'        from \code{data$data_colnames$variables}
+#'        if `variables=NULL`, then it is filled in as the unique values
+#'        from `data$data_colnames$variables`.
 #' @param ... Not used.
 #'
 #' @details
@@ -118,9 +117,9 @@ function( data,
           sem = NULL,
           dsem = NULL,
           family = gaussian(),
-          delta_options = list(delta_formula = ~ 1),
           data_colnames = list(space=c("x","y"), variable="var", time="time", distribution="dist"),
           times = NULL,
+          delta_options = list(delta_formula = ~ 1),
           variables = NULL,
           spatial_graph = NULL,
           control = tinyVASTcontrol(),

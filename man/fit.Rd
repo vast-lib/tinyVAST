@@ -31,29 +31,23 @@ an offset.}
 
 \item{sem}{Specification for structural equation model structure for
 constructing a space-variable interaction.
-\code{sem=NULL} disables the space-variable interaction, and
-see \code{\link[=make_sem_ram]{make_sem_ram()}} for more description.}
+\code{sem=NULL} disables the space-variable interaction;
+see \code{\link[=make_sem_ram]{make_sem_ram()}}.}
 
 \item{dsem}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects for
 constructing a space-variable interaction.
-\code{dsem=NULL} disables the space-variable interaction, and see
-\code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}
-for more description.}
+\code{dsem=NULL} disables the space-variable interaction; see
+\code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}.}
 
-\item{family}{a function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
-\code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}.  Alternatively, it can be a named list of
+\item{family}{A function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
+\code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}. Alternatively, can be a named list of
 these functions, with names that match levels of
-\code{data$data_colnames$distribution}.  Finally, the user can specify
-\code{\link[=independent_delta]{independent_delta()}} to specify a delta model.}
+\code{data$data_colnames$distribution} to allow different
+families by row of data. Delta model families are possible.
+See \code{\link[tidyVAST:families]{Families}},}
 
-\item{delta_options}{a named list with slots for \code{delta_formula},
-\code{delta_sem}, and \code{delta_dsem}.  These follow the same format as
-\code{family}, \code{sem}, and \code{dsem}, but specify options for the
-second linear predictor of a delta model, and are only used (or estimable)
-when \code{\link[=independent_delta]{independent_delta()}} for some samples.}
-
-\item{data_colnames}{A list that indicates what columns of \code{data} are used
+\item{data_colnames}{A named list that indicates what columns of \code{data} are used
 to indicate different space, time, variables, and distributions.
 Space and variable are then used to interpret argument \code{sem},
 space, time, and variables are used to interpret argument \code{dsem}, and
@@ -61,21 +55,27 @@ distribution is used to interpret argument \code{family}.}
 
 \item{times}{A integer vector listing the set of times in order.
 If \code{times=NULL}, then it is filled in as the vector of integers
-from the minimum to maximum value of \code{data$data_colnames$time}}
+from the minimum to maximum value of \code{data$data_colnames$time}.}
+
+\item{delta_options}{a named list with slots for \code{delta_formula},
+\code{delta_sem}, and \code{delta_dsem}. These follow the same format as
+\code{family}, \code{sem}, and \code{dsem}, but specify options for the
+second linear predictor of a delta model, and are only used (or estimable)
+when a \code{\link[tidyVAST:families]{delta family}} is used for some samples.}
 
 \item{variables}{A character vector listing the set of variables.
 if \code{variables=NULL}, then it is filled in as the unique values
-from \code{data$data_colnames$variables}}
+from \code{data$data_colnames$variables}.}
 
 \item{spatial_graph}{Object that represents spatial relationships, either using
-\emph{fmesher} \code{\link[=fm_mesh_2d]{fm_mesh_2d()}} to apply the SPDE method,
-\emph{igraph} \code{\link[=make_empty_graph]{make_empty_graph()}} for independent time-series,
-\emph{igraph} \code{\link[=make_graph]{make_graph()}} to apply a simultaneous autoregressive (SAR)
+\code{\link[fmesher:fm_mesh_2d]{fmesher::fm_mesh_2d()}} to apply the SPDE method,
+\code{\link[igraph:make_empty_graph]{igraph::make_empty_graph()}} for independent time-series,
+\code{\link[igraph:make_graph]{igraph::make_graph()}} to apply a simultaneous autoregressive (SAR)
 process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
 or \code{NULL} to specify a single site.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
-settings, and see documentation for that function for details.}
+settings.}
 
 \item{...}{Not used.}
 }
