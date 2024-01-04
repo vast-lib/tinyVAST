@@ -10,9 +10,14 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+has_fmesher = requireNamespace("fmesher", quietly = TRUE)
+has_rnaturalearth = requireNamespace("rnaturalearth", quietly = TRUE)
+EVAL <- has_rnaturalearth && has_fmesher
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = EVAL,
+  purl = EVAL
 )
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
@@ -26,7 +31,7 @@ library(fmesher)
 set.seed(101)
 ```
 
-`tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
+tinyVAST is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
 We here explore the capacity to specify a generalized linear latent variable model that is configured to
 generalize an empirical orthogonal function analysis.
 
@@ -135,5 +140,3 @@ matplot( y=L_tf, x=unique(Data$year), type="l",
   legend( "top", ncol=n_eof, legend=paste0("EOF",1:n_eof),
           fill=viridisLite::viridis(n_eof) )
 ```
-
-
