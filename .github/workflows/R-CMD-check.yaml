@@ -28,6 +28,7 @@ jobs:
 
       - name: Ensure latest Matrix version
         run: |
+          install.packages("remotes")
           remotes::install_cran(c("Matrix", "TMB"), type = "source")
         shell: Rscript {0}
 
