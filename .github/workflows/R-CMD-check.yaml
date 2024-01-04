@@ -29,11 +29,11 @@ jobs:
       - name: Ensure latest Matrix version
         run: |
           install.packages("remotes")
-          remotes::install_cran(c("Matrix", "TMB"), type = "source")
+          remotes::install_cran(c("Matrix", "TMB"), type = "source", force = TRUE)
         shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--as-cran", "--ignore-vignettes", "--no-build-vignettes")'
           build_args: 'c("--no-manual", "--no-build-vignettes")'
-          error-on: '"error"'
+          error-on: 'c("error", "warning')'
