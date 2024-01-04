@@ -345,7 +345,7 @@ Type two_predictor_likelihood( Type y,
       mu2 = p2;
       logmu2 = log( p2 );
       break;
-    case identity_link:
+    case log_link:
       mu2 = exp(p2);
       logmu2 = p2;
       break;
