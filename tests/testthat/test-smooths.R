@@ -62,3 +62,130 @@ test_that("2D splines work (or throw an error for now)", {
   expect_error(m_v <- fit(formula = y ~ te(x1, x2), data = dat), regexp = "te")
 })
 
+# modified from sdmTMB tests:
+test_that("A model with s(x, bs = 'fs') works", {
+  skip_on_cran()
+  skip_on_ci()
+  d <- subset(sdmTMB::pcod, density > 0)
+  d$yearf <- as.factor(d$year)
+  m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, by = year, bs = "fs"), data = d, method = "REML")
+  m_v <- fit(
+    data = d,
+    formula = log(density) ~ s(depth_scaled, by = year, bs = "fs")
+  )
+  p2 <- predict(m_mgcv)
+  p3 <- predict(m_v)
+  expect_gt(stats::cor(p3, p2), 0.995)
+})
+
+test_that("An fx=TRUE smoother errors out", {
+  skip_on_cran()
+  skip_on_ci()
+  d <- subset(sdmTMB::pcod, density > 0)
+  expect_error(m_v <- fit(
+    data = d,
+    formula = log(density) ~ s(depth_scaled, fx = TRUE)
+  )) # TODO issue a meaningful error!
+})
+
+test_that("A model with s(x, bs = 'gp') works", {
+  skip_on_cran()
+  skip_on_ci()
+  d <- subset(sdmTMB::pcod, density > 0)
+  m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
+  m_v <- fit(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
+  m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "gp"), data = d, spatial = "off")
+  p <- predict(m_mgcv)
+  p_s <- predict(m_s)$est
+  p_v <- predict(m_v)
+  plot(p2, p)
+  plot(p_v, p_s)
+  expect_gt(stats::cor(p_s, p_v), 0.999)
+  expect_gt(stats::cor(p_v, p), 0.999)
+})
+
+test_that("A model with s(x, bs = 'ds') works", {
+  skip_on_cran()
+  skip_on_ci()
+  d <- subset(sdmTMB::pcod, density > 0)
+  m_s <- sdmTMB::sdmTMB(
+    log(density) ~ s(depth_scaled, bs = "ds"),
+    data = d, spatial = "off"
+  )
+  m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, bs = "ds"), data = d)
+  m_v <- fit(formula = log(density) ~ s(depth_scaled, bs = "ds"), data = d)
+  p_m <- predict(m_mgcv)
+  p_v <- predict(m_v)
+  p_s <- predict(m_s)$est
+  plot(p_s, p_m)
+  plot(p_s, p_v)
+  expect_gt(stats::cor(p_s, p_v), 0.999)
+  expect_gt(stats::cor(p_m, p_v), 0.999)
+})
+
+test_that("A model with s(x, bs = 'cr') works", {
+  skip_on_cran()
+  skip_on_ci()
+  d <- subset(sdmTMB::pcod, density > 0)
+  m_s <- sdmTMB(log(density) ~ s(depth_scaled, bs = "cr"), data = d, spatial = "off")
+  m_m <- mgcv::gam(data = d, formula = log(density) ~ s(depth_scaled, bs = "cr"))
+  m_v <- fit(data = d, formula = log(density) ~ s(depth_scaled, bs = "cr"))
+  p_v <- predict(m_v)
+  p_m <- predict(m_m)
+  p_s <- predict(m_s)$est
+  plot(p_v, p_s)
+  plot(p_v, p_m)
+  expect_gt(stats::cor(p_s, p_v), 0.999)
+  expect_gt(stats::cor(p_v, p_m), 0.999)
+})
+
+test_that("A model with s(x, bs = 'cs') works", {
+  skip_on_cran()
+  skip_on_ci()
+  d <- subset(sdmTMB::pcod, density > 0)
+  m_s <- sdmTMB(log(density) ~ s(depth_scaled, bs = "cs"), data = d, spatial = "off")
+  m_m <- mgcv::gam(data = d, formula = log(density) ~ s(depth_scaled, bs = "cs"))
+  m_v <- fit(data = d, formula = log(density) ~ s(depth_scaled, bs = "cs"))
+  p_v <- predict(m_v)
+  p_m <- predict(m_m)
+  p_s <- predict(m_s)$est
+  plot(p_v, p_s)
+  plot(p_v, p_m)
+  expect_gt(stats::cor(p_s, p_v), 0.999)
+  expect_gt(stats::cor(p_v, p_m), 0.999)
+})
+
+test_that("A model with s(x, bs = 'cc') works", {
+  skip_on_cran()
+  skip_on_ci()
+  d <- subset(sdmTMB::pcod, density > 0)
+  m_s <- sdmTMB(log(density) ~ s(depth_scaled, bs = "cc"), data = d, spatial = "off")
+  m_m <- mgcv::gam(data = d, formula = log(density) ~ s(depth_scaled, bs = "cc"))
+  m_v <- fit(data = d, formula = log(density) ~ s(depth_scaled, bs = "cc"))
+  p_v <- predict(m_v)
+  p_m <- predict(m_m)
+  p_s <- predict(m_s)$est
+  plot(p_v, p_s)
+  plot(p_v, p_m);abline(0, 1)
+  expect_gt(stats::cor(p_s, p_v), 0.999)
+  expect_gt(stats::cor(p_v, p_m), 0.999)
+})
+
+# test_that("A model with s() by variables works", {
+#   set.seed(1)
+#   dat <- mgcv::gamSim(4)
+#   m_mgcv <- mgcv::gam(y ~ fac + s(x2, by = fac) + s(x0), data = dat)
+#   p_mgcv <- predict(m_mgcv)
+#
+#   m_s <- sdmTMB::sdmTMB(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat, spatial = "off")
+#
+#   m_v <- fit(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat)
+#   expect_s3_class(m_v, "tinyVAST")
+#
+#   p_m <- predict(m_mgcv)
+#   p_v <- predict(m_v)
+#   p_s <- predict(m_s)$est
+#
+#   plot(p_m, p_v);abline(a = 0, b = 1)
+#   expect_gt(cor(p_v, p_m), 0.9999)
+# })
