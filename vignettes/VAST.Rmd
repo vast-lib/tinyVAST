@@ -198,11 +198,12 @@ We can also fit these data using a delta model
 # fit model
 mydelta = fit( data = Data,
                formula = n ~ 1,
-               delta_formula = ~ 0 + factor(time),
+               delta_options = list(delta_formula = ~ 0 + factor(time)),
                delta_dsem = "logn -> logn, 1, rho",
-               family = list( "obs"=independent_delta() ),
+               family = list( "obs"=delta_lognormal() ),
                spatial_graph = mesh,
                control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+
 mydelta
 ```
 
