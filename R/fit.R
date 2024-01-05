@@ -347,19 +347,17 @@ function( data,
     offset_i = gam_setup$offset
 
     # Extract and combine penalization matrices
-    S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
+    gs = gam_setup$smooth
+    S_list = lapply(seq_along(gs), \(x) lapply(seq_along(gs[[x]]$S), \(y) gs[[x]]$S[[y]]))
+    # FIXME Reduce list nesting; note this approach breaks if some univariate, some multivariate! -SA
+    S_list = .mapply(cbind, dots = S_list, MoreArgs = NULL)
     S_kk = Matrix::.bdiag(S_list)       # join S's in sparse matrix
     Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
     if(is.null(Sdims)) Sdims = vector(length=0)
 
-    # Get covariates
-    not_allowed <- vapply(c("t2(", "te("), \(.x)
-      length(grep(.x, x=gam_setup$term.names, fixed=TRUE)) > 0, FUN.VALUE = logical(1L)
-    )
-    if (any(not_allowed)) {
-      stop("Found t2() or te() smoothers. These are not yet implemented.", call. = FALSE)
-    }
-    which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
+    not_allowed = grepl(pattern="t2\\(", x=gam_setup$term.names)
+    if (any(not_allowed)) stop("Found t2() smoothers. Please use te() instead.", call. = FALSE)
+    which_se = grep( pattern="s\\(|te\\(", x=gam_setup$term.names )
     X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
     Z_ik = gam_setup$X[,which_se,drop=FALSE]
 
@@ -496,8 +494,9 @@ function( data,
 
   # make params
   tmb_par = list(
-    alpha_j = rep(0,ncol(tmb_data$X_ij)),  # Spline coefficients
-    gamma_k = rep(0,ncol(tmb_data$Z_ik)),  # Spline coefficients
+    alpha_j = rep(0,ncol(tmb_data$X_ij)), # Spline coefficients
+    # FIXME I haven't thought through whether `* length(tmb_data$Sdims)` is right in all cases! -SA
+    gamma_k = rep(0,ncol(tmb_data$Z_ik) * length(tmb_data$Sdims)),  # Spline coefficients
     beta_z = as.numeric(ifelse(dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta_z = as.numeric(ifelse(sem_ram$param_type==1, 0.01, 1)),
     log_lambda = rep(0,length(tmb_data$Sdims)), #Log spline penalization coefficients
