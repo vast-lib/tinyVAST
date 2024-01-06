@@ -53,8 +53,25 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group), a=a )
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group, bs="ts") # + offset(a)
 myfit = fit( data = Data,
            formula = Formula,
-           delta_formula = ~ 1,
            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+```
+
+We can then compute the percent deviance explained, and confirm that it is identical to that calculated using mgcv
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+R1 = sum( residuals(myfit, type="deviance")^2 )
+
+# tinyVAST null model with just a single intercept
+null = fit( data = Data,
+            formula = y ~ 1,
+            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+R0 = sum( residuals(null, type="deviance")^2 )
+
+# Percent deviance explained
+1 - R1/R0
+
+#
+mygam_reduced = gam( Formula, data=Data ) #
+summary(mygam_reduced)$dev.expl
 ```
 
 `tinyVAST` then has a standard `predict` function:
