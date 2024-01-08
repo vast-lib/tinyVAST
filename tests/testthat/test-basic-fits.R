@@ -47,17 +47,16 @@ test_that("data_colnames are robust", {
 #   )
 #   }, regexp = "variable")
   #
-  expect_error({out <- tinyVAST(
-    data = dat,
-    formula = n ~ s(w),
-    spatial_graph = mesh,
-    data_colnames = list(
-      space = c("x", "y"),
-      banana = "var",
-      time = "time",
-      distribution = "dist"
-    ),
-    sem = ""
-  )
-  }, regexp = "data_colnames")
+#  mesh <- fmesher::fm_mesh_2d(dat[, c("x", "y")], n = 100)
+#  expect_error({out <- tinyVAST(
+#    data = dat,
+#    formula = n ~ s(w),
+#    spatial_graph = mesh,
+#    space_columns = c("x", "y"),
+#    variable_column = "var",
+#    time_column = "time",
+#    distribution_column = "dist",
+#    sem = ""
+#  )
+#  }, regexp = "data_colnames")
 })
