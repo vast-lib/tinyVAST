@@ -72,7 +72,7 @@ mean(Data$n==0)
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # fit model
-mytinyVAST = fit( dsem = "logn -> logn, 1, rho",
+mytinyVAST = tinyVAST( dsem = "logn -> logn, 1, rho",
            data = Data,
            formula = n ~ 0 + factor(time),
            spatial_graph = mesh,
@@ -200,7 +200,7 @@ We can also fit these data using a delta model
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # fit model
-mydelta = fit( data = Data,
+mydelta = tinyVAST( data = Data,
                formula = n ~ 1,
                delta_options = list(delta_formula = ~ 0 + factor(time)),
                delta_dsem = "logn -> logn, 1, rho",
@@ -252,7 +252,7 @@ dsem = "
 "
 
 # fit model
-out = fit( dsem = dsem,
+out = tinyVAST( dsem = dsem,
            data = Data,
            formula = n ~ 0 + var,
            spatial_graph = mesh,

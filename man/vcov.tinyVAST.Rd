@@ -7,7 +7,7 @@
 \method{vcov}{tinyVAST}(object, which = c("fixed", "random", "both"), ...)
 }
 \arguments{
-\item{object}{output from \code{fit}}
+\item{object}{output from \code{\link[=tinyVAST]{tinyVAST()}}}
 
 \item{which}{whether to extract the covariance among fixed effects, random effects, or both}
 

@@ -51,7 +51,7 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group), a=a )
 
 # fit model
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group, bs="ts") # + offset(a)
-myfit = fit( data = Data,
+myfit = tinyVAST( data = Data,
            formula = Formula,
            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 ```
@@ -61,7 +61,7 @@ We can then compute the percent deviance explained, and confirm that it is ident
 R1 = sum( residuals(myfit, type="deviance")^2 )
 
 # tinyVAST null model with just a single intercept
-null = fit( data = Data,
+null = tinyVAST( data = Data,
             formula = y ~ 1,
             control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 R0 = sum( residuals(null, type="deviance")^2 )
@@ -123,7 +123,7 @@ Data$group = factor(Data$group)
 
 # fit model
 Formula = n ~ s(x, y, by=group)
-myfit = fit( data = Data,
+myfit = tinyVAST( data = Data,
            formula = Formula,
            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 

@@ -58,7 +58,7 @@ Data$time = 2020
 mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
 
 # fit model
-out = fit( data = Data,
+out = tinyVAST( data = Data,
            formula = n ~ s(w),
            spatial_graph = mesh,
            control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj"),
@@ -85,7 +85,7 @@ We can compute deviance residuals and percent-deviance explained:
 R1 = sum( residuals(out, type="deviance")^2 )
 
 # tinyVAST null model with just a single intercept
-null = fit( data = Data, formula = n ~ 1,
+null = tinyVAST( data = Data, formula = n ~ 1,
             control = tinyVASTcontrol(quiet=TRUE, trace=0) )
 R0 = sum( residuals(null, type="deviance")^2 )
 
@@ -104,7 +104,7 @@ where this comparison shows that using the SPDE method in tinyVAST results in hi
 It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when excluding the spatial term from each.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-out_reduced = fit( data = Data, formula = n ~ s(w),
+out_reduced = tinyVAST( data = Data, formula = n ~ s(w),
                    control = tinyVASTcontrol(quiet=TRUE, trace=0), sem = "" )
 R1_reduced = sum( residuals(out_reduced, type="deviance")^2 )
 1 - R1_reduced/R0

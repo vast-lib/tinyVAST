@@ -101,7 +101,7 @@ sem = "
 "
 
 # fit model
-out = fit( sem = sem,
+out = tinyVAST( sem = sem,
            data = Data,
            formula = n ~ 0 + factor(species),
            spatial_graph = mesh,
@@ -165,7 +165,7 @@ sem = "
 "
 
 # fit model
-out = fit( sem = sem,
+out = tinyVAST( sem = sem,
            data = Data,
            formula = n ~ 0 + factor(species),
            spatial_graph = mesh,

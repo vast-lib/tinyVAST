@@ -102,7 +102,7 @@ the stream network, and plot those with the true (simulated) values at the
 location of simulated samples.
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # fit model
-out = fit( data = Data,
+out = tinyVAST( data = Data,
            formula = Count ~ 1,
            spatial_graph = graph,
            data_colnames = list( "space"=c("X","Y"),

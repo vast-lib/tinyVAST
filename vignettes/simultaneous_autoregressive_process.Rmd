@@ -69,7 +69,7 @@ dsem = "
 "
 
 # Fit tinyVAST model
-mytiny0 = fit(
+mytiny0 = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,
      data = Data,
      dsem = dsem,
@@ -94,7 +94,7 @@ adjacency_graph = make_graph( ~ Korea - Japan - M.I - WKam - EKam -
 plot(adjacency_graph)
 
 # Fit tinyVAST model
-mytiny = fit(
+mytiny = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,
      data = Data,
      dsem = dsem,

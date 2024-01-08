@@ -103,15 +103,15 @@
 #' mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 #'
 #' # fit model
-#' out = fit( data = Data,
-#'            formula = n ~ s(w),
-#'            spatial_graph = mesh,
-#'            control = tinyVASTcontrol(quiet=TRUE, trace=0),
-#'            sem = "n <-> n, sd_n" )
+#' out = tinyVAST( data = Data,
+#'                 formula = n ~ s(w),
+#'                 spatial_graph = mesh,
+#'                 control = tinyVASTcontrol(quiet=TRUE, trace=0),
+#'                 sem = "n <-> n, sd_n" )
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
-fit <-
+tinyVAST <-
 function( data,
           formula,
           sem = NULL,
@@ -670,7 +670,7 @@ function( data,
 #'   [stats::nlminb()].
 #' @param getsd Boolean indicating whether to call [TMB::sdreport()]
 #' @param tmb_par list of parameters for starting values, with shape identical
-#'   to `fit(...)$internal$parlist`
+#'   to `tinyVAST(...)$internal$parlist`
 #' @param eval.max Maximum number of evaluations of the objective function
 #'   allowed. Passed to `control` in [stats::nlminb()].
 #' @param iter.max Maximum number of iterations allowed. Passed to `control` in
@@ -745,7 +745,7 @@ function( x,
 #' It also outputs the z-score and a p-value arising from a two-sided Wald test (i.e.
 #' comparing the estimate divided by standard error against a standard normal distribution).
 #'
-#' @param object Output from \code{\link{fit}}
+#' @param object Output from [tinyVAST()]
 #' @param what What component to summarize
 #' @param ... Not used
 #'
@@ -821,7 +821,7 @@ function( object,
 #'
 #' @title Calculate deviance or response residuals for tinyVAST
 #'
-#' @param object Output from [fit()]
+#' @param object Output from [tinyVAST()]
 #' @param type which type of residuals to compute (only option is `"deviance"` or `"response"` for now)
 #' @param ... Note used
 #'
@@ -917,7 +917,7 @@ logLik.tinyVAST <- function(object, ...) {
 #'
 #' extract the covariance of fixed effects, or both fixed and random effects.
 #'
-#' @param object output from `fit`
+#' @param object output from [tinyVAST()]
 #' @param which whether to extract the covariance among fixed effects, random effects, or both
 #' @param ... ignored, for method compatibility
 #' @importFrom stats vcov

@@ -71,7 +71,7 @@ dsem = make_eof_ram( variables = "Ice",
 mesh = fm_mesh_2d( Data[,c('X','Y')], cutoff=1.5 )
 
 # fit model
-out = fit( dsem = dsem,
+out = tinyVAST( dsem = dsem,
            sem = "",
            data = as.data.frame(Data),
            formula = ice_concentration ~ 1,

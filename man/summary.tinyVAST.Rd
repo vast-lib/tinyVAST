@@ -7,7 +7,7 @@
 \method{summary}{tinyVAST}(object, what = c("sem", "dsem"), ...)
 }
 \arguments{
-\item{object}{Output from \code{\link{fit}}}
+\item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}}
 
 \item{what}{What component to summarize}
 

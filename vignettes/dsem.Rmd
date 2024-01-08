@@ -50,7 +50,7 @@ dsem = "
 "
 
 # fit model
-mytiny = fit( dsem = dsem,
+mytiny = tinyVAST( dsem = dsem,
                  data = data,
                  times = isle_royale[,1],
                  variables = colnames(isle_royale[,2:3]),

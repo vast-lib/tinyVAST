@@ -40,7 +40,7 @@ allowed. Passed to \code{control} in \code{\link[stats:nlminb]{stats::nlminb()}}
 \item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
 
 \item{tmb_par}{list of parameters for starting values, with shape identical
-to \code{fit(...)$internal$parlist}}
+to \code{tinyVAST(...)$internal$parlist}}
 
 \item{gmrf_parameterization}{Gaussian Markov Random Fields parameterization.}
 

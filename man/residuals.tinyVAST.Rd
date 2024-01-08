@@ -7,7 +7,7 @@
 \method{residuals}{tinyVAST}(object, type = c("deviance", "response"), ...)
 }
 \arguments{
-\item{object}{Output from \code{\link[=fit]{fit()}}}
+\item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}}
 
 \item{type}{which type of residuals to compute (only option is \code{"deviance"} or \code{"response"} for now)}
 

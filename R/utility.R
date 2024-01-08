@@ -4,9 +4,9 @@
 #'              the multivariate normal distribution with mean equal
 #'              to `mean` and sparse precision matrix `Q`.
 #'
+#' @param Q sparse precision (inverse-covariance) matrix.
 #' @param n number of observations.
 #' @param mean mean vector.
-#' @param Q sparse precision (inverse-covariance) matrix.
 #'
 #' @return a matrix with dimension \code{length(mean)} by
 #'         \code{n}, containing realized draws from the specified
@@ -14,8 +14,8 @@
 #'
 #' @export
 rmvnorm_prec <-
-function( n,
-          Q,
+function( Q,
+          n = 1,
           mean = rep(0,nrow(Q)) ) {
 
   # Simulate values
