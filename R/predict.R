@@ -162,7 +162,7 @@ function( object,
 #' @description Given user-provided `newdata`, expand the object `tmb_data`
 #'    to include predictions corresponding to those new observations
 #'
-#' @param object Output from [fit()].
+#' @param object Output from [tinyVAST()].
 #' @param newdata New data-frame of independent variables used to predict the response.
 #' @param remove_origdata Whether to remove original-data to allow faster evaluation.
 #'        \code{remove_origdata=TRUE} eliminates information about the distribution

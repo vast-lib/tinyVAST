@@ -7,7 +7,7 @@
 add_predictions(object, newdata, remove_origdata = FALSE)
 }
 \arguments{
-\item{object}{Output from \code{\link[=fit]{fit()}}.}
+\item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}.}
 
 \item{newdata}{New data-frame of independent variables used to predict the response.}
 

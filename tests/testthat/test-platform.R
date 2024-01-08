@@ -21,7 +21,7 @@ test_that("tinyVAST example is working ", {
   mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 
   # fit model
-  out = fit( data = Data,
+  out = tinyVAST( data = Data,
              formula = n ~ s(w),
              spatial_graph = mesh,
              control = tinyVASTcontrol(quiet=TRUE, trace=0),
