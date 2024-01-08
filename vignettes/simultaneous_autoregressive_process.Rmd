@@ -101,7 +101,6 @@ mytiny = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,
      data = Data,
      dsem = dsem,
-     variable="Species",
      variable_column = "Species",
      time_column = "Year",
      space_column = "Region",
