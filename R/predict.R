@@ -177,7 +177,6 @@ function( object,
 
   tmb_data = object$tmb_inputs$tmb_data
   origdata = object$data
-  data_colnames = object$internal$data_colnames
 
   # Check newdata for missing variables and/or factors
   pred_set = unique(unlist(sapply( object$internal[c('gam_setup','delta_gam_setup')],
@@ -223,15 +222,15 @@ function( object,
 
   # Assemble A_gs
   if( is(object$spatial_graph, "fm_mesh_2d") ){
-    A_gs = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,data_colnames$space]) )$proj$A
+    A_gs = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,object$internal$space_columns]) )$proj$A
   }else if( is(object$spatial_graph, "igraph") ) {
-    Match = match( newdata[,data_colnames$space], rownames(object$tmb_inputs$tmb_data$Adj) )
+    Match = match( newdata[,object$internal$space_columns], rownames(object$tmb_inputs$tmb_data$Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_gs = sparseMatrix( i=seq_len(nrow(newdata)), j=Match, x=rep(1,nrow(newdata)) )
   }else if( is(object$spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
     # stream network
     A_gs = sfnetwork_evaluator( stream = object$spatial_graph$stream,
-                                loc = as.matrix(newdata[,data_colnames$space]) )
+                                loc = as.matrix(newdata[,object$internal$space_columns]) )
   }else{
     A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
     A_gs = as(Matrix(A_gs),"CsparseMatrix")
@@ -240,10 +239,10 @@ function( object,
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(object$internal$times) > 0 ){
-    t_g = match( newdata[,data_colnames$time], object$internal$times )
+    t_g = match( newdata[,object$internal$time_column], object$internal$times )
   }else{ t_g = integer(0) }
   if( length(object$internal$variables) > 0 ){
-    c_g = match( newdata[,data_colnames$var], object$internal$variables )
+    c_g = match( newdata[,object$internal$variable_column], object$internal$variables )
   }else{ c_g = integer(0) }
 
   #
@@ -267,17 +266,17 @@ function( object,
   AomegaG_z = predAtriplet$x[which_Arows]
 
   # Telescope
-  if( !(data_colnames$distribution %in% colnames(newdata)) ){
+  if( !(object$internal$distribution_column %in% colnames(newdata)) ){
     if( length(object$internal$family)>1 ) stop("Must supply `dist` if using multiple `family_link` options")
-    newdata = data.frame( newdata, matrix(names(object$internal$family)[1], nrow=nrow(newdata), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+    newdata = data.frame( newdata, matrix(names(object$internal$family)[1], nrow=nrow(newdata), ncol=1, dimnames=list(NULL,object$internal$distribution_column)) )
   }
 
   # Build e_i ... always has length nrow(data)
-  e_g = match( newdata[,data_colnames$distribution], names(object$internal$family) )
+  e_g = match( newdata[,object$internal$distribution_column], names(object$internal$family) )
 
   #
-  if( !(data_colnames$distribution %in% colnames(newdata)) ){
-    newdata = cbind( newdata, matrix(1, nrow=nrow(newdata), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+  if( !(object$internal$distribution_column %in% colnames(newdata)) ){
+    newdata = cbind( newdata, matrix(1, nrow=nrow(newdata), ncol=1, dimnames=list(NULL,object$internal$distribution_column)) )
   }
 
   # Error checks

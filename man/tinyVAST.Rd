@@ -5,29 +5,32 @@
 \title{Fit vector autoregressive spatio-temporal model}
 \usage{
 tinyVAST(
-  data,
   formula,
+  data,
   sem = NULL,
   dsem = NULL,
   family = gaussian(),
-  data_colnames = list(space = c("x", "y"), variable = "var", time = "time", distribution
-    = "dist"),
-  times = NULL,
-  delta_options = list(delta_formula = ~1),
-  variables = NULL,
+  space_columns = c("x", "y"),
   spatial_graph = NULL,
+  time_column = "time",
+  times = NULL,
+  variable_column = "var",
+  variables = NULL,
+  distribution_column = "dist",
+  delta_options = list(delta_formula = ~1),
   control = tinyVASTcontrol(),
   ...
 )
 }
 \arguments{
-\item{data}{Data-frame of predictor, response, and offset variables.  Also includes
-variables that specify space, time, variables, and the distribution for samples,
-as identified by argument \code{data_colnames}.}
-
 \item{formula}{Formula with response on left-hand-side and predictors on right-hand-side,
 parsed by \code{mgcv} and hence allowing \code{s(.)} for splines or \code{offset(.)} for
 an offset.}
+
+\item{data}{Data-frame of predictor, response, and offset variables.  Also includes
+variables that specify space, time, variables, and the distribution for samples,
+as identified by arguments \code{variable_column}, \code{time_column}, \code{space_columns},
+and \code{distribution_column}.}
 
 \item{sem}{Specification for structural equation model structure for
 constructing a space-variable interaction.
@@ -43,29 +46,17 @@ constructing a space-variable interaction.
 \item{family}{A function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
 \code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}. Alternatively, can be a named list of
 these functions, with names that match levels of
-\code{data$data_colnames$distribution} to allow different
+\code{data$distribution_column} to allow different
 families by row of data. Delta model families are possible.
 See \code{\link[tinyVAST:families]{Families}},}
 
-\item{data_colnames}{A named list that indicates what columns of \code{data} are used
-to indicate different space, time, variables, and distributions.
-Space and variable are then used to interpret argument \code{sem},
-space, time, and variables are used to interpret argument \code{dsem}, and
-distribution is used to interpret argument \code{family}.}
-
-\item{times}{A integer vector listing the set of times in order.
-If \code{times=NULL}, then it is filled in as the vector of integers
-from the minimum to maximum value of \code{data$data_colnames$time}.}
-
-\item{delta_options}{a named list with slots for \code{delta_formula},
-\code{delta_sem}, and \code{delta_dsem}. These follow the same format as
-\code{family}, \code{sem}, and \code{dsem}, but specify options for the
-second linear predictor of a delta model, and are only used (or estimable)
-when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
-
-\item{variables}{A character vector listing the set of variables.
-if \code{variables=NULL}, then it is filled in as the unique values
-from \code{data$data_colnames$variables}.}
+\item{space_columns}{A string or character vector that indicates
+the column(s) of \link{data} indicating the location of each sample.
+When \link{spatial_graph} is an \link{igraph} object, \link{space_columns} is a string with
+with levels matching the names of vertices of that object.
+When \link{spatial_graph} is an \link{fmesher} or \link{sfnetwork} object,
+space_columns is a character vector indicating columns of \link{data} with
+coordinates for each sample.}
 
 \item{spatial_graph}{Object that represents spatial relationships, either using
 \code{\link[fmesher:fm_mesh_2d]{fmesher::fm_mesh_2d()}} to apply the SPDE method,
@@ -73,6 +64,34 @@ from \code{data$data_colnames$variables}.}
 \code{\link[igraph:make_graph]{igraph::make_graph()}} to apply a simultaneous autoregressive (SAR)
 process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
 or \code{NULL} to specify a single site.}
+
+\item{time_column}{A character string indicating the column of \link{data}
+listing the time-interval for each sample, from the set of times
+in argument \link{times}.}
+
+\item{times}{A integer vector listing the set of times in order.
+If \code{times=NULL}, then it is filled in as the vector of integers
+from the minimum to maximum value of \code{data$time}.}
+
+\item{variable_column}{A character string indicating the column of \link{data}
+listing the variable for each sample, from the set of times
+in argument \link{variables}.}
+
+\item{variables}{A character vector listing the set of variables.
+if \code{variables=NULL}, then it is filled in as the unique values
+from \code{data$variable_columns}.}
+
+\item{distribution_column}{A character string indicating the column of \link{data}
+listing the distribution for each sample, from the set of names
+in argument \link{family}.
+if \code{variables=NULL}, then it is filled in as the unique values
+from \code{data$variables}.}
+
+\item{delta_options}{a named list with slots for \code{delta_formula},
+\code{delta_sem}, and \code{delta_dsem}. These follow the same format as
+\code{family}, \code{sem}, and \code{dsem}, but specify options for the
+second linear predictor of a delta model, and are only used (or estimable)
+when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings.}

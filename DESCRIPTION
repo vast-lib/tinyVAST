@@ -3,9 +3,14 @@ Package: tinyVAST
 Title: Vector Autoregressive Spatio-Temporal Model Using Minimal
     Feature-Set
 Version: 0.1.0
-Authors@R: 
-    person("James", "Thorson", , "James.Thorson@noaa.gov", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-7415-1010"))
+Authors@R: c(
+    person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
+	   role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7415-1010")),
+    person(c("Sean", "C."), "Anderson", , "sean@seananderson.ca",
+           role = c("aut"),
+           comment = c(ORCID = "0000-0001-9563-1937")) 
+    )
 Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
     using a minimal feature-set, including using dynamic structural
     equation model (DSEM) to specify the space-time-variable interactions
