@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
 #  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/VAST.Rmd"); rmarkdown::render( "vignettes/VAST.Rmd", rmarkdown::pdf_document())
 ```
 
-```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+```{r setup, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(fmesher)
 set.seed(101)

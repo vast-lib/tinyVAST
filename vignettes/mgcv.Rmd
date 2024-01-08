@@ -32,6 +32,7 @@ library(tinyVAST)
 library(pdp)  # approx = TRUE gives effects for average of other covariates
 library(lattice)
 library(visreg)
+library(mgcv)
 set.seed(101)
 ```
 
