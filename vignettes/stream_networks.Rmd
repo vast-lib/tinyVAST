@@ -105,10 +105,10 @@ location of simulated samples.
 out = tinyVAST( data = Data,
            formula = Count ~ 1,
            spatial_graph = graph,
-           data_colnames = list( "space"=c("X","Y"),
-                                 "variable"="var",
-                                 "time"="time",
-                                 "distribution"="dist"),
+           space_column = c("X","Y"),
+           variable_column = "var",
+           time_column = "time",
+           distribution_column = "dist",
            control = tinyVASTcontrol(trace=0, quiet=TRUE),
            sem = "" )
 

@@ -3,6 +3,13 @@
 #' @description Fits a vector autoregressive spatio-temporal model using
 #'  a minimal feature-set and a widely used interface.
 #'
+#' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
+#'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
+#'        an offset.
+#' @param data Data-frame of predictor, response, and offset variables.  Also includes
+#'        variables that specify space, time, variables, and the distribution for samples,
+#'        as identified by arguments `variable_column`, `time_column`, `space_columns`,
+#'        and `distribution_column`.
 #' @param sem Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
 #'        \code{sem=NULL} disables the space-variable interaction;
@@ -12,42 +19,49 @@
 #'        constructing a space-variable interaction.
 #'        `dsem=NULL` disables the space-variable interaction; see
 #'        [make_dsem_ram()]  or [make_eof_ram()].
-#' @param data Data-frame of predictor, response, and offset variables.  Also includes
-#'        variables that specify space, time, variables, and the distribution for samples,
-#'        as identified by argument `data_colnames`.
-#' @param data_colnames A named list that indicates what columns of `data` are used
-#'        to indicate different space, time, variables, and distributions.
-#'        Space and variable are then used to interpret argument `sem`,
-#'        space, time, and variables are used to interpret argument `dsem`, and
-#'        distribution is used to interpret argument `family`.
-#' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
-#'        parsed by `mgcv` and hence allowing `s(.)` for splines or `offset(.)` for
-#'        an offset.
 #' @param family A function returning a class \code{family}, including [gaussian()],
 #'        [lognormal()], or [tweedie()]. Alternatively, can be a named list of
 #'        these functions, with names that match levels of
-#'        \code{data$data_colnames$distribution} to allow different
+#'        \code{data$distribution_column} to allow different
 #'        families by row of data. Delta model families are possible.
 #'        See \code{\link[tinyVAST:families]{Families}},
-#' @param delta_options a named list with slots for \code{delta_formula},
-#'        \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
-#'        \code{family}, \code{sem}, and \code{dsem}, but specify options for the
-#'        second linear predictor of a delta model, and are only used (or estimable)
-#'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
+#' @param space_columns A string or character vector that indicates
+#'        the column(s) of `data` indicating the location of each sample.
+#'        When `spatial_graph` is an `igraph` object, `space_columns` is a string with
+#'        with levels matching the names of vertices of that object.
+#'        When `spatial_graph` is an `fmesher` or `sfnetwork` object,
+#'        space_columns is a character vector indicating columns of `data` with
+#'        coordinates for each sample.
 #' @param spatial_graph Object that represents spatial relationships, either using
 #'        [fmesher::fm_mesh_2d()] to apply the SPDE method,
 #'        [igraph::make_empty_graph()] for independent time-series,
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
 #'        process, [sfnetwork_mesh()] for stream networks,
 #'        or `NULL` to specify a single site.
-#' @param control Output from [tinyVASTcontrol()], used to define user
-#'        settings.
+#' @param time_column A character string indicating the column of `data`
+#'        listing the time-interval for each sample, from the set of times
+#'        in argument `times`.
 #' @param times A integer vector listing the set of times in order.
 #'        If `times=NULL`, then it is filled in as the vector of integers
-#'        from the minimum to maximum value of `data$data_colnames$time`.
+#'        from the minimum to maximum value of `data$time`.
+#' @param variable_column A character string indicating the column of `data`
+#'        listing the variable for each sample, from the set of times
+#'        in argument `variables`.
 #' @param variables A character vector listing the set of variables.
 #'        if `variables=NULL`, then it is filled in as the unique values
-#'        from `data$data_colnames$variables`.
+#'        from `data$variable_columns`.
+#' @param distribution_column A character string indicating the column of `data`
+#'        listing the distribution for each sample, from the set of names
+#'        in argument `family`.
+#'        if `variables=NULL`, then it is filled in as the unique values
+#'        from `data$variables`.
+#' @param delta_options a named list with slots for \code{delta_formula},
+#'        \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
+#'        \code{family}, \code{sem}, and \code{dsem}, but specify options for the
+#'        second linear predictor of a delta model, and are only used (or estimable)
+#'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
+#' @param control Output from [tinyVASTcontrol()], used to define user
+#'        settings.
 #' @param ... Not used.
 #'
 #' @details
@@ -112,16 +126,19 @@
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
 tinyVAST <-
-function( data,
-          formula,
+function( formula,
+          data,
           sem = NULL,
           dsem = NULL,
           family = gaussian(),
-          data_colnames = list(space=c("x","y"), variable="var", time="time", distribution="dist"),
-          times = NULL,
-          delta_options = list(delta_formula = ~ 1),
-          variables = NULL,
+          space_columns = c("x","y"),
           spatial_graph = NULL,
+          time_column = "time",
+          times = NULL,
+          variable_column = "var",
+          variables = NULL,
+          distribution_column = "dist",
+          delta_options = list(delta_formula = ~ 1),
           control = tinyVASTcontrol(),
           ... ){
 
@@ -131,50 +148,46 @@ function( data,
   # General error checks
   if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`", call. = FALSE)
   if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
-  if (!identical(sort(names(data_colnames)), sort(c("space", "variable", "time", "distribution")))) {
-    stop("`data_colnames` must be a list with names `space`, `variable`, `time`, and `distribution`.", call. = FALSE)
-  }
 
   ##############
   # input telescoping
   ##############
 
-  # Telescope family ... comes before adding `data_colnames$distribution` to `data`
+  # Telescope family ... comes before adding `distribution` to `data`
   if( inherits(family,"family") ){
     family = list( "obs"=family )
   }
 
   # Defaults for missing columns of data
-  if( !(data_colnames$variable %in% colnames(data)) ){
-    data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$variable)))
+  if( !(variable_column %in% colnames(data)) ){
+    data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,variable_column)))
   }
-  if( !(data_colnames$time %in% colnames(data)) ){
-    data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$time)) )
+  if( !(time_column %in% colnames(data)) ){
+    data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,time_column)) )
   }
-  if( !(data_colnames$distribution %in% colnames(data)) ){
+  if( !(distribution_column %in% colnames(data)) ){
     if( length(family)>1 ) stop("Must supply `dist` if using multiple `family` options")
-    data = data.frame( data, matrix(names(family)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,data_colnames$distribution)) )
+    data = data.frame( data, matrix(names(family)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,distribution_column)) )
   }
 
   # Defaults for times
   if( is.null(dsem) & is.null(delta_options$delta_dsem) ){
     times = numeric(0)
   }
-  if(is.null(times)) times = seq( min(data[,data_colnames$time]), max(data[,data_colnames$time]) )
+  if(is.null(times)) times = seq( min(data[,time_column]), max(data[,time_column]) )
 
   # Defaults for variables
   if( is.null(dsem) & is.null(sem) & is.null(delta_options$delta_dsem) & is.null(delta_options$delta_sem) ){
     variables = numeric(0)
   }
-  if(is.null(variables)) variables = unique( data[,data_colnames$variable] )
-
+  if(is.null(variables)) variables = unique( data[,variable_column] )
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(times) > 0 ){
-    t_i = match( data[,data_colnames$time], times )
+    t_i = match( data[,time_column], times )
   }else{ t_i = integer(0) }
   if( length(variables) > 0 ){
-    c_i = match( data[,data_colnames$var], variables )
+    c_i = match( data[,variable_column], variables )
   }else{ c_i = integer(0) }
 
   ##############
@@ -282,14 +295,14 @@ function( data,
     spatial_method_code = 1
     spatial_list = fm_fem( spatial_graph )
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
-    A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,data_colnames$space]) )$proj$A
+    A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,space_columns]) )$proj$A
     estimate_kappa = TRUE
   }else if( is(spatial_graph,"igraph") ) {
     # SAR
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_graph, sparse=TRUE )
     n_s = nrow(Adj)
-    Match = match( data[,data_colnames$space], rownames(Adj) )
+    Match = match( data[,space_columns], rownames(Adj) )
     if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
@@ -300,7 +313,7 @@ function( data,
     n_s = spatial_graph$n
     spatial_list = spatial_graph$table
     A_is = sfnetwork_evaluator( stream = spatial_graph$stream,
-                                loc = as.matrix(data[,data_colnames$space]) )
+                                loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
   }else{
     # Single-site
@@ -379,11 +392,11 @@ function( data,
 
   build_distributions <-
   function( family ){
-    e_i = match( data[,data_colnames$distribution], names(family) )
+    e_i = match( data[,distribution_column], names(family) )
 
     # Check for errors
     if( (any(is.na(e_i))) ){
-      stop("`data[,data_colnames$distribution]` has values that don't match `names(family)`")
+      stop("`data[,distribution_column]` has values that don't match `names(family)`")
     }
 
     # Construct log_sigma based on family
@@ -634,7 +647,10 @@ function( data,
     delta_sem_ram = delta_sem_ram,                                    # for `add_predictions`
     delta_dsem = delta_options$delta_dsem,
     delta_sem = delta_options$delta_sem,
-    data_colnames = data_colnames,
+    space_columns = space_columns,
+    time_column = time_column,
+    variable_column = variable_column,
+    distribution_column = distribution_column,
     delta_gam_setup = delta_gam_basis$gam_setup,
     times = times,
     variables = variables,
@@ -653,7 +669,6 @@ function( data,
     tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map),
     call = match.call(),
     spatial_graph = spatial_graph,
-    data_colnames = data_colnames,
     run_time = Sys.time() - start_time,
     internal = internal
   ), class="tinyVAST" )

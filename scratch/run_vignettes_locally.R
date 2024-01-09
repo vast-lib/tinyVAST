@@ -6,7 +6,7 @@ compile("tinyVAST.cpp", framework="TMBad")
 devtools::document( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
 devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)',
                          force=TRUE, dep=FALSE )
-?tinyVAST::fit
+?tinyVAST::tinyVAST
 
 setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\vignettes)' )
 vignettes = list.files( pattern="Rmd")
