@@ -51,11 +51,11 @@ families by row of data. Delta model families are possible.
 See \code{\link[tinyVAST:families]{Families}},}
 
 \item{space_columns}{A string or character vector that indicates
-the column(s) of \link{data} indicating the location of each sample.
-When \link{spatial_graph} is an \link{igraph} object, \link{space_columns} is a string with
+the column(s) of \code{data} indicating the location of each sample.
+When \code{spatial_graph} is an \code{igraph} object, \code{space_columns} is a string with
 with levels matching the names of vertices of that object.
-When \link{spatial_graph} is an \link{fmesher} or \link{sfnetwork} object,
-space_columns is a character vector indicating columns of \link{data} with
+When \code{spatial_graph} is an \code{fmesher} or \code{sfnetwork} object,
+space_columns is a character vector indicating columns of \code{data} with
 coordinates for each sample.}
 
 \item{spatial_graph}{Object that represents spatial relationships, either using
@@ -65,25 +65,25 @@ coordinates for each sample.}
 process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
 or \code{NULL} to specify a single site.}
 
-\item{time_column}{A character string indicating the column of \link{data}
+\item{time_column}{A character string indicating the column of \code{data}
 listing the time-interval for each sample, from the set of times
-in argument \link{times}.}
+in argument \code{times}.}
 
 \item{times}{A integer vector listing the set of times in order.
 If \code{times=NULL}, then it is filled in as the vector of integers
 from the minimum to maximum value of \code{data$time}.}
 
-\item{variable_column}{A character string indicating the column of \link{data}
+\item{variable_column}{A character string indicating the column of \code{data}
 listing the variable for each sample, from the set of times
-in argument \link{variables}.}
+in argument \code{variables}.}
 
 \item{variables}{A character vector listing the set of variables.
 if \code{variables=NULL}, then it is filled in as the unique values
 from \code{data$variable_columns}.}
 
-\item{distribution_column}{A character string indicating the column of \link{data}
+\item{distribution_column}{A character string indicating the column of \code{data}
 listing the distribution for each sample, from the set of names
-in argument \link{family}.
+in argument \code{family}.
 if \code{variables=NULL}, then it is filled in as the unique values
 from \code{data$variables}.}
 

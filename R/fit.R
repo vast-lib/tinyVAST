@@ -26,11 +26,11 @@
 #'        families by row of data. Delta model families are possible.
 #'        See \code{\link[tinyVAST:families]{Families}},
 #' @param space_columns A string or character vector that indicates
-#'        the column(s) of [data] indicating the location of each sample.
-#'        When [spatial_graph] is an [igraph] object, [space_columns] is a string with
+#'        the column(s) of `data` indicating the location of each sample.
+#'        When `spatial_graph` is an `igraph` object, `space_columns` is a string with
 #'        with levels matching the names of vertices of that object.
-#'        When [spatial_graph] is an [fmesher] or [sfnetwork] object,
-#'        space_columns is a character vector indicating columns of [data] with
+#'        When `spatial_graph` is an `fmesher` or `sfnetwork` object,
+#'        space_columns is a character vector indicating columns of `data` with
 #'        coordinates for each sample.
 #' @param spatial_graph Object that represents spatial relationships, either using
 #'        [fmesher::fm_mesh_2d()] to apply the SPDE method,
@@ -38,21 +38,21 @@
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
 #'        process, [sfnetwork_mesh()] for stream networks,
 #'        or `NULL` to specify a single site.
-#' @param time_column A character string indicating the column of [data]
+#' @param time_column A character string indicating the column of `data`
 #'        listing the time-interval for each sample, from the set of times
-#'        in argument [times].
+#'        in argument `times`.
 #' @param times A integer vector listing the set of times in order.
 #'        If `times=NULL`, then it is filled in as the vector of integers
 #'        from the minimum to maximum value of `data$time`.
-#' @param variable_column A character string indicating the column of [data]
+#' @param variable_column A character string indicating the column of `data`
 #'        listing the variable for each sample, from the set of times
-#'        in argument [variables].
+#'        in argument `variables`.
 #' @param variables A character vector listing the set of variables.
 #'        if `variables=NULL`, then it is filled in as the unique values
 #'        from `data$variable_columns`.
-#' @param distribution_column A character string indicating the column of [data]
+#' @param distribution_column A character string indicating the column of `data`
 #'        listing the distribution for each sample, from the set of names
-#'        in argument [family].
+#'        in argument `family`.
 #'        if `variables=NULL`, then it is filled in as the unique values
 #'        from `data$variables`.
 #' @param delta_options a named list with slots for \code{delta_formula},
