@@ -1,5 +1,5 @@
 ---
-title: "Spatial model"
+title: "Spatial modeling"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document

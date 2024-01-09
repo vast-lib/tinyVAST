@@ -203,7 +203,7 @@ function( formula,
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
     }else if( isTRUE(is.character(dsem)) ){
-      output = make_dsem_ram( dsem, times=times, variables=variables, quiet=control$quiet, covs=variables )
+      output = make_dsem_ram( dsem, times=times, variables=variables, quiet=!control$verbose, covs=variables )
     }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
       output = dsem
     }else{
@@ -256,7 +256,7 @@ function( formula,
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
     }else if( isTRUE(is.character(sem)) ){
-      output = make_sem_ram( sem, variables=as.character(variables), quiet=control$quiet, covs=as.character(variables) )
+      output = make_sem_ram( sem, variables=as.character(variables), quiet=!control$verbose, covs=as.character(variables) )
     } else {
       stop("`sem` must be either `NULL` or a character-string")
     }
@@ -598,16 +598,17 @@ function( formula,
                    map = tmb_map,
                    random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
                    DLL = "tinyVAST",
-                   profile = control$profile )  #
+                   profile = control$profile,
+                   silent = control$silent )  #
   #openmp( ... , DLL="tinyVAST" )
-  obj$env$beSilent()
+  #obj$env$beSilent()
   # L = rep$IminusRho_hh %*% rep$Gamma_hh
 
   # Optimize
   #start_time = Sys.time()
   opt = list( "par"=obj$par )
   for( i in seq_len(max(0,control$nlminb_loops)) ){
-    if( isFALSE(control$quiet) ) message("Running nlminb_loop #", i)
+    if( isTRUE(control$verbose) ) message("Running nlminb_loop #", i)
     opt = nlminb( start = opt$par,
                   objective = obj$fn,
                   gradient = obj$gr,
@@ -620,7 +621,7 @@ function( formula,
 
   # Newtonsteps
   for( i in seq_len(max(0,control$newton_loops)) ){
-    if( isFALSE(control$quiet) ) message("Running newton_loop #", i)
+    if( isTRUE(control$verbose) ) message("Running newton_loop #", i)
     g = as.numeric( obj$gr(opt$par) )
     h = optimHess(opt$par, fn=obj$fn, gr=obj$gr)
     opt$par = opt$par - solve(h, g)
@@ -629,7 +630,7 @@ function( formula,
 
   # Run sdreport
   if( isTRUE(control$getsd) ){
-    if( isFALSE(control$quiet) ) message("Running sdreport")
+    if( isTRUE(control$verbose) ) message("Running sdreport")
     Hess_fixed = optimHess( par=opt$par, fn=obj$fn, gr=obj$gr )
     sdrep = sdreport( obj, hessian.fixed=Hess_fixed )
   }else{
@@ -690,8 +691,10 @@ function( formula,
 #'   allowed. Passed to `control` in [stats::nlminb()].
 #' @param iter.max Maximum number of iterations allowed. Passed to `control` in
 #'   [stats::nlminb()].
-#' @param quiet Silence optimization details?
-#' @param trace Parameter values are printed every `trace` iteration. Passed to
+#' @param verbose Output additional messages about model steps during fitting?
+#' @param silent Disable terminal output for inner optimizer?
+#' @param trace Parameter values are printed every `trace` iteration
+#'   for the outer optimizer. Passed to
 #'   `control` in [stats::nlminb()].
 #' @param gmrf_parameterization Gaussian Markov Random Fields parameterization.
 #' @param estimate_delta0 Estimate a delta model?
@@ -703,8 +706,9 @@ function( nlminb_loops = 1,
           eval.max = 1000,
           iter.max = 1000,
           getsd = TRUE,
-          quiet = FALSE,
-          trace = 1,
+          silent = getOption("tinyVAST.silent", TRUE),
+          trace = getOption("tinyVAST.trace", 0),
+          verbose = getOption("tinyVAST.verbose", TRUE),
           profile = c(),
           tmb_par = NULL,
           gmrf_parameterization = c("separable","projection"),
@@ -719,8 +723,9 @@ function( nlminb_loops = 1,
     eval.max = eval.max,
     iter.max = iter.max,
     getsd = getsd,
-    quiet = quiet,
+    silent = silent,
     trace = trace,
+    verbose = verbose,
     profile = profile,
     tmb_par = tmb_par,
     gmrf_parameterization = gmrf_parameterization,

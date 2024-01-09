@@ -1,5 +1,5 @@
 ---
-title: "VAST"
+title: "Vector autoregressive spatio-temporal models"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
