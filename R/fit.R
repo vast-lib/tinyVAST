@@ -121,7 +121,6 @@
 #' out = tinyVAST( data = Data,
 #'                 formula = n ~ s(w),
 #'                 spatial_graph = mesh,
-#'                 control = tinyVASTcontrol(quiet=TRUE, trace=0),
 #'                 sem = "n <-> n, sd_n" )
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
