@@ -10,8 +10,9 @@ tinyVASTcontrol(
   eval.max = 1000,
   iter.max = 1000,
   getsd = TRUE,
-  quiet = FALSE,
-  trace = 1,
+  silent = getOption("tinyVAST.silent", TRUE),
+  trace = getOption("tinyVAST.trace", 0),
+  verbose = getOption("tinyVAST.verbose", TRUE),
   profile = c(),
   tmb_par = NULL,
   gmrf_parameterization = c("separable", "projection"),
@@ -32,10 +33,13 @@ allowed. Passed to \code{control} in \code{\link[stats:nlminb]{stats::nlminb()}}
 
 \item{getsd}{Boolean indicating whether to call \code{\link[TMB:sdreport]{TMB::sdreport()}}}
 
-\item{quiet}{Silence optimization details?}
+\item{silent}{Disable terminal output for inner optimizer?}
 
-\item{trace}{Parameter values are printed every \code{trace} iteration. Passed to
+\item{trace}{Parameter values are printed every \code{trace} iteration
+for the outer optimizer. Passed to
 \code{control} in \code{\link[stats:nlminb]{stats::nlminb()}}.}
+
+\item{verbose}{Output additional messages about model steps during fitting?}
 
 \item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
 

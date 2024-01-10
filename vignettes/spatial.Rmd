@@ -31,6 +31,7 @@ library(tinyVAST)
 library(mgcv)
 library(fmesher)
 set.seed(101)
+options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
@@ -60,7 +61,7 @@ mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
 out = tinyVAST( data = Data,
            formula = n ~ s(w),
            spatial_graph = mesh,
-           control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj"),
+           control = tinyVASTcontrol(gmrf="proj"),
            sem = "" )
 ```
 
@@ -84,8 +85,8 @@ We can compute deviance residuals and percent-deviance explained:
 R1 = sum( residuals(out, type="deviance")^2 )
 
 # tinyVAST null model with just a single intercept
-null = tinyVAST( data = Data, formula = n ~ 1,
-            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+null = tinyVAST( data = Data,
+                 formula = n ~ 1 )
 R0 = sum( residuals(null, type="deviance")^2 )
 
 # Percent deviance explained
@@ -103,8 +104,8 @@ where this comparison shows that using the SPDE method in tinyVAST results in hi
 It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when excluding the spatial term from each.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-out_reduced = tinyVAST( data = Data, formula = n ~ s(w),
-                   control = tinyVASTcontrol(quiet=TRUE, trace=0), sem = "" )
+out_reduced = tinyVAST( data = Data,
+                        formula = n ~ s(w) )
 R1_reduced = sum( residuals(out_reduced, type="deviance")^2 )
 1 - R1_reduced/R0
 

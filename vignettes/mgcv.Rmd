@@ -34,6 +34,7 @@ library(lattice)
 library(visreg)
 library(mgcv)
 set.seed(101)
+options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
@@ -53,8 +54,7 @@ Data = data.frame( x=x, y=y, w=w, z=z, group=factor(group), a=a )
 # fit model
 Formula = y ~ 1 + s(group, bs="re") + poly(x, 2, raw=TRUE) + s(w, by=group, bs="ts") # + offset(a)
 myfit = tinyVAST( data = Data,
-           formula = Formula,
-           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+           formula = Formula )
 ```
 
 We can then compute the percent deviance explained, and confirm that it is identical to that calculated using mgcv
@@ -63,8 +63,7 @@ R1 = sum( residuals(myfit, type="deviance")^2 )
 
 # tinyVAST null model with just a single intercept
 null = tinyVAST( data = Data,
-            formula = y ~ 1,
-            control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+            formula = y ~ 1 )
 R0 = sum( residuals(null, type="deviance")^2 )
 
 # Percent deviance explained
@@ -125,8 +124,7 @@ Data$group = factor(Data$group)
 # fit model
 Formula = n ~ s(x, y, by=group)
 myfit = tinyVAST( data = Data,
-           formula = Formula,
-           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+           formula = Formula )
 
 # compute partial dependence plot
 mypartial = partial( object = myfit,

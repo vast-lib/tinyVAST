@@ -29,7 +29,8 @@ Imports:
     sf,
     sfnetworks,
     TMB (>= 1.9.7),
-    units
+    units,
+    checkmate
 Suggests:
     dsem,
     ggplot2,

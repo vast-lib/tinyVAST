@@ -96,6 +96,7 @@
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula
 #' @importFrom TMB MakeADFun sdreport
+#' @importFrom checkmate assertClass assertDataFrame
 #'
 #' @examples
 #' # Simulate a 2D AR1 spatial process with a cyclic confounder w
@@ -146,8 +147,10 @@ function( formula,
   start_time = Sys.time()
 
   # General error checks
-  if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`", call. = FALSE)
-  if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
+  #if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`", call. = FALSE)
+  #if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
+  assertClass(control, "tinyVASTcontrol")
+  assertDataFrame(data)
 
   ##############
   # input telescoping

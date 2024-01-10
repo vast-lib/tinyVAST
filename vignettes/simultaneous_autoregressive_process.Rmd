@@ -28,6 +28,7 @@ knitr::opts_chunk$set(
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(igraph)
+options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
@@ -81,7 +82,7 @@ mytiny0 = tinyVAST(
                           "pink" = lognormal(),
                           "sockeye" = lognormal() ),
      spatial_graph = unconnected_graph,
-     control = tinyVASTcontrol( trace=0, profile="alpha_j" ) )
+     control = tinyVASTcontrol( profile="alpha_j" ) )
 
 # Summarize output
 Summary = summary(mytiny0, what="dsem")
@@ -109,7 +110,7 @@ mytiny = tinyVAST(
                           "pink" = lognormal(),
                           "sockeye" = lognormal() ),
      spatial_graph = adjacency_graph,
-     control = tinyVASTcontrol( trace=0, profile="alpha_j" ) )
+     control = tinyVASTcontrol( profile="alpha_j" ) )
 
 # Summarize output
 Summary = summary(mytiny, what="dsem")
