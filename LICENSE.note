@@ -1,0 +1,5 @@
+The tinyVAST package as a whole is distributed under GPL-3. The tinyVAST package includes other open source software components. The following is a list of these components:
+
+* sem: GPL-2 | GPL-3
+* sdmTMB: GPL-3
+

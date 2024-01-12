@@ -409,7 +409,8 @@ function( formula,
                          "gaussian" = 1,
                          "tweedie" = 2,
                          "lognormal" = 1,
-                         "poisson" = 0
+                         "poisson" = 0,
+                         "Gamma" = 1
                        )} )
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
@@ -423,7 +424,8 @@ function( formula,
                          "lognormal" = 2,
                          "poisson" = 3,
                          "bernoulli" = 4,
-                         "binomial" = 4)[x$family])
+                         "binomial" = 4,
+                         "Gamma" = 5)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("identity" = 0,
