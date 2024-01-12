@@ -5,6 +5,8 @@
 \alias{lognormal}
 \alias{tweedie}
 \alias{delta_lognormal}
+\alias{delta_gamma}
+\alias{delta_poisson_link_gamma}
 \title{Additional families}
 \usage{
 lognormal(link = "log")
@@ -12,13 +14,17 @@ lognormal(link = "log")
 tweedie(link = "log")
 
 delta_lognormal(link1 = "logit", link2 = "log")
+
+delta_gamma(link1 = "logit", link2 = "log")
+
+delta_poisson_link_gamma(link1 = "log", link2 = "log")
 }
 \arguments{
 \item{link}{Link.}
 
-\item{link1}{First linear predictor link}
+\item{link1}{Link for first part of delta/hurdle model.}
 
-\item{link2}{Second linear predictor link}
+\item{link2}{Link for second part of delta/hurdle model.}
 }
 \value{
 A list with elements common to standard R family objects including \code{family},
@@ -29,9 +35,22 @@ Additional families compatible with \pkg{tinyVAST}.
 }
 \details{
 Copied from sdmTMB
+
+\code{delta_poisson_link_gamma()} is the Poisson-link (complementary
+log-log) delta model (Thorson 2018).
 }
 \examples{
 lognormal(link = "log")
 tweedie(link = "log")
 delta_lognormal()
+delta_gamma()
+delta_poisson_link_gamma()
+}
+\references{
+\emph{Poisson-link families}:
+
+Thorson, J.T. 2018. Three problems with the conventional delta-model for
+biomass sampling data, and a computationally efficient alternative. Canadian
+Journal of Fisheries and Aquatic Sciences, 75(9), 1369-1382.
+\doi{10.1139/cjfas-2017-0266}
 }
