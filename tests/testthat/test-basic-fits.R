@@ -22,7 +22,6 @@ test_that("Basic tinyVAST works", {
     data = dat,
     formula = n ~ s(w),
     spatial_graph = mesh,
-    control = tinyVASTcontrol(quiet = TRUE, trace = 0),
     sem = ""
   )
   expect_s3_class(out, "tinyVAST")

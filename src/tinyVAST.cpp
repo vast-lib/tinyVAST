@@ -7,6 +7,7 @@ enum valid_family {
   lognormal_family = 2,
   poisson_family   = 3,
   bernoulli_family = 4,
+  gamma_family = 5,
 };
 
 enum valid_link {
@@ -315,6 +316,10 @@ Type one_predictor_likelihood( Type y,
         nll -= dpois( y, mu, true );
         //devresid = MUST ADD;
         break;
+      case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
+        nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
+        devresid = sign(y - mu) * pow(2 * ( (y-mu)/mu - log(y/mu) ), 0.5);
+        break;
       default:
         error("Distribution not implemented.");
     }
@@ -379,6 +384,10 @@ Type two_predictor_likelihood( Type y,
           // devresid = MUST ADD;
           break;
         // case 4:  // Bernoulli
+        case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
+          nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)), true );
+          devresid = sign(y - mu2) * pow(2 * ( (y-mu2)/mu2 - log(y/mu2) ), 0.5);
+          break;
         default:
           error("Distribution not implemented.");
       }

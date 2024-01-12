@@ -81,8 +81,7 @@ out = tinyVAST( dsem = dsem,
            time_column = "year",
            distribution_column = "dist",
            times = c(paste0("EOF_",seq_len(n_eof)), sort(unique(Data[,'year']))),
-           control = tinyVASTcontrol( quiet=F, trace=1, profile="alpha_j",
-                                      nlminb_loops=1, getsd=TRUE,
+           control = tinyVASTcontrol( profile="alpha_j",
                                       gmrf_parameterization="projection") )
 ```
 

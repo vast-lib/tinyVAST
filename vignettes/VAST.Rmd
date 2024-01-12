@@ -1,5 +1,5 @@
 ---
-title: "VAST"
+title: "Vector autoregressive spatio-temporal models"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
@@ -36,6 +36,7 @@ knitr::opts_chunk$set(
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
+options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
@@ -76,8 +77,7 @@ mytinyVAST = tinyVAST( dsem = "logn -> logn, 1, rho",
            data = Data,
            formula = n ~ 0 + factor(time),
            spatial_graph = mesh,
-           family = list( "obs"=tweedie() ),
-           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+           family = tweedie() )
 mytinyVAST
 ```
 The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`.
@@ -204,9 +204,8 @@ mydelta = tinyVAST( data = Data,
                formula = n ~ 1,
                delta_options = list(delta_formula = ~ 0 + factor(time)),
                delta_dsem = "logn -> logn, 1, rho",
-               family = list( "obs"=delta_lognormal() ),
-               spatial_graph = mesh,
-               control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+               family = delta_lognormal(),
+               spatial_graph = mesh )
 
 mydelta
 ```
@@ -256,8 +255,7 @@ out = tinyVAST( dsem = dsem,
            data = Data,
            formula = n ~ 0 + var,
            spatial_graph = mesh,
-           family = list( "obs"=tweedie() ),
-           control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+           family = tweedie() )
 out
 ```
 

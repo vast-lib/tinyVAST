@@ -28,6 +28,7 @@ knitr::opts_chunk$set(
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
+options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
@@ -111,7 +112,7 @@ out = tinyVAST( sem = sem,
            variable_column = "species",
            time_column = "time",
            distribution_column = "dist",
-           control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj") )
+           control = tinyVASTcontrol(gmrf="proj") )
 out
 ```
 
@@ -177,7 +178,7 @@ out = tinyVAST( sem = sem,
            variable_column = "species",
            time_column = "time",
            distribution_column = "dist",
-           control = tinyVASTcontrol(quiet=TRUE, trace=0, gmrf="proj") )
+           control = tinyVASTcontrol(gmrf="proj") )
 
 # Extract and rotate estimated loadings
 Lhat_cf = matrix( 0, nrow=n_c, ncol=2 )

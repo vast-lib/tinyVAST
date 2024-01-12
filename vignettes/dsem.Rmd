@@ -28,6 +28,7 @@ knitr::opts_chunk$set(
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 set.seed(101)
+options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` includes features to fit a dynamic structural equation model.  We here show this using a bivariate vector autoregressive model for wolf and moose abundance on Isle Royale.
@@ -54,8 +55,7 @@ mytiny = tinyVAST( dsem = dsem,
                  data = data,
                  times = isle_royale[,1],
                  variables = colnames(isle_royale[,2:3]),
-                 formula = logn ~ 0 + var,
-                 control = tinyVASTcontrol(quiet=TRUE, trace=0) )
+                 formula = logn ~ 0 + var )
 mytiny
 ```
 
@@ -79,7 +79,6 @@ family = c("normal","normal")
 # initial first without delta0 (to improve starting values)
 mydsem = dsem::dsem( sem = dsem,
              tsdata = dsem_data,
-             control = dsem_control(quiet = TRUE),
              getsd = FALSE,
              family = family )
 mydsem
