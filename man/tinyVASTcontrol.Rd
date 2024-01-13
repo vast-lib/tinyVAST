@@ -12,7 +12,7 @@ tinyVASTcontrol(
   getsd = TRUE,
   silent = getOption("tinyVAST.silent", TRUE),
   trace = getOption("tinyVAST.trace", 0),
-  verbose = getOption("tinyVAST.verbose", TRUE),
+  verbose = getOption("tinyVAST.verbose", FALSE),
   profile = c(),
   tmb_par = NULL,
   gmrf_parameterization = c("separable", "projection"),

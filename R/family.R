@@ -70,6 +70,21 @@ tweedie <- function(link = "log") {
   add_to_family(x)
 }
 
+#bernoulli <-
+#function( link = "log" ){
+#  linktemp <- substitute(link)
+#  if (!is.character(linktemp))
+#    linktemp <- deparse(linktemp)
+#  okLinks <- c("log", "identity", "cloglog")
+#  if (linktemp %in% okLinks)
+#    stats <- stats::make.link(linktemp)
+#  else if (is.character(link))
+#    stats <- stats::make.link(link)
+#
+#  x <- c(list(family = "bernoulli", link = linktemp), stats)
+#  add_to_family(x)
+#}
+
 # Copied from sdmTMB
 #' @param link1 First linear predictor link
 #' @param link2 Second linear predictor link

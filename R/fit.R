@@ -94,7 +94,7 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula
+#'   update.formula binomial poisson
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame
 #'
@@ -410,6 +410,8 @@ function( formula,
                          "tweedie" = 2,
                          "lognormal" = 1,
                          "poisson" = 0,
+                         "binomial" = 0,
+                         "bernoulli" = 0,
                          "Gamma" = 1
                        )} )
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
@@ -423,14 +425,15 @@ function( formula,
                          "tweedie" = 1,
                          "lognormal" = 2,
                          "poisson" = 3,
-                         "bernoulli" = 4,
                          "binomial" = 4,
+                         "bernoulli" = 4,
                          "Gamma" = 5)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("identity" = 0,
                          "log" = 1,
-                         "logit" = 2 )[x$link])
+                         "logit" = 2,
+                         "cloglog" = 3 )[x$link])
                        } )))
     components = apply( family_code, MARGIN=1,
                          FUN=\(x)sum(!is.na(x)) )

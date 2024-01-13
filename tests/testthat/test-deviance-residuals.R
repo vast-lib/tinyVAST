@@ -56,6 +56,56 @@ test_that("deviance residuals for tweedie match mgcv", {
                 tolerance=1e-3 )
 })
 
+test_that("deviance residuals for poisson works", {
+  skip_on_cran()
+  skip_on_ci()
+
+  # simulate data
+  set.seed(101)
+  x = rnorm(100)
+  mu = exp(1 + 0.5*x)
+  y = rpois( n=100, lambda=mu )
+
+  # delta-gamma in tinyVAST
+  mytiny = tinyVAST( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = poisson("log") )
+  resid1 = residuals( mytiny, type="deviance" )
+
+  #
+  myglm = glm( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = poisson("log") )
+  resid2 = residuals( myglm, type="deviance" )
+  expect_equal( as.numeric(resid1), as.numeric(resid2),
+                tolerance=1e-3 )
+})
+
+test_that("deviance residuals for Bernoulli works", {
+  skip_on_cran()
+  skip_on_ci()
+
+  # simulate data
+  set.seed(101)
+  x = rnorm(100)
+  mu = plogis(1 + 0.5*x)
+  y = rbinom( n=100, prob=mu, size=1 )
+
+  # delta-gamma in tinyVAST
+  mytiny = tinyVAST( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("logit") )
+  resid1 = residuals( mytiny, type="deviance" )
+
+  #
+  myglm = glm( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("logit") )
+  resid2 = residuals( myglm, type="deviance" )
+  expect_equal( as.numeric(resid1), as.numeric(resid2),
+                tolerance=1e-3 )
+})
+
 test_that("delta-gamma works", {
   skip_on_cran()
   skip_on_ci()

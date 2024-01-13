@@ -7,13 +7,15 @@ enum valid_family {
   lognormal_family = 2,
   poisson_family   = 3,
   bernoulli_family = 4,
+  binomial_family = 4,
   gamma_family = 5,
 };
 
 enum valid_link {
   identity_link = 0,
   log_link      = 1,
-  logit_link    = 2
+  logit_link    = 2,
+  cloglog_link = 3
 };
 
 // Needed for returning SparseMatrix for Ornstein-Uhlenbeck network correlations
@@ -281,18 +283,29 @@ Type one_predictor_likelihood( Type y,
                         vector<Type> log_sigma_segment,
                         Type &nll,
                         Type &devresid ){
-  Type mu;
-  Type logmu;
+  Type mu, logmu, log_one_minus_mu;
   //Type devresid = 0;
 
   switch( link ){
     case identity_link:
       mu = p;
       logmu = log( p );
+      log_one_minus_mu = log( Type(1.0) - mu );
       break;
     case log_link:
       mu = exp(p);
       logmu = p;
+      log_one_minus_mu = log( Type(1.0) - mu );
+      break;
+    case logit_link:
+      mu = invlogit(p);
+      logmu = log(mu);
+      log_one_minus_mu = log( invlogit(-1 * p) );
+      break;
+    case cloglog_link:
+      mu = Type(1.0) - exp( -1*exp(p) );
+      logmu = logspace_sub( Type(0.0), -1*exp(p) );
+      log_one_minus_mu = -1*exp(p);
       break;
     default:
       error("Link not implemented.");
@@ -314,7 +327,15 @@ Type one_predictor_likelihood( Type y,
         break;
       case poisson_family:
         nll -= dpois( y, mu, true );
-        //devresid = MUST ADD;
+        devresid = sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
+        break;
+      case binomial_family:
+        if(y==0){
+          nll -= log_one_minus_mu;
+        }else{
+          nll -= logmu;
+        }
+        devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
         nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
@@ -357,7 +378,6 @@ Type two_predictor_likelihood( Type y,
         mu2 = exp(p2);
         logmu2 = p2;
         break;
-      // case logit_link: // Logit
       default:
         error("Link not implemented.");
     }
