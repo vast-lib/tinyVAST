@@ -94,7 +94,7 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula
+#'   update.formula binomial poisson
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame
 #'
@@ -410,6 +410,8 @@ function( formula,
                          "tweedie" = 2,
                          "lognormal" = 1,
                          "poisson" = 0,
+                         "binomial" = 0,
+                         "bernoulli" = 0,
                          "Gamma" = 1
                        )} )
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
@@ -423,20 +425,24 @@ function( formula,
                          "tweedie" = 1,
                          "lognormal" = 2,
                          "poisson" = 3,
-                         "bernoulli" = 4,
                          "binomial" = 4,
+                         "bernoulli" = 4,
                          "Gamma" = 5)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("identity" = 0,
                          "log" = 1,
-                         "logit" = 2 )[x$link])
+                         "logit" = 2,
+                         "cloglog" = 3 )[x$link])
                        } )))
     components = apply( family_code, MARGIN=1,
-                                  FUN=\(x)sum(!is.na(x)) )
+                         FUN=\(x)sum(!is.na(x)) )
+    poisson_link_delta = sapply( family, FUN=\(x){
+                         as.integer(isTRUE(x$type == "poisson_link_delta"))} )
     out = list( "family_code" = cbind(family_code),
                 "link_code" = cbind(link_code),
                 "components" = components,
+                "poisson_link_delta" = poisson_link_delta,
                 "e_i" = e_i,
                 "Nsigma_e" = Nsigma_e,
                 "Edims_ez" = Edims_ez )
@@ -455,24 +461,21 @@ function( formula,
     y_i = gam_basis$y_i,
     X_ij = gam_basis$X_ij,
     Z_ik = gam_basis$Z_ik,
-
     X2_ij = delta_gam_basis$X_ij,
     Z2_ik = delta_gam_basis$Z_ik,
-
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     offset_i = gam_basis$offset_i,
     family_ez = distributions$family_code,
     link_ez = distributions$link_code,
     components_e = distributions$components,
+    poislink_e = distributions$poisson_link_delta,
     e_i = distributions$e_i - 1, # -1 to convert to CPP index
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,
     Sdims = gam_basis$Sdims,
-
     S2_kk = delta_gam_basis$S_kk,
     S2dims = delta_gam_basis$Sdims,
-
     Aepsilon_zz = Aepsilon_zz - 1,     # Index form, i, s, t
     Aepsilon_z = Aepsilon_z,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
@@ -481,14 +484,12 @@ function( formula,
     ram_sem_start = as.numeric(sem_ram$output$ram[,5]),
     ram_dsem = as.matrix(na.omit(dsem_ram$output$ram[,1:4])),
     ram_dsem_start = as.numeric(dsem_ram$output$ram[,5]),
-
     ram2_sem = as.matrix(na.omit(delta_sem_ram$output$ram[,1:4])),
     ram2_sem_start = as.numeric(delta_sem_ram$output$ram[,5]),
     ram2_dsem = as.matrix(na.omit(delta_dsem_ram$output$ram[,1:4])),
     ram2_dsem_start = as.numeric(delta_dsem_ram$output$ram[,5]),
     X2_gj = matrix(0,ncol=ncol(delta_gam_basis$X_ij),nrow=0),
     Z2_gk = matrix(0,ncol=ncol(delta_gam_basis$Z_ik),nrow=0),
-
     X_gj = matrix(0,ncol=ncol(gam_basis$X_ij),nrow=0),
     Z_gk = matrix(0,ncol=ncol(gam_basis$Z_ik),nrow=0),
     AepsilonG_zz = matrix(0,nrow=0,ncol=4),
@@ -712,7 +713,7 @@ function( nlminb_loops = 1,
           getsd = TRUE,
           silent = getOption("tinyVAST.silent", TRUE),
           trace = getOption("tinyVAST.trace", 0),
-          verbose = getOption("tinyVAST.verbose", TRUE),
+          verbose = getOption("tinyVAST.verbose", FALSE),
           profile = c(),
           tmb_par = NULL,
           gmrf_parameterization = c("separable","projection"),

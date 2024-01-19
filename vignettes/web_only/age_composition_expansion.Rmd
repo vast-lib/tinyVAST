@@ -59,6 +59,11 @@ Data = cbind( st_drop_geometry(Data), st_coordinates(Data) )
 Next, we construct the various inputs to _tinyVAST_
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# adds different variances for each age
+sem = ""
+
+# Constant AR1 spatio-temporal term across ages
+# and adds different variances for each age
 dsem = "
   Age_1 -> Age_1, 1, lag1
   Age_2 -> Age_2, 1, lag1
@@ -82,7 +87,12 @@ mesh = fm_mesh_2d( loc = Data[,c("X","Y")],
 control = tinyVASTcontrol( getsd = FALSE,
                            profile = c("alpha_j"),  
                            trace = 0 )
-family = list( 
+```
+
+We could run the model with a log-linked Tweedie distribution and a single linear predictor:
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+family = list(
   Age_1 = tweedie(),
   Age_2 = tweedie(),
   Age_3 = tweedie(),
@@ -104,6 +114,7 @@ family = list(
 myfit = tinyVAST(
   data = Data,
   formula = Catch_KG ~ 0 + Year_Age,
+  sem = sem,
   dsem = dsem,
   family = family,
   space_column = c("X", "Y"), 

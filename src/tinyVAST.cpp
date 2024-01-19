@@ -7,13 +7,15 @@ enum valid_family {
   lognormal_family = 2,
   poisson_family   = 3,
   bernoulli_family = 4,
+  binomial_family = 4,
   gamma_family = 5,
 };
 
 enum valid_link {
   identity_link = 0,
   log_link      = 1,
-  logit_link    = 2
+  logit_link    = 2,
+  cloglog_link = 3
 };
 
 // Needed for returning SparseMatrix for Ornstein-Uhlenbeck network correlations
@@ -281,18 +283,29 @@ Type one_predictor_likelihood( Type y,
                         vector<Type> log_sigma_segment,
                         Type &nll,
                         Type &devresid ){
-  Type mu;
-  Type logmu;
+  Type mu, logmu, log_one_minus_mu;
   //Type devresid = 0;
 
   switch( link ){
     case identity_link:
       mu = p;
       logmu = log( p );
+      log_one_minus_mu = log( Type(1.0) - mu );
       break;
     case log_link:
       mu = exp(p);
       logmu = p;
+      log_one_minus_mu = log( Type(1.0) - mu );
+      break;
+    case logit_link:
+      mu = invlogit(p);
+      logmu = log(mu);
+      log_one_minus_mu = log( invlogit(-1 * p) );
+      break;
+    case cloglog_link:
+      mu = Type(1.0) - exp( -1*exp(p) );
+      logmu = logspace_sub( Type(0.0), -1*exp(p) );
+      log_one_minus_mu = -1*exp(p);
       break;
     default:
       error("Link not implemented.");
@@ -314,7 +327,15 @@ Type one_predictor_likelihood( Type y,
         break;
       case poisson_family:
         nll -= dpois( y, mu, true );
-        //devresid = MUST ADD;
+        devresid = sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
+        break;
+      case binomial_family:
+        if(y==0){
+          nll -= log_one_minus_mu;
+        }else{
+          nll -= logmu;
+        }
+        devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
         nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
@@ -336,32 +357,41 @@ Type two_predictor_likelihood( Type y,
                                vector<int> link,
                                vector<int> family,
                                vector<Type> log_sigma_segment,
+                               int poislink,
                                Type &nll,
                                Type &devresid ){
-  Type mu1, logmu1, mu2, logmu2;
+  Type mu1, logmu1, mu2, logmu2, log_one_minus_mu1;
   //Type devresid = 0;
 
   // First link
-  mu1 = invlogit( p1 );
-  logmu1 = log( mu1 );
-  // second link
-  switch( link(1) ){
-    case identity_link:
-      mu2 = p2;
-      logmu2 = log( p2 );
-      break;
-    case log_link:
-      mu2 = exp(p2);
-      logmu2 = p2;
-      break;
-    // case logit_link: // Logit
-    default:
-      error("Link not implemented.");
+  if( poislink==0 ){
+    mu1 = invlogit( p1 );
+    logmu1 = log( mu1 );
+    log_one_minus_mu1 = log( Type(1.0) - mu1 );
+    // second link
+    switch( link(1) ){
+      case identity_link:
+        mu2 = p2;
+        logmu2 = log( p2 );
+        break;
+      case log_link:
+        mu2 = exp(p2);
+        logmu2 = p2;
+        break;
+      default:
+        error("Link not implemented.");
+    }
+  }else{
+    mu1 = Type(1.0) - exp( -1*exp(p1) );
+    logmu1 = logspace_sub( Type(0.0), -1*exp(p1) );
+    log_one_minus_mu1 = -1*exp(p1);
+    mu2 = exp( p1 + p2 ) / mu1;
+    logmu2 = p1 + p2 - logmu1;
   }
   if( !R_IsNA(asDouble(y)) ){
     // Distribution
     if( y == 0 ){
-      nll -= log( Type(1.0) - mu1 );
+      nll -= log_one_minus_mu1;
       //deviance1_i(i) = -2 * log_one_minus_R1_i(i);
     }else{
       nll -= logmu1;
@@ -386,7 +416,7 @@ Type two_predictor_likelihood( Type y,
         // case 4:  // Bernoulli
         case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
           nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)), true );
-          devresid = sign(y - mu2) * pow(2 * ( (y-mu2)/mu2 - log(y/mu2) ), 0.5);
+          //devresid = sign(y - mu2) * pow(2 * ( (y-mu2)/mu2 - log(y/mu2) ), 0.5);
           break;
         default:
           error("Distribution not implemented.");
@@ -417,6 +447,7 @@ Type objective_function<Type>::operator() (){
   DATA_IMATRIX( family_ez );      // family
   DATA_IMATRIX( link_ez );        // family
   DATA_IVECTOR( components_e );   // family
+  DATA_IVECTOR( poislink_e );     // family
   DATA_IVECTOR( e_i );      // Asssociate each sample with a family/link
   DATA_IMATRIX( Edims_ez );  // Start (in C++ indexing) and Length, of log_sigma for each family/link
 
@@ -424,16 +455,13 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( y_i );        // The response
   DATA_MATRIX( X_ij );        // Design matrix for fixed covariates
   DATA_MATRIX( Z_ik );        // Design matrix for splines
-
   DATA_MATRIX( X2_ij );        // Design matrix for fixed covariates
   DATA_MATRIX( Z2_ik );        // Design matrix for splines
-
   DATA_IVECTOR( t_i );
   DATA_IVECTOR( c_i );
   DATA_VECTOR( offset_i );
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
-
   DATA_SPARSE_MATRIX( S2_kk ); // Sparse penalization matrix
   DATA_IVECTOR( S2dims );   // Dimensions of blockwise components of S_kk
 
@@ -448,26 +476,18 @@ Type objective_function<Type>::operator() (){
   // DSEM objects
   DATA_IMATRIX( ram_dsem );
   DATA_VECTOR( ram_dsem_start );
-
-  // SEM objects
   DATA_IMATRIX( ram_sem );
   DATA_VECTOR( ram_sem_start );
-
-  // DSEM objects
   DATA_IMATRIX( ram2_dsem );
   DATA_VECTOR( ram2_dsem_start );
-
-  // SEM objects
   DATA_IMATRIX( ram2_sem );
   DATA_VECTOR( ram2_sem_start );
 
   // Prediction options
   DATA_MATRIX( X_gj );       // Design matrix for fixed covariates
   DATA_MATRIX( Z_gk );       // Design matrix for splines
-
   DATA_MATRIX( X2_gj );       // Design matrix for fixed covariates
   DATA_MATRIX( Z2_gk );       // Design matrix for splines
-
   DATA_IMATRIX( AepsilonG_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
   DATA_VECTOR( AepsilonG_z );
   DATA_IMATRIX( AomegaG_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
@@ -642,7 +662,7 @@ Type objective_function<Type>::operator() (){
       mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll, devresid );
     }
     if( components_e(e_i(i))==2 ){
-      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, nll, devresid );
+      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll, devresid );
     }
     devresid_i(i) = devresid;
   }
