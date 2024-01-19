@@ -1,0 +1,16 @@
+bibentry(
+  bibtype = "Article",
+  title = paste0("tinyVAST: R package with an expressive interface to ",
+                 "specify lagged and simultaneous effects in multivariate ",
+                 "spatio-temporal models"),
+  author = c(
+    person(c("James", "T."), "Thorson"),
+    person(c("Sean", "C."), "Ward"),
+    person(c("Pamela"), "Goddard"),
+    person(c("Christopher", "N."), "Rooper")
+  ),
+  year = "2024",
+  journal = "bioRxiv",
+  volume = "2401.10193",
+  doi = "10.48550/arXiv.2401.10193"
+)
