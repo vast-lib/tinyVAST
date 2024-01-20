@@ -49,6 +49,6 @@ test_that("Basic spatial factor analysis works", {
   expect_equal( my1$opt, my2$opt, tol=0.001 )
 
   # Predicted sample-weighted total
-  integrate_output( mytinyVAST,
+  integrate_output( my1,
                     newdata = subset(Data,time==t) )
 })
