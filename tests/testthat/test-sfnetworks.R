@@ -38,15 +38,15 @@ test_that("Basic sfnetworks works", {
                      time = "2020",    # no time-dynamics, so only one value
                      dist = "obs" )    # only one type of sampling in data
 
-#  # fit model
-#  out = tinyVAST( data = Data,
-#             formula = Count ~ 1,
-#             spatial_graph = graph,
-#             space_column = c("X","Y"),
-#             variable_column = "var",
-#             time_column = "time",
-#             distribution_column = "dist",
-#             sem = "" )
+  # fit model
+  out = tinyVAST( data = Data,
+             formula = Count ~ 1,
+             spatial_graph = graph,
+             space_column = c("X","Y"),
+             variable_column = "var",
+             time_column = "time",
+             distribution_column = "dist",
+             sem = "" )
 #
 #  #
 #  integrate_output( out,
