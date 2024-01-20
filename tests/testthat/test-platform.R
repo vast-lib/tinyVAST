@@ -24,7 +24,18 @@ test_that("tinyVAST example is working ", {
   out = tinyVAST( data = Data,
              formula = n ~ s(w),
              spatial_graph = mesh,
-             sem = "" )
+             sem = "",
+             control = tinyVASTcontrol(getJointPrecision=TRUE) )
   expect_s3_class(out, "tinyVAST")
+
+  #
+  vcov( out, which="fixed")
+  vcov( out, which="random")
+  vcov( out, which="both")
+
+  #
+  predict( out )
+  predict( out, newdata = Data[1:10,] )
+  predict( out, se.fit = TRUE, what="p_g" )
 })
 
