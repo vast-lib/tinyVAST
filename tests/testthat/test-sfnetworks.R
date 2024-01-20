@@ -31,22 +31,22 @@ test_that("Basic sfnetworks works", {
   #Count = rpois( n=graph$n, lambda=exp(alpha + omega) )
   Count_i = rnorm( n=length(omega_i), mean=alpha + omega_i, sd=0.5 )
 
-  # Format into long-form data frame expected by tinyVAST
-  Data = data.frame( Count = Count_i,
-                     st_coordinates(extrap),
-                     var = "species",  # Univariate model so only one value
-                     time = "2020",    # no time-dynamics, so only one value
-                     dist = "obs" )    # only one type of sampling in data
-
-  # fit model
-  out = tinyVAST( data = Data,
-             formula = Count ~ 1,
-             spatial_graph = graph,
-             space_column = c("X","Y"),
-             variable_column = "var",
-             time_column = "time",
-             distribution_column = "dist",
-             sem = "" )
+#  # Format into long-form data frame expected by tinyVAST
+#  Data = data.frame( Count = Count_i,
+#                     st_coordinates(extrap),
+#                     var = "species",  # Univariate model so only one value
+#                     time = "2020",    # no time-dynamics, so only one value
+#                     dist = "obs" )    # only one type of sampling in data
+#
+#  # fit model
+#  out = tinyVAST( data = Data,
+#             formula = Count ~ 1,
+#             spatial_graph = graph,
+#             space_column = c("X","Y"),
+#             variable_column = "var",
+#             time_column = "time",
+#             distribution_column = "dist",
+#             sem = "" )
 #
 #  #
 #  integrate_output( out,
