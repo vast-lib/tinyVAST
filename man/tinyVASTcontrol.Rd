@@ -50,6 +50,9 @@ to \code{tinyVAST(...)$internal$parlist}}
 \item{gmrf_parameterization}{Gaussian Markov Random Fields parameterization.}
 
 \item{estimate_delta0}{Estimate a delta model?}
+
+\item{getJointPrecision}{whether to get the joint precision matrix.  Passed
+to \code{\link[TMB]{sdreport}}.}
 }
 \description{
 Control parameters for tinyVAST

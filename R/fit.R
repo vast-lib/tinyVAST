@@ -705,6 +705,8 @@ function( formula,
 #'   `control` in [stats::nlminb()].
 #' @param gmrf_parameterization Gaussian Markov Random Fields parameterization.
 #' @param estimate_delta0 Estimate a delta model?
+#' @param getJointPrecision whether to get the joint precision matrix.  Passed
+#'        to \code{\link[TMB]{sdreport}}.
 #'
 #' @export
 tinyVASTcontrol <-
