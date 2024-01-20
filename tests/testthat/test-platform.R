@@ -37,5 +37,13 @@ test_that("tinyVAST example is working ", {
   predict( out )
   predict( out, newdata = Data[1:10,] )
   predict( out, se.fit = TRUE, what="p_g" )
+
+  #
+  print(out)
+
+  #
+  AIC(out)
+  logLik(out)
+
 })
 
