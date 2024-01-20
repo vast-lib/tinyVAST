@@ -21,23 +21,23 @@ test_that("Basic sfnetworks works", {
   # sample locations along network
   extrap = st_union( st_line_sample( activate(stream,"edges"), density=1/10000))
   extrap = st_cast( extrap, "POINT" )
-#
-#  # Project to sampled locations
-#  A_is = sfnetwork_evaluator( stream = graph$stream,
-#                                  loc = st_coordinates(extrap) )
-#  omega_i = (A_is %*% omega_s)[,1]
-#
-#  # Simulate sampling
-#  #Count = rpois( n=graph$n, lambda=exp(alpha + omega) )
-#  Count_i = rnorm( n=length(omega_i), mean=alpha + omega_i, sd=0.5 )
-#
-#  # Format into long-form data frame expected by tinyVAST
-#  Data = data.frame( Count = Count_i,
-#                     st_coordinates(extrap),
-#                     var = "species",  # Univariate model so only one value
-#                     time = "2020",    # no time-dynamics, so only one value
-#                     dist = "obs" )    # only one type of sampling in data
-#
+
+  # Project to sampled locations
+  A_is = sfnetwork_evaluator( stream = graph$stream,
+                                  loc = st_coordinates(extrap) )
+  omega_i = (A_is %*% omega_s)[,1]
+
+  # Simulate sampling
+  #Count = rpois( n=graph$n, lambda=exp(alpha + omega) )
+  Count_i = rnorm( n=length(omega_i), mean=alpha + omega_i, sd=0.5 )
+
+  # Format into long-form data frame expected by tinyVAST
+  Data = data.frame( Count = Count_i,
+                     st_coordinates(extrap),
+                     var = "species",  # Univariate model so only one value
+                     time = "2020",    # no time-dynamics, so only one value
+                     dist = "obs" )    # only one type of sampling in data
+
 #  # fit model
 #  out = tinyVAST( data = Data,
 #             formula = Count ~ 1,
