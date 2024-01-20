@@ -637,7 +637,9 @@ function( formula,
   if( isTRUE(control$getsd) ){
     if( isTRUE(control$verbose) ) message("Running sdreport")
     Hess_fixed = optimHess( par=opt$par, fn=obj$fn, gr=obj$gr )
-    sdrep = sdreport( obj, hessian.fixed=Hess_fixed )
+    sdrep = sdreport( obj,
+                      hessian.fixed = Hess_fixed,
+                      getJointPrecision = control$getJointPrecision )
   }else{
     Hess_fixed = sdrep = NULL
   }
@@ -703,6 +705,8 @@ function( formula,
 #'   `control` in [stats::nlminb()].
 #' @param gmrf_parameterization Gaussian Markov Random Fields parameterization.
 #' @param estimate_delta0 Estimate a delta model?
+#' @param getJointPrecision whether to get the joint precision matrix.  Passed
+#'        to \code{\link[TMB]{sdreport}}.
 #'
 #' @export
 tinyVASTcontrol <-
@@ -717,7 +721,8 @@ function( nlminb_loops = 1,
           profile = c(),
           tmb_par = NULL,
           gmrf_parameterization = c("separable","projection"),
-          estimate_delta0 = FALSE ){
+          estimate_delta0 = FALSE,
+          getJointPrecision = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -734,7 +739,8 @@ function( nlminb_loops = 1,
     profile = profile,
     tmb_par = tmb_par,
     gmrf_parameterization = gmrf_parameterization,
-    estimate_delta0 = estimate_delta0
+    estimate_delta0 = estimate_delta0,
+    getJointPrecision = getJointPrecision
   ), class = "tinyVASTcontrol" )
 }
 

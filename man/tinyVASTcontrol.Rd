@@ -16,7 +16,8 @@ tinyVASTcontrol(
   profile = c(),
   tmb_par = NULL,
   gmrf_parameterization = c("separable", "projection"),
-  estimate_delta0 = FALSE
+  estimate_delta0 = FALSE,
+  getJointPrecision = FALSE
 )
 }
 \arguments{
@@ -49,6 +50,9 @@ to \code{tinyVAST(...)$internal$parlist}}
 \item{gmrf_parameterization}{Gaussian Markov Random Fields parameterization.}
 
 \item{estimate_delta0}{Estimate a delta model?}
+
+\item{getJointPrecision}{whether to get the joint precision matrix.  Passed
+to \code{\link[TMB]{sdreport}}.}
 }
 \description{
 Control parameters for tinyVAST
