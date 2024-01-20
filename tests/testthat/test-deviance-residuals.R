@@ -162,6 +162,7 @@ test_that("Poisson-link delta-gamma works", {
                      control = tinyVASTcontrol(verbose=FALSE) )
 
   # delta-gamma in sdmTMB
+  library(sdmTMB)
   mysdmTMB = sdmTMB( list( y ~ 1 + x, y ~ 1 + x ),
                      data = data.frame(x=x, y=y),
                      family = delta_poisson_link_gamma(),
