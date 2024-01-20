@@ -7,20 +7,20 @@ test_that("Basic sfnetworks works", {
                      "East_Fork_Lewis_basin.shp"), quiet=TRUE )
   stream = as_sfnetwork(stream)
 
-#  # Rescale
-#  graph = sfnetwork_mesh( stream )
-#  graph$table$dist = graph$table$dist / 1000  # Convert distance scale
-#
-#  # Parameters
-#  alpha = 2
-#  kappa = 0.05
-#
-#  # simulate
-#  omega_s = simulate_sfnetwork( n=1, sfnetwork_mesh=graph, theta=kappa)[,1]
-#
-#  # sample locations along network
-#  extrap = st_union( st_line_sample( activate(stream,"edges"), density=1/10000))
-#  extrap = st_cast( extrap, "POINT" )
+  # Rescale
+  graph = sfnetwork_mesh( stream )
+  graph$table$dist = graph$table$dist / 1000  # Convert distance scale
+
+  # Parameters
+  alpha = 2
+  kappa = 0.05
+
+  # simulate
+  omega_s = simulate_sfnetwork( n=1, sfnetwork_mesh=graph, theta=kappa)[,1]
+
+  # sample locations along network
+  extrap = st_union( st_line_sample( activate(stream,"edges"), density=1/10000))
+  extrap = st_cast( extrap, "POINT" )
 #
 #  # Project to sampled locations
 #  A_is = sfnetwork_evaluator( stream = graph$stream,
