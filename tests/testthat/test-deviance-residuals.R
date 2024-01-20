@@ -10,13 +10,13 @@ test_that("deviance residuals for Gamma match glm", {
   
   # simulated model
   mytiny = tinyVAST( y ~ 1 + x, 
-            data = data.frame(y=y),
+            data = data.frame(y=y, x=x),
             family = Gamma(link = "log") )
   resid1 = residuals(mytiny, type="deviance")
 
   # Null model 
   mytiny0 = tinyVAST( y ~ 1, 
-            data = data.frame(y=y),
+            data = data.frame(y=y, x=x),
             family = Gamma(link = "log") )
   resid0 = residuals(mytiny0, type="deviance")
 
