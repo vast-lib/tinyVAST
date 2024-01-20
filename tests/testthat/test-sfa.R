@@ -65,4 +65,6 @@ test_that("Basic spatial factor analysis works", {
              time_column = "time",
              distribution_column = "dist",
              control = tinyVASTcontrol(gmrf="proj") )
+  #
+  summary( out, what="sem" )
 })
