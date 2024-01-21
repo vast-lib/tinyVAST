@@ -4,16 +4,26 @@
 # Last Modified: 5/17/2021
 # Notes: Based on instructions found here: https://pkgdown.r-lib.org/index.html
 
-setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
-
 #-----------------------------------------------------------------
 # load needed libraries
 library(pkgdown)
 
 # Precompute vignettes
 # https://ropensci.org/blog/2019/12/08/precompute-vignettes/
-knitr::knit( "vignettes/web_only/age_composition_expansion.Rmd.orig",
-             output = "vignettes/web_only/age_composition_expansion.Rmd")
+if( FALSE ){
+  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\vignettes)')
+
+  knitr::knit( "web_only/age_composition_expansion.Rmd.orig",
+               output = "vignettes/web_only/age_composition_expansion.Rmd" )
+
+  knitr::knit( "web_only/empirical_orthogonal_functions.Rmd.orig",
+               output = "web_only/empirical_orthogonal_functions.Rmd" )
+
+  knitr::knit( "web_only/VAST.Rmd.orig",
+               output = "web_only/VAST.Rmd" )
+}
+
+setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
 
 # Only needed once
 if( FALSE ){
