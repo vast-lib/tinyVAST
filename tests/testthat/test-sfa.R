@@ -67,4 +67,5 @@ test_that("Basic spatial factor analysis works", {
              control = tinyVASTcontrol(gmrf="proj") )
   #
   summary( out, what="sem" )
+  expect_s3_class(out, "tinyVAST")
 })

@@ -29,7 +29,7 @@ test_that("Basic tinyVAST works", {
   expect_true(sum(is.na(s[,2])) == 0L)
 })
 
-test_that("data_colnames are robust", {
+# test_that("data_colnames are robust", {
 #
 #   expect_error({out <- tinyVAST(
 #     data = dat,
@@ -58,4 +58,4 @@ test_that("data_colnames are robust", {
 #    sem = ""
 #  )
 #  }, regexp = "data_colnames")
-})
+# })
