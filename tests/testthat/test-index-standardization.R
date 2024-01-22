@@ -46,7 +46,7 @@ test_that("Basic spatial factor analysis works", {
              spatial_graph = mesh,
              family = delta_poisson_link_gamma(),
              control = tinyVASTcontrol(gmrf="sep") )
-  expect_equal( my1$opt, my2$opt, tol=0.001 )
+  expect_equal( my1$opt, my2$opt, tolerance=0.001 )
 
   # Predicted sample-weighted total
   integrate_output( my1,
