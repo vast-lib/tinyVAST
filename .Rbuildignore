@@ -12,3 +12,4 @@
 ^LICENSE$
 ^vignettes/web_only$
 ^codecov\.yml$
+^figure$

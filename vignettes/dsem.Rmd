@@ -79,7 +79,7 @@ family = c("normal","normal")
 # initial first without delta0 (to improve starting values)
 mydsem = dsem::dsem( sem = dsem,
              tsdata = dsem_data,
-             getsd = FALSE,
+             control = dsem_control(getsd=FALSE),
              family = family )
 mydsem
 ```

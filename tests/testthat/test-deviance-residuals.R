@@ -1,7 +1,7 @@
 
 test_that("deviance residuals for Gamma match glm", {
   skip_on_cran()
-  skip_on_ci()
+  #skip_on_ci()
 
   set.seed(101)
   x = rnorm(100)
@@ -35,7 +35,7 @@ test_that("deviance residuals for Gamma match glm", {
 
 test_that("deviance residuals for tweedie match mgcv", {
   skip_on_cran()
-  skip_on_ci()
+  #skip_on_ci()
   skip_if_not_installed("tweedie")
   skip_if_not_installed("mgcv")
 
@@ -58,7 +58,7 @@ test_that("deviance residuals for tweedie match mgcv", {
 
 test_that("deviance residuals for poisson works", {
   skip_on_cran()
-  skip_on_ci()
+  #skip_on_ci()
 
   # simulate data
   set.seed(101)
@@ -83,7 +83,7 @@ test_that("deviance residuals for poisson works", {
 
 test_that("deviance residuals for Bernoulli works", {
   skip_on_cran()
-  skip_on_ci()
+  #skip_on_ci()
 
   # simulate data
   set.seed(101)
@@ -108,7 +108,7 @@ test_that("deviance residuals for Bernoulli works", {
 
 test_that("delta-gamma works", {
   skip_on_cran()
-  skip_on_ci()
+  #skip_on_ci()
 
   # simulate data
   set.seed(101)
@@ -142,7 +142,7 @@ test_that("delta-gamma works", {
 
 test_that("Poisson-link delta-gamma works", {
   skip_on_cran()
-  skip_on_ci()
+  #skip_on_ci()
   skip_if_not_installed("sdmTMB")
 
   # simulate data
