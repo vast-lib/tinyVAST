@@ -37,7 +37,7 @@ generalize an empirical orthogonal function analysis.
 # Empirical Orthogonal Function (EOF) analysis
 To start, we reformat data on September Sea ice concentrations:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
 data( sea_ice )
 library(sf)
 library(rnaturalearth)
