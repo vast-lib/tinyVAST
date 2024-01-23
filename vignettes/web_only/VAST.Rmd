@@ -1,0 +1,552 @@
+---
+title: "Vector autoregressive spatio-temporal models"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{VAST}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{pdp}
+---
+
+
+
+
+```r
+library(tinyVAST)
+library(fmesher)
+set.seed(101)
+options("tinyVAST.verbose" = FALSE)
+```
+
+`tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
+We here explore the capacity to specify the vector-autoregressive spatio-temporal component.
+
+# Spatio-temporal autoregressive model
+We first explore the ability to specify a first-order autoregressive spatio-temporal process:
+
+
+```r
+# Simulate settings
+theta_xy = 0.4
+n_x = n_y = 10
+n_t = 15
+rho = 0.8
+spatial_sd = 0.5
+
+# Simulate GMRFs
+R_s = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
+V_ss = spatial_sd^2*kronecker(R_s, R_s)
+d = mvtnorm::rmvnorm(n_t, sigma=V_ss )
+
+# Project through time and add mean
+for( t in seq_len(n_t) ){
+  if(t>1) d[t,] = rho*d[t-1,] + d[t,]
+}
+#d = d + 0.5
+
+# Shape into longform data-frame and add error
+Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), "var"="logn", z=exp(as.vector(d)))
+Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
+mean(Data$n==0)
+#> [1] 0.046
+
+# make mesh
+mesh = fm_mesh_2d( Data[,c('x','y')] )
+
+# fit model
+mytinyVAST = tinyVAST( dsem = "logn -> logn, 1, rho",
+           data = Data,
+           formula = n ~ 0 + factor(time),
+           spatial_graph = mesh,
+           family = tweedie() )
+mytinyVAST
+#> $call
+#> tinyVAST(formula = n ~ 0 + factor(time), data = Data, dsem = "logn -> logn, 1, rho", 
+#>     family = tweedie(), spatial_graph = mesh)
+#> 
+#> $opt
+#> $opt$par
+#>     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j 
+#> -0.08323603 -0.13549103 -0.10579218 -0.14499111 -0.37823867 -0.21633304 -0.41489958 -0.67168422 -0.49463135 -0.13968722  0.14836185 -0.21516692 -0.20120062  0.16887042 
+#>     alpha_j      beta_z      beta_z   log_sigma   log_sigma   log_kappa 
+#>  0.30040122  0.81229113  0.40988915 -0.64868475  0.04394543  0.07228544 
+#> 
+#> $opt$objective
+#> [1] 1717.689
+#> 
+#> $opt$convergence
+#> [1] 0
+#> 
+#> $opt$iterations
+#> [1] 77
+#> 
+#> $opt$evaluations
+#> function gradient 
+#>      107       77 
+#> 
+#> $opt$message
+#> [1] "relative convergence (4)"
+#> 
+#> 
+#> $sdrep
+#> sdreport(.) result
+#>              Estimate Std. Error
+#> alpha_j   -0.08323603 0.15196456
+#> alpha_j   -0.13549103 0.18670340
+#> alpha_j   -0.10579218 0.20529851
+#> alpha_j   -0.14499111 0.21780791
+#> alpha_j   -0.37823867 0.22691800
+#> alpha_j   -0.21633304 0.23026450
+#> alpha_j   -0.41489958 0.23456777
+#> alpha_j   -0.67168422 0.23833635
+#> alpha_j   -0.49463135 0.23869331
+#> alpha_j   -0.13968722 0.23733095
+#> alpha_j    0.14836185 0.23640201
+#> alpha_j   -0.21516692 0.23873590
+#> alpha_j   -0.20120062 0.23979214
+#> alpha_j    0.16887042 0.23708655
+#> alpha_j    0.30040122 0.23660035
+#> beta_z     0.81229113 0.03708631
+#> beta_z     0.40988915 0.03291043
+#> log_sigma -0.64868475 0.05422114
+#> log_sigma  0.04394543 0.07275797
+#> log_kappa  0.07228544 0.10755269
+#> Maximum gradient component: 0.00633756 
+#> 
+#> $run_time
+#> Time difference of 21.55907 secs
+```
+The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`.
+
+We can compare the true densities:
+
+
+```r
+library(sf)
+data_wide = reshape( Data[,c('x','y','time','z')],
+                     direction = "wide", idvar = c('x','y'), timevar = "time")
+sf_data = st_as_sf( data_wide, coords=c("x","y"))
+sf_grid = sf::st_make_grid( sf_data )
+sf_plot = st_sf(sf_grid, st_drop_geometry(sf_data) )
+plot(sf_plot, max.plot=n_t )
+```
+
+![plot of chunk VAST-true-dens](figure/VAST-true-dens-1.png)
+
+with the estimated densities:
+
+```r
+Data$z_hat = predict(mytinyVAST)
+data_wide = reshape( Data[,c('x','y','time','z_hat')],
+                     direction = "wide", idvar = c('x','y'), timevar = "time")
+sf_data = st_as_sf( data_wide, coords=c("x","y"))
+sf_plot = st_sf(sf_grid, st_drop_geometry(sf_data) )
+plot(sf_plot, max.plot=n_t )
+```
+
+![plot of chunk VAST-est-dens](figure/VAST-est-dens-1.png)
+
+where a scatterplot shows that they are highly correlated:
+
+```r
+plot( x=Data$z, y=Data$z_hat )
+```
+
+![plot of chunk VAST-scatterplot](figure/VAST-scatterplot-1.png)
+
+We can then calculate the area-weighted total abundance and compare it with its true value:
+
+```r
+# Predicted sample-weighted total
+(Est = sapply( seq_len(n_t),
+   FUN=\(t) integrate_output(mytinyVAST, newdata=subset(Data,time==t)) ))
+#>                           [,1]       [,2]       [,3]       [,4]      [,5]       [,6]      [,7]      [,8]      [,9]      [,10]     [,11]      [,12]     [,13]     [,14]
+#> Estimate             97.164903  96.643634  98.362457 101.517620 84.760587  97.538111 77.520820 59.565797 75.752785 113.562127 159.66734 120.156811 137.80745 192.64174
+#> Std. Error            7.194683   7.216494   7.309312   7.572241  6.643419   7.406226  6.207919  5.090533  6.144821   8.454587  11.09945   9.107853  10.39448  13.68245
+#> Est. (bias.correct) 102.324275 102.850496 105.043003 108.373177 90.604659 104.258111 83.102278 64.065173 81.166865 120.921460 169.20673 127.519261 145.78500 203.55063
+#> Std. (bias.correct)         NA         NA         NA         NA        NA         NA        NA        NA        NA         NA        NA         NA        NA        NA
+#>                         [,15]
+#> Estimate            187.86973
+#> Std. Error           12.88189
+#> Est. (bias.correct) 200.54754
+#> Std. (bias.correct)        NA
+
+# True (latent) sample-weighted total
+(True = tapply( Data$z, INDEX=Data$time, FUN=sum ))
+#>         1         2         3         4         5         6         7         8         9        10        11        12        13        14        15 
+#>  99.21643 100.10603 101.66846 109.52622  85.76973 100.97116  80.99847  68.60738  85.39974 119.62380 147.41437 122.00580 158.26179 200.56813 203.37545
+
+#
+Index = data.frame( time=seq_len(n_t), t(Est), True )
+Index$low = Index[,'Est...bias.correct.'] - 1.96*Index[,'Std..Error']
+Index$high = Index[,'Est...bias.correct.'] + 1.96*Index[,'Std..Error']
+
+#
+library(ggplot2)
+ggplot(Index, aes(time, Estimate)) +
+  geom_ribbon(aes(ymin = low,
+                  ymax = high),    # shadowing cnf intervals
+              fill = "lightgrey") +
+  geom_line( color = "black",
+            linewidth = 1) +
+  geom_point( aes(time, True), color = "red" )
+```
+
+![plot of chunk VAST-abundance](figure/VAST-abundance-1.png)
+
+Next, we compare this against the current version of VAST
+
+
+```r
+settings = make_settings( purpose="index3",
+                          n_x = n_x*n_y,
+                          Region = "Other",
+                          bias.correct = FALSE,
+                          use_anisotropy = FALSE )
+settings$FieldConfig['Epsilon','Component_1'] = 0
+settings$FieldConfig['Omega',] = 0
+settings$RhoConfig['Epsilon2'] = 4
+settings$RhoConfig['Beta1'] = 3
+settings$ObsModel = c(10,2)
+
+# Run VAST
+myVAST = fit_model( settings=settings,
+                 Lat_i = Data[,'y'],
+                 Lon_i = Data[,'x'],
+                 t_i = Data[,'time'],
+                 b_i = Data[,'n'],
+                 a_i = rep(1,nrow(Data)),
+                 observations_LL = cbind(Lat=Data[,'y'],Lon=Data[,'x']),
+                 grid_dim_km = c(100,100),
+                 newtonsteps = 0,
+                 loopnum = 1,
+                 control = list(eval.max = 10000, iter.max = 10000, trace = 0) )
+```
+
+```r
+myVAST
+#> fit_model(.) result
+#> $par
+#>       beta1_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft 
+#>     -0.5893007      0.5155656      0.4645813      0.4905492      0.4681547      0.2299517      0.3966665      0.1932249     -0.0707245      0.1168034      0.4710110 
+#>       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft   L_epsilon2_z      logkappa2 Epsilon_rho2_f      logSigmaM 
+#>      0.7713592      0.4083181      0.4283945      0.7999825      0.9117057      0.4926612     -4.3006228      0.8503593      0.1042231 
+#> 
+#> $objective
+#> [1] 1738.337
+#> 
+#> $iterations
+#> [1] 6
+#> 
+#> $evaluations
+#> function gradient 
+#>       12        7 
+#> 
+#> $time_for_MLE
+#> Time difference of 1.146127 secs
+#> 
+#> $max_gradient
+#> [1] 0.0005695924
+#> 
+#> $Convergence_check
+#> [1] "The model is likely not converged"
+#> 
+#> $number_of_coefficients
+#>  Total  Fixed Random 
+#>   2060     20   2040 
+#> 
+#> $AIC
+#> [1] 3516.675
+#> 
+#> $diagnostics
+#>             Param starting_value     Lower        MLE     Upper final_gradient
+#> 1        beta1_ft    -0.58930212      -Inf -0.5893007       Inf  -2.536713e-04
+#> 2        beta2_ft     0.51556567      -Inf  0.5155656       Inf   6.146817e-06
+#> 3        beta2_ft     0.46458079      -Inf  0.4645813       Inf  -1.687555e-05
+#> 4        beta2_ft     0.49055250      -Inf  0.4905492       Inf   2.253267e-04
+#> 5        beta2_ft     0.46815185      -Inf  0.4681547       Inf  -2.148305e-04
+#> 6        beta2_ft     0.22994933      -Inf  0.2299517       Inf  -1.963653e-04
+#> 7        beta2_ft     0.39666756      -Inf  0.3966665       Inf   7.340152e-05
+#> 8        beta2_ft     0.19322633      -Inf  0.1932249       Inf   1.265007e-04
+#> 9        beta2_ft    -0.07072355      -Inf -0.0707245       Inf   8.101025e-05
+#> 10       beta2_ft     0.11680235      -Inf  0.1168034       Inf  -9.054017e-05
+#> 11       beta2_ft     0.47100949      -Inf  0.4710110       Inf  -1.182830e-04
+#> 12       beta2_ft     0.77135980      -Inf  0.7713592       Inf   3.358385e-05
+#> 13       beta2_ft     0.40831860      -Inf  0.4083181       Inf   3.654143e-05
+#> 14       beta2_ft     0.42839431      -Inf  0.4283945       Inf  -2.791045e-05
+#> 15       beta2_ft     0.79997984      -Inf  0.7999825       Inf  -1.679115e-04
+#> 16       beta2_ft     0.91170839      -Inf  0.9117057       Inf   1.978860e-04
+#> 17   L_epsilon2_z     0.49266060      -Inf  0.4926612       Inf  -3.405162e-04
+#> 18      logkappa2    -4.30062176 -6.214608 -4.3006228 -3.565449   1.067025e-04
+#> 19 Epsilon_rho2_f     0.85035619 -0.990000  0.8503593  0.990000  -5.695924e-04
+#> 20      logSigmaM     0.10422369      -Inf  0.1042231 10.000000   8.634076e-05
+#> 
+#> $SD
+#> sdreport(.) result
+#>                  Estimate Std. Error
+#> beta1_ft       -0.5893007 0.05080467
+#> beta2_ft        0.5155656 0.14414517
+#> beta2_ft        0.4645813 0.17371753
+#> beta2_ft        0.4905492 0.19200615
+#> beta2_ft        0.4681547 0.20433941
+#> beta2_ft        0.2299517 0.21476799
+#> beta2_ft        0.3966665 0.21934844
+#> beta2_ft        0.1932249 0.22481460
+#> beta2_ft       -0.0707245 0.22973075
+#> beta2_ft        0.1168034 0.23059099
+#> beta2_ft        0.4710110 0.22964743
+#> beta2_ft        0.7713592 0.22895295
+#> beta2_ft        0.4083181 0.23199191
+#> beta2_ft        0.4283945 0.23305157
+#> beta2_ft        0.7999825 0.23091833
+#> beta2_ft        0.9117057 0.23072494
+#> L_epsilon2_z    0.4926612 0.04727208
+#> logkappa2      -4.3006228 0.13652887
+#> Epsilon_rho2_f  0.8503593 0.03527714
+#> logSigmaM       0.1042231 0.07108160
+#> Maximum gradient component: 0.0005695924 
+#> 
+#> $time_for_sdreport
+#> Time difference of 4.772874 secs
+#> 
+#> $time_for_run
+#> Time difference of 22.12857 secs
+```
+
+Or with sdmTMB
+
+
+```r
+library(sdmTMB)
+mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
+
+start_time = Sys.time()
+mysdmTMB = sdmTMB(
+  formula = n ~ 0 + factor(time),
+  data = Data,
+  mesh = mesh,
+  spatial = "off",
+  spatiotemporal = "ar1",
+  time = "time",
+  family = tweedie()
+)
+sdmTMBtime = Sys.time() - start_time
+```
+
+
+The models all have similar runtimes
+
+```r
+Times = c( "tinyVAST" = mytinyVAST$run_time,
+           "VAST" = myVAST$total_time,
+           "sdmTMB" = sdmTMBtime )
+knitr::kable( cbind("run times (sec.)"=Times), digits=1)
+```
+
+
+
+|         | run times (sec.)|
+|:--------|----------------:|
+|tinyVAST |             21.6|
+|VAST     |             24.2|
+|sdmTMB   |             21.0|
+
+
+
+# Delta models
+
+We can also fit these data using a delta model
+
+
+```r
+# fit model
+mydelta = tinyVAST( data = Data,
+               formula = n ~ 1,
+               delta_options = list(delta_formula = ~ 0 + factor(time)),
+               delta_dsem = "logn -> logn, 1, rho",
+               family = delta_lognormal(),
+               spatial_graph = mesh )
+
+mydelta
+#> $call
+#> tinyVAST(formula = n ~ 1, data = Data, family = delta_lognormal(), 
+#>     spatial_graph = mesh, delta_options = list(delta_formula = ~0 + 
+#>         factor(time)), delta_dsem = "logn -> logn, 1, rho")
+#> 
+#> $opt
+#> $opt$par
+#>     alpha_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j 
+#>  3.03202265  0.44672872  0.41133136  0.50538800  0.36948863  0.07255043  0.33370219  0.12528532 -0.13606008  0.23483809  0.44215395  0.74139997  0.53250764  0.28655618 
+#>    alpha2_j    alpha2_j   log_sigma 
+#>  0.79138930  0.98368567  0.25650797 
+#> 
+#> $opt$objective
+#> [1] 2069.593
+#> 
+#> $opt$convergence
+#> [1] 0
+#> 
+#> $opt$iterations
+#> [1] 39
+#> 
+#> $opt$evaluations
+#> function gradient 
+#>       62       40 
+#> 
+#> $opt$message
+#> [1] "relative convergence (4)"
+#> 
+#> 
+#> $sdrep
+#> sdreport(.) result
+#>              Estimate Std. Error
+#> alpha_j    3.03202265 0.12325408
+#> alpha2_j   0.44672872 0.13555087
+#> alpha2_j   0.41133136 0.13488757
+#> alpha2_j   0.50538800 0.13488757
+#> alpha2_j   0.36948863 0.13423476
+#> alpha2_j   0.07255043 0.13423466
+#> alpha2_j   0.33370219 0.13488757
+#> alpha2_j   0.12528532 0.13622468
+#> alpha2_j  -0.13606008 0.13555088
+#> alpha2_j   0.23483809 0.14050804
+#> alpha2_j   0.44215395 0.13690954
+#> alpha2_j   0.74139997 0.13555086
+#> alpha2_j   0.53250764 0.13690945
+#> alpha2_j   0.28655618 0.13903247
+#> alpha2_j   0.79138930 0.13488758
+#> alpha2_j   0.98368567 0.13555086
+#> log_sigma  0.25650797 0.01869247
+#> Maximum gradient component: 0.001393463 
+#> 
+#> $run_time
+#> Time difference of 0.03579116 secs
+```
+
+# Bivariate spatio-temporal autoregressive model
+
+We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.
+
+
+```r
+# Simulate settings
+theta_xy = 0.2
+n_x = n_y = 10
+n_t = 20
+B = rbind( c( 0.5, -0.25),
+           c(-0.1,  0.50) )
+
+# Simulate GMRFs
+R = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
+d1 = mvtnorm::rmvnorm(n_t, sigma=0.2*kronecker(R,R) )
+d2 = mvtnorm::rmvnorm(n_t, sigma=0.2*kronecker(R,R) )
+d = abind::abind( d1, d2, along=3 )
+
+# Project through time and add mean
+for( t in seq_len(n_t) ){
+  if(t>1) d[t,,] = t(B%*%t(d[t-1,,])) + d[t,,]
+}
+
+# Shape into longform data-frame and add error
+Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")), z=exp(as.vector(d)))
+Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
+
+# make mesh
+mesh = fm_mesh_2d( Data[,c('x','y')] )
+
+# Define DSEM
+dsem = "
+  d1 -> d1, 1, b11
+  d2 -> d2, 1, b22
+  d2 -> d1, 1, b21
+  d1 -> d2, 1, b12
+  d1 <-> d1, 0, var1
+  d2 <-> d2, 0, var1
+"
+
+# fit model
+out = tinyVAST( dsem = dsem,
+           data = Data,
+           formula = n ~ 0 + var,
+           spatial_graph = mesh,
+           family = tweedie() )
+out
+#> $call
+#> tinyVAST(formula = n ~ 0 + var, data = Data, dsem = dsem, family = tweedie(), 
+#>     spatial_graph = mesh)
+#> 
+#> $opt
+#> $opt$par
+#>      alpha_j      alpha_j       beta_z       beta_z       beta_z       beta_z       beta_z    log_sigma    log_sigma    log_kappa 
+#> -0.090128407 -0.002000414  0.509529382  0.529236412 -0.200418872 -0.117205376  0.294319076 -0.646266081  0.012846257 -0.669057058 
+#> 
+#> $opt$objective
+#> [1] 4365.006
+#> 
+#> $opt$convergence
+#> [1] 0
+#> 
+#> $opt$iterations
+#> [1] 52
+#> 
+#> $opt$evaluations
+#> function gradient 
+#>       66       53 
+#> 
+#> $opt$message
+#> [1] "relative convergence (4)"
+#> 
+#> 
+#> $sdrep
+#> sdreport(.) result
+#>               Estimate Std. Error
+#> alpha_j   -0.090128407 0.09771149
+#> alpha_j   -0.002000414 0.09611298
+#> beta_z     0.509529382 0.07886506
+#> beta_z     0.529236412 0.07336727
+#> beta_z    -0.200418872 0.08304602
+#> beta_z    -0.117205376 0.07264403
+#> beta_z     0.294319076 0.01800602
+#> log_sigma -0.646266081 0.02660900
+#> log_sigma  0.012846257 0.04964136
+#> log_kappa -0.669057058 0.09746707
+#> Maximum gradient component: 0.004494597 
+#> 
+#> $run_time
+#> Time difference of 2.364918 mins
+```
+
+The values for `beta_z` again correspond to the specified value for interaction-matrix `B`
+
+We can again calculate the area-weighted total abundance and compare it with its true value:
+
+```r
+# Predicted sample-weighted total
+Est1 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d1")) )
+Est2 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d2")) )
+
+# True (latent) sample-weighted total
+True = tapply( Data$z, INDEX=list("time"=Data$time,"var"=Data$var), FUN=sum )
+
+#
+Index = data.frame( expand.grid(dimnames(True)), "True"=as.vector(True) )
+Index = data.frame( Index, rbind(t(Est1), t(Est2)) )
+Index$low = Index[,'Est...bias.correct.'] - 1.96*Index[,'Std..Error']
+Index$high = Index[,'Est...bias.correct.'] + 1.96*Index[,'Std..Error']
+
+#
+library(ggplot2)
+ggplot(Index, aes( time, Estimate )) +
+  facet_grid( rows=vars(var), scales="free" ) +
+  geom_segment(aes(y = low,
+                  yend = high,
+                  x = time,
+                  xend = time) ) +
+  geom_point( aes(x=time, y=Estimate), color = "black") +
+  geom_point( aes(x=time, y=True), color = "red" )
+```
+
+![plot of chunk VAST-VAR-index](figure/VAST-VAR-index-1.png)
+

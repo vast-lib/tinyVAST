@@ -32,11 +32,13 @@ Eigen::SparseMatrix<Type> Q_network( Type log_theta,
     Q.coeffRef( s, s ) = Type(1.0);
   }
   for(int s=1; s<parent_s.size(); s++){
-    if( exp(-dist_s(s))!=0 ){
-      Q.coeffRef( parent_s(s), child_s(s) ) = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
-      Q.coeffRef( child_s(s), parent_s(s) ) = Q.coeffRef( parent_s(s), child_s(s) );
-      Q.coeffRef( parent_s(s), parent_s(s) ) += exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
-      Q.coeffRef( child_s(s), child_s(s) ) += exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+    if( exp(-dist_s(s))!= Type(0.) ){
+      Type tmp = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+      Type tmp2 = exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+      Q.coeffRef( parent_s(s), child_s(s) ) = tmp;
+      Q.coeffRef( child_s(s), parent_s(s) ) = tmp;
+      Q.coeffRef( parent_s(s), parent_s(s) ) += tmp2;
+      Q.coeffRef( child_s(s), child_s(s) ) += tmp2;
     }
   }
   return Q;
@@ -63,15 +65,15 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
       tmp = ram_start(r);
     }
     // Rho_cc
-    if( (ram(r,0)==1) & (what==0) ){
+    if( (ram(r,0)==1) && (what==0) ){
        out_cc.coeffRef( ram(r,1)-1, ram(r,2)-1 ) = tmp;
     }
     // Gammainv_cc
-    if( (ram(r,0)==2) & (what==1) ){
+    if( (ram(r,0)==2) && (what==1) ){
       out_cc.coeffRef( ram(r,1)-1, ram(r,2)-1 ) = 1 / tmp;
     }
     // Gamma_cc
-    if( (ram(r,0)==2) & (what==2) ){
+    if( (ram(r,0)==2) && (what==2) ){
       out_cc.coeffRef( ram(r,1)-1, ram(r,2)-1 ) = tmp;
     }
   }
@@ -87,7 +89,7 @@ Type gamma_distribution( vector<Type> gamma_k,
                          vector<Type> log_lambda ){
 
   using namespace density;
-  Type nll = 0;
+  Type nll = 0.0;
   int k = 0;   // Counter
   for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
     int m_z = Sdims(z);
@@ -382,9 +384,9 @@ Type two_predictor_likelihood( Type y,
         error("Link not implemented.");
     }
   }else{
-    mu1 = Type(1.0) - exp( -1*exp(p1) );
+    mu1 = Type(1.0) - exp( -1.0*exp(p1) );
     logmu1 = logspace_sub( Type(0.0), -1*exp(p1) );
-    log_one_minus_mu1 = -1*exp(p1);
+    log_one_minus_mu1 = -1.0*exp(p1);
     mu2 = exp( p1 + p2 ) / mu1;
     logmu2 = p1 + p2 - logmu1;
   }
@@ -529,8 +531,7 @@ Type objective_function<Type>::operator() (){
   PARAMETER_VECTOR( eps );     // manual epsilon bias-correction, empty to turn off
 
   // Globals
-  Type nll = 0;
-  Type tmp;
+  Type nll = 0.0;
 
   // dimensions
   int n_s = epsilon_stc.dim(0);
@@ -538,16 +539,16 @@ Type objective_function<Type>::operator() (){
   int n_c = epsilon_stc.dim(2);
   int n_h = n_t * n_c;      // data
 
-  int n2_s = epsilon2_stc.dim(0);
+  // int n2_s = epsilon2_stc.dim(0);
   int n2_t = epsilon2_stc.dim(1);
   int n2_c = epsilon2_stc.dim(2);
   int n2_h = n2_t * n2_c;      // data
 
   // Spatial distribution
   PARAMETER( log_kappa );
-  Type log_tau = 0;
+  Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
-  if( (spatial_options(0)==1) ){
+  if( spatial_options(0)==1 ){
     // Using INLA
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
@@ -654,7 +655,7 @@ Type objective_function<Type>::operator() (){
   // Likelihood
   vector<Type> mu_i( y_i.size() );
   vector<Type> devresid_i( y_i.size() );
-  Type devresid = 0;
+  Type devresid = 0.0;
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
@@ -668,102 +669,98 @@ Type objective_function<Type>::operator() (){
   }
 
   // Predictions
-  vector<Type> palpha_g = X_gj*alpha_j;
-  vector<Type> pgamma_g = Z_gk*gamma_k;
-  vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
-  // Second linear predictor
-  vector<Type> palpha2_g = X2_gj*alpha2_j;
-  vector<Type> pgamma2_g = Z2_gk*gamma2_k;
-  vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g;
-  vector<Type> mu_g( p_g.size() );
-  //for( int g=0; g<p_g.size(); g++ ){
-  //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
-  //    h = c_g(g)*n_t + t_g(g);
-  //    p_g(g) -= delta_h(h);
-  //  }
-  //}
-  for( int g=0; g<p_g.size(); g++ ){
-    if( components_e(e_g(g))==1 ){
-      switch( link_ez(e_g(g),0) ){
-        case identity_link:
-          mu_g(g) = p_g(g);
-          break;
-        case log_link:
-          mu_g(g) = exp(p_g(g));
-          break;
+  if( X_gj.rows() > 0 ){
+    vector<Type> palpha_g = X_gj*alpha_j;
+    vector<Type> pgamma_g = Z_gk*gamma_k;
+    vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
+    // Second linear predictor
+    vector<Type> palpha2_g = X2_gj*alpha2_j;
+    vector<Type> pgamma2_g = Z2_gk*gamma2_k;
+    vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g;
+    vector<Type> mu_g( p_g.size() );
+    //for( int g=0; g<p_g.size(); g++ ){
+    //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
+    //    h = c_g(g)*n_t + t_g(g);
+    //    p_g(g) -= delta_h(h);
+    //  }
+    //}
+    for( int g=0; g<p_g.size(); g++ ){
+      if( components_e(e_g(g))==1 ){
+        switch( link_ez(e_g(g),0) ){
+          case identity_link:
+            mu_g(g) = p_g(g);
+            break;
+          case log_link:
+            mu_g(g) = exp(p_g(g));
+            break;
+        }
+      }
+      if( components_e(e_g(g))==2 ){
+        mu_g(g) = invlogit( p_g(g) );
+        // second link
+        switch( link_ez(e_g(g),1) ){
+          case identity_link:
+            mu_g(g) *= p2_g(g);
+            break;
+          case log_link:
+            mu_g(g) *= exp(p2_g(g));
+            break;
+          // case logit_link: // Logit
+          default:
+            error("Link not implemented.");
+        }
       }
     }
-    if( components_e(e_g(g))==2 ){
-      mu_g(g) = invlogit( p_g(g) );
-      // second link
-      switch( link_ez(e_g(g),1) ){
-        case identity_link:
-          mu_g(g) *= p2_g(g);
-          break;
-        case log_link:
-          mu_g(g) *= exp(p2_g(g));
-          break;
-        // case logit_link: // Logit
-        default:
-          error("Link not implemented.");
-      }
-    }
-  }
 
-  // Expansion
-  if( (W_gz.rows()==mu_g.size()) && (V_gz.rows()==mu_g.size()) ){
-    // First sweep
-    vector<Type> phi0_g( mu_g.size() );
-    for( int g=0; g<mu_g.size(); g++ ){
-      if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) ){
-        // Area-weighted average
-        phi0_g(g) = mu_g(g) * W_gz(g,0);
+    // Expansion
+    if( (W_gz.rows()==mu_g.size()) && (V_gz.rows()==mu_g.size()) ){
+      // First sweep
+      vector<Type> phi0_g( mu_g.size() );
+      for( int g=0; g<mu_g.size(); g++ ){
+        if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) ){
+          // Area-weighted average
+          phi0_g(g) = mu_g(g) * W_gz(g,0);
+        }
+      }
+      Type sumphi0 = sum(phi0_g);
+      REPORT( phi0_g );
+
+      // Second sweep for covariate or density-weighted averages
+      vector<Type> phi_g( mu_g.size() );
+      phi_g.setZero();
+      for( int g=0; g<mu_g.size(); g++ ){
+        if( V_gz(g,0)==0 ){
+          // Exclude from 2nd-sweep calculation
+          phi_g(g) = 0.0;
+        }
+        if( V_gz(g,0)==1 ){
+          // Default: equal to 1st sweep
+          phi_g(g) = phi0_g(g);
+        }
+        if( V_gz(g,0)==2 ){
+          // density-weighted average of W_gz(g,1)
+          phi_g(g) = (phi0_g(g) / sumphi0) * W_gz(g,1);
+        }
+        if( (V_gz(g,0)==3) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
+          // density-weighted average of prediction
+          phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
+        }
+      }
+      //Type Metric = sum(phi_g);
+      Type Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
+      REPORT( phi_g );
+      REPORT( Metric );
+      ADREPORT( Metric );
+
+      if( eps.size() == 1 ){
+        nll += Metric * eps(0);
       }
     }
-    Type sumphi0 = sum(phi0_g);
-    REPORT( phi0_g );
 
-    // Second sweep for covariate or density-weighted averages
-    vector<Type> phi_g( mu_g.size() );
-    phi_g.setZero();
-    for( int g=0; g<mu_g.size(); g++ ){
-      if( V_gz(g,0)==0 ){
-        // Exclude from 2nd-sweep calculation
-        phi_g(g) = 0;
-      }
-      if( V_gz(g,0)==1 ){
-        // Default:  equal to 1st swepp
-        phi_g(g) = phi0_g(g);
-      }
-      if( V_gz(g,0)==2 ){
-        // density-weighted average of W_gz(g,1)
-        phi_g(g) = (phi0_g(g) / sumphi0) * W_gz(g,1);
-      }
-      if( (V_gz(g,0)==3) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
-        // density-weighted average of prediction
-        phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
-      }
-    }
-    //Type Metric = sum(phi_g);
-    Type Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
-    REPORT( phi_g );
-    REPORT( Metric );
-    ADREPORT( Metric );
-
-    if( eps.size() == 1 ){
-      nll += Metric * eps(0);
-    }
-  }
-
-  // Reporting
-  REPORT( p_i );
-  REPORT( p2_i );
-  REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
-  if(p_g.size()>0){
     REPORT( p_g );
     REPORT( palpha_g );
     REPORT( pgamma_g );
@@ -777,6 +774,11 @@ Type objective_function<Type>::operator() (){
     REPORT( mu_g );
     ADREPORT( p_g );
   }
+
+  // Reporting
+  REPORT( p_i );
+  REPORT( p2_i );
+  REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
   //REPORT( Q_ss );
   REPORT( devresid_i );
   REPORT( nll );

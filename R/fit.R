@@ -402,7 +402,7 @@ function( formula,
     }
 
     # Construct log_sigma based on family
-    pad_length = function(x){if(length(x)==1) c(x,NA) else x}
+    pad_length = function(x){if(length(x)==1) c(x,99L) else x}
     remove_last = \(x) x[-length(x)]
     Nsigma_e = sapply( family, FUN=\(x){
                        switch( x$family[length(x$family)],
@@ -436,7 +436,7 @@ function( formula,
                          "cloglog" = 3 )[x$link])
                        } )))
     components = apply( family_code, MARGIN=1,
-                         FUN=\(x)sum(!is.na(x)) )
+                         FUN=\(x)sum(x != 99L) )
     poisson_link_delta = sapply( family, FUN=\(x){
                          as.integer(isTRUE(x$type == "poisson_link_delta"))} )
     out = list( "family_code" = cbind(family_code),
@@ -593,10 +593,10 @@ function( formula,
   ##############
 
   if( FALSE ){
-    setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
-    dyn.unload(dynlib("tinyVAST"))
-    compile("tinyVAST.cpp" , framework = "TMBad" )
-    dyn.load(dynlib("tinyVAST"))
+    #setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
+    #dyn.unload(dynlib("tinyVAST"))
+    #compile("tinyVAST.cpp" , framework = "TMBad" )
+    #dyn.load(dynlib("tinyVAST"))
   }
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
@@ -865,47 +865,46 @@ function( object,
 
   # https://stats.stackexchange.com/questions/1432/what-do-the-residuals-in-a-logistic-regression-mean
   # Normal deviance residuals
-  if( FALSE ){
-    x = rnorm(10)
-    y = x + rnorm(10)
-    Glm = glm( y ~ 1 + x, family="gaussian")
-    mu = predict(Glm,type="response")
-    r1 = y - mu
-    r1 - resid(Glm)
-  }
-  # Poisson deviance residuals
-  if( FALSE ){
-    x = rnorm(10)
-    y = rpois(10, exp(x))
-    Glm = glm( y ~ 1 + x, family="poisson")
-    mu = predict(Glm,type="response")
-    # https://stats.stackexchange.com/questions/398098/formula-for-deviance-residuals-for-poisson-model-with-identity-link-function
-    r1 = sign(y - mu) * sqrt(2*(y*log((y+1e-10)/mu) - (y-mu)))
-    r1 - resid(Glm)
-  }
-  # Binomial deviance residuals
-  if( FALSE ){
-    p = 0.5
-    y = rbinom(10, prob=p, size=1)
-    Glm = glm( y ~ 1, family="binomial")
-    mu = predict(Glm, type="response")
-    r1 = sign(y - mu) * sqrt(-2*(((1-y)*log(1-mu) + y*log(mu))))
-    r1 - resid(Glm)
-  }
-  # Gamma deviance residuals
-  if( FALSE ){
-    mu = 1
-    cv = 0.8
-    y = rgamma( n=10, shape=1/cv^2, scale=mu*cv^2 )
-    Glm = glm( y ~ 1, family=Gamma(link='log'))
-    mu = predict(Glm, type="response")
-    r1 = sign(y - mu) * sqrt(2 * ( (y-mu)/mu - log(y/mu) ))
-    r1 - resid(Glm)
-  }
-
+  #if( FALSE ){
+  #  x = rnorm(10)
+  #  y = x + rnorm(10)
+  #  Glm = glm( y ~ 1 + x, family="gaussian")
+  #  mu = predict(Glm,type="response")
+  #  r1 = y - mu
+  #  r1 - resid(Glm)
+  #}
+  ## Poisson deviance residuals
   # Poisson: sign(y - mu) * sqrt(2*(ifelse(y==0, 0, y*log(y/mu)) - (y-mu)))
+  #if( FALSE ){
+  #  x = rnorm(10)
+  #  y = rpois(10, exp(x))
+  #  Glm = glm( y ~ 1 + x, family="poisson")
+  #  mu = predict(Glm,type="response")
+  #  # https://stats.stackexchange.com/questions/398098/formula-for-deviance-residuals-for-poisson-model-with-identity-link-function
+  #  r1 = sign(y - mu) * sqrt(2*(y*log((y+1e-10)/mu) - (y-mu)))
+  #  r1 - resid(Glm)
+  #}
+  ## Binomial deviance residuals
   # Binomial:  -2 * ((1-y)*log(1-mu) + y*log(mu))
+  #if( FALSE ){
+  #  p = 0.5
+  #  y = rbinom(10, prob=p, size=1)
+  #  Glm = glm( y ~ 1, family="binomial")
+  #  mu = predict(Glm, type="response")
+  #  r1 = sign(y - mu) * sqrt(-2*(((1-y)*log(1-mu) + y*log(mu))))
+  #  r1 - resid(Glm)
+  #}
+  ## Gamma deviance residuals
   # Gamma: 2 * ( (y-mu)/mu - log(y/mu) )
+  #if( FALSE ){
+  #  mu = 1
+  #  cv = 0.8
+  #  y = rgamma( n=10, shape=1/cv^2, scale=mu*cv^2 )
+  #  Glm = glm( y ~ 1, family=Gamma(link='log'))
+  #  mu = predict(Glm, type="response")
+  #  r1 = sign(y - mu) * sqrt(2 * ( (y-mu)/mu - log(y/mu) ))
+  #  r1 - resid(Glm)
+  #}
 
   # Easy of use
   mu = object$rep$mu

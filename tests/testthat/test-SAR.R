@@ -28,20 +28,25 @@ test_that("SAR model with spatio-temporal dynamics works", {
   "
 
   # Fit tinyVAST model
-  mytiny0 = tinyVAST(
-       formula = Biomass_nozeros ~ 0 + Species + Region,
-       data = Data,
-       dsem = dsem,
-       variable_column = "Species",
-       time_column = "Year",
-       space_column = "Region",
-       distribution_column = "Species",
-       family = list( "chum" = lognormal(),
-                            "pink" = lognormal(),
-                            "sockeye" = lognormal() ),
-       spatial_graph = unconnected_graph,
-       control = tinyVASTcontrol( profile="alpha_j" ) )
+  suppressWarnings({
+    mytiny0 = tinyVAST(
+      formula = Biomass_nozeros ~ 0 + Species + Region,
+      data = Data,
+      dsem = dsem,
+      variable_column = "Species",
+      time_column = "Year",
+      space_column = "Region",
+      distribution_column = "Species",
+      family = list( "chum" = lognormal(),
+        "pink" = lognormal(),
+        "sockeye" = lognormal() ),
+      spatial_graph = unconnected_graph,
+      control = tinyVASTcontrol( profile="alpha_j" ) )
+  })
 
   # Summarize output
   Summary = summary(mytiny0, what="dsem")
+  expect_equal(sum(is.na(Summary$Std_Error)), 0L)
+  expect_equal(Summary$Estimate[1:5],
+    c(0.8075069, 0.1946127, 0.05004454, 0.8819951, 0.6749841), tolerance = 1e-3)
 })
