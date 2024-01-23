@@ -669,102 +669,98 @@ Type objective_function<Type>::operator() (){
   }
 
   // Predictions
-  vector<Type> palpha_g = X_gj*alpha_j;
-  vector<Type> pgamma_g = Z_gk*gamma_k;
-  vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
-  // Second linear predictor
-  vector<Type> palpha2_g = X2_gj*alpha2_j;
-  vector<Type> pgamma2_g = Z2_gk*gamma2_k;
-  vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
-  vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g;
-  vector<Type> mu_g( p_g.size() );
-  //for( int g=0; g<p_g.size(); g++ ){
-  //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
-  //    h = c_g(g)*n_t + t_g(g);
-  //    p_g(g) -= delta_h(h);
-  //  }
-  //}
-  for( int g=0; g<p_g.size(); g++ ){
-    if( components_e(e_g(g))==1 ){
-      switch( link_ez(e_g(g),0) ){
-        case identity_link:
-          mu_g(g) = p_g(g);
-          break;
-        case log_link:
-          mu_g(g) = exp(p_g(g));
-          break;
+  if( X_gj.rows() > 0 ){
+    vector<Type> palpha_g = X_gj*alpha_j;
+    vector<Type> pgamma_g = Z_gk*gamma_k;
+    vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
+    // Second linear predictor
+    vector<Type> palpha2_g = X2_gj*alpha2_j;
+    vector<Type> pgamma2_g = Z2_gk*gamma2_k;
+    vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g;
+    vector<Type> mu_g( p_g.size() );
+    //for( int g=0; g<p_g.size(); g++ ){
+    //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
+    //    h = c_g(g)*n_t + t_g(g);
+    //    p_g(g) -= delta_h(h);
+    //  }
+    //}
+    for( int g=0; g<p_g.size(); g++ ){
+      if( components_e(e_g(g))==1 ){
+        switch( link_ez(e_g(g),0) ){
+          case identity_link:
+            mu_g(g) = p_g(g);
+            break;
+          case log_link:
+            mu_g(g) = exp(p_g(g));
+            break;
+        }
+      }
+      if( components_e(e_g(g))==2 ){
+        mu_g(g) = invlogit( p_g(g) );
+        // second link
+        switch( link_ez(e_g(g),1) ){
+          case identity_link:
+            mu_g(g) *= p2_g(g);
+            break;
+          case log_link:
+            mu_g(g) *= exp(p2_g(g));
+            break;
+          // case logit_link: // Logit
+          default:
+            error("Link not implemented.");
+        }
       }
     }
-    if( components_e(e_g(g))==2 ){
-      mu_g(g) = invlogit( p_g(g) );
-      // second link
-      switch( link_ez(e_g(g),1) ){
-        case identity_link:
-          mu_g(g) *= p2_g(g);
-          break;
-        case log_link:
-          mu_g(g) *= exp(p2_g(g));
-          break;
-        // case logit_link: // Logit
-        default:
-          error("Link not implemented.");
-      }
-    }
-  }
 
-  // Expansion
-  if( (W_gz.rows()==mu_g.size()) && (V_gz.rows()==mu_g.size()) ){
-    // First sweep
-    vector<Type> phi0_g( mu_g.size() );
-    for( int g=0; g<mu_g.size(); g++ ){
-      if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) ){
-        // Area-weighted average
-        phi0_g(g) = mu_g(g) * W_gz(g,0);
+    // Expansion
+    if( (W_gz.rows()==mu_g.size()) && (V_gz.rows()==mu_g.size()) ){
+      // First sweep
+      vector<Type> phi0_g( mu_g.size() );
+      for( int g=0; g<mu_g.size(); g++ ){
+        if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) ){
+          // Area-weighted average
+          phi0_g(g) = mu_g(g) * W_gz(g,0);
+        }
+      }
+      Type sumphi0 = sum(phi0_g);
+      REPORT( phi0_g );
+
+      // Second sweep for covariate or density-weighted averages
+      vector<Type> phi_g( mu_g.size() );
+      phi_g.setZero();
+      for( int g=0; g<mu_g.size(); g++ ){
+        if( V_gz(g,0)==0 ){
+          // Exclude from 2nd-sweep calculation
+          phi_g(g) = 0.0;
+        }
+        if( V_gz(g,0)==1 ){
+          // Default: equal to 1st sweep
+          phi_g(g) = phi0_g(g);
+        }
+        if( V_gz(g,0)==2 ){
+          // density-weighted average of W_gz(g,1)
+          phi_g(g) = (phi0_g(g) / sumphi0) * W_gz(g,1);
+        }
+        if( (V_gz(g,0)==3) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
+          // density-weighted average of prediction
+          phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
+        }
+      }
+      //Type Metric = sum(phi_g);
+      Type Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
+      REPORT( phi_g );
+      REPORT( Metric );
+      ADREPORT( Metric );
+
+      if( eps.size() == 1 ){
+        nll += Metric * eps(0);
       }
     }
-    Type sumphi0 = sum(phi0_g);
-    REPORT( phi0_g );
 
-    // Second sweep for covariate or density-weighted averages
-    vector<Type> phi_g( mu_g.size() );
-    phi_g.setZero();
-    for( int g=0; g<mu_g.size(); g++ ){
-      if( V_gz(g,0)==0 ){
-        // Exclude from 2nd-sweep calculation
-        phi_g(g) = 0.0;
-      }
-      if( V_gz(g,0)==1 ){
-        // Default: equal to 1st sweep
-        phi_g(g) = phi0_g(g);
-      }
-      if( V_gz(g,0)==2 ){
-        // density-weighted average of W_gz(g,1)
-        phi_g(g) = (phi0_g(g) / sumphi0) * W_gz(g,1);
-      }
-      if( (V_gz(g,0)==3) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
-        // density-weighted average of prediction
-        phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
-      }
-    }
-    //Type Metric = sum(phi_g);
-    Type Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
-    REPORT( phi_g );
-    REPORT( Metric );
-    ADREPORT( Metric );
-
-    if( eps.size() == 1 ){
-      nll += Metric * eps(0);
-    }
-  }
-
-  // Reporting
-  REPORT( p_i );
-  REPORT( p2_i );
-  REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
-  if(p_g.size()>0){
     REPORT( p_g );
     REPORT( palpha_g );
     REPORT( pgamma_g );
@@ -778,6 +774,11 @@ Type objective_function<Type>::operator() (){
     REPORT( mu_g );
     ADREPORT( p_g );
   }
+
+  // Reporting
+  REPORT( p_i );
+  REPORT( p2_i );
+  REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
   //REPORT( Q_ss );
   REPORT( devresid_i );
   REPORT( nll );
