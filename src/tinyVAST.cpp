@@ -32,9 +32,10 @@ Eigen::SparseMatrix<Type> Q_network( Type log_theta,
     Q.coeffRef( s, s ) = Type(1.0);
   }
   for(int s=1; s<parent_s.size(); s++){
-    if( exp(-dist_s(s))!=0 ){
-      Q.coeffRef( parent_s(s), child_s(s) ) = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
-      Q.coeffRef( child_s(s), parent_s(s) ) = Q.coeffRef( parent_s(s), child_s(s) );
+    if( exp(-dist_s(s))!= Type(0.) ){
+      Type temp = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+      Q.coeffRef( parent_s(s), child_s(s) ) = temp;
+      Q.coeffRef( child_s(s), parent_s(s) ) = temp;
       Q.coeffRef( parent_s(s), parent_s(s) ) += exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
       Q.coeffRef( child_s(s), child_s(s) ) += exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
     }
