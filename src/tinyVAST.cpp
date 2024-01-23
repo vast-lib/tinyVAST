@@ -530,7 +530,6 @@ Type objective_function<Type>::operator() (){
 
   // Globals
   Type nll = 0;
-  Type tmp;
 
   // dimensions
   int n_s = epsilon_stc.dim(0);
@@ -538,7 +537,7 @@ Type objective_function<Type>::operator() (){
   int n_c = epsilon_stc.dim(2);
   int n_h = n_t * n_c;      // data
 
-  int n2_s = epsilon2_stc.dim(0);
+  // int n2_s = epsilon2_stc.dim(0);
   int n2_t = epsilon2_stc.dim(1);
   int n2_c = epsilon2_stc.dim(2);
   int n2_h = n2_t * n2_c;      // data
@@ -547,7 +546,7 @@ Type objective_function<Type>::operator() (){
   PARAMETER( log_kappa );
   Type log_tau = 0;
   Eigen::SparseMatrix<Type> Q_ss;
-  if( (spatial_options(0)==1) ){
+  if( spatial_options(0)==1 ){
     // Using INLA
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
