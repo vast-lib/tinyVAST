@@ -65,15 +65,15 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
       tmp = ram_start(r);
     }
     // Rho_cc
-    if( (ram(r,0)==1) & (what==0) ){
+    if( (ram(r,0)==1) && (what==0) ){
        out_cc.coeffRef( ram(r,1)-1, ram(r,2)-1 ) = tmp;
     }
     // Gammainv_cc
-    if( (ram(r,0)==2) & (what==1) ){
+    if( (ram(r,0)==2) && (what==1) ){
       out_cc.coeffRef( ram(r,1)-1, ram(r,2)-1 ) = 1 / tmp;
     }
     // Gamma_cc
-    if( (ram(r,0)==2) & (what==2) ){
+    if( (ram(r,0)==2) && (what==2) ){
       out_cc.coeffRef( ram(r,1)-1, ram(r,2)-1 ) = tmp;
     }
   }
@@ -89,7 +89,7 @@ Type gamma_distribution( vector<Type> gamma_k,
                          vector<Type> log_lambda ){
 
   using namespace density;
-  Type nll = 0;
+  Type nll = 0.0;
   int k = 0;   // Counter
   for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
     int m_z = Sdims(z);
@@ -384,9 +384,9 @@ Type two_predictor_likelihood( Type y,
         error("Link not implemented.");
     }
   }else{
-    mu1 = Type(1.0) - exp( -1*exp(p1) );
+    mu1 = Type(1.0) - exp( -1.0*exp(p1) );
     logmu1 = logspace_sub( Type(0.0), -1*exp(p1) );
-    log_one_minus_mu1 = -1*exp(p1);
+    log_one_minus_mu1 = -1.0*exp(p1);
     mu2 = exp( p1 + p2 ) / mu1;
     logmu2 = p1 + p2 - logmu1;
   }
@@ -531,7 +531,7 @@ Type objective_function<Type>::operator() (){
   PARAMETER_VECTOR( eps );     // manual epsilon bias-correction, empty to turn off
 
   // Globals
-  Type nll = 0;
+  Type nll = 0.0;
 
   // dimensions
   int n_s = epsilon_stc.dim(0);
@@ -546,7 +546,7 @@ Type objective_function<Type>::operator() (){
 
   // Spatial distribution
   PARAMETER( log_kappa );
-  Type log_tau = 0;
+  Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
   if( spatial_options(0)==1 ){
     // Using INLA
@@ -655,7 +655,7 @@ Type objective_function<Type>::operator() (){
   // Likelihood
   vector<Type> mu_i( y_i.size() );
   vector<Type> devresid_i( y_i.size() );
-  Type devresid = 0;
+  Type devresid = 0.0;
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
@@ -734,10 +734,10 @@ Type objective_function<Type>::operator() (){
     for( int g=0; g<mu_g.size(); g++ ){
       if( V_gz(g,0)==0 ){
         // Exclude from 2nd-sweep calculation
-        phi_g(g) = 0;
+        phi_g(g) = 0.0;
       }
       if( V_gz(g,0)==1 ){
-        // Default:  equal to 1st swepp
+        // Default: equal to 1st sweep
         phi_g(g) = phi0_g(g);
       }
       if( V_gz(g,0)==2 ){
