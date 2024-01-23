@@ -1,7 +1,7 @@
 
 
 
-test_that("Basic spatial factor analysis works", {
+test_that("Basic index standardization works", {
   library(fmesher)
   set.seed(101)
   options("tinyVAST.verbose" = FALSE)
