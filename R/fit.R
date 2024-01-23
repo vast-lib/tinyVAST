@@ -402,7 +402,7 @@ function( formula,
     }
 
     # Construct log_sigma based on family
-    pad_length = function(x){if(length(x)==1) c(x,NA) else x}
+    pad_length = function(x){if(length(x)==1) c(x,99L) else x}
     remove_last = \(x) x[-length(x)]
     Nsigma_e = sapply( family, FUN=\(x){
                        switch( x$family[length(x$family)],
@@ -436,7 +436,7 @@ function( formula,
                          "cloglog" = 3 )[x$link])
                        } )))
     components = apply( family_code, MARGIN=1,
-                         FUN=\(x)sum(!is.na(x)) )
+                         FUN=\(x)sum(x != 99L) )
     poisson_link_delta = sapply( family, FUN=\(x){
                          as.integer(isTRUE(x$type == "poisson_link_delta"))} )
     out = list( "family_code" = cbind(family_code),
