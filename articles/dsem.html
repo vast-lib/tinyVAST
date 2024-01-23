@@ -46,10 +46,10 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
       </ul>
@@ -88,7 +88,7 @@ Thorson</h4>
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">tinyVAST</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/" class="external-link">tinyVAST</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"tinyVAST.verbose"</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><code>tinyVAST</code> includes features to fit a dynamic structural
@@ -117,8 +117,6 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span>                 times <span class="op">=</span> <span class="va">isle_royale</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
 <span>                 variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">isle_royale</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>                 formula <span class="op">=</span> <span class="va">logn</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">var</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
-<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
 <span><span class="va">mytiny</span></span>
 <span><span class="co">#&gt; $call</span></span>
 <span><span class="co">#&gt; tinyVAST(formula = logn ~ 0 + var, data = data, dsem = dsem, </span></span>
@@ -128,9 +126,9 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; $opt</span></span>
 <span><span class="co">#&gt; $opt$par</span></span>
 <span><span class="co">#&gt;      alpha_j      alpha_j       beta_z       beta_z       beta_z       beta_z </span></span>
-<span><span class="co">#&gt;   3.32526212   6.44165421   0.89304301   0.01420970  -0.11865018   0.86169482 </span></span>
+<span><span class="co">#&gt;   3.32526278   6.44165304   0.89304281   0.01420922  -0.11865009   0.86169513 </span></span>
 <span><span class="co">#&gt;       beta_z       beta_z       beta_z    log_sigma </span></span>
-<span><span class="co">#&gt;  -0.01539658   0.37749042   0.17052360 -12.56122233 </span></span>
+<span><span class="co">#&gt;  -0.01539661   0.37749042   0.17052363 -12.46190562 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $opt$objective</span></span>
 <span><span class="co">#&gt; [1] 5.781919</span></span>
@@ -139,11 +137,11 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $opt$iterations</span></span>
-<span><span class="co">#&gt; [1] 93</span></span>
+<span><span class="co">#&gt; [1] 83</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $opt$evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;      116       94 </span></span>
+<span><span class="co">#&gt;      102       84 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $opt$message</span></span>
 <span><span class="co">#&gt; [1] "relative convergence (4)"</span></span>
@@ -152,20 +150,20 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; $sdrep</span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;               Estimate   Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j     3.32526212 2.483496e-01</span></span>
-<span><span class="co">#&gt; alpha_j     6.44165421 2.116034e-01</span></span>
-<span><span class="co">#&gt; beta_z      0.89304301 8.420632e-02</span></span>
-<span><span class="co">#&gt; beta_z      0.01420970 1.279152e-01</span></span>
-<span><span class="co">#&gt; beta_z     -0.11865018 6.477638e-02</span></span>
-<span><span class="co">#&gt; beta_z      0.86169482 7.080269e-02</span></span>
-<span><span class="co">#&gt; beta_z     -0.01539658 6.067738e-02</span></span>
+<span><span class="co">#&gt; alpha_j     3.32526278 2.483496e-01</span></span>
+<span><span class="co">#&gt; alpha_j     6.44165304 2.116033e-01</span></span>
+<span><span class="co">#&gt; beta_z      0.89304281 8.420635e-02</span></span>
+<span><span class="co">#&gt; beta_z      0.01420922 1.279150e-01</span></span>
+<span><span class="co">#&gt; beta_z     -0.11865009 6.477640e-02</span></span>
+<span><span class="co">#&gt; beta_z      0.86169513 7.080268e-02</span></span>
+<span><span class="co">#&gt; beta_z     -0.01539661 6.067739e-02</span></span>
 <span><span class="co">#&gt; beta_z      0.37749042 3.503686e-02</span></span>
-<span><span class="co">#&gt; beta_z      0.17052360 1.582618e-02</span></span>
-<span><span class="co">#&gt; log_sigma -12.56122233 1.909999e+04</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 9.935109e-05 </span></span>
+<span><span class="co">#&gt; beta_z      0.17052363 1.582619e-02</span></span>
+<span><span class="co">#&gt; log_sigma -12.46190562 1.723192e+04</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 5.899486e-05 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $run_time</span></span>
-<span><span class="co">#&gt; Time difference of 0.7474802 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 0.5496843 secs</span></span></code></pre></div>
 <p>And we can specifically inspect the estimated interaction matrix:</p>
 <table class="table">
 <thead><tr class="header">
@@ -213,7 +211,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;        beta_z        beta_z        beta_z        beta_z        beta_z </span></span>
 <span><span class="co">#&gt;   0.895834720   0.007358847  -0.109332511   0.875012562  -0.017355229 </span></span>
 <span><span class="co">#&gt;        beta_z        beta_z     lnsigma_j     lnsigma_j </span></span>
-<span><span class="co">#&gt;   0.378795847  -0.172873038 -15.762049571 -12.481728219 </span></span>
+<span><span class="co">#&gt;   0.378795847  -0.172873038 -15.722545078 -12.472189464 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
 <span><span class="co">#&gt; [1] 7.739638</span></span>
