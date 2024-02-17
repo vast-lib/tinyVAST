@@ -21,6 +21,18 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install dependencies Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          install.packages('remotes')
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("knitr")
+          remotes::install_cran("rmarkdown")
+          remotes::install_cran("rcmdcheck")
+          install.packages("Matrix", type = "source")
+          install.packages("TMB", type = "source")
+        shell: Rscript {0}
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::covr
