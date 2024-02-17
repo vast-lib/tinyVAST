@@ -55,6 +55,7 @@ jobs:
       - name: Install dependencies macOS
         if: runner.os == 'macOS'
         run: |
+          install.packages('remotes')
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
           install.packages("Matrix", type = "source")
@@ -64,6 +65,7 @@ jobs:
       - name: Install dependencies Windows
         if: runner.os == 'Windows'
         run: |
+          install.packages('remotes')
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("knitr")
           remotes::install_cran("rmarkdown")
