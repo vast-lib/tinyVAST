@@ -33,7 +33,7 @@ Imports:
     units,
     checkmate
 Suggests:
-    dsem,
+    dsem (>= 1.1.0),
     ggplot2,
     knitr,
     lattice,
