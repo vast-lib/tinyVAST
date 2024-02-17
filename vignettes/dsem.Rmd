@@ -47,7 +47,8 @@ dsem = "
   moose -> wolves, 1, MtoW
   wolves -> moose, 1, WtoM
   moose -> moose, 1, arM
-  wolves -> moose, 0, corr
+  #wolves -> moose, 0, corr
+  wolves <-> moose, 0, corr
 "
 
 # fit model
@@ -57,6 +58,9 @@ mytiny = tinyVAST( dsem = dsem,
                  variables = colnames(isle_royale[,2:3]),
                  formula = logn ~ 0 + var )
 mytiny
+
+# See summary
+knitr::kable( summary(mytiny,"dsem"), digits=3 )
 ```
 
 And we can specifically inspect the estimated interaction matrix:
@@ -76,12 +80,16 @@ library(dsem)
 dsem_data = ts( log(isle_royale[,2:3]), start=1959)
 family = c("normal","normal")
 
-# initial first without delta0 (to improve starting values)
+# fit without delta0
+# SEs aren't available because measurement errors goes to zero
 mydsem = dsem::dsem( sem = dsem,
              tsdata = dsem_data,
              control = dsem_control(getsd=FALSE),
              family = family )
 mydsem
+
+# See summary
+knitr::kable( summary(mydsem), digits=3 )
 ```
 
 where we again inspect the estimated interaction matrix:

@@ -118,10 +118,17 @@ array<Type> omega_distribution( array<Type> omega_sc,
     Eigen::SparseMatrix<Type> I_cc( n_c, n_c );
     I_cc.setIdentity();
     if( omega_sc.size()>0 ){ // PARALLEL_REGION
+      Eigen::SparseMatrix<Type> IminusRho_cc = I_cc - Rho_cc;
       if( spatial_options(1) == 0 ){
-        // Separable precision
-        Eigen::SparseMatrix<Type> Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
-        Eigen::SparseMatrix<Type> Q_cc = Linv_cc.transpose() * Linv_cc;
+        // Separable precision ... Option-1
+        //Eigen::SparseMatrix<Type> Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
+        //Eigen::SparseMatrix<Type> Q_cc = Linv_cc.transpose() * Linv_cc;
+
+        // Separable precision ... Option-2
+        Eigen::SparseMatrix<Type> V_cc = Gamma_cc.transpose() * Gamma_cc;
+        matrix<Type> Vinv_cc = invertSparseMatrix( V_cc );
+        Eigen::SparseMatrix<Type> Vinv2_cc = asSparseMatrix( Vinv_cc );
+        Eigen::SparseMatrix<Type> Q_cc = IminusRho_cc.transpose() * Vinv2_cc * IminusRho_cc;
 
         // GMRF for SEM:  separable variable-space
         nll += SEPARABLE( GMRF(Q_cc), GMRF(Q_ss) )( omega_sc );
@@ -133,7 +140,7 @@ array<Type> omega_distribution( array<Type> omega_sc,
         nll += SEPARABLE( GMRF(I_cc), GMRF(Q_ss) )( omega_sc );
 
         // Sparse inverse-product
-        Eigen::SparseMatrix<Type> IminusRho_cc = I_cc - Rho_cc;
+        //Eigen::SparseMatrix<Type> IminusRho_cc = I_cc - Rho_cc;
         Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > inverseIminusRho_cc;
         inverseIminusRho_cc.compute(IminusRho_cc);
 
@@ -177,11 +184,18 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
         h = c*n_t + t;
         epsilon_hs(h,s) = epsilon_stc(s,t,c);
       }}}
+      Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
 
       if( spatial_options(1) == 0 ){
-        // Separable precision
-        Eigen::SparseMatrix<Type> Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
-        Eigen::SparseMatrix<Type> Q_hh = Linv_hh.transpose() * Linv_hh;
+        // Separable precision ... Option-1
+        //Eigen::SparseMatrix<Type> Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
+        //Eigen::SparseMatrix<Type> Q_hh = Linv_hh.transpose() * Linv_hh;
+
+        // Separable precision ... Option-2
+        Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
+        matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
+        Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
+        Eigen::SparseMatrix<Type> Q_hh = IminusRho_hh.transpose() * Vinv2_hh * IminusRho_hh;
 
         // GMRF for DSEM:  non-separable time-variable, with separable space
         nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
@@ -190,7 +204,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
         nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
 
         // Sparse inverse-product
-        Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
+        //Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
         Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > inverseIminusRho_hh;
         inverseIminusRho_hh.compute(IminusRho_hh);
 
