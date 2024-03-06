@@ -181,16 +181,22 @@ function( formula,
   # Defaults for variables
   if( is.null(dsem) & is.null(sem) & is.null(delta_options$delta_dsem) & is.null(delta_options$delta_sem) ){
     variables = numeric(0)
+    # Force spatial_graph = NULL so that estimate_kappa=FALSE
+    spatial_graph = NULL
   }
   if(is.null(variables)) variables = unique( data[,variable_column] )
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(times) > 0 ){
     t_i = match( data[,time_column], times )
-  }else{ t_i = integer(0) }
+  }else{
+    t_i = integer(0)
+  }
   if( length(variables) > 0 ){
     c_i = match( data[,variable_column], variables )
-  }else{ c_i = integer(0) }
+  }else{
+    c_i = integer(0)
+  }
 
   ##############
   # DSEM RAM constructor
@@ -703,7 +709,12 @@ function( formula,
 #' @param trace Parameter values are printed every `trace` iteration
 #'   for the outer optimizer. Passed to
 #'   `control` in [stats::nlminb()].
-#' @param gmrf_parameterization Gaussian Markov Random Fields parameterization.
+#' @param gmrf_parameterization Parameterization to use for the Gaussian Markov 
+#'        random field, where the default `separable` constructs a full-rank and
+#'        separable precision matrix, and the alternative `projection` constructs
+#'        a full-rank and IID precision for variables over time, and then projects
+#'        this using the inverse-cholesky of the precision, where this projection
+#'        allows for rank-deficient covariance.
 #' @param estimate_delta0 Estimate a delta model?
 #' @param getJointPrecision whether to get the joint precision matrix.  Passed
 #'        to \code{\link[TMB]{sdreport}}.

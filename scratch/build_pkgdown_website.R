@@ -5,6 +5,9 @@
 # Notes: Based on instructions found here: https://pkgdown.r-lib.org/index.html
 
 #-----------------------------------------------------------------
+# Install locally if needed
+# devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+
 # load needed libraries
 library(pkgdown)
 
