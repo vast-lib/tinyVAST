@@ -46,10 +46,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
+    <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -131,7 +132,7 @@ autoregressive model</p>
 <code class="sourceCode R"><span><span class="co"># Predicted sample-weighted total</span></span>
 <span><span class="fu"><a href="../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">out</span>, newdata <span class="op">=</span> <span class="va">out</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
-<span><span class="co">#&gt;          -104.15025            25.99686          -104.15025                  NA</span></span>
+<span><span class="co">#&gt;          -104.15032            25.99485          -104.15032                  NA</span></span>
 <span><span class="co"># integrate_output(out, apply.epsilon=TRUE )</span></span>
 <span><span class="co"># predict(out)</span></span>
 <span></span>
@@ -152,7 +153,7 @@ autoregressive model</p>
 <span></span>
 <span><span class="co"># Percent deviance explained</span></span>
 <span><span class="fl">1</span> <span class="op">-</span> <span class="va">R1</span><span class="op">/</span><span class="va">R0</span></span>
-<span><span class="co">#&gt; [1] 0.706273</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.7063608</span></span></code></pre></div>
 <p>We can then compare this with the PDE reported by
 <code>mgcv</code></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -186,7 +187,7 @@ identical PDE when excluding the spatial term from each.</p>
 function:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">out</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">1</span>, y<span class="op">=</span><span class="fl">1</span>, time<span class="op">=</span><span class="fl">1</span>, w<span class="op">=</span><span class="fl">1</span>, var<span class="op">=</span><span class="st">"n"</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.2990957</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.2978245</span></span></code></pre></div>
 <p>and this is used to compute the spatial response</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Prediction grid</span></span>

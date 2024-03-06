@@ -46,10 +46,11 @@
     <a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
-    <a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
+    <a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a>
+    <a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -110,8 +111,8 @@ stream segments, and nodes where edges connect.</p>
 <span>                   <span class="st">"East_Fork_Lewis_basin.shp"</span><span class="op">)</span>, quiet<span class="op">=</span><span class="cn">TRUE</span> <span class="op">)</span></span>
 <span><span class="va">stream</span> <span class="op">=</span> <span class="fu"><a href="https://luukvdmeer.github.io/sfnetworks/reference/as_sfnetwork.html" class="external-link">as_sfnetwork</a></span><span class="op">(</span><span class="va">stream</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">stream</span>, main<span class="op">=</span><span class="st">"East Fork Lewis Basin"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="figure/stream-shape-1.png" alt=""><p class="caption">plot of chunk stream-shape</p>
+<div class="float">
+<img src="figure/stream-shape-1.png" alt="plot of chunk stream-shape"><div class="figcaption">plot of chunk stream-shape</div>
 </div>
 <p>We then convert it to an S3 class “sfnetwork_mesh” defined by
 <em>tinyVAST</em> for stream networks, and rescale distances to 1000 ft
@@ -162,8 +163,8 @@ simulate data at those locations:</p>
 <span><span class="co"># Extract nodes and plot on network</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html" class="external-link">activate</a></span><span class="op">(</span><span class="va">stream</span>,<span class="st">"nodes"</span><span class="op">)</span><span class="op">)</span>, <span class="st">"omega"</span><span class="op">=</span><span class="va">omega_s</span><span class="op">)</span>,</span>
 <span>      add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="figure/stream-dens-1.png" alt=""><p class="caption">plot of chunk stream-dens</p>
+<div class="float">
+<img src="figure/stream-dens-1.png" alt="plot of chunk stream-dens"><div class="figcaption">plot of chunk stream-dens</div>
 </div>
 <p>Finally, we can fit the model, interpolate the GMRF along at dense
 locations along the stream network, and plot those with the true
@@ -193,8 +194,8 @@ locations along the stream network, and plot those with the true
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">stream</span>, main<span class="op">=</span><span class="st">"omegahat_i"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">sf_plot</span>,<span class="st">"omega"</span><span class="op">=</span><span class="va">omega_plot</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">0.5</span>, pal<span class="op">=</span><span class="va">viridis</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">extrap</span>,<span class="st">"omega"</span><span class="op">=</span><span class="va">omega_i</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">2</span>, pal<span class="op">=</span><span class="va">viridis</span> <span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="figure/stream-pred-1.png" alt=""><p class="caption">plot of chunk stream-pred</p>
+<div class="float">
+<img src="figure/stream-pred-1.png" alt="plot of chunk stream-pred"><div class="figcaption">plot of chunk stream-pred</div>
 </div>
   </main>
 </div>

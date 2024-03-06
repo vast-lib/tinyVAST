@@ -46,10 +46,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
+    <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -157,9 +158,9 @@ function:</p>
 output:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 8.587517e-13 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334</span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): "what" is not a</span></span>
@@ -174,9 +175,9 @@ output:</p>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"x"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 8.587517e-13 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334</span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): "what" is not a</span></span>
@@ -189,21 +190,21 @@ output:</p>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-6-2.png" width="576"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"w"</span>, by<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 8.587517e-13 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 8.587517e-13 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 8.587517e-13 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 8.587517e-13 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 8.587517e-13 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334</span></span></code></pre></div>
+<span><span class="co">#&gt; outer mgc:  0.001043272</span></span></code></pre></div>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-6-3.png" width="576"></p>
 <p>Alternatively, we can calculate derived quantities via Monte Carlo
 integration of the estimated density function:</p>

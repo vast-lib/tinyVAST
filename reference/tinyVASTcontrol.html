@@ -29,10 +29,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
+    <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -131,7 +132,12 @@ to <code>tinyVAST(...)$internal$parlist</code></p></dd>
 
 
 <dt>gmrf_parameterization</dt>
-<dd><p>Gaussian Markov Random Fields parameterization.</p></dd>
+<dd><p>Parameterization to use for the Gaussian Markov
+random field, where the default <code>separable</code> constructs a full-rank and
+separable precision matrix, and the alternative <code>projection</code> constructs
+a full-rank and IID precision for variables over time, and then projects
+this using the inverse-cholesky of the precision, where this projection
+allows for rank-deficient covariance.</p></dd>
 
 
 <dt>estimate_delta0</dt>
