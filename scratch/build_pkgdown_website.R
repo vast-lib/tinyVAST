@@ -27,6 +27,9 @@ if( FALSE ){
 
   knitr::knit( "web_only/stream_networks.Rmd.orig",
                output = "web_only/stream_networks.Rmd" )
+
+  knitr::knit( "web_only/condition.Rmd.orig",
+               output = "web_only/condition.Rmd" )
 }
 
 setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
