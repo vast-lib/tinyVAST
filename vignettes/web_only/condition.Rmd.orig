@@ -128,7 +128,7 @@ To explore output, we can plot output using the survey extent:
 region = condition_and_density$eastern_bering_sea
 
 # make extrapolation-grid
-sf_grid = st_make_grid( region, cellsize=c(0.5,0.5) )
+sf_grid = st_make_grid( region, cellsize=c(0.2,0.2) )
 sf_grid = st_intersection( sf_grid, region )
 sf_grid = st_make_valid( sf_grid )
 
@@ -156,7 +156,7 @@ plot_grid = st_sf( sf_grid,
                     "Condition.1982" = cond_1982,
                     "Density.1982" = dens_1982 )
 
-plot( plot_grid )
+plot( plot_grid, border=NA )
 ```
 
 # Density-weighted condition
