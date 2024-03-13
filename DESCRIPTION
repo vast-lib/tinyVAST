@@ -31,7 +31,8 @@ Imports:
     sfnetworks,
     TMB (>= 1.9.7),
     units,
-    checkmate
+    checkmate,
+    abind
 Suggests:
     dsem (>= 1.1.0),
     ggplot2,

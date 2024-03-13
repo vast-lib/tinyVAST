@@ -39,7 +39,7 @@ function( object,
   newobj = MakeADFun( data = tmb_data2,
                       parameters = object$internal$parlist,
                       map = object$tmb_inputs$tmb_map,
-                      random = c("gamma_k","epsilon_stc","omega_sc"),
+                      random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
                       profile = object$internal$control$profile,
                       DLL = "tinyVAST" )
   out = newobj$report()[[what]]

@@ -97,6 +97,8 @@
 #'   update.formula binomial poisson
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame
+#' @importFrom Matrix Cholesky solve
+#' @importFrom abind abind
 #'
 #' @examples
 #' # Simulate a 2D AR1 spatial process with a cyclic confounder w
