@@ -217,8 +217,8 @@ function( x,
 #' @description
 #' \code{sample_variable} samples from the joint distribution of random and fixed effects to approximate the predictive distribution for a variable
 #'
-#' Using \code{sample_fixed=TRUE} (the default) in \code{\link{sample_variable}} is similar to using \code{type=3} in \code{\link{simulate_data}}, while
-#'       using \code{sample_fixed=TRUE} in \code{\link{sample_variable}} is similar to using \code{type=4} in \code{\link{simulate_data}}.
+#' Using \code{sample_fixed=TRUE} (the default) in \code{\link{sample_variable}} propagates variance in both fixed and random effects, while
+#'       using \code{sample_fixed=FALSE} does not.
 #'       Sampling fixed effects will sometimes cause numerical under- or overflow (i.e., output values of \code{NA}) in cases when
 #'       variance parameters are estimated imprecisely.  In these cases, the multivariate normal approximation being used is a poor
 #'       representation of the tail probabilities, and results in some samples with implausibly high (or negative) variances,
