@@ -154,10 +154,10 @@ function( model ){
 #' \code{reload_model} allows a user to save a fitted model, reload it in a new
 #'      R terminal, and then relink the DLLs so that it functions as expected.
 #'
-#' @param x Output from \code{\link{fit_model}}, potentially with DLLs not linked
+#' @param x Output from \code{\link{tinyVAST}}, potentially with DLLs not linked
 #' @param check_gradient Whether to check the gradients of the reloaded model
 #'
-#' @return Output from \code{\link{fit_model}} with DLLs relinked
+#' @return Output from \code{\link{tinyVAST}} with DLLs relinked
 #'
 #' @examples
 #' \dontrun{
@@ -238,13 +238,13 @@ function( x,
 #'
 #' # Run sample_variable
 #' sample = sample_variable( x = fit,
-#'                           variable_name = "D_gct" )
+#'                           variable_name = "mu_i" )
 #' }
 #'
 #' @export
 sample_variable <-
 function( x,
-          variable_name,
+          variable_name = "mu_i",
           n_samples = 100,
           sample_fixed = TRUE,
           seed = 123456 ){

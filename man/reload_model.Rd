@@ -7,12 +7,12 @@
 reload_model(x, check_gradient = TRUE)
 }
 \arguments{
-\item{x}{Output from \code{\link{fit_model}}, potentially with DLLs not linked}
+\item{x}{Output from \code{\link{tinyVAST}}, potentially with DLLs not linked}
 
 \item{check_gradient}{Whether to check the gradients of the reloaded model}
 }
 \value{
-Output from \code{\link{fit_model}} with DLLs relinked
+Output from \code{\link{tinyVAST}} with DLLs relinked
 }
 \description{
 \code{reload_model} allows a user to save a fitted model, reload it in a new

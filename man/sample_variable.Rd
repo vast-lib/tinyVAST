@@ -6,7 +6,7 @@
 \usage{
 sample_variable(
   x,
-  variable_name,
+  variable_name = "mu_i",
   n_samples = 100,
   sample_fixed = TRUE,
   seed = 123456
@@ -41,7 +41,7 @@ fit = tinyVAST( ...,
 
 # Run sample_variable
 sample = sample_variable( x = fit,
-                          variable_name = "D_gct" )
+                          variable_name = "mu_i" )
 }
 
 }
