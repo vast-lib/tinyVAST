@@ -37,14 +37,14 @@ test_that("Basic index standardization works", {
              data = Data,
              formula = n ~ 0 + factor(time),
              spatial_graph = mesh,
-             family = delta_poisson_link_gamma(),
+             family = delta_gamma(type="poisson-link"),
              control = tinyVASTcontrol(gmrf="proj") )
   # fit model with random walk using standard GMRF
   my2 = tinyVAST( dsem = "logn -> logn, 1, NA, 1",
              data = Data,
              formula = n ~ 0 + factor(time),
              spatial_graph = mesh,
-             family = delta_poisson_link_gamma(),
+             family = delta_gamma(type="poisson-link"),
              control = tinyVASTcontrol(gmrf="sep") )
   expect_equal( my1$opt, my2$opt, tolerance=0.001 )
 
