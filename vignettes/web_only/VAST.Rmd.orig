@@ -205,11 +205,12 @@ We can also fit these data using a delta model
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # fit model
-mydelta = tinyVAST( data = Data,
+mydelta2 = tinyVAST( data = Data,
                formula = n ~ 1,
-               delta_options = list(delta_formula = ~ 0 + factor(time)),
-               delta_dsem = "logn -> logn, 1, rho",
-               family = delta_lognormal(),
+               delta_options = list(
+                 delta_formula = ~ 0 + factor(time),
+                 delta_dsem = "logn -> logn, 1, rho"),
+               family = delta_lognormal(type="poisson-link"),
                spatial_graph = mesh )
 
 mydelta
