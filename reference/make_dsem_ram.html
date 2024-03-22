@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,11 +29,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -182,25 +182,25 @@ As one example, consider a univariate and first-order autoregressive process whe
 with independent errors.  This is specified by passing <code> sem = X -&gt; X, 1, rho; X &lt;-&gt; X, 0, sigma </code> to <code>make_dsem_ram</code>.
 This is then parsed to a RAM:</p>
 <table class="table table"><tr><td><strong>heads</strong></td><td><strong>to</strong></td><td><strong>from</strong></td><td><strong>paarameter</strong></td><td><strong>start</strong></td></tr><tr><td>1</td><td>2</td><td>1</td><td>1</td><td><na></na></td></tr><tr><td>1</td><td>3</td><td>2</td><td>1</td><td><na></na></td></tr><tr><td>1</td><td>4</td><td>3</td><td>1</td><td><na></na></td></tr><tr><td>2</td><td>1</td><td>1</td><td>2</td><td><na></na></td></tr><tr><td>2</td><td>2</td><td>2</td><td>2</td><td><na></na></td></tr><tr><td>2</td><td>3</td><td>3</td><td>2</td><td><na></na></td></tr><tr><td>2</td><td>4</td><td>4</td><td>2</td><td><na></na></td></tr></table><p>Rows of this RAM where <code>heads=1</code> are then interpreted to construct the path matrix \(\mathbf \Rho\):</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>\deqn{ \mathbf \Rho <span class="ot">=</span> \begin{bmatrix}</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    \rho <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> \rho <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> \rho <span class="sc">&amp;</span> <span class="dv">0</span>\</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>\deqn{ \mathbf \Rho <span class="ot">=</span> \begin{bmatrix}</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    \rho <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> \rho <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> \rho <span class="sc">&amp;</span> <span class="dv">0</span>\</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    \end{bmatrix} }</span></code></pre><p></p></div>
 <p>While rows where <code>heads=2</code> are interpreted to construct the Cholesky of exogenous covariance \(\mathbf \Gamma\):</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>\deqn{ \mathbf \Gamma <span class="ot">=</span> \begin{bmatrix}</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    \sigma <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> \sigma <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> \sigma <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> \sigma\</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>\deqn{ \mathbf \Gamma <span class="ot">=</span> \begin{bmatrix}</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    \sigma <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> \sigma <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> \sigma <span class="sc">&amp;</span> <span class="dv">0</span> \</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="dv">0</span> <span class="sc">&amp;</span> \sigma\</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    \end{bmatrix} }</span></code></pre><p></p></div>
 <p>with two estimated parameters \(\mathbf \beta = (\rho, \sigma) \). This then results in covariance:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>\deqn{ \mathrm{Cov}(\mathbf X) <span class="ot">=</span> \sigma<span class="sc">^</span><span class="dv">2</span> \begin{bmatrix}</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">2</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">3</span> \</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> <span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">2</span> \</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    \rho<span class="sc">^</span><span class="dv">2</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> <span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> \</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    \rho<span class="sc">^</span><span class="dv">3</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">2</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> <span class="dv">1</span>\</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>\deqn{ \mathrm{Cov}(\mathbf X) <span class="ot">=</span> \sigma<span class="sc">^</span><span class="dv">2</span> \begin{bmatrix}</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">2</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">3</span> \</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> <span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">2</span> \</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    \rho<span class="sc">^</span><span class="dv">2</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> <span class="dv">1</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> \</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    \rho<span class="sc">^</span><span class="dv">3</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">2</span> <span class="sc">&amp;</span> \rho<span class="sc">^</span><span class="dv">1</span> <span class="sc">&amp;</span> <span class="dv">1</span>\</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    \end{bmatrix} }</span></code></pre><p></p></div>
 <p>Similarly, the arrow-and-lag notation can be used to specify a SAR representing
 a conventional structural equation model (SEM), cross-lagged (a.k.a. vector autoregressive)
