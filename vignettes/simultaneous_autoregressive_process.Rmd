@@ -28,6 +28,8 @@ knitr::opts_chunk$set(
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(igraph)
+library(rnaturalearth)
+library(sf)
 options("tinyVAST.verbose" = FALSE)
 ```
 
@@ -95,8 +97,46 @@ We also explore an SAR process for adjacency among regions
 adjacency_graph = make_graph( ~ Korea - Japan - M.I - WKam - EKam -
                                 WAK - SPen - Kod - CI - PWS -
                                 SEAK - NBC - SBC - WA )
-plot(adjacency_graph)
+```
 
+We can plot this adjacency on a map to emphasize that it is a simple way to encode information about spatial proximity:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=7, fig.height=5}
+#maps = ne_countries( country = c("united states of america","russia","canada","south korea","north korea","japan") )
+maps = ne_countries( continent = c("north america","asia","europe") )
+maps = st_combine( maps )
+maps = st_transform( maps, crs=st_crs(3832) )
+#maps = st_crop( maps, xmin = -5*1e5, xmax = 12*1e5,
+#                      ymin = 0 * 1e6, ymax=10 * 1e6 )
+
+# Format inputs
+loc_xy = cbind(
+  x = c(129,143,140,156,163,-163,-161,-154,-154,-147,-138,-129,-126,-125),
+  y = c(36,40,57,53,57,60,55,56,59,61,57,54,50,45)
+)
+loc_xy = sf_project( loc_xy, from=st_crs(4326), to=st_crs(3832) )
+
+# Plot
+xlim = c(-4,10) * 1e6
+ylim = c(3,10) * 1e6
+plot( maps, 
+      xlim = xlim,
+      ylim = ylim,
+      col = "grey",
+      asp = FALSE,
+      add = FALSE )
+plot( adjacency_graph, 
+      layout = loc_xy,
+      add = TRUE, 
+      rescale = FALSE,
+      vertex.label.color = "red",
+      xlim = xlim, 
+      ylim = ylim, 
+      edge.width = 2,
+      edge.color = "red" )
+```
+
+We can then pass this adjacency graph to `tinyVAST` during fitting:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Fit tinyVAST model
 mytiny = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,

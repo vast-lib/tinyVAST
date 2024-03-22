@@ -35,7 +35,7 @@ options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
-We here show how it can fit spatial autoregressive model
+We here show how it can fit spatial autoregressive model.  We first simulate a spatial random field and a confounder variable, and simulate data from this simulated process.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate a 2D AR1 spatial process with a cyclic confounder w
@@ -53,15 +53,25 @@ Data$n = Data$z + rnorm(nrow(Data), sd=1)
 # Add columns for multivariate and temporal dimensions
 Data$var = "n"
 Data$time = 2020
+```
 
+We next construct a triangulated mesh that represents our continuous spatial domain
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # make mesh
-mesh = fm_mesh_2d( Data[,c('x','y')], n=100 )
+mesh = fm_mesh_2d( Data[,c('x','y')], cutoff = 2 )
 
+# Plot it
+plot(mesh)
+```
+
+Finally, we can fit these data using `tinyVAST`
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # fit model
 out = tinyVAST( data = Data,
            formula = n ~ s(w),
            spatial_graph = mesh,
-           control = tinyVASTcontrol(gmrf="proj"),
+           control = tinyVASTcontrol(getsd=FALSE),
            sem = "" )
 ```
 
@@ -95,23 +105,21 @@ R0 = sum( residuals(null, type="deviance")^2 )
 
 We can then compare this with the PDE reported by `mgcv`
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+start_time = Sys.time()
 mygam = gam( n ~ s(w) + s(x,y), data=Data ) #
+Sys.time() - start_time
 summary(mygam)$dev.expl
 ```
 
 where this comparison shows that using the SPDE method in tinyVAST results in higher percent-deviance-explained.  This reduced performance for splines relative to the SPDE method presumably arises due to the reduced rank of the spline basis expansion, and the better match for the Matern function (in the SPDE method) relative to the true (simulated) exponential semivariogram.
 
-It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when excluding the spatial term from each.
+It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when switching tinyVAST to use the same bivariate spline for space.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 out_reduced = tinyVAST( data = Data,
-                        formula = n ~ s(w) )
+                        formula = n ~ s(w) + s(x,y) )
 R1_reduced = sum( residuals(out_reduced, type="deviance")^2 )
 1 - R1_reduced/R0
-
-#
-mygam_reduced = gam( n ~ s(w), data=Data ) #
-summary(mygam_reduced)$dev.expl
 ```
 
 # Visualize spatial response

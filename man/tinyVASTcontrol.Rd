@@ -47,7 +47,12 @@ for the outer optimizer. Passed to
 \item{tmb_par}{list of parameters for starting values, with shape identical
 to \code{tinyVAST(...)$internal$parlist}}
 
-\item{gmrf_parameterization}{Gaussian Markov Random Fields parameterization.}
+\item{gmrf_parameterization}{Parameterization to use for the Gaussian Markov
+random field, where the default \code{separable} constructs a full-rank and
+separable precision matrix, and the alternative \code{projection} constructs
+a full-rank and IID precision for variables over time, and then projects
+this using the inverse-cholesky of the precision, where this projection
+allows for rank-deficient covariance.}
 
 \item{estimate_delta0}{Estimate a delta model?}
 

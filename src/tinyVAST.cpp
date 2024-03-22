@@ -125,6 +125,7 @@ array<Type> omega_distribution( array<Type> omega_sc,
         //Eigen::SparseMatrix<Type> Q_cc = Linv_cc.transpose() * Linv_cc;
 
         // Separable precision ... Option-2
+        // Only compute Vinv_kk if Gamma_kk is full rank
         Eigen::SparseMatrix<Type> V_cc = Gamma_cc.transpose() * Gamma_cc;
         matrix<Type> Vinv_cc = invertSparseMatrix( V_cc );
         Eigen::SparseMatrix<Type> Vinv2_cc = asSparseMatrix( Vinv_cc );
@@ -192,6 +193,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
         //Eigen::SparseMatrix<Type> Q_hh = Linv_hh.transpose() * Linv_hh;
 
         // Separable precision ... Option-2
+        // Only compute Vinv_kk if Gamma_kk is full rank
         Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
         matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
         Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
@@ -551,12 +553,12 @@ Type objective_function<Type>::operator() (){
   int n_s = epsilon_stc.dim(0);
   int n_t = epsilon_stc.dim(1);
   int n_c = epsilon_stc.dim(2);
-  int n_h = n_t * n_c;      // data
+  int n_h = n_t * n_c;      
 
   // int n2_s = epsilon2_stc.dim(0);
   int n2_t = epsilon2_stc.dim(1);
   int n2_c = epsilon2_stc.dim(2);
-  int n2_h = n2_t * n2_c;      // data
+  int n2_h = n2_t * n2_c;      
 
   // Spatial distribution
   PARAMETER( log_kappa );

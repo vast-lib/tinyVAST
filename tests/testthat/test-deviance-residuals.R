@@ -155,7 +155,7 @@ test_that("Poisson-link delta-gamma works", {
   # delta-gamma in tinyVAST
   mytiny = tinyVAST( y ~ 1 + x,
                      data = data.frame(x=x, y=y),
-                     family = delta_poisson_link_gamma(),
+                     family = delta_gamma(type="poisson-link"),
                      delta_options = list(
                        delta_formula = ~ 1 + x
                      ),
@@ -164,7 +164,7 @@ test_that("Poisson-link delta-gamma works", {
   # delta-gamma in sdmTMB
   mysdmTMB = sdmTMB::sdmTMB( list( y ~ 1 + x, y ~ 1 + x ),
                      data = data.frame(x=x, y=y),
-                     family = delta_poisson_link_gamma(),
+                     family = delta_gamma(type="poisson-link"),
                      spatial = "off" )
 
   # separate GLMs

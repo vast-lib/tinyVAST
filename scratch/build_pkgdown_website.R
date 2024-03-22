@@ -5,6 +5,9 @@
 # Notes: Based on instructions found here: https://pkgdown.r-lib.org/index.html
 
 #-----------------------------------------------------------------
+# Install locally if needed
+# devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+
 # load needed libraries
 library(pkgdown)
 
@@ -24,6 +27,9 @@ if( FALSE ){
 
   knitr::knit( "web_only/stream_networks.Rmd.orig",
                output = "web_only/stream_networks.Rmd" )
+
+  knitr::knit( "web_only/condition.Rmd.orig",
+               output = "web_only/condition.Rmd" )
 }
 
 setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
@@ -32,7 +38,6 @@ setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
 if( FALSE ){
   # set up to automatically publish pkgdown site to GitHub
   # usethis::create_github_token()
-  # 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
   # gitcreds::gitcreds_set(url = "https://github.com")
   usethis::use_pkgdown_github_pages()
 

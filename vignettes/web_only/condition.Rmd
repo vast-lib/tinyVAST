@@ -1,0 +1,195 @@
+---
+title: "Condition and density"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Condition and density}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+
+```r
+library(tinyVAST)
+library(fmesher)
+library(sf)
+library(ggplot2)
+```
+
+`tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
+We here show how it can fit a bivariate spatio-temporal model representing density dependence in physiological condition for fishes.  
+This replicates a similar vignette provided for the VAST package, but showcases several improvements in interpretation and interface.
+
+We first load and combine the two data sets:
+
+
+```r
+data( condition_and_density )
+
+# Combine both parts
+combo_data = plyr::rbind.fill( condition_and_density$condition, 
+                              condition_and_density$density )
+
+# Reformat data in expected format
+formed_data = cbind( combo_data[,c("Year","Lat","Lon")],
+  "Type" = factor(ifelse( is.na(combo_data[,'Individual_length_cm']), 
+                   "Biomass", "Condition" )),
+  "Response" = ifelse( is.na(combo_data[,'Individual_length_cm']), 
+                        combo_data[,'Sample_biomass_KGperHectare'], 
+                        log(combo_data[,'Individual_weight_Grams']) ),
+  "log_length" = ifelse( is.na(combo_data[,'Individual_length_cm']), 
+                        rep(0,nrow(combo_data)), 
+                        log(combo_data[,'Individual_length_cm'] / 10) ))
+
+#
+#formed_data$Year_Type = paste0( formed_data$Year, "_", formed_data$Type )
+```
+
+We then construct the SPDE mesh
+
+```r
+# make mesh
+mesh = fm_mesh_2d( formed_data[,c('Lon','Lat')], cutoff=1 )
+```
+
+Next, we specify spatial and spatio-temporal variance in both condition and density. 
+
+```r
+#
+sem = "
+  Biomass <-> Biomass, sdB
+  Condition <-> Condition, sdC
+  Biomass -> Condition, dens_dep
+"
+
+#
+dsem = "
+  Biomass <-> Biomass, 0, sdB
+  Condition <-> Condition, 0, sdC
+  Biomass -> Condition, 0, dens_dep
+"
+```
+
+Finally, we define the distribution for each data set using the `family` argument:
+
+```r
+#
+family = list(
+  Biomass = tweedie(),
+  Condition = gaussian()
+)
+```
+
+Finally, we fit the model using tinyVAST
+
+```r
+# fit model
+fit = tinyVAST( data = formed_data,
+           formula = Response ~ interaction(Year,Type) + log_length,
+           spatial_graph = mesh,
+           control = tinyVASTcontrol( trace=0, verbose=TRUE, profile="alpha_j" ),
+           sem = sem,
+           dsem = dsem,
+           family = family,
+           variables = c("Biomass","Condition"),
+           variable_column = "Type",
+           space_columns = c("Lon", "Lat"),
+           time_column = "Year",
+           distribution_column = "Type",
+           times = 1982:2016 )
+```
+
+We can look at structural parameters using summary functions:
+
+```r
+# spatial terms
+summary(fit, "sem")
+#>   heads        to      from parameter start      Estimate   Std_Error    z_value      p_value
+#> 1     2   Biomass   Biomass         1  <NA>  1.4238785229 0.133047112 10.7020626 9.953750e-27
+#> 2     2 Condition Condition         2  <NA> -0.0331621242 0.004167438 -7.9574358 1.756412e-15
+#> 3     1 Condition   Biomass         3  <NA>  0.0000933144 0.004855041  0.0192201 9.846655e-01
+
+# spatio-temporal terms
+summary(fit, "dsem")
+#>   heads        to      from parameter start lag     Estimate   Std_Error    z_value      p_value
+#> 1     2   Biomass   Biomass         1  <NA>   0  0.966429610 0.024274988  39.811745 0.000000e+00
+#> 2     2 Condition Condition         2  <NA>   0 -0.040541568 0.002723387 -14.886454 4.036166e-50
+#> 3     1 Condition   Biomass         3  <NA>   0  0.008201795 0.003339302   2.456141 1.404382e-02
+```
+
+# Abundance-weighted expansion
+
+To explore output, we can plot output using the survey extent:
+
+
+```r
+# Extract shapefile
+region = condition_and_density$eastern_bering_sea
+
+# make extrapolation-grid
+sf_grid = st_make_grid( region, cellsize=c(0.5,0.5) )
+sf_grid = st_intersection( sf_grid, region )
+sf_grid = st_make_valid( sf_grid )
+
+#
+grid_coords = st_coordinates( st_centroid(sf_grid) )
+areas_km2 = st_area( sf_grid ) / 1e6
+
+# Condition in 
+newdata = data.frame( "Lat" = grid_coords[,'Y'], 
+                      "Lon" = grid_coords[,'X'],
+                      "Year" = 1982,
+                      "Type" = "Condition",
+                      #"Year_Type" = "1982_Condition",
+                      "log_length" = 0 )
+cond_1982 = predict(fit, newdata=newdata, what="p_g")
+
+# Repeat for density
+newdata2 = newdata
+newdata2$Type = "Biomass"
+#newdata2$Year_Type = "1982_Biomass"
+dens_1982 = predict(fit, newdata=newdata2, what="p_g")
+
+# Plot on map
+plot_grid = st_sf( sf_grid, 
+                    "Condition.1982" = cond_1982,
+                    "Density.1982" = dens_1982 )
+
+plot( plot_grid )
+```
+
+![plot of chunk condition-maps](figure/condition-maps-1.png)
+
+# Density-weighted condition
+
+Finally, we can calculate density-weighted condition
+
+
+```r
+# 
+expand_data = rbind( newdata2, newdata )
+W_gz = cbind( c(as.numeric(areas_km2),rep(0,length(areas_km2))), 0 )
+V_gz = cbind( rep(c(0,3),each=length(areas_km2)), seq_along(areas_km2)-1 )
+
+#
+cond_tz = data.frame( "Year"=1998:2016, "Est"=NA, "SE"=NA )
+for( yearI in seq_len(nrow(cond_tz)) ){
+  expand_data[,'Year'] = cond_tz[yearI,"Year"]
+  out = integrate_output( fit, 
+                          newdata = expand_data,
+                          V_gz = V_gz,
+                          W_gz = W_gz, 
+                          bias.correct = TRUE ) 
+  cond_tz[yearI,c("Est","SE")] = out[c("Estimate","Std. Error")]
+}
+
+# plot time-series
+ggplot( cond_tz ) +
+  geom_line( aes(x=Year, y=Est) ) +
+  geom_ribbon( aes(x=Year, ymin=Est-SE, ymax=Est+SE), alpha=0.2 )
+```
+
+![plot of chunk condition-timeseries](figure/condition-timeseries-1.png)
