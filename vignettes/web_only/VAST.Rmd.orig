@@ -109,6 +109,19 @@ where a scatterplot shows that they are highly correlated:
 plot( x=Data$z, y=Data$z_hat )
 ```
 
+We can also use the `DHARMa` package to visualize simulation residuals:
+```{r VAST-DHARMa, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# simulate new data conditional on fixed and random effects
+y_ir = replicate( n = 100, 
+           expr = mytinyVAST$obj$simulate()$y_i )
+
+#
+res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
+                            observedResponse = Data$n, 
+                            fittedPredictedResponse = fitted(mytinyVAST) )
+plot(res)
+```
+
 We can then calculate the area-weighted total abundance and compare it with its true value:
 ```{r VAST-abundance, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Predicted sample-weighted total
@@ -214,6 +227,24 @@ mydelta2 = tinyVAST( data = Data,
                spatial_graph = mesh )
 
 mydelta
+```
+
+And we can again use the `DHARMa` package to visualize simulation residuals:
+```{r delta-DHARMa, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# simulate new data conditional on fixed and random effects
+y_ir = replicate( n = 100, 
+           expr = mydelta2$obj$simulate()$y_i )
+
+#
+res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
+                            observedResponse = Data$n, 
+                            fittedPredictedResponse = fitted(mydelta2) )
+plot(res)
+```
+
+We can then use AIC to compare the fit of the delta-model and Tweedie distribution:
+```{r AIC-comparison, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+knitr::kable( c("Tweedie"=AIC(mytinyVAST),"delta-lognormal"=AIC(mydelta2)), digits=3)
 ```
 
 # Bivariate spatio-temporal autoregressive model

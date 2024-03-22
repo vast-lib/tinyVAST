@@ -1,3 +1,7 @@
+# tinyVAST 0.4.0
+
+* Adding code for simulation residuals, and examples to vignettes
+
 # tinyVAST 0.3.0
 
 * Adding `sdmTMB` as dependency, and importing family options from it

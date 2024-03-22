@@ -77,6 +77,19 @@ Sys.time() - start_time
 summary(mygam_reduced)$dev.expl
 ```
 
+We can also use the `DHARMa` package to visualize simulation residuals:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# simulate new data conditional on fixed and random effects
+y_ir = replicate( n = 100, 
+           expr = myfit$obj$simulate()$y_i )
+
+#
+res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
+                            observedResponse = Data$y, 
+                            fittedPredictedResponse = fitted(myfit) )
+plot(res)
+```
+
 `tinyVAST` then has a standard `predict` function:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 predict(myfit, newdata=data.frame(x=0, y=1, w=0.4, group=2, a=1) )
