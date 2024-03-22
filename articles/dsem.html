@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -135,7 +135,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;      alpha_j      alpha_j       beta_z       beta_z       beta_z       beta_z </span></span>
 <span><span class="co">#&gt;   3.32526197   6.44165343   0.89304266   0.01420908  -0.13239996   0.86147627 </span></span>
 <span><span class="co">#&gt;       beta_z       beta_z       beta_z    log_sigma </span></span>
-<span><span class="co">#&gt;  -0.01285890   0.37727131   0.17062266 -12.62531823 </span></span>
+<span><span class="co">#&gt;  -0.01285890   0.37727131   0.17062266 -12.62352160 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $opt$objective</span></span>
 <span><span class="co">#&gt; [1] 5.781919</span></span>
@@ -166,11 +166,11 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; beta_z     -0.01285890 5.063467e-02</span></span>
 <span><span class="co">#&gt; beta_z      0.37727131 3.504314e-02</span></span>
 <span><span class="co">#&gt; beta_z      0.17062266 1.584742e-02</span></span>
-<span><span class="co">#&gt; log_sigma -12.62531823 2.008272e+04</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 3.635293e-05 </span></span>
+<span><span class="co">#&gt; log_sigma -12.62352160 2.012258e+04</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 3.60018e-05 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $run_time</span></span>
-<span><span class="co">#&gt; Time difference of 0.6724758 secs</span></span>
+<span><span class="co">#&gt; Time difference of 0.3011179 secs</span></span>
 <span></span>
 <span><span class="co"># See summary</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mytiny</span>,<span class="st">"dsem"</span><span class="op">)</span>, digits<span class="op">=</span><span class="fl">3</span> <span class="op">)</span></span></code></pre></div>
@@ -320,21 +320,24 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span>             tsdata <span class="op">=</span> <span class="va">dsem_data</span>,</span>
 <span>             control <span class="op">=</span> <span class="fu"><a href="https://james-thorson-noaa.github.io/dsem/reference/dsem_control.html" class="external-link">dsem_control</a></span><span class="op">(</span>getsd<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>             family <span class="op">=</span> <span class="va">family</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; 1 regions found.</span></span>
-<span><span class="co">#&gt; Using 1 threads</span></span>
-<span><span class="co">#&gt; 1 regions found.</span></span>
-<span><span class="co">#&gt; Using 1 threads</span></span>
+<span><span class="co">#&gt; Warning in dsem::dsem(sem = dsem, tsdata = dsem_data, control =</span></span>
+<span><span class="co">#&gt; dsem_control(getsd = FALSE), : Some variables in `tsdata` have much higher</span></span>
+<span><span class="co">#&gt; variance than others. Please consider rescaling variables to prevent issues</span></span>
+<span><span class="co">#&gt; with numerical convergence.</span></span>
 <span><span class="co">#&gt;   Coefficient_name Number_of_coefficients   Type</span></span>
 <span><span class="co">#&gt; 1           beta_z                      7  Fixed</span></span>
 <span><span class="co">#&gt; 2        lnsigma_j                      2  Fixed</span></span>
 <span><span class="co">#&gt; 3             mu_j                      2 Random</span></span>
 <span><span class="co">#&gt; 4             x_tj                    122 Random</span></span>
+<span><span class="co">#&gt; Warning in dsem::dsem(sem = dsem, tsdata = dsem_data, control =</span></span>
+<span><span class="co">#&gt; dsem_control(getsd = FALSE), : The ratio of maximum and minimum Hessian</span></span>
+<span><span class="co">#&gt; eigenvalues is high. Some parameters might not be identifiable.</span></span>
 <span><span class="va">mydsem</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;        beta_z        beta_z        beta_z        beta_z        beta_z </span></span>
 <span><span class="co">#&gt;   0.895834720   0.007358847  -0.124879928   0.874884847  -0.014394603 </span></span>
 <span><span class="co">#&gt;        beta_z        beta_z     lnsigma_j     lnsigma_j </span></span>
-<span><span class="co">#&gt;   0.378522244   0.172997994 -16.141398482 -12.488408401 </span></span>
+<span><span class="co">#&gt;   0.378522244   0.172997994 -17.248978101 -12.636038113 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
 <span><span class="co">#&gt; [1] 7.739638</span></span>
@@ -345,11 +348,11 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 76</span></span>
+<span><span class="co">#&gt; [1] 74</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       99       77 </span></span>
+<span><span class="co">#&gt;       96       75 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "relative convergence (4)"</span></span>

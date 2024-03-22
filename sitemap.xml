@@ -4,9 +4,6 @@
     <loc>/404.html</loc>
   </url>
   <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
     <loc>/articles/dsem.html</loc>
   </url>
   <url>
@@ -25,9 +22,6 @@
     <loc>/articles/spatial_factor_analysis.html</loc>
   </url>
   <url>
-    <loc>/articles/web_only/VAST.html</loc>
-  </url>
-  <url>
     <loc>/articles/web_only/age_composition_expansion.html</loc>
   </url>
   <url>
@@ -40,6 +34,9 @@
     <loc>/articles/web_only/stream_networks.html</loc>
   </url>
   <url>
+    <loc>/articles/web_only/VAST.html</loc>
+  </url>
+  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
@@ -47,6 +44,9 @@
   </url>
   <url>
     <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/LICENSE-text.html</loc>
   </url>
   <url>
     <loc>/news/index.html</loc>

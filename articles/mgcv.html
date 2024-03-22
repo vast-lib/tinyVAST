@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -137,17 +137,30 @@ it is identical to that calculated using mgcv</p>
 <span><span class="va">start_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mygam_reduced</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span> <span class="va">Formula</span>, data<span class="op">=</span><span class="va">Data</span> <span class="op">)</span> <span class="co">#</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span>
-<span><span class="co">#&gt; Time difference of 0.05569196 secs</span></span>
+<span><span class="co">#&gt; Time difference of 0.04182291 secs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mygam_reduced</span><span class="op">)</span><span class="op">$</span><span class="va">dev.expl</span></span>
 <span><span class="co">#&gt; [1] 0.9814113</span></span></code></pre></div>
+<p>We can also use the <code>DHARMa</code> package to visualize
+simulation residuals:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># simulate new data conditional on fixed and random effects</span></span>
+<span><span class="va">y_ir</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span> n <span class="op">=</span> <span class="fl">100</span>, </span>
+<span>           expr <span class="op">=</span> <span class="va">myfit</span><span class="op">$</span><span class="va">obj</span><span class="op">$</span><span class="fu">simulate</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">y_i</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="co">#</span></span>
+<span><span class="va">res</span> <span class="op">=</span> <span class="fu">DHARMa</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DHARMa/man/createDHARMa.html" class="external-link">createDHARMa</a></span><span class="op">(</span> simulatedResponse <span class="op">=</span> <span class="va">y_ir</span>, </span>
+<span>                            observedResponse <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">y</span>, </span>
+<span>                            fittedPredictedResponse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-4-1.png" width="576"></p>
 <p><code>tinyVAST</code> then has a standard <code>predict</code>
 function:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">myfit</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">0</span>, y<span class="op">=</span><span class="fl">1</span>, w<span class="op">=</span><span class="fl">0.4</span>, group<span class="op">=</span><span class="fl">2</span>, a<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2.977754</span></span></code></pre></div>
 <p>and this is used to compute partial-dependence plots using package
 <code>pdp</code></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># compute partial dependence plot</span></span>
 <span><span class="va">Partial</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/pdp/man/partial.html" class="external-link">partial</a></span><span class="op">(</span> object <span class="op">=</span> <span class="va">myfit</span>,</span>
 <span>                   pred.var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"w"</span>,<span class="st">"group"</span><span class="op">)</span>,</span>
@@ -157,73 +170,73 @@ function:</p>
 <span></span>
 <span><span class="co"># Lattice plots as default option</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">Partial</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-5-1.png" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
 <p>Alternatively, we can use <code>visreg</code> to visualize
 output:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 1.43889e-12 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.292133e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 4.355821e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.01082915 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.890599e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.01107291 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.525975e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.01107285 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.991881e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.076812e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14653 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 8.13731e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.031677e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14591 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.39078e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.403592e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87596 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.678492e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 3.948446e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87805 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.00227471 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.040886e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 5.356134e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002520276 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.002272436 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.534289e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.477063e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002474023 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002556752 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004443804 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002554196 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.206064e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004392743 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18956 mgc: 0.001668019 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004339981 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001666352 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.00435362 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18955 mgc: 0.001849062 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004324244 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004324245 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001847214 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.50277e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004361163 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004361162 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002420394 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.255832e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.191331e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004368366 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002417975 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004372513 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.774047e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004372514 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18957 mgc: 0.002388624 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004361748 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.1898 mgc: 0.002386237 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004385635 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004385634 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.2395 mgc: 0.005105839 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.979113e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.702995e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.900175 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.14177 mgc: 0.005116061 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.44857e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.245157e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.903708</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter</span></span>
@@ -236,71 +249,71 @@ output:</p>
 <span><span class="co">#&gt; Warning in title(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in axis(side = 1, at = c(0.0833333333333333, 0.291666666666667, :</span></span>
 <span><span class="co">#&gt; "what" is not a graphical parameter</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p><img src="mgcv_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"x"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 1.43889e-12 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.292133e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 4.355821e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.01082915 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.890599e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.01107291 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.525975e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.01107285 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.991881e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.076812e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14653 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 8.13731e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.031677e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14591 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.39078e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.403592e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87596 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.678492e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 3.948446e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87805 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.00227471 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.040886e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 5.356134e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002520276 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.002272436 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.534289e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.477063e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002474023 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002556752 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004443804 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002554196 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.206064e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004392743 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18956 mgc: 0.001668019 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004339981 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001666352 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.00435362 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18955 mgc: 0.001849062 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004324244 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004324245 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001847214 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.50277e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004361163 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004361162 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002420394 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.255832e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.191331e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004368366 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002417975 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004372513 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.774047e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004372514 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18957 mgc: 0.002388624 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004361748 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.1898 mgc: 0.002386237 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004385635 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004385634 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.2395 mgc: 0.005105839 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.979113e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.702995e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.900175 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.14177 mgc: 0.005116061 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.44857e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.245157e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.903708</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter</span></span>
@@ -311,328 +324,328 @@ output:</p>
 <span><span class="co">#&gt; graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in box(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in title(...): "what" is not a graphical parameter</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-6-2.png" width="576"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p><img src="mgcv_files/figure-html/unnamed-chunk-7-2.png" width="576"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"w"</span>, by<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 1.43889e-12 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.292133e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 4.355821e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.01082915 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.890599e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.01107291 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.525975e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.01107285 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.991881e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.076812e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14653 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 8.13731e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.031677e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14591 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.39078e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.403592e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87596 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.678492e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 3.948446e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87805 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.00227471 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.040886e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 5.356134e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002520276 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.002272436 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.534289e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.477063e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002474023 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002556752 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004443804 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002554196 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.206064e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004392743 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18956 mgc: 0.001668019 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004339981 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001666352 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.00435362 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18955 mgc: 0.001849062 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004324244 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004324245 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001847214 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.50277e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004361163 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004361162 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002420394 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.255832e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.191331e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004368366 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002417975 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004372513 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.774047e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004372514 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18957 mgc: 0.002388624 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004361748 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.1898 mgc: 0.002386237 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004385635 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004385634 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.2395 mgc: 0.005105839 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.979113e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.702995e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.900175 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.14177 mgc: 0.005116061 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.44857e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.245157e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.903708 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 1.43889e-12 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.292133e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 4.355821e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.01082915 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.890599e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.01107291 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.525975e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.01107285 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.991881e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.076812e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14653 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 8.13731e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.031677e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14591 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.39078e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.403592e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87596 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.678492e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 3.948446e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87805 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.00227471 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.040886e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 5.356134e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002520276 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.002272436 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.534289e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.477063e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002474023 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002556752 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004443804 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002554196 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.206064e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004392743 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18956 mgc: 0.001668019 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004339981 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001666352 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.00435362 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18955 mgc: 0.001849062 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004324244 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004324245 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001847214 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.50277e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004361163 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004361162 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002420394 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.255832e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.191331e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004368366 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002417975 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004372513 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.774047e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004372514 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18957 mgc: 0.002388624 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004361748 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.1898 mgc: 0.002386237 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004385635 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004385634 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.2395 mgc: 0.005105839 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.979113e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.702995e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.900175 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.14177 mgc: 0.005116061 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.44857e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.245157e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.903708 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 1.43889e-12 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.292133e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 4.355821e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.01082915 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.890599e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.01107291 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.525975e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.01107285 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.991881e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.076812e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14653 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 8.13731e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.031677e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14591 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.39078e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.403592e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87596 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.678492e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 3.948446e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87805 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.00227471 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.040886e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 5.356134e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002520276 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.002272436 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.534289e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.477063e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002474023 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002556752 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004443804 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002554196 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.206064e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004392743 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18956 mgc: 0.001668019 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004339981 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001666352 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.00435362 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18955 mgc: 0.001849062 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004324244 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004324245 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001847214 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.50277e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004361163 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004361162 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002420394 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.255832e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.191331e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004368366 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002417975 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004372513 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.774047e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004372514 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18957 mgc: 0.002388624 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004361748 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.1898 mgc: 0.002386237 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004385635 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004385634 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.2395 mgc: 0.005105839 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.979113e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.702995e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.900175 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.14177 mgc: 0.005116061 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.44857e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.245157e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.903708 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 1.43889e-12 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.292133e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 4.355821e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.01082915 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.890599e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.01107291 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.525975e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.01107285 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.991881e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.076812e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14653 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 8.13731e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.031677e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14591 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.39078e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.403592e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87596 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.678492e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 3.948446e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87805 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.00227471 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.040886e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 5.356134e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002520276 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.002272436 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.534289e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.477063e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002474023 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002556752 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004443804 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002554196 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.206064e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004392743 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18956 mgc: 0.001668019 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004339981 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001666352 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.00435362 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18955 mgc: 0.001849062 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004324244 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004324245 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001847214 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.50277e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004361163 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004361162 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002420394 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.255832e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.191331e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004368366 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002417975 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004372513 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.774047e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004372514 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18957 mgc: 0.002388624 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004361748 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.1898 mgc: 0.002386237 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004385635 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004385634 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.2395 mgc: 0.005105839 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.979113e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.702995e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.900175 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.14177 mgc: 0.005116061 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.44857e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.245157e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.903708 </span></span>
-<span><span class="co">#&gt; iter: 1  mgc: 1.43889e-12 </span></span>
+<span><span class="co">#&gt; iter: 1  mgc: 9.96113e-13 </span></span>
 <span><span class="co">#&gt; Matching hessian patterns... Done</span></span>
-<span><span class="co">#&gt; outer mgc:  0.001043334 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.001043272 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.292133e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 4.355821e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.01082915 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18969 mgc: 4.103365 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.890599e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.01107291 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.525975e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.01107285 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.991881e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.076812e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14653 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.19825 mgc: 0.3606377 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 8.13731e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.031677e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  17.14591 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.39078e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.403592e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87596 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.20462 mgc: 4.085759 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.678492e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 3.948446e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  29.87805 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.00227471 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.040886e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 5.356134e-13 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002520276 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18968 mgc: 0.002272436 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.534289e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.477063e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.002474023 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002556752 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004443804 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002554196 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.824732e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.206064e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004392743 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18956 mgc: 0.001668019 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004339981 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001666352 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.158573e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.00435362 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18955 mgc: 0.001849062 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004324244 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004324245 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18981 mgc: 0.001847214 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.50277e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004361163 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.078808e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004361162 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18958 mgc: 0.002420394 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 1.255832e-12 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.191331e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004368366 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18978 mgc: 0.002417975 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.051783e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004372513 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.774047e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004372514 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.18957 mgc: 0.002388624 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  0.004361748 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.1898 mgc: 0.002386237 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 9.896077e-13 </span></span>
-<span><span class="co">#&gt; outer mgc:  0.004385635 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.11604e-12 </span></span>
+<span><span class="co">#&gt; outer mgc:  0.004385634 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.2395 mgc: 0.005105839 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 6.979113e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.702995e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.900175 </span></span>
 <span><span class="co">#&gt; iter: 1  value: 29.14177 mgc: 0.005116061 ustep: 1 </span></span>
-<span><span class="co">#&gt; iter: 2  mgc: 7.44857e-13 </span></span>
+<span><span class="co">#&gt; iter: 2  mgc: 1.245157e-12 </span></span>
 <span><span class="co">#&gt; outer mgc:  1.903708</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-6-3.png" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-7-3.png" width="576"></p>
 <p>Alternatively, we can calculate derived quantities via Monte Carlo
 integration of the estimated density function:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predicted sample-weighted total</span></span>
 <span><span class="fu"><a href="../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
@@ -642,7 +655,7 @@ integration of the estimated density function:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">$</span><span class="va">z</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1606.42</span></span></code></pre></div>
 <p>Similarly, we can fit a grouped 2D spline</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate</span></span>
 <span><span class="va">R</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.4</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, FUN<span class="op">=</span><span class="st">"-"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">z</span> <span class="op">=</span> <span class="fu">mvtnorm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html" class="external-link">rmvnorm</a></span><span class="op">(</span><span class="fl">3</span>, sigma<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/kronecker.html" class="external-link">kronecker</a></span><span class="op">(</span><span class="va">R</span>,<span class="va">R</span><span class="op">)</span> <span class="op">)</span></span>
@@ -664,20 +677,20 @@ integration of the estimated density function:</p>
 <span></span>
 <span><span class="co"># Lattice plots as default option</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">mypartial</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<p><img src="mgcv_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Lattice plot of true values</span></span>
 <span><span class="va">mypartial</span><span class="op">$</span><span class="va">yhat</span> <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">z</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">mypartial</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-8-2.png" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-9-2.png" width="576"></p>
 <p>We can again use <code>visreg</code> to visualize response surfaces,
 although it doesn’t seem possible to extract a grouped spatial term, so
 we here show only a single term:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg2d.html" class="external-link">visreg2d</a></span><span class="op">(</span> <span class="va">myfit</span>, <span class="st">"x"</span>, <span class="st">"y"</span>, cond<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"group"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>, plot<span class="op">=</span><span class="cn">FALSE</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">out</span>, main<span class="op">=</span><span class="st">"f(x,y) for group=1"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
   </main>
 </div>
 
