@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,11 @@
     <a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
+    <a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a>
-    <a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -138,7 +138,7 @@ spatio-temporal process:</p>
 <span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>,</span>
 <span>           spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>           family <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
+<span>           family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">mytinyVAST</span></span>
 <span><span class="co">#&gt; $call</span></span>
 <span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + factor(time), data = Data, dsem = "logn -&gt; logn, 1, rho", </span></span>
@@ -391,7 +391,7 @@ it with its true value:</p>
 <span>  spatial <span class="op">=</span> <span class="st">"off"</span>,</span>
 <span>  spatiotemporal <span class="op">=</span> <span class="st">"ar1"</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sdmTMBtime</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>The models all have similar runtimes</p>
@@ -535,7 +535,7 @@ with a cross-laggged (vector autoregressive) interaction.</p>
 <span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">var</span>,</span>
 <span>           spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>           family <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
+<span>           family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; $call</span></span>
 <span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + var, data = Data, dsem = dsem, family = tweedie(), </span></span>

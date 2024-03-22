@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,11 @@
     <a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
+    <a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a>
-    <a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -159,21 +159,21 @@ primary sample:</p>
 single linear predictor:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Age_1 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_2 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_3 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_4 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_5 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>, </span>
-<span>  Age_6 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_7 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_8 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_9 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_10 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_11 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_12 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_13 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_14 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Age_15 <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>     </span>
+<span>  Age_1 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_2 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_3 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_4 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_5 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>, </span>
+<span>  Age_6 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_7 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_8 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_9 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_10 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_11 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_12 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_13 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_14 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Age_15 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>     </span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">#Data$Year = factor(Data$Year)</span></span>

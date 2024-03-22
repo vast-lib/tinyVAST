@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -94,6 +94,8 @@ Thorson</h4>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/" class="external-link">tinyVAST</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/rnaturalearth/" class="external-link">rnaturalearth</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"tinyVAST.verbose"</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><code>tinyVAST</code> is an R package for fitting vector
 autoregressive spatio-temporal (VAST) models using a minimal and
@@ -145,9 +147,9 @@ not quite) nonstationary.</p>
 <span>     time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
 <span>     space_column <span class="op">=</span> <span class="st">"Region"</span>,</span>
 <span>     distribution_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>     family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="../reference/families.html">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="../reference/families.html">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="../reference/families.html">lognormal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>     family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                          <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                          <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
 <span>     spatial_graph <span class="op">=</span> <span class="va">unconnected_graph</span>,</span>
 <span>     control <span class="op">=</span> <span class="fu"><a href="../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> profile<span class="op">=</span><span class="st">"alpha_j"</span> <span class="op">)</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
@@ -189,9 +191,9 @@ not quite) nonstationary.</p>
 <td align="left">1</td>
 <td align="left">NA</td>
 <td align="left">-1</td>
-<td align="right">0.808</td>
+<td align="right">0.807</td>
 <td align="right">0.059</td>
-<td align="right">13.710</td>
+<td align="right">13.711</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -203,7 +205,7 @@ not quite) nonstationary.</p>
 <td align="left">-2</td>
 <td align="right">0.195</td>
 <td align="right">0.059</td>
-<td align="right">3.307</td>
+<td align="right">3.308</td>
 <td align="right">0.001</td>
 </tr>
 <tr class="odd">
@@ -227,7 +229,7 @@ not quite) nonstationary.</p>
 <td align="left">-2</td>
 <td align="right">0.882</td>
 <td align="right">0.022</td>
-<td align="right">39.933</td>
+<td align="right">39.931</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -238,8 +240,8 @@ not quite) nonstationary.</p>
 <td align="left">NA</td>
 <td align="left">-1</td>
 <td align="right">0.675</td>
-<td align="right">0.103</td>
-<td align="right">6.582</td>
+<td align="right">0.102</td>
+<td align="right">6.584</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -249,9 +251,9 @@ not quite) nonstationary.</p>
 <td align="left">6</td>
 <td align="left">NA</td>
 <td align="left">-2</td>
-<td align="right">0.292</td>
-<td align="right">0.100</td>
-<td align="right">2.939</td>
+<td align="right">0.293</td>
+<td align="right">0.099</td>
+<td align="right">2.940</td>
 <td align="right">0.003</td>
 </tr>
 <tr class="odd">
@@ -263,7 +265,7 @@ not quite) nonstationary.</p>
 <td align="left">0</td>
 <td align="right">0.648</td>
 <td align="right">0.039</td>
-<td align="right">16.766</td>
+<td align="right">16.764</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -275,7 +277,7 @@ not quite) nonstationary.</p>
 <td align="left">0</td>
 <td align="right">0.294</td>
 <td align="right">0.035</td>
-<td align="right">8.349</td>
+<td align="right">8.353</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -297,12 +299,47 @@ not quite) nonstationary.</p>
 <code class="sourceCode R"><span><span class="co"># Define graph for SAR process</span></span>
 <span><span class="va">adjacency_graph</span> <span class="op">=</span> <span class="fu"><a href="https://r.igraph.org/reference/make_graph.html" class="external-link">make_graph</a></span><span class="op">(</span> <span class="op">~</span> <span class="va">Korea</span> <span class="op">-</span> <span class="va">Japan</span> <span class="op">-</span> <span class="va">M.I</span> <span class="op">-</span> <span class="va">WKam</span> <span class="op">-</span> <span class="va">EKam</span> <span class="op">-</span></span>
 <span>                                <span class="va">WAK</span> <span class="op">-</span> <span class="va">SPen</span> <span class="op">-</span> <span class="va">Kod</span> <span class="op">-</span> <span class="va">CI</span> <span class="op">-</span> <span class="va">PWS</span> <span class="op">-</span></span>
-<span>                                <span class="va">SEAK</span> <span class="op">-</span> <span class="va">NBC</span> <span class="op">-</span> <span class="va">SBC</span> <span class="op">-</span> <span class="va">WA</span> <span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">adjacency_graph</span><span class="op">)</span></span></code></pre></div>
-<p><img src="simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-4-1.png" width="576"></p>
+<span>                                <span class="va">SEAK</span> <span class="op">-</span> <span class="va">NBC</span> <span class="op">-</span> <span class="va">SBC</span> <span class="op">-</span> <span class="va">WA</span> <span class="op">)</span></span></code></pre></div>
+<p>We can plot this adjacency on a map to emphasize that it is a simple
+way to encode information about spatial proximity:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Fit tinyVAST model</span></span>
+<code class="sourceCode R"><span><span class="co">#maps = ne_countries( country = c("united states of america","russia","canada","south korea","north korea","japan") )</span></span>
+<span><span class="va">maps</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/rnaturalearth/reference/ne_countries.html" class="external-link">ne_countries</a></span><span class="op">(</span> continent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"north america"</span>,<span class="st">"asia"</span>,<span class="st">"europe"</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">maps</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html" class="external-link">st_combine</a></span><span class="op">(</span> <span class="va">maps</span> <span class="op">)</span></span>
+<span><span class="va">maps</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span> <span class="va">maps</span>, crs<span class="op">=</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">3832</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="co">#maps = st_crop( maps, xmin = -5*1e5, xmax = 12*1e5,</span></span>
+<span><span class="co">#                      ymin = 0 * 1e6, ymax=10 * 1e6 )</span></span>
+<span></span>
+<span><span class="co"># Format inputs</span></span>
+<span><span class="va">loc_xy</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">129</span>,<span class="fl">143</span>,<span class="fl">140</span>,<span class="fl">156</span>,<span class="fl">163</span>,<span class="op">-</span><span class="fl">163</span>,<span class="op">-</span><span class="fl">161</span>,<span class="op">-</span><span class="fl">154</span>,<span class="op">-</span><span class="fl">154</span>,<span class="op">-</span><span class="fl">147</span>,<span class="op">-</span><span class="fl">138</span>,<span class="op">-</span><span class="fl">129</span>,<span class="op">-</span><span class="fl">126</span>,<span class="op">-</span><span class="fl">125</span><span class="op">)</span>,</span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">36</span>,<span class="fl">40</span>,<span class="fl">57</span>,<span class="fl">53</span>,<span class="fl">57</span>,<span class="fl">60</span>,<span class="fl">55</span>,<span class="fl">56</span>,<span class="fl">59</span>,<span class="fl">61</span>,<span class="fl">57</span>,<span class="fl">54</span>,<span class="fl">50</span>,<span class="fl">45</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">loc_xy</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf_project.html" class="external-link">sf_project</a></span><span class="op">(</span> <span class="va">loc_xy</span>, from<span class="op">=</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">4326</span><span class="op">)</span>, to<span class="op">=</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">3832</span><span class="op">)</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot</span></span>
+<span><span class="va">xlim</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">4</span>,<span class="fl">10</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1e6</span></span>
+<span><span class="va">ylim</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">10</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1e6</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">maps</span>, </span>
+<span>      xlim <span class="op">=</span> <span class="va">xlim</span>,</span>
+<span>      ylim <span class="op">=</span> <span class="va">ylim</span>,</span>
+<span>      col <span class="op">=</span> <span class="st">"grey"</span>,</span>
+<span>      asp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>      add <span class="op">=</span> <span class="cn">FALSE</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">adjacency_graph</span>, </span>
+<span>      layout <span class="op">=</span> <span class="va">loc_xy</span>,</span>
+<span>      add <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>      rescale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>      vertex.label.color <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>      xlim <span class="op">=</span> <span class="va">xlim</span>, </span>
+<span>      ylim <span class="op">=</span> <span class="va">ylim</span>, </span>
+<span>      edge.width <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>      edge.color <span class="op">=</span> <span class="st">"red"</span> <span class="op">)</span></span></code></pre></div>
+<p><img src="simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
+<p>We can then pass this adjacency graph to <code>tinyVAST</code> during
+fitting:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Fit tinyVAST model</span></span>
 <span><span class="va">mytiny</span> <span class="op">=</span> <span class="fu"><a href="../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span>
 <span>     formula <span class="op">=</span> <span class="va">Biomass_nozeros</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Region</span>,</span>
 <span>     data <span class="op">=</span> <span class="va">Data</span>,</span>
@@ -311,11 +348,47 @@ not quite) nonstationary.</p>
 <span>     time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
 <span>     space_column <span class="op">=</span> <span class="st">"Region"</span>,</span>
 <span>     distribution_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>     family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="../reference/families.html">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="../reference/families.html">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="../reference/families.html">lognormal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>     family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                          <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                          <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
 <span>     spatial_graph <span class="op">=</span> <span class="va">adjacency_graph</span>,</span>
 <span>     control <span class="op">=</span> <span class="fu"><a href="../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> profile<span class="op">=</span><span class="st">"alpha_j"</span> <span class="op">)</span> <span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
+<span><span class="co">#&gt; NA/NaN function evaluation</span></span>
+<span></span>
 <span><span class="co">#&gt; Warning in nlminb(start = opt$par, objective = obj$fn, gradient = obj$gr, :</span></span>
 <span><span class="co">#&gt; NA/NaN function evaluation</span></span>
 <span></span>
@@ -355,10 +428,10 @@ not quite) nonstationary.</p>
 <td align="left">1</td>
 <td align="left">NA</td>
 <td align="left">-1</td>
-<td align="right">1.505</td>
-<td align="right">0.081</td>
-<td align="right">18.529</td>
-<td align="right">0.000</td>
+<td align="right">0.952</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td align="left">1</td>
@@ -367,10 +440,10 @@ not quite) nonstationary.</p>
 <td align="left">2</td>
 <td align="left">NA</td>
 <td align="left">-2</td>
-<td align="right">-0.502</td>
-<td align="right">0.082</td>
-<td align="right">-6.113</td>
-<td align="right">0.000</td>
+<td align="right">0.914</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="odd">
 <td align="left">1</td>
@@ -379,10 +452,10 @@ not quite) nonstationary.</p>
 <td align="left">3</td>
 <td align="left">NA</td>
 <td align="left">-1</td>
-<td align="right">0.010</td>
-<td align="right">0.009</td>
-<td align="right">1.093</td>
-<td align="right">0.274</td>
+<td align="right">0.320</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td align="left">1</td>
@@ -391,10 +464,10 @@ not quite) nonstationary.</p>
 <td align="left">4</td>
 <td align="left">NA</td>
 <td align="left">-2</td>
-<td align="right">0.978</td>
-<td align="right">0.010</td>
-<td align="right">100.558</td>
-<td align="right">0.000</td>
+<td align="right">0.677</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="odd">
 <td align="left">1</td>
@@ -403,10 +476,10 @@ not quite) nonstationary.</p>
 <td align="left">5</td>
 <td align="left">NA</td>
 <td align="left">-1</td>
-<td align="right">1.685</td>
-<td align="right">0.113</td>
-<td align="right">14.978</td>
-<td align="right">0.000</td>
+<td align="right">0.521</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td align="left">1</td>
@@ -415,10 +488,10 @@ not quite) nonstationary.</p>
 <td align="left">6</td>
 <td align="left">NA</td>
 <td align="left">-2</td>
-<td align="right">-0.688</td>
-<td align="right">0.113</td>
-<td align="right">-6.108</td>
-<td align="right">0.000</td>
+<td align="right">0.493</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="odd">
 <td align="left">2</td>
@@ -427,10 +500,10 @@ not quite) nonstationary.</p>
 <td align="left">7</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.575</td>
-<td align="right">0.041</td>
-<td align="right">14.158</td>
-<td align="right">0.000</td>
+<td align="right">0.445</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="even">
 <td align="left">2</td>
@@ -439,10 +512,10 @@ not quite) nonstationary.</p>
 <td align="left">8</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.077</td>
-<td align="right">0.023</td>
-<td align="right">3.421</td>
-<td align="right">0.001</td>
+<td align="right">0.235</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 <tr class="odd">
 <td align="left">2</td>
@@ -451,26 +524,26 @@ not quite) nonstationary.</p>
 <td align="left">9</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.232</td>
-<td align="right">0.029</td>
-<td align="right">7.977</td>
-<td align="right">0.000</td>
+<td align="right">0.666</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
+<td align="right">NaN</td>
 </tr>
 </tbody>
 </table>
 <p>We can use AIC to compare these two models. This comparison suggests
 that spatial adjancency is not a parsimonious way to describe
 correlations among time-series.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># AIC for unconnected time-series</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">mytiny0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 49086.47</span></span>
 <span><span class="co"># AIC for SAR spatial variation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">mytiny</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 49755.91</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 51825.84</span></span></code></pre></div>
 <p>Finally, we can plot observations and predictions for the selected
 model</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compile long-form dataframe of observations and predictions</span></span>
 <span><span class="va">Resid</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Species'</span>,<span class="st">'Year'</span>,<span class="st">'Region'</span>,<span class="st">'Biomass_nozeros'</span><span class="op">)</span><span class="op">]</span>, <span class="st">"Which"</span><span class="op">=</span><span class="st">"Obs"</span><span class="op">)</span>,</span>
 <span>               <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Species'</span>,<span class="st">'Year'</span>,<span class="st">'Region'</span><span class="op">)</span><span class="op">]</span>, <span class="st">"Biomass_nozeros"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mytiny0</span>,<span class="va">Data</span><span class="op">)</span>, <span class="st">"Which"</span><span class="op">=</span><span class="st">"Pred"</span><span class="op">)</span> <span class="op">)</span></span>
@@ -481,7 +554,7 @@ model</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span>, cols<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Species</span><span class="op">)</span>, scales<span class="op">=</span><span class="st">"free"</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>trans<span class="op">=</span><span class="st">'log'</span><span class="op">)</span>  <span class="co">#</span></span></code></pre></div>
-<p><img src="simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
+<p><img src="simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
   </main>
 </div>
 

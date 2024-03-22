@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -224,7 +224,7 @@ response for each manifest variable:</p>
 <span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
 <span>           spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>           family <span class="op">=</span> <span class="fu"><a href="../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>           family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>           variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"f1"</span>, <span class="st">"f2"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_c</span> <span class="op">)</span>,</span>
 <span>           space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>,</span>
 <span>           variable_column <span class="op">=</span> <span class="st">"species"</span>,</span>
@@ -284,10 +284,10 @@ response for each manifest variable:</p>
 <span><span class="co">#&gt; log_sigma -0.52205331 0.06761637</span></span>
 <span><span class="co">#&gt; log_sigma  0.21851154 0.13313019</span></span>
 <span><span class="co">#&gt; log_kappa -0.26761196 0.21030826</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.002233932 </span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.00223394 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $run_time</span></span>
-<span><span class="co">#&gt; Time difference of 1.444743 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 2.064242 secs</span></span></code></pre></div>
 <p>We can compare the true loadings (rotated to optimize
 comparison):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -425,7 +425,7 @@ variation is also captured:</p>
 <span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
 <span>           spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>           family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"obs"</span><span class="op">=</span><span class="fu"><a href="../reference/families.html">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>           family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"obs"</span><span class="op">=</span><span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
 <span>           variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"f1"</span>, <span class="st">"f2"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_c</span> <span class="op">)</span>,</span>
 <span>           space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>,</span>
 <span>           variable_column <span class="op">=</span> <span class="st">"species"</span>,</span>
@@ -438,8 +438,7 @@ variation is also captured:</p>
 <span><span class="va">Lhat_cf</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">lower.tri</a></span><span class="op">(</span><span class="va">Lhat_cf</span>,diag<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">sdrep</span>, what<span class="op">=</span><span class="st">"Estimate"</span><span class="op">)</span><span class="op">$</span><span class="va">theta_z</span></span>
 <span><span class="co">#&gt; Warning in Lhat_cf[lower.tri(Lhat_cf, diag = TRUE)] = as.list(out$sdrep, :</span></span>
 <span><span class="co">#&gt; number of items to replace is not a multiple of replacement length</span></span>
-<span><span class="va">Lhat_cf</span> <span class="op">=</span> <span class="fu"><a href="../reference/rotate_pca.html">rotate_pca</a></span><span class="op">(</span> L_tf<span class="op">=</span><span class="va">Lhat_cf</span>, order<span class="op">=</span><span class="st">"decreasing"</span> <span class="op">)</span><span class="op">$</span><span class="va">L_tf</span></span>
-<span><span class="co">#&gt; Warning in sqrt(Eigen$values): NaNs produced</span></span></code></pre></div>
+<span><span class="va">Lhat_cf</span> <span class="op">=</span> <span class="fu"><a href="../reference/rotate_pca.html">rotate_pca</a></span><span class="op">(</span> L_tf<span class="op">=</span><span class="va">Lhat_cf</span>, order<span class="op">=</span><span class="st">"decreasing"</span> <span class="op">)</span><span class="op">$</span><span class="va">L_tf</span></span></code></pre></div>
 <p>Where we can again compared the estimated and true loadings
 matrices:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">

@@ -1,4 +1,4 @@
-pandoc: 3.1.1
+pandoc: 3.1.11
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
@@ -7,10 +7,10 @@ articles:
   simultaneous_autoregressive_process: simultaneous_autoregressive_process.html
   spatial: spatial.html
   spatial_factor_analysis: spatial_factor_analysis.html
+  VAST: web_only/VAST.html
   age_composition_expansion: web_only/age_composition_expansion.html
   condition: web_only/condition.html
   empirical_orthogonal_functions: web_only/empirical_orthogonal_functions.html
   stream_networks: web_only/stream_networks.html
-  VAST: web_only/VAST.html
-last_built: 2024-03-06T21:09Z
+last_built: 2024-03-22T15:24Z
 

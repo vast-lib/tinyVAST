@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,11 @@
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
+    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
     <a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a>
     <a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a>
     <a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a>
     <a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a>
-    <a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -100,7 +100,8 @@ Thorson</h4>
 <p><code>tinyVAST</code> is an R package for fitting vector
 autoregressive spatio-temporal (VAST) models using a minimal and
 user-friendly interface. We here show how it can fit spatial
-autoregressive model</p>
+autoregressive model. We first simulate a spatial random field and a
+confounder variable, and simulate data from this simulated process.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate a 2D AR1 spatial process with a cyclic confounder w</span></span>
 <span><span class="va">n_x</span> <span class="op">=</span> <span class="va">n_y</span> <span class="op">=</span> <span class="fl">25</span></span>
@@ -116,23 +117,30 @@ autoregressive model</p>
 <span></span>
 <span><span class="co"># Add columns for multivariate and temporal dimensions</span></span>
 <span><span class="va">Data</span><span class="op">$</span><span class="va">var</span> <span class="op">=</span> <span class="st">"n"</span></span>
-<span><span class="va">Data</span><span class="op">$</span><span class="va">time</span> <span class="op">=</span> <span class="fl">2020</span></span>
+<span><span class="va">Data</span><span class="op">$</span><span class="va">time</span> <span class="op">=</span> <span class="fl">2020</span></span></code></pre></div>
+<p>We next construct a triangulated mesh that represents our continuous
+spatial domain</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># make mesh</span></span>
+<span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span>, cutoff <span class="op">=</span> <span class="fl">2</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># make mesh</span></span>
-<span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span>, n<span class="op">=</span><span class="fl">100</span> <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># fit model</span></span>
+<span><span class="co"># Plot it</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mesh</span><span class="op">)</span></span></code></pre></div>
+<p><img src="spatial_files/figure-html/unnamed-chunk-3-1.png" width="576"></p>
+<p>Finally, we can fit these data using <code>tinyVAST</code></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># fit model</span></span>
 <span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span>,</span>
 <span>           spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>           control <span class="op">=</span> <span class="fu"><a href="../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span>gmrf<span class="op">=</span><span class="st">"proj"</span><span class="op">)</span>,</span>
+<span>           control <span class="op">=</span> <span class="fu"><a href="../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span>getsd<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>           sem <span class="op">=</span> <span class="st">""</span> <span class="op">)</span></span></code></pre></div>
 <p>We can then calculate the area-weighted total abundance:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predicted sample-weighted total</span></span>
 <span><span class="fu"><a href="../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">out</span>, newdata <span class="op">=</span> <span class="va">out</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
-<span><span class="co">#&gt;          -104.15032            25.99485          -104.15032                  NA</span></span>
+<span><span class="co">#&gt;          -104.15036            29.90545          -104.15036                  NA</span></span>
 <span><span class="co"># integrate_output(out, apply.epsilon=TRUE )</span></span>
 <span><span class="co"># predict(out)</span></span>
 <span></span>
@@ -143,7 +151,7 @@ autoregressive model</p>
 <h2 id="percent-deviance-explained">Percent deviance explained<a class="anchor" aria-label="anchor" href="#percent-deviance-explained"></a>
 </h2>
 <p>We can compute deviance residuals and percent-deviance explained:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">R1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">out</span>, type<span class="op">=</span><span class="st">"deviance"</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># tinyVAST null model with just a single intercept</span></span>
@@ -153,11 +161,14 @@ autoregressive model</p>
 <span></span>
 <span><span class="co"># Percent deviance explained</span></span>
 <span><span class="fl">1</span> <span class="op">-</span> <span class="va">R1</span><span class="op">/</span><span class="va">R0</span></span>
-<span><span class="co">#&gt; [1] 0.7063608</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.5051624</span></span></code></pre></div>
 <p>We can then compare this with the PDE reported by
 <code>mgcv</code></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mygam</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span> <span class="va">n</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span>, data<span class="op">=</span><span class="va">Data</span> <span class="op">)</span> <span class="co">#</span></span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">start_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">mygam</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span> <span class="va">n</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span>, data<span class="op">=</span><span class="va">Data</span> <span class="op">)</span> <span class="co">#</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span>
+<span><span class="co">#&gt; Time difference of 0.0454061 secs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mygam</span><span class="op">)</span><span class="op">$</span><span class="va">dev.expl</span></span>
 <span><span class="co">#&gt; [1] 0.3517756</span></span></code></pre></div>
 <p>where this comparison shows that using the SPDE method in tinyVAST
@@ -167,42 +178,38 @@ reduced rank of the spline basis expansion, and the better match for the
 Matern function (in the SPDE method) relative to the true (simulated)
 exponential semivariogram.</p>
 <p>It is then easy to confirm that mgcv and tinyVAST give (essentially)
-identical PDE when excluding the spatial term from each.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+identical PDE when switching tinyVAST to use the same bivariate spline
+for space.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_reduced</span> <span class="op">=</span> <span class="fu"><a href="../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>                        formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">)</span></span>
+<span>                        formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">R1_reduced</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">out_reduced</span>, type<span class="op">=</span><span class="st">"deviance"</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">)</span></span>
 <span><span class="fl">1</span> <span class="op">-</span> <span class="va">R1_reduced</span><span class="op">/</span><span class="va">R0</span></span>
-<span><span class="co">#&gt; [1] 0.1721612</span></span>
-<span></span>
-<span><span class="co">#</span></span>
-<span><span class="va">mygam_reduced</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span> <span class="va">n</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span>, data<span class="op">=</span><span class="va">Data</span> <span class="op">)</span> <span class="co">#</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mygam_reduced</span><span class="op">)</span><span class="op">$</span><span class="va">dev.expl</span></span>
-<span><span class="co">#&gt; [1] 0.1713967</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.3497174</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualize-spatial-response">Visualize spatial response<a class="anchor" aria-label="anchor" href="#visualize-spatial-response"></a>
 </h2>
 <p><code>tinyVAST</code> then has a standard <code>predict</code>
 function:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">out</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x<span class="op">=</span><span class="fl">1</span>, y<span class="op">=</span><span class="fl">1</span>, time<span class="op">=</span><span class="fl">1</span>, w<span class="op">=</span><span class="fl">1</span>, var<span class="op">=</span><span class="st">"n"</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.2978245</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.3649899</span></span></code></pre></div>
 <p>and this is used to compute the spatial response</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Prediction grid</span></span>
 <span><span class="va">pred</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">n_x</span>,len<span class="op">=</span><span class="fl">51</span><span class="op">)</span>,</span>
 <span>              <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">n_y</span>,len<span class="op">=</span><span class="fl">51</span><span class="op">)</span>,</span>
 <span>              FUN<span class="op">=</span>\<span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">out</span>,newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>,y<span class="op">=</span><span class="va">y</span>,w<span class="op">=</span><span class="fl">1</span>,time<span class="op">=</span><span class="fl">1</span>,var<span class="op">=</span><span class="st">"n"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span> x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">n_x</span>,len<span class="op">=</span><span class="fl">51</span><span class="op">)</span>, y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">n_y</span>,len<span class="op">=</span><span class="fl">51</span><span class="op">)</span>, z<span class="op">=</span><span class="va">pred</span>, main<span class="op">=</span><span class="st">"Predicted response"</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="spatial_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p><img src="spatial_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># True value</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span> x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span>, z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">z</span>,ncol<span class="op">=</span><span class="va">n_y</span><span class="op">)</span>, main<span class="op">=</span><span class="st">"True response"</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="spatial_files/figure-html/unnamed-chunk-8-2.png" width="576"></p>
+<p><img src="spatial_files/figure-html/unnamed-chunk-10-2.png" width="576"></p>
 <p>We can also compute the marginal effect of the cyclic confounder</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bgreenwell/pdp" class="external-link">pdp</a></span><span class="op">)</span>  <span class="co"># approx = TRUE gives effects for average of other covariates</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lattice.r-forge.r-project.org/" class="external-link">lattice</a></span><span class="op">)</span></span>
 <span><span class="co">#library(visreg)</span></span>
@@ -216,7 +223,7 @@ function:</p>
 <span></span>
 <span><span class="co"># Lattice plots as default option</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">Partial</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="spatial_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
+<p><img src="spatial_files/figure-html/unnamed-chunk-11-1.png" width="576"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
