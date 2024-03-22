@@ -26,7 +26,7 @@ A list with elements common to standard R family objects including \code{family}
 elements \code{delta} (logical) and \code{type} (standard vs. Poisson-link).
 }
 \description{
-Additional families compatible with \code{\link[=sdmTMB]{sdmTMB()}}.
+Additional families compatible with \code{\link[=tinyVAST]{tinyVAST()}}.
 }
 \examples{
 delta_lognormal()

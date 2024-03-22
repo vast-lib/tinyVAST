@@ -69,9 +69,9 @@ mytinyVAST
 #> $opt
 #> $opt$par
 #>     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j 
-#> -0.08323603 -0.13549103 -0.10579218 -0.14499111 -0.37823867 -0.21633304 -0.41489958 -0.67168422 -0.49463135 -0.13968722  0.14836185 -0.21516692 -0.20120062  0.16887042 
+#> -0.08323604 -0.13549104 -0.10579217 -0.14499114 -0.37823869 -0.21633307 -0.41489959 -0.67168423 -0.49463135 -0.13968720  0.14836187 -0.21516693 -0.20120058  0.16887045 
 #>     alpha_j      beta_z      beta_z   log_sigma   log_sigma   log_kappa 
-#>  0.30040122  0.81229113  0.40988915 -0.64868475  0.04394543  0.07228544 
+#>  0.30040122  0.81229112  0.40988915 -0.64868475  0.04394543  0.07228542 
 #> 
 #> $opt$objective
 #> [1] 1717.689
@@ -93,30 +93,30 @@ mytinyVAST
 #> $sdrep
 #> sdreport(.) result
 #>              Estimate Std. Error
-#> alpha_j   -0.08323603 0.15196456
-#> alpha_j   -0.13549103 0.18670340
-#> alpha_j   -0.10579218 0.20529851
-#> alpha_j   -0.14499111 0.21780791
-#> alpha_j   -0.37823867 0.22691800
-#> alpha_j   -0.21633304 0.23026450
-#> alpha_j   -0.41489958 0.23456777
-#> alpha_j   -0.67168422 0.23833635
+#> alpha_j   -0.08323604 0.15196456
+#> alpha_j   -0.13549104 0.18670340
+#> alpha_j   -0.10579217 0.20529851
+#> alpha_j   -0.14499114 0.21780791
+#> alpha_j   -0.37823869 0.22691800
+#> alpha_j   -0.21633307 0.23026450
+#> alpha_j   -0.41489959 0.23456777
+#> alpha_j   -0.67168423 0.23833635
 #> alpha_j   -0.49463135 0.23869331
-#> alpha_j   -0.13968722 0.23733095
-#> alpha_j    0.14836185 0.23640201
-#> alpha_j   -0.21516692 0.23873590
-#> alpha_j   -0.20120062 0.23979214
-#> alpha_j    0.16887042 0.23708655
+#> alpha_j   -0.13968720 0.23733095
+#> alpha_j    0.14836187 0.23640201
+#> alpha_j   -0.21516693 0.23873590
+#> alpha_j   -0.20120058 0.23979214
+#> alpha_j    0.16887045 0.23708655
 #> alpha_j    0.30040122 0.23660035
-#> beta_z     0.81229113 0.03708631
+#> beta_z     0.81229112 0.03708631
 #> beta_z     0.40988915 0.03291043
 #> log_sigma -0.64868475 0.05422114
 #> log_sigma  0.04394543 0.07275797
-#> log_kappa  0.07228544 0.10755269
-#> Maximum gradient component: 0.00633756 
+#> log_kappa  0.07228542 0.10755269
+#> Maximum gradient component: 0.006315957 
 #> 
 #> $run_time
-#> Time difference of 21.55907 secs
+#> Time difference of 19.30986 secs
 ```
 The estimated values for `beta_z` then correspond to the simulated value for `rho` and `spatial_sd`.
 
@@ -156,6 +156,22 @@ plot( x=Data$z, y=Data$z_hat )
 
 ![plot of chunk VAST-scatterplot](figure/VAST-scatterplot-1.png)
 
+We can also use the `DHARMa` package to visualize simulation residuals:
+
+```r
+# simulate new data conditional on fixed and random effects
+y_ir = replicate( n = 100, 
+           expr = mytinyVAST$obj$simulate()$y_i )
+
+#
+res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
+                            observedResponse = Data$n, 
+                            fittedPredictedResponse = fitted(mytinyVAST) )
+plot(res)
+```
+
+![plot of chunk VAST-DHARMa](figure/VAST-DHARMa-1.png)
+
 We can then calculate the area-weighted total abundance and compare it with its true value:
 
 ```r
@@ -163,9 +179,9 @@ We can then calculate the area-weighted total abundance and compare it with its 
 (Est = sapply( seq_len(n_t),
    FUN=\(t) integrate_output(mytinyVAST, newdata=subset(Data,time==t)) ))
 #>                           [,1]       [,2]       [,3]       [,4]      [,5]       [,6]      [,7]      [,8]      [,9]      [,10]     [,11]      [,12]     [,13]     [,14]
-#> Estimate             97.164903  96.643634  98.362457 101.517620 84.760587  97.538111 77.520820 59.565797 75.752785 113.562127 159.66734 120.156811 137.80745 192.64174
-#> Std. Error            7.194683   7.216494   7.309312   7.572241  6.643419   7.406226  6.207919  5.090533  6.144821   8.454587  11.09945   9.107853  10.39448  13.68245
-#> Est. (bias.correct) 102.324275 102.850496 105.043003 108.373177 90.604659 104.258111 83.102278 64.065173 81.166865 120.921460 169.20673 127.519261 145.78500 203.55063
+#> Estimate             97.164902  96.643634  98.362458 101.517620 84.760587  97.538110 77.520820 59.565797 75.752785 113.562128 159.66734 120.156809 137.80745 192.64174
+#> Std. Error            7.194683   7.216494   7.309313   7.572241  6.643419   7.406226  6.207919  5.090533  6.144821   8.454587  11.09945   9.107852  10.39448  13.68245
+#> Est. (bias.correct) 102.324275 102.850496 105.043004 108.373176 90.604659 104.258111 83.102278 64.065173 81.166864 120.921460 169.20673 127.519259 145.78500 203.55063
 #> Std. (bias.correct)         NA         NA         NA         NA        NA         NA        NA        NA        NA         NA        NA         NA        NA        NA
 #>                         [,15]
 #> Estimate            187.86973
@@ -185,6 +201,7 @@ Index$high = Index[,'Est...bias.correct.'] + 1.96*Index[,'Std..Error']
 
 #
 library(ggplot2)
+#> Warning: package 'ggplot2' was built under R version 4.3.3
 ggplot(Index, aes(time, Estimate)) +
   geom_ribbon(aes(ymin = low,
                   ymax = high),    # shadowing cnf intervals
@@ -230,9 +247,9 @@ myVAST
 #> fit_model(.) result
 #> $par
 #>       beta1_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft 
-#>     -0.5893007      0.5155656      0.4645813      0.4905492      0.4681547      0.2299517      0.3966665      0.1932249     -0.0707245      0.1168034      0.4710110 
+#>    -0.58930073     0.51556564     0.46458138     0.49054919     0.46815476     0.22995172     0.39666650     0.19322490    -0.07072448     0.11680345     0.47101097 
 #>       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft   L_epsilon2_z      logkappa2 Epsilon_rho2_f      logSigmaM 
-#>      0.7713592      0.4083181      0.4283945      0.7999825      0.9117057      0.4926612     -4.3006228      0.8503593      0.1042231 
+#>     0.77135921     0.40831814     0.42839450     0.79998255     0.91170568     0.49266123    -4.30062279     0.85035927     0.10422305 
 #> 
 #> $objective
 #> [1] 1738.337
@@ -245,10 +262,10 @@ myVAST
 #>       12        7 
 #> 
 #> $time_for_MLE
-#> Time difference of 1.146127 secs
+#> Time difference of 0.9828639 secs
 #> 
 #> $max_gradient
-#> [1] 0.0005695924
+#> [1] 0.0005696325
 #> 
 #> $Convergence_check
 #> [1] "The model is likely not converged"
@@ -261,58 +278,58 @@ myVAST
 #> [1] 3516.675
 #> 
 #> $diagnostics
-#>             Param starting_value     Lower        MLE     Upper final_gradient
-#> 1        beta1_ft    -0.58930212      -Inf -0.5893007       Inf  -2.536713e-04
-#> 2        beta2_ft     0.51556567      -Inf  0.5155656       Inf   6.146817e-06
-#> 3        beta2_ft     0.46458079      -Inf  0.4645813       Inf  -1.687555e-05
-#> 4        beta2_ft     0.49055250      -Inf  0.4905492       Inf   2.253267e-04
-#> 5        beta2_ft     0.46815185      -Inf  0.4681547       Inf  -2.148305e-04
-#> 6        beta2_ft     0.22994933      -Inf  0.2299517       Inf  -1.963653e-04
-#> 7        beta2_ft     0.39666756      -Inf  0.3966665       Inf   7.340152e-05
-#> 8        beta2_ft     0.19322633      -Inf  0.1932249       Inf   1.265007e-04
-#> 9        beta2_ft    -0.07072355      -Inf -0.0707245       Inf   8.101025e-05
-#> 10       beta2_ft     0.11680235      -Inf  0.1168034       Inf  -9.054017e-05
-#> 11       beta2_ft     0.47100949      -Inf  0.4710110       Inf  -1.182830e-04
-#> 12       beta2_ft     0.77135980      -Inf  0.7713592       Inf   3.358385e-05
-#> 13       beta2_ft     0.40831860      -Inf  0.4083181       Inf   3.654143e-05
-#> 14       beta2_ft     0.42839431      -Inf  0.4283945       Inf  -2.791045e-05
-#> 15       beta2_ft     0.79997984      -Inf  0.7999825       Inf  -1.679115e-04
-#> 16       beta2_ft     0.91170839      -Inf  0.9117057       Inf   1.978860e-04
-#> 17   L_epsilon2_z     0.49266060      -Inf  0.4926612       Inf  -3.405162e-04
-#> 18      logkappa2    -4.30062176 -6.214608 -4.3006228 -3.565449   1.067025e-04
-#> 19 Epsilon_rho2_f     0.85035619 -0.990000  0.8503593  0.990000  -5.695924e-04
-#> 20      logSigmaM     0.10422369      -Inf  0.1042231 10.000000   8.634076e-05
+#>             Param starting_value     Lower         MLE     Upper final_gradient
+#> 1        beta1_ft    -0.58930212      -Inf -0.58930073       Inf  -2.567181e-04
+#> 2        beta2_ft     0.51556572      -Inf  0.51556564       Inf   7.261656e-06
+#> 3        beta2_ft     0.46458084      -Inf  0.46458138       Inf  -1.594548e-05
+#> 4        beta2_ft     0.49055254      -Inf  0.49054919       Inf   2.243884e-04
+#> 5        beta2_ft     0.46815189      -Inf  0.46815476       Inf  -2.138462e-04
+#> 6        beta2_ft     0.22994937      -Inf  0.22995172       Inf  -1.954432e-04
+#> 7        beta2_ft     0.39666757      -Inf  0.39666650       Inf   7.243535e-05
+#> 8        beta2_ft     0.19322636      -Inf  0.19322490       Inf   1.265298e-04
+#> 9        beta2_ft    -0.07072352      -Inf -0.07072448       Inf   8.136321e-05
+#> 10       beta2_ft     0.11680233      -Inf  0.11680345       Inf  -9.143842e-05
+#> 11       beta2_ft     0.47100948      -Inf  0.47101097       Inf  -1.191484e-04
+#> 12       beta2_ft     0.77135985      -Inf  0.77135921       Inf   3.399154e-05
+#> 13       beta2_ft     0.40831866      -Inf  0.40831814       Inf   3.723723e-05
+#> 14       beta2_ft     0.42839437      -Inf  0.42839450       Inf  -2.700504e-05
+#> 15       beta2_ft     0.79997987      -Inf  0.79998255       Inf  -1.674651e-04
+#> 16       beta2_ft     0.91170842      -Inf  0.91170568       Inf   1.970479e-04
+#> 17   L_epsilon2_z     0.49266062      -Inf  0.49266123       Inf  -3.367341e-04
+#> 18      logkappa2    -4.30062172 -6.214608 -4.30062279 -3.565449   1.066371e-04
+#> 19 Epsilon_rho2_f     0.85035618 -0.990000  0.85035927  0.990000  -5.696325e-04
+#> 20      logSigmaM     0.10422369      -Inf  0.10422305 10.000000   8.907767e-05
 #> 
 #> $SD
 #> sdreport(.) result
-#>                  Estimate Std. Error
-#> beta1_ft       -0.5893007 0.05080467
-#> beta2_ft        0.5155656 0.14414517
-#> beta2_ft        0.4645813 0.17371753
-#> beta2_ft        0.4905492 0.19200615
-#> beta2_ft        0.4681547 0.20433941
-#> beta2_ft        0.2299517 0.21476799
-#> beta2_ft        0.3966665 0.21934844
-#> beta2_ft        0.1932249 0.22481460
-#> beta2_ft       -0.0707245 0.22973075
-#> beta2_ft        0.1168034 0.23059099
-#> beta2_ft        0.4710110 0.22964743
-#> beta2_ft        0.7713592 0.22895295
-#> beta2_ft        0.4083181 0.23199191
-#> beta2_ft        0.4283945 0.23305157
-#> beta2_ft        0.7999825 0.23091833
-#> beta2_ft        0.9117057 0.23072494
-#> L_epsilon2_z    0.4926612 0.04727208
-#> logkappa2      -4.3006228 0.13652887
-#> Epsilon_rho2_f  0.8503593 0.03527714
-#> logSigmaM       0.1042231 0.07108160
-#> Maximum gradient component: 0.0005695924 
+#>                   Estimate Std. Error
+#> beta1_ft       -0.58930073 0.05080467
+#> beta2_ft        0.51556564 0.14414517
+#> beta2_ft        0.46458138 0.17371753
+#> beta2_ft        0.49054919 0.19200615
+#> beta2_ft        0.46815476 0.20433941
+#> beta2_ft        0.22995172 0.21476798
+#> beta2_ft        0.39666650 0.21934844
+#> beta2_ft        0.19322490 0.22481460
+#> beta2_ft       -0.07072448 0.22973074
+#> beta2_ft        0.11680345 0.23059098
+#> beta2_ft        0.47101097 0.22964742
+#> beta2_ft        0.77135921 0.22895295
+#> beta2_ft        0.40831814 0.23199191
+#> beta2_ft        0.42839450 0.23305156
+#> beta2_ft        0.79998255 0.23091833
+#> beta2_ft        0.91170568 0.23072494
+#> L_epsilon2_z    0.49266123 0.04727208
+#> logkappa2      -4.30062279 0.13652887
+#> Epsilon_rho2_f  0.85035927 0.03527714
+#> logSigmaM       0.10422305 0.07108160
+#> Maximum gradient component: 0.0005696325 
 #> 
 #> $time_for_sdreport
-#> Time difference of 4.772874 secs
+#> Time difference of 4.135285 secs
 #> 
 #> $time_for_run
-#> Time difference of 22.12857 secs
+#> Time difference of 19.02913 secs
 ```
 
 Or with sdmTMB
@@ -320,6 +337,7 @@ Or with sdmTMB
 
 ```r
 library(sdmTMB)
+#> Warning: package 'sdmTMB' was built under R version 4.3.3
 mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
 start_time = Sys.time()
@@ -349,9 +367,9 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 |         | run times (sec.)|
 |:--------|----------------:|
-|tinyVAST |             21.6|
-|VAST     |             24.2|
-|sdmTMB   |             21.0|
+|tinyVAST |             19.3|
+|VAST     |             22.6|
+|sdmTMB   |             18.1|
 
 
 
@@ -362,68 +380,48 @@ We can also fit these data using a delta model
 
 ```r
 # fit model
-mydelta = tinyVAST( data = Data,
+mydelta2 = tinyVAST( data = Data,
                formula = n ~ 1,
-               delta_options = list(delta_formula = ~ 0 + factor(time)),
-               delta_dsem = "logn -> logn, 1, rho",
-               family = delta_lognormal(),
+               delta_options = list(
+                 delta_formula = ~ 0 + factor(time),
+                 delta_dsem = "logn -> logn, 1, rho"),
+               family = delta_lognormal(type="poisson-link"),
                spatial_graph = mesh )
 
 mydelta
-#> $call
-#> tinyVAST(formula = n ~ 1, data = Data, family = delta_lognormal(), 
-#>     spatial_graph = mesh, delta_options = list(delta_formula = ~0 + 
-#>         factor(time)), delta_dsem = "logn -> logn, 1, rho")
-#> 
-#> $opt
-#> $opt$par
-#>     alpha_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j    alpha2_j 
-#>  3.03202265  0.44672872  0.41133136  0.50538800  0.36948863  0.07255043  0.33370219  0.12528532 -0.13606008  0.23483809  0.44215395  0.74139997  0.53250764  0.28655618 
-#>    alpha2_j    alpha2_j   log_sigma 
-#>  0.79138930  0.98368567  0.25650797 
-#> 
-#> $opt$objective
-#> [1] 2069.593
-#> 
-#> $opt$convergence
-#> [1] 0
-#> 
-#> $opt$iterations
-#> [1] 39
-#> 
-#> $opt$evaluations
-#> function gradient 
-#>       62       40 
-#> 
-#> $opt$message
-#> [1] "relative convergence (4)"
-#> 
-#> 
-#> $sdrep
-#> sdreport(.) result
-#>              Estimate Std. Error
-#> alpha_j    3.03202265 0.12325408
-#> alpha2_j   0.44672872 0.13555087
-#> alpha2_j   0.41133136 0.13488757
-#> alpha2_j   0.50538800 0.13488757
-#> alpha2_j   0.36948863 0.13423476
-#> alpha2_j   0.07255043 0.13423466
-#> alpha2_j   0.33370219 0.13488757
-#> alpha2_j   0.12528532 0.13622468
-#> alpha2_j  -0.13606008 0.13555088
-#> alpha2_j   0.23483809 0.14050804
-#> alpha2_j   0.44215395 0.13690954
-#> alpha2_j   0.74139997 0.13555086
-#> alpha2_j   0.53250764 0.13690945
-#> alpha2_j   0.28655618 0.13903247
-#> alpha2_j   0.79138930 0.13488758
-#> alpha2_j   0.98368567 0.13555086
-#> log_sigma  0.25650797 0.01869247
-#> Maximum gradient component: 0.001393463 
-#> 
-#> $run_time
-#> Time difference of 0.03579116 secs
+#> Error in eval(expr, envir, enclos): object 'mydelta' not found
 ```
+
+And we can again use the `DHARMa` package to visualize simulation residuals:
+
+```r
+# simulate new data conditional on fixed and random effects
+y_ir = replicate( n = 100, 
+           expr = mydelta2$obj$simulate()$y_i )
+
+#
+res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
+                            observedResponse = Data$n, 
+                            fittedPredictedResponse = fitted(mydelta2) )
+plot(res)
+```
+
+![plot of chunk delta-DHARMa](figure/delta-DHARMa-1.png)
+
+We can then use AIC to compare the fit of the delta-model and Tweedie distribution:
+
+```r
+knitr::kable( c("Tweedie"=AIC(mytinyVAST),"delta-lognormal"=AIC(mydelta2)), digits=3)
+```
+
+
+
+|                |        x|
+|:---------------|--------:|
+|Tweedie         | 3475.378|
+|delta-lognormal | 4177.185|
+
+
 
 # Bivariate spatio-temporal autoregressive model
 
@@ -480,20 +478,20 @@ out
 #> $opt
 #> $opt$par
 #>      alpha_j      alpha_j       beta_z       beta_z       beta_z       beta_z       beta_z    log_sigma    log_sigma    log_kappa 
-#> -0.090128407 -0.002000414  0.509529382  0.529236412 -0.200418872 -0.117205376  0.294319076 -0.646266081  0.012846257 -0.669057058 
+#> -0.135067087 -0.050931909  0.537678546  0.471060516 -0.268664645 -0.080655519  0.355720082 -0.675048463  0.004059747 -0.566274472 
 #> 
 #> $opt$objective
-#> [1] 4365.006
+#> [1] 4300.721
 #> 
 #> $opt$convergence
 #> [1] 0
 #> 
 #> $opt$iterations
-#> [1] 52
+#> [1] 45
 #> 
 #> $opt$evaluations
 #> function gradient 
-#>       66       53 
+#>       60       46 
 #> 
 #> $opt$message
 #> [1] "relative convergence (4)"
@@ -502,20 +500,20 @@ out
 #> $sdrep
 #> sdreport(.) result
 #>               Estimate Std. Error
-#> alpha_j   -0.090128407 0.09771149
-#> alpha_j   -0.002000414 0.09611298
-#> beta_z     0.509529382 0.07886506
-#> beta_z     0.529236412 0.07336727
-#> beta_z    -0.200418872 0.08304602
-#> beta_z    -0.117205376 0.07264403
-#> beta_z     0.294319076 0.01800602
-#> log_sigma -0.646266081 0.02660900
-#> log_sigma  0.012846257 0.04964136
-#> log_kappa -0.669057058 0.09746707
-#> Maximum gradient component: 0.004494597 
+#> alpha_j   -0.135067087 0.11243173
+#> alpha_j   -0.050931909 0.09302442
+#> beta_z     0.537678546 0.06461591
+#> beta_z     0.471060516 0.07549660
+#> beta_z    -0.268664645 0.07225850
+#> beta_z    -0.080655519 0.06157438
+#> beta_z     0.355720082 0.01973953
+#> log_sigma -0.675048463 0.02959907
+#> log_sigma  0.004059747 0.04917005
+#> log_kappa -0.566274472 0.09138031
+#> Maximum gradient component: 0.002923767 
 #> 
 #> $run_time
-#> Time difference of 2.364918 mins
+#> Time difference of 2.327756 mins
 ```
 
 The values for `beta_z` again correspond to the specified value for interaction-matrix `B`

@@ -956,6 +956,17 @@ logLik.tinyVAST <- function(object, ...) {
   return(out)
 }
 
+#' Get fitted values from a tinyVAST model
+#'
+#' @param object The fitted tinyVAST model object
+#' @param ... Not used
+#' @importFrom stats fitted
+#' @export
+#' @noRd
+fitted.tinyVAST <- function(object, ...) {
+  predict( object, what="mu_g" )
+}
+
 #' Extract Variance-Covariance Matrix
 #'
 #' extract the covariance of fixed effects, or both fixed and random effects.
