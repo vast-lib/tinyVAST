@@ -156,4 +156,6 @@ out = tinyVAST( data = Data,
 Details section of \code{\link[=make_dsem_ram]{make_dsem_ram()}} for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 
 \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
+
+\code{\link[=summary.tinyVAST]{summary.tinyVAST()}} to visualize parameter estimates related to SEM and DSEM model components
 }
