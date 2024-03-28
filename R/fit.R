@@ -100,6 +100,9 @@
 #' @importFrom Matrix Cholesky solve
 #' @importFrom abind abind
 #'
+#' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
+#' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
+#'
 #' @examples
 #' # Simulate a 2D AR1 spatial process with a cyclic confounder w
 #' n_x = n_y = 25
