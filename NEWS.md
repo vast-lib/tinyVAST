@@ -1,3 +1,7 @@
+# tinyVAST 0.5.0
+
+* Adding vignette showing how to fit multiple data types in an SDM
+
 # tinyVAST 0.4.0
 
 * Adding code for simulation residuals, and examples to vignettes
