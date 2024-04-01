@@ -167,8 +167,9 @@ function( formula,
   }
 
   # Defaults for missing columns of data
+  # character so that make_dsem_ram arg covs has a character
   if( !(variable_column %in% colnames(data)) ){
-    data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,variable_column)))
+    data = data.frame(data, matrix("response", nrow=nrow(data), ncol=1, dimnames=list(NULL,variable_column)))
   }
   if( !(time_column %in% colnames(data)) ){
     data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,time_column)) )

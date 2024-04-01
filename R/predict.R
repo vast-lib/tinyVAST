@@ -181,7 +181,7 @@ function( object,
   # Check newdata for missing variables and/or factors
   pred_set = unique(unlist(sapply( object$internal[c('gam_setup','delta_gam_setup')],
                             FUN=\(x) all.vars(x$pred.formula) ) ))
-  for(pred in pred_set ){
+  for( pred in pred_set ){
     if( !(pred %in% colnames(newdata)) ){
       stop("Missing ", pred, " in newdata")
     }
