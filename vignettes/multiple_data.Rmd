@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/spatial.Rmd"); rmarkdown::render( "vignettes/spatial.Rmd", rmarkdown::pdf_document())
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/multiple_data.Rmd"); rmarkdown::render( "vignettes/multiple_data.Rmd", rmarkdown::pdf_document())
 ```
 
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
@@ -50,7 +50,7 @@ legend( "bottomleft", bty="n",
         fill = rainbow(3) )
 ```
 
-To fit these data, we first define the `family` for each datum.  Critically, we define the cloglog link for the Presence/Absence data, so that the linear predictor is proportional to numerical density for each data type:
+To fit these data, we first define the `family` for each datum.  Critically, we define the cloglog link for the Presence/Absence data, so that the linear predictor is proportional to numerical density for each data type.  See [Gruss and Thorson (2019)](https://doi.org/10.1093/icesjms/fsz075) or [Thorson and Kristensen (2024) Chap-7](https://doi.org/10.1201/9781003410294) for more details
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 #
@@ -77,11 +77,11 @@ formula = Response_variable ~ Data_type + factor(Year) + offset(log(AreaSwept_km
 # make variable column
 red_snapper$var = "logdens"
 
-# 
+# fit using tinyVAST
 fit = tinyVAST( data = red_snapper, 
                 formula = formula,
                 sem = "logdens <-> logdens, sd_space",
-                #dsem = "logdens <-> logdens, 0, sd_spacetime",
+                dsem = "logdens <-> logdens, 0, sd_spacetime",
                 space_columns = c("Lon",'Lat'),
                 spatial_graph = mesh,
                 time_column = "Year",
@@ -98,30 +98,54 @@ sf_grid = st_make_grid( red_snapper_shapefile, cellsize=c(0.2,0.2) )
 sf_grid = st_intersection( sf_grid, red_snapper_shapefile )
 sf_grid = st_make_valid( sf_grid )
 
-#
+# Extract coordinates for grid
 grid_coords = st_coordinates( st_centroid(sf_grid) )
 areas_km2 = st_area( sf_grid ) / 1e6
 
-# Condition in 
-plot_grid = NULL
+# Calcualte log-density for each year and grid-cell
+index = plot_grid = NULL
 for( year in sort(unique(red_snapper$Year)) ){
+  # compile predictive data frame
   newdata = data.frame( "Lat" = grid_coords[,'Y'], 
                         "Lon" = grid_coords[,'X'],
                         "Year" = year,
                         "Data_type" = "Biomass_KG",
                         "AreaSwept_km2" = mean(red_snapper$AreaSwept_km2),
                         "var" = "logdens" )
+  
+  # predict
   log_dens = predict( fit, 
                       newdata = newdata, 
                       what = "p_g")
-  
-  # Plot on map
-  plot_grid = cbind( plot_grid, log_dens )
-}
-colnames(plot_grid) = sort(unique(red_snapper$Year))
+  log_dens = ifelse( log_dens < max(log_dens-log(100)), NA, log_dens )
 
+  # Compile densities
+  plot_grid = cbind( plot_grid, log_dens )
+
+  # Estimate and compile total
+  total = integrate_output( fit, 
+                            newdata = newdata,
+                            area = areas_km2 )
+  index = cbind( index, total[c('Est. (bias.correct)','Std. Error')] )
+  
+}
+colnames(plot_grid) = colnames(index) = sort(unique(red_snapper$Year))
+```
+
+We then plot densities in each year
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Convert to sf and plot
 plot_grid = st_sf( sf_grid, 
                    plot_grid )
 plot( plot_grid,
       border = NA )
+```
+
+Similarly, we can plot the abundance index and standard errors
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+library(ggplot2)
+ggplot( data.frame("Year"=colnames(index),"Est"=index[1,],"SE"=index[2,]) ) + 
+  geom_point( aes(x=Year, y=Est)) + 
+  geom_errorbar( aes(x=Year, ymin=Est-SE, ymax=Est+SE) )
 ```
