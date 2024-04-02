@@ -312,4 +312,69 @@ function( x,
   return( Var_zr )
 }
 
+#' @title
+#' Calculate deviance explained
+#'
+#' @description
+#' \code{deviance_explained} fits a null model, calculates the deviance relative to 
+#'       a saturated model for both the original and the null model, and uses these
+#'       to calculate the proportion of deviance explained.                   
+#'
+#' This implementation conditions upon the maximum likelihood estimate of fixed effects
+#'      and the empirical Bayes ("plug-in") prediction of random effects.  It can 
+#'      be described as "conditional deviance explained". 
+#'
+#' @param x output from `\code{tinyVAST()}`
+#' @param null_formula formula for the null model.  If missing, it uses
+#'        \code{null_formula = response ~ 1}. For multivariate models, it 
+#'        might make sense to use \code{null_formula = response ~ category}
+#' @param null_delta_formula formula for the null model for the delta component.  
+#'        If missing, it uses
+#'        \code{null_formula = response ~ 1}. For multivariate models, it 
+#'        might make sense to use \code{null_delta_formula = response ~ category}
+#'
+#' @export
+deviance_explained <-
+function( x, 
+          null_formula,
+          null_delta_formula = ~ 1 ){
+
+  # null formula
+  if(missing(null_formula)){
+    null_formula = update.formula( old = x$formula, 
+                                   new = . ~ 1 )
+  }
+  
+  # Edit control to save time
+  # Make sure to set calculate_deviance_explained = FALSE to avoid recursion in tinyVAST(.) call
+  control = x$internal$control
+    control$getsd = FALSE
+    control$silent = TRUE
+    control$trace = 0
+    control$verbose = FALSE
+    control$calculate_deviance_explained = FALSE
+  
+  # run null model
+  null_fit = tinyVAST( data = x$data,
+                       formula = null_formula, 
+                       control = control,
+                       family = x$internal$family,
+                       space_columns = x$internal$space_columns,
+                       time_column = x$internal$time_column,
+                       variable_column = x$internal$variable_column,
+                       times = x$internal$times,
+                       variables = x$internal$variables,
+                       delta_options = list( delta_formula = null_delta_formula ),
+                       distribution_column = x$internal$distribution_column) 
+  
+  # Calculate deviance explained
+  devexpl = 1 - x$rep$deviance / null_fit$rep$deviance
+  if( (devexpl<0) | (devexpl>1) ){
+    warning("Problem detected: deviance explained should be between 0 and 1")
+  }
+  
+  # Return
+  return( devexpl )
+}
+
 

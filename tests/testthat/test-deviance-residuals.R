@@ -33,6 +33,40 @@ test_that("deviance residuals for Gamma match glm", {
                 tolerance=1e-3 )
 })
 
+test_that("deviance residuals for lognormal match glm", {
+  skip_on_cran()
+  #skip_on_ci()
+
+  set.seed(101)
+  x = rnorm(100)
+  logmu = 1 + 0.5*x
+  y = rlnorm( n=100, meanlog=logmu, sdlog=0.5 )
+
+  # simulated model
+  mytiny = tinyVAST( y ~ 1 + x,
+            data = data.frame(y=y, x=x),
+            family = lognormal(link = "log") )
+  resid1 = residuals(mytiny, type="deviance")
+
+  # Null model
+  mytiny0 = tinyVAST( y ~ 1,
+            data = data.frame(y=y),
+            family = lognormal(link = "log") )
+  resid0 = residuals(mytiny0, type="deviance")
+
+  #
+  myglm = glm( log(y) ~ 1 + x, family=gaussian(link="identity"))
+  resid2 = residuals( myglm, type="deviance" )
+  expect_equal( as.numeric(resid1), as.numeric(resid2),
+                tolerance=1e-3 )
+
+  # Compare percent-deviance-explained
+  PDEglm = with(summary(myglm), 1 - deviance/null.deviance)
+  PDEtiny = (sum(resid0^2)-sum(resid1^2)) / sum(resid0^2)
+  expect_equal( PDEglm, PDEtiny,
+                tolerance=1e-3 )
+})
+
 test_that("deviance residuals for tweedie match mgcv", {
   skip_on_cran()
   #skip_on_ci()
@@ -132,6 +166,11 @@ test_that("delta-gamma works", {
   myglm2 = glm( y ~ 1 + x,
                 data = subset(data.frame(x=x, y=y),y>0),
                 family = Gamma(link="log") )
+  
+  # relative deviance
+  expect_equal( mytiny$rep$deviance, 
+                as.numeric(myglm1$deviance + myglm2$deviance),
+                tolerance=1e-2 )
 
   # Compare them
   glmpar = c( coef(myglm1), coef(myglm2) )

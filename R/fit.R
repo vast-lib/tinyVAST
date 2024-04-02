@@ -94,11 +94,15 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula binomial poisson
+#'   update.formula binomial poisson predict
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame
 #' @importFrom Matrix Cholesky solve
 #' @importFrom abind abind
+#'
+#' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
+#' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
+#' @seealso [summary.tinyVAST()] to visualize parameter estimates related to SEM and DSEM model components
 #'
 #' @examples
 #' # Simulate a 2D AR1 spatial process with a cyclic confounder w
@@ -163,13 +167,14 @@ function( formula,
   }
 
   # Defaults for missing columns of data
-  if( !(variable_column %in% colnames(data)) ){
-    data = data.frame(data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,variable_column)))
+  # character so that make_dsem_ram arg covs has a character
+  if( isFALSE(variable_column %in% colnames(data)) ){
+    data = data.frame(data, matrix("response", nrow=nrow(data), ncol=1, dimnames=list(NULL,variable_column)))
   }
-  if( !(time_column %in% colnames(data)) ){
+  if( isFALSE(time_column %in% colnames(data)) ){
     data = data.frame( data, matrix(1, nrow=nrow(data), ncol=1, dimnames=list(NULL,time_column)) )
   }
-  if( !(distribution_column %in% colnames(data)) ){
+  if( isFALSE(distribution_column %in% colnames(data)) ){
     if( length(family)>1 ) stop("Must supply `dist` if using multiple `family` options")
     data = data.frame( data, matrix(names(family)[1], nrow=nrow(data), ncol=1, dimnames=list(NULL,distribution_column)) )
   }
@@ -213,7 +218,7 @@ function( formula,
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
     }else if( isTRUE(is.character(dsem)) ){
-      output = make_dsem_ram( dsem, times=times, variables=variables, quiet=!control$verbose, covs=variables )
+      output = make_dsem_ram( dsem, times=times, variables=variables, quiet=isFALSE(control$verbose), covs=variables )
     }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
       output = dsem
     }else{
@@ -230,7 +235,7 @@ function( formula,
       if( any((output$model[,'direction']==2) & (output$model[,2]!=0)) ){
         stop("All two-headed arrows should have lag=0")
       }
-      if( !all(c(output$model[,'first'],output$model[,'second']) %in% variables) ){
+      if( isFALSE(all(c(output$model[,'first'],output$model[,'second']) %in% variables)) ){
         stop("Some variable in `dsem` is not in `tsdata`")
       }
     }
@@ -266,7 +271,7 @@ function( formula,
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
     }else if( isTRUE(is.character(sem)) ){
-      output = make_sem_ram( sem, variables=as.character(variables), quiet=!control$verbose, covs=as.character(variables) )
+      output = make_sem_ram( sem, variables=as.character(variables), quiet=isFALSE(control$verbose), covs=as.character(variables) )
     } else {
       stop("`sem` must be either `NULL` or a character-string")
     }
@@ -675,7 +680,7 @@ function( formula,
     control = control,
     family = family                                       # for `add_predictions`
   )
-  out = structure( list(
+  out = list(
     formula = formula,
     data = data,
     obj = obj,
@@ -687,7 +692,16 @@ function( formula,
     spatial_graph = spatial_graph,
     run_time = Sys.time() - start_time,
     internal = internal
-  ), class="tinyVAST" )
+  )
+
+  # Run deviance_explained()
+  if( isTRUE(control$calculate_deviance_explained) ){
+    out$deviance_explained = deviance_explained( out )
+  }else{
+    out$deviance_explained = "Not run; please use `deviance_explained()`"
+  }
+
+  class(out) = "tinyVAST"
   return(out)
 }
 
@@ -720,6 +734,8 @@ function( formula,
 #' @param estimate_delta0 Estimate a delta model?
 #' @param getJointPrecision whether to get the joint precision matrix.  Passed
 #'        to \code{\link[TMB]{sdreport}}.
+#' @param calculate_deviance_explained whether to calculate proportion of deviance
+#'        explained.  See [deviance_explained()]
 #'
 #' @export
 tinyVASTcontrol <-
@@ -735,7 +751,8 @@ function( nlminb_loops = 1,
           tmb_par = NULL,
           gmrf_parameterization = c("separable","projection"),
           estimate_delta0 = FALSE,
-          getJointPrecision = FALSE ){
+          getJointPrecision = FALSE,
+          calculate_deviance_explained = TRUE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -753,7 +770,8 @@ function( nlminb_loops = 1,
     tmb_par = tmb_par,
     gmrf_parameterization = gmrf_parameterization,
     estimate_delta0 = estimate_delta0,
-    getJointPrecision = getJointPrecision
+    getJointPrecision = getJointPrecision,
+    calculate_deviance_explained = calculate_deviance_explained
   ), class = "tinyVASTcontrol" )
 }
 

@@ -17,7 +17,8 @@ tinyVASTcontrol(
   tmb_par = NULL,
   gmrf_parameterization = c("separable", "projection"),
   estimate_delta0 = FALSE,
-  getJointPrecision = FALSE
+  getJointPrecision = FALSE,
+  calculate_deviance_explained = TRUE
 )
 }
 \arguments{
@@ -58,6 +59,9 @@ allows for rank-deficient covariance.}
 
 \item{getJointPrecision}{whether to get the joint precision matrix.  Passed
 to \code{\link[TMB]{sdreport}}.}
+
+\item{calculate_deviance_explained}{whether to calculate proportion of deviance
+explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 }
 \description{
 Control parameters for tinyVAST

@@ -293,6 +293,7 @@ Type devresid_tweedie( Type y,
 }
 
 // distribution/projection for epsilon
+// deviance = deviance1 + deviance2
 template<class Type>
 Type one_predictor_likelihood( Type &y,
                         Type p,
@@ -334,7 +335,7 @@ Type one_predictor_likelihood( Type &y,
     switch( family ){
       case gaussian_family:
         nll -= dnorm( y, mu, exp(log_sigma_segment(0)), true );
-        devresid = y - p;
+        devresid = y - mu;
         if(isDouble<Type>::value && of->do_simulate){
           y = rnorm( mu, exp(log_sigma_segment(0)) );
         }
@@ -396,7 +397,7 @@ Type two_predictor_likelihood( Type y,
                                vector<Type> log_sigma_segment,
                                int poislink,
                                Type &nll,
-                               Type &devresid,
+                               Type &dev,
                                objective_function<Type>* of ){
   Type mu1, logmu1, mu2, logmu2, log_one_minus_mu1;
 
@@ -429,47 +430,48 @@ Type two_predictor_likelihood( Type y,
     // Distribution
     if( y == 0 ){
       nll -= log_one_minus_mu1;
-      //deviance1_i(i) = -2 * log_one_minus_R1_i(i);
+      dev = -2 * log_one_minus_mu1;
       if(isDouble<Type>::value && of->do_simulate){
         y = rbinom( Type(1), mu1 );
       }
     }
     if( y>0 ){  // Not if-else so y>0 triggered when simulating y>0
       nll -= logmu1;
+      dev = -2 * logmu1;
       //deviance1_i(i) = -2 * log_mu1(i);
       switch( family(1) ){
         case gaussian_family:
           nll -= dnorm( y, mu2, exp(log_sigma_segment(0)), true );
-          //devresid = y - p;
+          dev += pow(y - mu2, 2.0);
           if(isDouble<Type>::value && of->do_simulate){
             y = rnorm( mu2, exp(log_sigma_segment(0)) );
           }
           break;
-        case tweedie_family:
-          nll -= dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
-          //devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
-          if(isDouble<Type>::value && of->do_simulate){
-            y = rtweedie( mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
-          }
-          break;
+        //case tweedie_family:
+        //  nll -= dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+        //  devresid += devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
+        //  if(isDouble<Type>::value && of->do_simulate){
+        //    y = rtweedie( mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
+        //  }
+        //  break;
         case lognormal_family:
           nll -= dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
-          //devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
+          dev += pow( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), 2.0 );
           if(isDouble<Type>::value && of->do_simulate){
             y = exp(rnorm( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
           }
           break;
-        case poisson_family:
-          nll -= dpois( y, mu2, true );
-          // devresid = MUST ADD;
-          if(isDouble<Type>::value && of->do_simulate){
-            y = rpois( mu2 );
-          }
-          break;
+        //case poisson_family:
+        //  nll -= dpois( y, mu2, true );
+        //  devresid += sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
+        //  if(isDouble<Type>::value && of->do_simulate){
+        //    y = rpois( mu2 );
+        //  }
+        //  break;
         // case 4:  // Bernoulli
         case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
           nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)), true );
-          //devresid = sign(y - mu2) * pow(2 * ( (y-mu2)/mu2 - log(y/mu2) ), 0.5);
+          dev += 2 * ( (y-mu2)/mu2 - log(y/mu2) );
           if(isDouble<Type>::value && of->do_simulate){
             y = rgamma( exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)) );
           }
@@ -707,19 +709,25 @@ Type objective_function<Type>::operator() (){
   p2_i += multiply_2d_sparse( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
 
   // Likelihood
+  // relative_deviance != devresid^2 for hurdle model
   vector<Type> mu_i( y_i.size() );
   vector<Type> devresid_i( y_i.size() );
   Type devresid = 0.0;
+  Type deviance = 0.0;
+  Type dev; 
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
     if( components_e(e_i(i))==1 ){
       mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll, devresid, this );
+      deviance += pow( devresid, 2.0 );
+      devresid_i(i) = devresid;
     }
     if( components_e(e_i(i))==2 ){
-      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll, devresid, this );
+      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll, dev, this );
+      deviance += dev; 
+      devresid_i(i) = NAN; 
     }
-    devresid_i(i) = devresid;
   }
 
   // Predictions
@@ -835,6 +843,7 @@ Type objective_function<Type>::operator() (){
   REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
   //REPORT( Q_ss );
   REPORT( devresid_i );
+  REPORT( deviance );
   REPORT( nll );
   SIMULATE{ 
     REPORT(y_i);

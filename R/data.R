@@ -71,3 +71,24 @@ NULL
 #' @usage data(bering_sea_pollock_vast)
 #' @keywords data
 NULL
+
+#' Presence/absence, count, and biomass data for red snapper
+#'
+#' Data used to demonstrate and test analysis using multiple data types
+#'
+#' @name red_snapper
+#' @docType data
+#' @usage data(red_snapper)
+#' @keywords data
+NULL
+
+#' Shapefile for red snapper analysis
+#'
+#' Spatial extent used for red snapper analysis, derived from Chap-7 of \doi{10.1201/9781003410294}
+#'
+#' @name red_snapper_shapefile
+#' @docType data
+#' @usage data(red_snapper_shapefile)
+#' @keywords data
+NULL
+
