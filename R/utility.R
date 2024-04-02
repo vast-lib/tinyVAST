@@ -337,13 +337,9 @@ function( x,
 
   # null formula
   if(missing(null_formula)){
-    # Option-1
-    tmp = as.character(x$internal$gam_setup$formula)[2]
-    tmp = c( tmp, "~ 1" )
-    null_formula = paste(tmp, collapse=" ")
-    null_formula = as.formula(null_formula)
+    null_formula = update.formula( old = x$formula, 
+                                   new = . ~ 1 )
   }
-  null_data = x$data
   
   # Edit control to save time
   # Make sure to set calculate_deviance_explained = FALSE to avoid recursion in tinyVAST(.) call
@@ -353,8 +349,6 @@ function( x,
     control$trace = 0
     control$verbose = FALSE
     control$calculate_deviance_explained = FALSE
-  #control = do.call( what = tinyVASTcontrol,
-  #                   args = control )
   
   # run null model
   null_fit = tinyVAST( data = x$data,
