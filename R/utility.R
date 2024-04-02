@@ -328,6 +328,10 @@ function( x,
 #' @param null_formula formula for the null model.  If missing, it uses
 #'        \code{null_formula = response ~ 1}. For multivariate models, it 
 #'        might make sense to use \code{null_formula = response ~ category}
+#' @param null_delta_formula formula for the null model for the delta component.  
+#'        If missing, it uses
+#'        \code{null_formula = response ~ 1}. For multivariate models, it 
+#'        might make sense to use \code{null_delta_formula = response ~ category}
 #'
 #' @export
 deviance_explained <-

@@ -4,7 +4,7 @@
 \alias{deviance_explained}
 \title{Calculate deviance explained}
 \usage{
-deviance_explained(x, null_formula)
+deviance_explained(x, null_formula, null_delta_formula = ~1)
 }
 \arguments{
 \item{x}{output from \verb{\code{tinyVAST()}}}
@@ -12,9 +12,18 @@ deviance_explained(x, null_formula)
 \item{null_formula}{formula for the null model.  If missing, it uses
 \code{null_formula = response ~ 1}. For multivariate models, it
 might make sense to use \code{null_formula = response ~ category}}
+
+\item{null_delta_formula}{formula for the null model for the delta component.
+If missing, it uses
+\code{null_formula = response ~ 1}. For multivariate models, it
+might make sense to use \code{null_delta_formula = response ~ category}}
 }
 \description{
 \code{deviance_explained} fits a null model, calculates the deviance relative to
 a saturated model for both the original and the null model, and uses these
 to calculate the proportion of deviance explained.
+
+This implementation conditions upon the maximum likelihood estimate of fixed effects
+and the empirical Bayes ("plug-in") prediction of random effects.  It can
+be described as "conditional deviance explained".
 }
