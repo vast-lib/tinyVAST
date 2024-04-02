@@ -12,7 +12,7 @@ a minimal feature-set and a widely used interface."><!-- mathjax --><script src=
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@ a minimal feature-set and a widely used interface."><!-- mathjax --><script src=
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a>
     <a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a>
+    <a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a>
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
@@ -208,6 +209,14 @@ that <code>spatial_graph</code> is then ignored, and the model collapses
 to a standard model using <code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></code>.  To specify a univeriate spatial model,
 the user must specify both <code>spatial_graph</code> and <code>dsem=""</code>, where the latter
 is then parsed to include a single exogenous variance for the single variable</p><table class="table table"><tr><td><strong>Model type</strong></td><td><strong>How to specify</strong></td></tr><tr><td>Generalized additive model</td><td>specify <code>spatial_graph=NULL</code> and <code>dsem=""</code>, and then use <code>formula</code> to specify splines and covariates</td></tr><tr><td>Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models)</td><td>specify <code>spatial_graph=NULL</code> and use <code>dsem</code> to specify interactions among variables and over time</td></tr><tr><td>Univariate spatial model</td><td>specify <code>spatial_graph</code> and <code>dsem=""</code>, where the latter is then parsed to include a single exogenous variance for the single variable</td></tr><tr><td>Multivariate spatial model</td><td>specify <code>spatial_graph</code> and use <code>dsem</code> (without any lagged effects) to specify spatial interactions</td></tr><tr><td>Vector autoregressive spatio-temporal model</td><td>specify <code>spatial_graph</code> and use <code>dsem=""</code> to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of <code>dsem</code> and <code>spatial_graph</code></td></tr></table></div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Details section of <code><a href="make_dsem_ram.html">make_dsem_ram()</a></code> for a summary of the math involved with constructing the DSEM, and <a href="https://doi.org/10.1111/2041-210X.14289" class="external-link">doi:10.1111/2041-210X.14289</a>
+ for more background on math and inference</p>
+<p><a href="https://doi.org/10.48550/arXiv.2401.10193" class="external-link">doi:10.48550/arXiv.2401.10193</a>
+ for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective</p>
+<p><code><a href="summary.tinyVAST.html">summary.tinyVAST()</a></code> to visualize parameter estimates related to SEM and DSEM model components</p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

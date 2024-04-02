@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a>
     <a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a>
+    <a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a>
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
@@ -170,7 +171,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; Maximum gradient component: 3.635293e-05 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $run_time</span></span>
-<span><span class="co">#&gt; Time difference of 0.6716404 secs</span></span>
+<span><span class="co">#&gt; Time difference of 0.6696332 secs</span></span>
 <span></span>
 <span><span class="co"># See summary</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mytiny</span>,<span class="st">"dsem"</span><span class="op">)</span>, digits<span class="op">=</span><span class="fl">3</span> <span class="op">)</span></span></code></pre></div>
@@ -320,6 +321,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span>             tsdata <span class="op">=</span> <span class="va">dsem_data</span>,</span>
 <span>             control <span class="op">=</span> <span class="fu"><a href="https://james-thorson-noaa.github.io/dsem/reference/dsem_control.html" class="external-link">dsem_control</a></span><span class="op">(</span>getsd<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>             family <span class="op">=</span> <span class="va">family</span> <span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in dsem::dsem(sem = dsem, tsdata = dsem_data, control =</span></span>
+<span><span class="co">#&gt; dsem_control(getsd = FALSE), : Some variables in `tsdata` have much higher</span></span>
+<span><span class="co">#&gt; variance than others. Please consider rescaling variables to prevent issues</span></span>
+<span><span class="co">#&gt; with numerical convergence.</span></span>
 <span><span class="co">#&gt; 1 regions found.</span></span>
 <span><span class="co">#&gt; Using 1 threads</span></span>
 <span><span class="co">#&gt; 1 regions found.</span></span>
@@ -329,6 +334,9 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; 2        lnsigma_j                      2  Fixed</span></span>
 <span><span class="co">#&gt; 3             mu_j                      2 Random</span></span>
 <span><span class="co">#&gt; 4             x_tj                    122 Random</span></span>
+<span><span class="co">#&gt; Warning in dsem::dsem(sem = dsem, tsdata = dsem_data, control =</span></span>
+<span><span class="co">#&gt; dsem_control(getsd = FALSE), : Some Hessian eigenvalue is negative. Some</span></span>
+<span><span class="co">#&gt; parameters might not be converged.</span></span>
 <span><span class="va">mydsem</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;        beta_z        beta_z        beta_z        beta_z        beta_z </span></span>

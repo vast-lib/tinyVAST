@@ -16,6 +16,9 @@
     <loc>/articles/mgcv.html</loc>
   </url>
   <url>
+    <loc>/articles/multiple_data.html</loc>
+  </url>
+  <url>
     <loc>/articles/simultaneous_autoregressive_process.html</loc>
   </url>
   <url>
@@ -70,6 +73,9 @@
     <loc>/reference/condition_and_density.html</loc>
   </url>
   <url>
+    <loc>/reference/deviance_explained.html</loc>
+  </url>
+  <url>
     <loc>/reference/families.html</loc>
   </url>
   <url>
@@ -92,6 +98,12 @@
   </url>
   <url>
     <loc>/reference/predict.tinyVAST.html</loc>
+  </url>
+  <url>
+    <loc>/reference/red_snapper.html</loc>
+  </url>
+  <url>
+    <loc>/reference/red_snapper_shapefile.html</loc>
   </url>
   <url>
     <loc>/reference/reexports.html</loc>

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a>
     <a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a>
+    <a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a>
     <a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a>
     <a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a>
     <a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a>
@@ -118,26 +119,16 @@ using splines specified via <code>mgcv</code></p>
 <span><span class="va">Formula</span> <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">group</span>, bs<span class="op">=</span><span class="st">"re"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">2</span>, raw<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">w</span>, by<span class="op">=</span><span class="va">group</span>, bs<span class="op">=</span><span class="st">"ts"</span><span class="op">)</span> <span class="co"># + offset(a)</span></span>
 <span><span class="va">myfit</span> <span class="op">=</span> <span class="fu"><a href="../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">Formula</span>,</span>
-<span>           control <span class="op">=</span> <span class="fu"><a href="../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span>getsd<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<span>           control <span class="op">=</span> <span class="fu"><a href="../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> getsd<span class="op">=</span><span class="cn">FALSE</span> <span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <p>We can then compute the percent deviance explained, and confirm that
 it is identical to that calculated using mgcv</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">R1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">myfit</span>, type<span class="op">=</span><span class="st">"deviance"</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># tinyVAST null model with just a single intercept</span></span>
-<span><span class="va">null</span> <span class="op">=</span> <span class="fu"><a href="../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>            formula <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">)</span></span>
-<span><span class="va">R0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">null</span>, type<span class="op">=</span><span class="st">"deviance"</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Percent deviance explained</span></span>
-<span><span class="fl">1</span> <span class="op">-</span> <span class="va">R1</span><span class="op">/</span><span class="va">R0</span></span>
+<code class="sourceCode R"><span><span class="co"># By default</span></span>
+<span><span class="va">myfit</span><span class="op">$</span><span class="va">deviance_explained</span></span>
 <span><span class="co">#&gt; [1] 0.9814343</span></span>
 <span></span>
 <span><span class="co">#</span></span>
-<span><span class="va">start_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mygam_reduced</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span> <span class="va">Formula</span>, data<span class="op">=</span><span class="va">Data</span> <span class="op">)</span> <span class="co">#</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span>
-<span><span class="co">#&gt; Time difference of 0.05701208 secs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mygam_reduced</span><span class="op">)</span><span class="op">$</span><span class="va">dev.expl</span></span>
 <span><span class="co">#&gt; [1] 0.9814113</span></span></code></pre></div>
 <p>We can also use the <code>DHARMa</code> package to visualize

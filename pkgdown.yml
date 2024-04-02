@@ -4,6 +4,7 @@ pkgdown_sha: ~
 articles:
   dsem: dsem.html
   mgcv: mgcv.html
+  multiple_data: multiple_data.html
   simultaneous_autoregressive_process: simultaneous_autoregressive_process.html
   spatial: spatial.html
   spatial_factor_analysis: spatial_factor_analysis.html
@@ -12,5 +13,5 @@ articles:
   condition: web_only/condition.html
   empirical_orthogonal_functions: web_only/empirical_orthogonal_functions.html
   stream_networks: web_only/stream_networks.html
-last_built: 2024-03-22T18:46Z
+last_built: 2024-04-02T21:41Z
 
