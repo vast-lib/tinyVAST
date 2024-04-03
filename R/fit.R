@@ -215,8 +215,9 @@ function( formula,
     if( is.null(dsem) ){
       output = list(
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
-        model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
+        model = array( 0, dim=c(0,8), dimnames=list(NULL,c("path","lag","name","start","parameter","first","second","direction")) )
       )
+      class(output) = "dsem_ram"   # Define class for summary.tinyVAST
     }else if( isTRUE(is.character(dsem)) ){
       output = make_dsem_ram( dsem, times=times, variables=variables, quiet=isFALSE(control$verbose), covs=variables )
     }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
@@ -270,6 +271,7 @@ function( formula,
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
+      class(output) = "sem_ram" # Define class for summary.tinyVAST
     }else if( isTRUE(is.character(sem)) ){
       output = make_sem_ram( sem, variables=as.character(variables), quiet=isFALSE(control$verbose), covs=as.character(variables) )
     } else {
@@ -781,7 +783,50 @@ function( nlminb_loops = 1,
 print.tinyVAST <-
 function( x,
           ... ){
-  print(x[c('call','opt','sdrep','run_time')])
+  #
+  cat( "Call: \n")
+  print(x$call)
+  cat( "\n")
+  
+  cat( "Run time: \n")
+  print(x$run_time)
+  cat( "\n")
+
+  cat( "Family: \n")
+  print(x$internal$family)
+  cat( "\n")
+
+  if( !is.null(x$sdrep) ){
+    cat( "\n")
+    print(x$sdrep)
+    cat( "\n")
+  }
+  if( !is.null(x$deviance_explained) ){
+    cat( "Proportion deviance explained: \n")
+    print(x$deviance_explained)
+    cat( "\n")
+  }
+  
+  out = summary( x, "sem")
+  if( nrow(out)>0 ){
+    cat( "SEM terms: \n")
+    print(out)
+    cat( "\n")
+  }
+
+  out = summary( x, "dsem")
+  if( nrow(out)>0 ){
+    cat( "DSEM terms: \n")
+    print(out)
+    cat( "\n")
+  }
+
+  out = summary( x, "fixed")
+  if( nrow(out)>0 ){
+    cat( "Fixed terms: \n")
+    print(out)
+    cat( "\n")
+  }
 }
 
 
@@ -790,8 +835,14 @@ function( x,
 #' @description summarize parameters from a fitted tinyVAST
 #'
 #' @details
-#' tinyVAST includes an "arrow and lag" notation, which specifies the set of
-#' path coefficients and exogenous variance parameters to be estimated. Function \code{fit}
+#' \code{tinyVAST} includes three components: a structural equation model (SEM),
+#' a dynamic structural equation model (DSEM), and a generalized additive model (GAM).
+#' Each of these are summarized and interpreted differently, and \code{summary.tinyVAST}
+#' facilitates this. 
+#'
+#' Regarding the DSEM componennt, tinyVAST includes an "arrow and lag" 
+#' notation, which specifies the set of
+#' path coefficients and exogenous variance parameters to be estimated. Function \code{tinyVAST}
 #' then estimates the maximum likelihood value for those coefficients and parameters
 #' by maximizing the log-marginal likelihood.
 #'
@@ -808,18 +859,23 @@ function( x,
 #' comparing the estimate divided by standard error against a standard normal distribution).
 #'
 #' @param object Output from [tinyVAST()]
-#' @param what What component to summarize
+#' @param what What component to summarize, whether \code{sem}, \code{dsem}, or
+#'        \code{fixed} for the fixed effects included in the GAM formula
 #' @param ... Not used
 #'
 #' @method summary tinyVAST
 #' @export
 summary.tinyVAST <-
 function( object,
-          what = c("sem","dsem"),
+          what = c("sem","dsem","fixed"),
           ... ){
 
   #
   what = match.arg(what)
+  ParHat = object$obj$env$parList()
+  if( !is.null(object$sdrep) ){
+    SE = as.list( object$sdrep, report=FALSE, what="Std. Error")
+  }
 
   # SEM component
   if( what=="sem" ){
@@ -828,13 +884,11 @@ function( object,
       model$to = as.character(object$internal$variables)[model$to]
       model$from = as.character(object$internal$variables)[model$from]
     }
-    ParHat = object$obj$env$parList()
 
     #
     coefs = data.frame( model, "Estimate"=c(NA,ParHat$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
     coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,'start']), coefs$Estimate )
-    if( "sdrep" %in% names(object) ){
-      SE = as.list( object$sdrep, report=FALSE, what="Std. Error")
+    if( !is.null(object$sdrep) ){
       coefs = data.frame( coefs, "Std_Error"=c(NA,SE$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
@@ -863,17 +917,27 @@ function( object,
     }else{
       stop("Class for what=`dsem` not implemented for `summary(.)`")
     }
-    ParHat = object$obj$env$parList()
 
     #
     coefs = data.frame( model, "Estimate"=c(NA,ParHat$beta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
     coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,'start']), coefs$Estimate )
-    if( "sdrep" %in% names(object) ){
-      SE = as.list( object$sdrep, report=FALSE, what="Std. Error")
+    if( !is.null(object$sdrep) ){
       coefs = data.frame( coefs, "Std_Error"=c(NA,SE$beta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
     }
+  }
+
+  if( what=="fixed" ){
+    coefs = data.frame( 
+      Estimate = ParHat$alpha_j
+    )
+    if( !is.null(object$sdrep) ){
+      coefs = data.frame( coefs, "Std_Error"=SE$alpha_j ) # parameter=0 outputs NA
+      coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
+      coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
+    }
+    rownames(coefs) = colnames(myfit$tmb_input$tmb_data$X_ij)
   }
 
   return(coefs)

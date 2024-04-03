@@ -4,12 +4,13 @@
 \alias{summary.tinyVAST}
 \title{summarize tinyVAST}
 \usage{
-\method{summary}{tinyVAST}(object, what = c("sem", "dsem"), ...)
+\method{summary}{tinyVAST}(object, what = c("sem", "dsem", "fixed"), ...)
 }
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}}
 
-\item{what}{What component to summarize}
+\item{what}{What component to summarize, whether \code{sem}, \code{dsem}, or
+\code{fixed} for the fixed effects included in the GAM formula}
 
 \item{...}{Not used}
 }
@@ -17,8 +18,14 @@
 summarize parameters from a fitted tinyVAST
 }
 \details{
-tinyVAST includes an "arrow and lag" notation, which specifies the set of
-path coefficients and exogenous variance parameters to be estimated. Function \code{fit}
+\code{tinyVAST} includes three components: a structural equation model (SEM),
+a dynamic structural equation model (DSEM), and a generalized additive model (GAM).
+Each of these are summarized and interpreted differently, and \code{summary.tinyVAST}
+facilitates this.
+
+Regarding the DSEM componennt, tinyVAST includes an "arrow and lag"
+notation, which specifies the set of
+path coefficients and exogenous variance parameters to be estimated. Function \code{tinyVAST}
 then estimates the maximum likelihood value for those coefficients and parameters
 by maximizing the log-marginal likelihood.
 

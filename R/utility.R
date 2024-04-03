@@ -377,4 +377,17 @@ function( x,
   return( devexpl )
 }
 
+# from glmmTMB:
+named_list <- function(...) {
+  L <- list(...)
+  snm <- sapply(substitute(list(...)), deparse)[-1L]
+  if (is.null(nm <- names(L))) {
+    nm <- snm
+  }
+  if (any(nonames <- nm == "")) {
+    nm[nonames] <- snm[nonames]
+  }
+  stats::setNames(L, nm)
+}
+
 
