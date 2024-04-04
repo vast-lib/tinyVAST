@@ -937,7 +937,7 @@ function( object,
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
     }
-    rownames(coefs) = colnames(myfit$tmb_input$tmb_data$X_ij)
+    rownames(coefs) = colnames(object$tmb_input$tmb_data$X_ij)
   }
 
   return(coefs)
