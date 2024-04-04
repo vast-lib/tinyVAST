@@ -233,39 +233,24 @@ response for each manifest variable:</p>
 <span>           distribution_column <span class="op">=</span> <span class="st">"dist"</span>,</span>
 <span>           control <span class="op">=</span> <span class="fu"><a href="../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span>gmrf<span class="op">=</span><span class="st">"proj"</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">out</span></span>
-<span><span class="co">#&gt; $call</span></span>
+<span><span class="co">#&gt; Call: </span></span>
 <span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + factor(species), data = Data, sem = sem, </span></span>
 <span><span class="co">#&gt;     family = tweedie(), space_columns = c("x", "y"), spatial_graph = mesh, </span></span>
 <span><span class="co">#&gt;     time_column = "time", variable_column = "species", variables = c("f1", </span></span>
 <span><span class="co">#&gt;         "f2", 1:n_c), distribution_column = "dist", control = tinyVASTcontrol(gmrf = "proj"))</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $opt</span></span>
-<span><span class="co">#&gt; $opt$par</span></span>
-<span><span class="co">#&gt;     alpha_j     alpha_j     alpha_j     alpha_j     alpha_j     theta_z </span></span>
-<span><span class="co">#&gt;  0.07570783 -0.02014888  0.22318277  0.14728087 -0.26514652  0.68016356 </span></span>
-<span><span class="co">#&gt;     theta_z     theta_z     theta_z     theta_z     theta_z     theta_z </span></span>
-<span><span class="co">#&gt;  0.68285927  0.31701846  0.52123769  0.14819781  0.51873790 -0.31998633 </span></span>
-<span><span class="co">#&gt;     theta_z     theta_z   log_sigma   log_sigma   log_kappa </span></span>
-<span><span class="co">#&gt;  0.23601680 -0.21613586 -0.52205331  0.21851154 -0.26761196 </span></span>
+<span><span class="co">#&gt; Run time: </span></span>
+<span><span class="co">#&gt; Time difference of 2.170973 secs</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $opt$objective</span></span>
-<span><span class="co">#&gt; [1] 631.3721</span></span>
+<span><span class="co">#&gt; Family: </span></span>
+<span><span class="co">#&gt; $obs</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $opt$convergence</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $opt$iterations</span></span>
-<span><span class="co">#&gt; [1] 71</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $opt$evaluations</span></span>
-<span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       84       71 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $opt$message</span></span>
-<span><span class="co">#&gt; [1] "relative convergence (4)"</span></span>
+<span><span class="co">#&gt; Family: tweedie </span></span>
+<span><span class="co">#&gt; Link function: log </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $sdrep</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;              Estimate Std. Error</span></span>
 <span><span class="co">#&gt; alpha_j    0.07570783 0.31850774</span></span>
@@ -287,8 +272,35 @@ response for each manifest variable:</p>
 <span><span class="co">#&gt; log_kappa -0.26761196 0.21030826</span></span>
 <span><span class="co">#&gt; Maximum gradient component: 0.00223394 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $run_time</span></span>
-<span><span class="co">#&gt; Time difference of 2.138665 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Proportion deviance explained: </span></span>
+<span><span class="co">#&gt; [1] 0.551999</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; SEM terms: </span></span>
+<span><span class="co">#&gt;    heads to from parameter start   Estimate  Std_Error   z_value      p_value</span></span>
+<span><span class="co">#&gt; 1      1  1   f1         1  &lt;NA&gt;  0.6801636 0.11510781  5.908926 3.443444e-09</span></span>
+<span><span class="co">#&gt; 2      1  2   f1         2  &lt;NA&gt;  0.6828593 0.15773444  4.329170 1.496721e-05</span></span>
+<span><span class="co">#&gt; 3      1  3   f1         3  &lt;NA&gt;  0.3170185 0.10358197  3.060556 2.209261e-03</span></span>
+<span><span class="co">#&gt; 4      1  4   f1         4  &lt;NA&gt;  0.5212377 0.10914344  4.775713 1.790719e-06</span></span>
+<span><span class="co">#&gt; 5      1  5   f1         5  &lt;NA&gt;  0.1481978 0.09200614  1.610738 1.072368e-01</span></span>
+<span><span class="co">#&gt; 6      1  2   f2         6  &lt;NA&gt;  0.5187379 0.13709521  3.783778 1.544654e-04</span></span>
+<span><span class="co">#&gt; 7      1  3   f2         7  &lt;NA&gt; -0.3199863 0.10049164 -3.184209 1.451504e-03</span></span>
+<span><span class="co">#&gt; 8      1  4   f2         8  &lt;NA&gt;  0.2360168 0.10640963  2.218002 2.655468e-02</span></span>
+<span><span class="co">#&gt; 9      1  5   f2         9  &lt;NA&gt; -0.2161359 0.09652980 -2.239058 2.515211e-02</span></span>
+<span><span class="co">#&gt; 10     2 f1   f1         0     1  1.0000000         NA        NA           NA</span></span>
+<span><span class="co">#&gt; 11     2 f2   f2         0     1  1.0000000         NA        NA           NA</span></span>
+<span><span class="co">#&gt; 12     2  1    1         0     0  0.0000000         NA        NA           NA</span></span>
+<span><span class="co">#&gt; 13     2  2    2         0     0  0.0000000         NA        NA           NA</span></span>
+<span><span class="co">#&gt; 14     2  3    3         0     0  0.0000000         NA        NA           NA</span></span>
+<span><span class="co">#&gt; 15     2  4    4         0     0  0.0000000         NA        NA           NA</span></span>
+<span><span class="co">#&gt; 16     2  5    5         0     0  0.0000000         NA        NA           NA</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Fixed terms: </span></span>
+<span><span class="co">#&gt;                     Estimate Std_Error     z_value    p_value</span></span>
+<span><span class="co">#&gt; factor(species)1  0.07570783 0.3185077  0.23769543 0.81211733</span></span>
+<span><span class="co">#&gt; factor(species)2 -0.02014888 0.3976341 -0.05067191 0.95958696</span></span>
+<span><span class="co">#&gt; factor(species)3  0.22318277 0.2184716  1.02156419 0.30698721</span></span>
+<span><span class="co">#&gt; factor(species)4  0.14728087 0.2705785  0.54431841 0.58622238</span></span>
+<span><span class="co">#&gt; factor(species)5 -0.26514652 0.1463832 -1.81131833 0.07009159</span></span></code></pre></div>
 <p>We can compare the true loadings (rotated to optimize
 comparison):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
