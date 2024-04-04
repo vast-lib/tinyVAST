@@ -322,7 +322,10 @@ function( x,
 #'
 #' This implementation conditions upon the maximum likelihood estimate of fixed effects
 #'      and the empirical Bayes ("plug-in") prediction of random effects.  It can 
-#'      be described as "conditional deviance explained". 
+#'      be described as "conditional deviance explained". A state-space model that 
+#'      estimates measurement error variance approaching one (i.e., collapses to 
+#'      a process-error-only model) will have a conditional deviance explained
+#'      that approaches 1.0
 #'
 #' @param x output from `\code{tinyVAST()}`
 #' @param null_formula formula for the null model.  If missing, it uses

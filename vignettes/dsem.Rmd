@@ -59,6 +59,11 @@ mytiny = tinyVAST( dsem = dsem,
                  formula = logn ~ 0 + var )
 mytiny
 
+# Deviance explained relative to both intercepts
+# Note that a process-error-only estimate with have devexpl -> 1
+deviance_explained( mytiny, 
+                    null_formula = logn ~ 0 + var )
+
 # See summary
 knitr::kable( summary(mytiny,"dsem"), digits=3 )
 ```
