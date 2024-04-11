@@ -107,17 +107,17 @@ We can look at structural parameters using summary functions:
 ```r
 # spatial terms
 summary(fit, "sem")
-#>   heads        to      from parameter start      Estimate   Std_Error    z_value      p_value
-#> 1     2   Biomass   Biomass         1  <NA>  1.4238785229 0.133047112 10.7020626 9.953750e-27
-#> 2     2 Condition Condition         2  <NA> -0.0331621242 0.004167438 -7.9574358 1.756412e-15
-#> 3     1 Condition   Biomass         3  <NA>  0.0000933144 0.004855041  0.0192201 9.846655e-01
+#>   heads        to      from parameter start      Estimate   Std_Error     z_value      p_value
+#> 1     2   Biomass   Biomass         1  <NA>  1.423877e+00 0.133046685 10.70208186 9.951682e-27
+#> 2     2 Condition Condition         2  <NA> -3.316273e-02 0.004167567 -7.95733630 1.757825e-15
+#> 3     1 Condition   Biomass         3  <NA>  9.292899e-05 0.004855089  0.01914053 9.847290e-01
 
 # spatio-temporal terms
 summary(fit, "dsem")
 #>   heads        to      from parameter start lag     Estimate   Std_Error    z_value      p_value
-#> 1     2   Biomass   Biomass         1  <NA>   0  0.966429610 0.024274988  39.811745 0.000000e+00
-#> 2     2 Condition Condition         2  <NA>   0 -0.040541568 0.002723387 -14.886454 4.036166e-50
-#> 3     1 Condition   Biomass         3  <NA>   0  0.008201795 0.003339302   2.456141 1.404382e-02
+#> 1     2   Biomass   Biomass         1  <NA>   0  0.966426764 0.024274856  39.811844 0.000000e+00
+#> 2     2 Condition Condition         2  <NA>   0 -0.040541910 0.002723401 -14.886499 4.033460e-50
+#> 3     1 Condition   Biomass         3  <NA>   0  0.008201997 0.003339314   2.456192 1.404181e-02
 ```
 
 # Abundance-weighted expansion
@@ -130,7 +130,7 @@ To explore output, we can plot output using the survey extent:
 region = condition_and_density$eastern_bering_sea
 
 # make extrapolation-grid
-sf_grid = st_make_grid( region, cellsize=c(0.5,0.5) )
+sf_grid = st_make_grid( region, cellsize=c(0.2,0.2) )
 sf_grid = st_intersection( sf_grid, region )
 sf_grid = st_make_valid( sf_grid )
 
@@ -158,7 +158,7 @@ plot_grid = st_sf( sf_grid,
                     "Condition.1982" = cond_1982,
                     "Density.1982" = dens_1982 )
 
-plot( plot_grid )
+plot( plot_grid, border=NA )
 ```
 
 ![plot of chunk condition-maps](figure/condition-maps-1.png)

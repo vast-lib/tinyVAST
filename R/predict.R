@@ -42,6 +42,7 @@ function( object,
                       random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
                       profile = object$internal$control$profile,
                       DLL = "tinyVAST" )
+  newobj$env$beSilent()
   out = newobj$report()[[what]]
 
   # Add standard errors
@@ -66,16 +67,100 @@ function( object,
 #'
 #' @description Applies Monte Carlo integration to approximate area-expanded abundance
 #'
-#' @inheritParams TMB::sdreport
 #' @inheritParams add_predictions
 #'
-#' @param area value used for area-weighted expansion of estimated density surface
-#'     for each row of `newdata`.
-#' @param V_gz Settings for expansion.
-#' @param W_gz Covariates for expansion.
+#' @param newdata New data-frame of independent variables used to predict the response,
+#'        where a total value is calculated by combining across these individual predictions.
+#'        If these locations are randomly drawn from a specified spatial domain, then 
+#'        `integrate_output` applies Monte Carlo integration to approximate the
+#'        total over that area.  If locations are drawn sysmatically from a domain,
+#'        then `integrate_output` is applying a midpoint approximation to the integral.
+#' @param area vector of values used for area-weighted expansion of 
+#'        estimated density surface for each row of `newdata`
+#'        which must have same lnegth as number of rows of `newdata`.
+#' @param V_gz Integer-matrix providing settings for expansion, with two columns
+#'        and as many rows as `newdata`. If `V_gz` is missing, the first column is `1s`, 
+#'        which indicates to expand each row by the first column of `W_gz`. If the
+#'        first column is `2`, then it weights the second
+#'        column of `W_gz` by the proportion at that row, e.g., to calculate
+#'        an abundance-weighted covariate.
+#'        If the first column is a `3`, then it weights that
+#'        row of `newdata` by a previous row of `newdata`, specified via the 2nd
+#'        column of `V_gz`.  This 3rd option is used to weight a prediction for 
+#'        one category based on predicted density of another category, e.g., 
+#'        to calculate abundance-weighted condition in a bivariate model.  
+#'        If the first column is a `0`, then that row of `newdata` is not included
+#'        when calculating the total across rows.  Including a row of `newdata` with 
+#'        first-column of `0` is useful, e.g., when calculating abundance at that 
+#'        location, but where the eventual index uses abundance as weighting term
+#'        but without otherwise using the predicted density in calculating a total
+#'        value. 
+#' @param W_gz Matrix providing covariates for expansion, with two columns and 
+#'        as many rows as `newdata`.  If `W_gz` is missing, the first column is 
+#'        populated from user-supplied values for `area`.
+#'        The second column can be used to provide a covariate
+#'        that are specified for use in expansion, e.g., to provide positional 
+#'        coordinates when calculating the abundance-weighted centroid with respect 
+#'        to that coordinate. 
+#' @param bias.correct logical indicating if bias correction should be applied using
+#'        standard methods in [TMB::sdreport()]
 #' @param intern Do Laplace approximation on C++ side? Passed to [TMB::MakeADFun()].
-#' @param apply.epsilon Apply epsilon bias correction?
+#' @param apply.epsilon Apply epsilon bias correction using a manual calculation
+#'        rather than using the conventional method in [TMB::sdreport]?  Using
+#'        `apply.epsilon` is sometimes substantially faster.  
 #'
+#' @details
+#' Analysts will often want to calculate some value by combing the predicted response at multiple
+#' locations, and potentially from multiple variables in a multivariate analysis. 
+#' This arises in a univariate model, e.g., when calculating the integral under a predicted
+#' density function, which is approximated using a midpoint or Monte Carlo approximation
+#' by calculating the linear predictors at each location `newdata`, 
+#' applying the inverse-link-trainsformation,
+#' and calling this predicted response `mu_g`.  Total abundance is then be approximated
+#' by multiplying `mu_g` by the area associated with each midpoint or Monte Carlo 
+#' approximation point (supplied by argument `area`), 
+#' and summing across these area-expanded values.
+#'
+#' In more complicated cases, an analyst can then use `V_gz` and 
+#' `W_gz` to calculate the weighted average
+#' of a covariate (e.g., positional coordinates) for each Monte Carlo point. 
+#' Alternatively, an analyst fitting a multivariate model might weight one variable
+#' based on another, e.g., to calculate abundance-weighted average condition, or
+#' predator-expanded stomach contents.
+#'
+#' In practice, supplying `V_gz` and `W_gz` requires two passes through the rows of
+#' `newdata` when calculating a total value.  In the following, we
+#' use write equations using C++ indexing conventions such that indexing starts with 0, 
+#' to match the way that `integrate_output` expects indices to be supplied.  
+#' Given `mu_g` for each row of `newdata`,
+#' the first pass calculates:
+#'
+#' \deqn{ \nu_g = \mu_g W_{g,0} }
+#'
+#' where the total value from this first pass is calculated as:
+#'
+#' \deqn{ \nu^* = \sum_{g=0}^{G-1} \nu_g }
+#' 
+#' The second pass then applies a further weighting, which depends upon \eqn{ V_{g,0} },
+#' and potentially upon \eqn{ V_{g,1} } and \eqn{ W_{g,1} }.
+#'
+#' If \eqn{V_{g,0} = 0} then \eqn{\phi_g = 0}
+#'  
+#' If \eqn{V_{g,0} = 1} then \eqn{\phi_g = \nu_g}
+#'  
+#' If \eqn{V_{g,0} = 2} then \eqn{\phi_g = W_{g,1} \frac{\nu_g}{\nu^*} }
+#'  
+#' If \eqn{V_{g,0} = 3} then \eqn{\phi_g = \frac{\nu_{V_{g,1}}}{\nu^*} \mu_g }
+#'  
+#' Finally, the total value from this second pass is calculated as:
+#'
+#' \deqn{ \phi^* = \sum_{g=0}^{G-1} \phi_g }
+#'
+#' and \eqn{\phi^*} is outputted by `integrate_output`, 
+#' along with a standard error and potentially using
+#' the epsilon bias-correction estimator to correct for skewness and retransformation
+#' bias.  
+#' 
 #' @export
 integrate_output <-
 function( object,

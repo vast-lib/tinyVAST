@@ -30,6 +30,7 @@ knitr::opts_chunk$set(
 library(tinyVAST)
 library(sf)
 library(fmesher)
+library(ggplot2)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
@@ -144,7 +145,6 @@ plot( plot_grid,
 
 Similarly, we can plot the abundance index and standard errors
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-library(ggplot2)
 ggplot( data.frame("Year"=colnames(index),"Est"=index[1,],"SE"=index[2,]) ) + 
   geom_point( aes(x=Year, y=Est)) + 
   geom_errorbar( aes(x=Year, ymin=Est-SE, ymax=Est+SE) )
