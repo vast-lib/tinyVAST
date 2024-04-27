@@ -603,6 +603,9 @@ function( formula,
     tmb_map$log_kappa = factor(NA)
   }
 
+  # 
+  tmb_random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc")
+
   ##############
   # Fit model
   ##############
@@ -616,7 +619,7 @@ function( formula,
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
                    map = tmb_map,
-                   random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
+                   random = tmb_random,
                    DLL = "tinyVAST",
                    profile = control$profile,
                    silent = control$silent )  #
@@ -689,7 +692,7 @@ function( formula,
     opt = opt,
     rep = obj$report(obj$env$last.par.best),
     sdrep = sdrep,
-    tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map),
+    tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map, tmb_random=tmb_random),
     call = match.call(),
     spatial_graph = spatial_graph,
     run_time = Sys.time() - start_time,

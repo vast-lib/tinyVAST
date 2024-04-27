@@ -190,7 +190,7 @@ function( x,
 
   # Ensure that last.par and last.par.best are right
   nll_new = obj$fn(x$opt$par)
-  if( isFALSE(nll_new==x$opt$obj) ){
+  if( abs(nll_new-x$opt$obj) > 0.01 ){
     stop("Model fit is not identical to recorded value: Something is not working as expected")
   }
 
@@ -206,6 +206,7 @@ function( x,
     }
   }
 
+  x$obj = obj
   return(x)
 }
 

@@ -39,7 +39,7 @@ function( object,
   newobj = MakeADFun( data = tmb_data2,
                       parameters = object$internal$parlist,
                       map = object$tmb_inputs$tmb_map,
-                      random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
+                      random = object$tmb_inputs$tmb_random,
                       profile = object$internal$control$profile,
                       DLL = "tinyVAST" )
   newobj$env$beSilent()
@@ -177,8 +177,8 @@ function( object,
   if(missing(newdata)) newdata = object$data
   # Build new .. object$data must be same as used for fitting to get SEs / skewness of random effects
   tmb_data2 = add_predictions( object = object,
-                               newdata = newdata,
-                               remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
+                               newdata = newdata ) # ,
+                               # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
 
   # Area-expanded sum
   if(missing(W_gz)){
@@ -217,7 +217,7 @@ function( object,
   newobj = MakeADFun( data = tmb_data2,
                       parameters = tmb_par2,
                       map = object$tmb_inputs$tmb_map,
-                      random = c("gamma_k","epsilon_stc","omega_sc"),
+                      random = object$tmb_inputs$tmb_random,
                       DLL = "tinyVAST",
                       intern = intern,
                       inner.control = inner.control,
