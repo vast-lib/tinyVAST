@@ -108,7 +108,7 @@ test_that("deviance residuals for poisson works", {
   # resid1^2
   # mu = mytiny$rep$mu_i; 
   # 2*y*log(y/mu) - (y-mu)
-  sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
+  # sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
   # resid1
   # pow = function(a,b) a^b
   # Type = function(z)z

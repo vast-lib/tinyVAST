@@ -7,9 +7,10 @@
 integrate_output(
   object,
   newdata,
-  V_gz,
   area,
-  W_gz,
+  type = rep(1, nrow(newdata)),
+  weighting_index,
+  covariate,
   bias.correct = TRUE,
   apply.epsilon = FALSE,
   intern = FALSE
@@ -25,35 +26,37 @@ If these locations are randomly drawn from a specified spatial domain, then
 total over that area.  If locations are drawn sysmatically from a domain,
 then \code{integrate_output} is applying a midpoint approximation to the integral.}
 
-\item{V_gz}{Integer-matrix providing settings for expansion, with two columns
-and as many rows as \code{newdata}. If \code{V_gz} is missing, the first column is \verb{1s},
-which indicates to expand each row by the first column of \code{W_gz}. If the
-first column is \code{2}, then it weights the second
-column of \code{W_gz} by the proportion at that row, e.g., to calculate
-an abundance-weighted covariate.
-If the first column is a \code{3}, then it weights that
-row of \code{newdata} by a previous row of \code{newdata}, specified via the 2nd
-column of \code{V_gz}.  This 3rd option is used to weight a prediction for
+\item{area}{vector of values used for area-weighted expansion of
+estimated density surface for each row of \code{newdata}
+which must have same length as number of rows of \code{newdata}.}
+
+\item{type}{Integer-vector indicating what type of expansion to apply to
+each row of \code{newdata}, with length of \code{nrow(newdata)}.
+\describe{
+\item{\code{type=1}}{Area-weighting: weight predictor by argument \code{area}}
+\item{\code{type=2}}{Abundance-weighted covariate: weight \code{covariate} by
+proportion of total in each row of \code{newdata}}
+\item{\code{type=3}}{Abundance-weighted variable: weight predictor by
+proportion of total in a prior row of \code{newdata}.
+This 3rd option is used to weight a prediction for
 one category based on predicted density of another category, e.g.,
-to calculate abundance-weighted condition in a bivariate model.
-If the first column is a \code{0}, then that row of \code{newdata} is not included
-when calculating the total across rows.  Including a row of \code{newdata} with
+to calculate abundance-weighted condition in a bivariate model.}
+\item{\code{type=0}}{Exclude from weighting: give weight of zero for
+a given row of \code{newdata}. Including a row of \code{newdata} with
 first-column of \code{0} is useful, e.g., when calculating abundance at that
 location, but where the eventual index uses abundance as weighting term
 but without otherwise using the predicted density in calculating a total
 value.}
+}}
 
-\item{area}{vector of values used for area-weighted expansion of
-estimated density surface for each row of \code{newdata}
-which must have same lnegth as number of rows of \code{newdata}.}
+\item{weighting_index}{integer-vector used to indicate a previous row
+that is used to calculate a weighted average that is then
+applied to the given row of \code{newdata}. Only used for when \code{type=3}.}
 
-\item{W_gz}{Matrix providing covariates for expansion, with two columns and
-as many rows as \code{newdata}.  If \code{W_gz} is missing, the first column is
-populated from user-supplied values for \code{area}.
-The second column can be used to provide a covariate
+\item{covariate}{numeric-vector used to provide a covariate
 that are specified for use in expansion, e.g., to provide positional
 coordinates when calculating the abundance-weighted centroid with respect
-to that coordinate.}
+to that coordinate. Only used for when \code{type=2}.}
 
 \item{bias.correct}{logical indicating if bias correction should be applied using
 standard methods in \code{\link[TMB:sdreport]{TMB::sdreport()}}}
@@ -68,7 +71,7 @@ rather than using the conventional method in \link[TMB:sdreport]{TMB::sdreport}?
 Applies Monte Carlo integration to approximate area-expanded abundance
 }
 \details{
-Analysts will often want to calculate some value by combing the predicted response at multiple
+Analysts will often want to calculate some value by combiningg the predicted response at multiple
 locations, and potentially from multiple variables in a multivariate analysis.
 This arises in a univariate model, e.g., when calculating the integral under a predicted
 density function, which is approximated using a midpoint or Monte Carlo approximation
@@ -79,36 +82,42 @@ by multiplying \code{mu_g} by the area associated with each midpoint or Monte Ca
 approximation point (supplied by argument \code{area}),
 and summing across these area-expanded values.
 
-In more complicated cases, an analyst can then use \code{V_gz} and
-\code{W_gz} to calculate the weighted average
+In more complicated cases, an analyst can then use \code{covariate}
+to calculate the weighted average
 of a covariate (e.g., positional coordinates) for each Monte Carlo point.
 Alternatively, an analyst fitting a multivariate model might weight one variable
-based on another, e.g., to calculate abundance-weighted average condition, or
+based on another using \code{weighting_index}, e.g.,
+to calculate abundance-weighted average condition, or
 predator-expanded stomach contents.
 
-In practice, supplying \code{V_gz} and \code{W_gz} requires two passes through the rows of
+In practice, spatial integration in a multivariate model requires two passes through the rows of
 \code{newdata} when calculating a total value.  In the following, we
-use write equations using C++ indexing conventions such that indexing starts with 0,
+write equations using C++ indexing conventions such that indexing starts with 0,
 to match the way that \code{integrate_output} expects indices to be supplied.
-Given \code{mu_g} for each row of \code{newdata},
+Given inverse-link-transformed predictor \eqn{ \mu_g },
+function argument \code{type} as \eqn{ type_g }
+function argument \code{area} as \eqn{ a_g },
+function argument \code{covariate} as \eqn{ x_g },
+function argument \code{weighting_index} as \verb{\eqn{ h_g }}
+function argument \code{weighting_index} as \verb{\eqn{ h_g }}
 the first pass calculates:
 
-\deqn{ \nu_g = \mu_g W_{g,0} }
+\deqn{ \nu_g = \mu_g a_g }
 
 where the total value from this first pass is calculated as:
 
 \deqn{ \nu^* = \sum_{g=0}^{G-1} \nu_g }
 
-The second pass then applies a further weighting, which depends upon \eqn{ V_{g,0} },
-and potentially upon \eqn{ V_{g,1} } and \eqn{ W_{g,1} }.
+The second pass then applies a further weighting, which depends upon \eqn{ type_g },
+and potentially upon \eqn{ x_g } and \eqn{ h_g }.
 
-If \eqn{V_{g,0} = 0} then \eqn{\phi_g = 0}
+If \eqn{type_g = 0} then \eqn{\phi_g = 0}
 
-If \eqn{V_{g,0} = 1} then \eqn{\phi_g = \nu_g}
+If \eqn{type_g = 1} then \eqn{\phi_g = \nu_g}
 
-If \eqn{V_{g,0} = 2} then \eqn{\phi_g = W_{g,1} \frac{\nu_g}{\nu^*} }
+If \eqn{type_g = 2} then \eqn{\phi_g = x_g \frac{\nu_g}{\nu^*} }
 
-If \eqn{V_{g,0} = 3} then \eqn{\phi_g = \frac{\nu_{V_{g,1}}}{\nu^*} \mu_g }
+If \eqn{type_g = 3} then \eqn{\phi_g = \frac{\nu_{h_g}}{\nu^*} \mu_g }
 
 Finally, the total value from this second pass is calculated as:
 

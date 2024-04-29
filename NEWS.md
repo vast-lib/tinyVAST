@@ -1,3 +1,9 @@
+# tinyVAST 0.6.0
+
+* Change `integrate_output` interface by splitting `W_gz` and `V_gz`
+  into four vectors `area`, `type`, `covariate`, and `weighting_index`
+  to simplify documentations and improve naming 
+
 # tinyVAST 0.5.0
 
 * Adding vignette showing how to fit multiple data types in an SDM

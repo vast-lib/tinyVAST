@@ -96,7 +96,7 @@
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict
 #' @importFrom TMB MakeADFun sdreport
-#' @importFrom checkmate assertClass assertDataFrame
+#' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric
 #' @importFrom Matrix Cholesky solve
 #' @importFrom abind abind
 #'

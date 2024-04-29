@@ -65,7 +65,9 @@ function( object,
 
 #' @title Monte Carlo integration for abundance
 #'
-#' @description Applies Monte Carlo integration to approximate area-expanded abundance
+#' @description 
+#' Calculates an estimator by summing across multiple predictions, 
+#' e.g., to approximate an integral when estimating area-expanded abundance.
 #'
 #' @inheritParams add_predictions
 #'
@@ -77,31 +79,32 @@ function( object,
 #'        then `integrate_output` is applying a midpoint approximation to the integral.
 #' @param area vector of values used for area-weighted expansion of 
 #'        estimated density surface for each row of `newdata`
-#'        which must have same lnegth as number of rows of `newdata`.
-#' @param V_gz Integer-matrix providing settings for expansion, with two columns
-#'        and as many rows as `newdata`. If `V_gz` is missing, the first column is `1s`, 
-#'        which indicates to expand each row by the first column of `W_gz`. If the
-#'        first column is `2`, then it weights the second
-#'        column of `W_gz` by the proportion at that row, e.g., to calculate
-#'        an abundance-weighted covariate.
-#'        If the first column is a `3`, then it weights that
-#'        row of `newdata` by a previous row of `newdata`, specified via the 2nd
-#'        column of `V_gz`.  This 3rd option is used to weight a prediction for 
-#'        one category based on predicted density of another category, e.g., 
-#'        to calculate abundance-weighted condition in a bivariate model.  
-#'        If the first column is a `0`, then that row of `newdata` is not included
-#'        when calculating the total across rows.  Including a row of `newdata` with 
-#'        first-column of `0` is useful, e.g., when calculating abundance at that 
-#'        location, but where the eventual index uses abundance as weighting term
-#'        but without otherwise using the predicted density in calculating a total
-#'        value. 
-#' @param W_gz Matrix providing covariates for expansion, with two columns and 
-#'        as many rows as `newdata`.  If `W_gz` is missing, the first column is 
-#'        populated from user-supplied values for `area`.
-#'        The second column can be used to provide a covariate
-#'        that are specified for use in expansion, e.g., to provide positional 
+#'        with length of \code{nrow(newdata)}.
+#' @param type Integer-vector indicating what type of expansion to apply to
+#'        each row of `newdata`, with length of \code{nrow(newdata)}.  
+#' \describe{
+#'   \item{\code{type=1}}{Area-weighting: weight predictor by argument `area`}
+#'   \item{\code{type=2}}{Abundance-weighted covariate: weight `covariate` by 
+#'   proportion of total in each row of `newdata`}
+#'   \item{\code{type=3}}{Abundance-weighted variable: weight predictor by 
+#'   proportion of total in a prior row of `newdata`. 
+#'   This option is used to weight a prediction for 
+#'   one category based on predicted density of another category, e.g., 
+#'   to calculate abundance-weighted condition in a bivariate model.}
+#'   \item{\code{type=0}}{Exclude from weighting: give weight of zero for
+#'   a given row of `newdata`. Including a row of `newdata` with 
+#'   \code{type=0} is useful, e.g., when calculating abundance at that 
+#'   location, where the eventual index uses abundance as weighting term
+#'   but without otherwise using the predicted density in calculating a total
+#'   value.}
+#' }
+#' @param covariate numeric-vector used to provide a covariate
+#'        that is used in expansion, e.g., to provide positional 
 #'        coordinates when calculating the abundance-weighted centroid with respect 
-#'        to that coordinate. 
+#'        to that coordinate. Only used for when \code{type=2}.
+#' @param weighting_index integer-vector used to indicate a previous row
+#'        that is used to calculate a weighted average that is then 
+#'        applied to the given row of `newdata`. Only used for when \code{type=3}.
 #' @param bias.correct logical indicating if bias correction should be applied using
 #'        standard methods in [TMB::sdreport()]
 #' @param intern Do Laplace approximation on C++ side? Passed to [TMB::MakeADFun()].
@@ -110,7 +113,7 @@ function( object,
 #'        `apply.epsilon` is sometimes substantially faster.  
 #'
 #' @details
-#' Analysts will often want to calculate some value by combing the predicted response at multiple
+#' Analysts will often want to calculate some value by combiningg the predicted response at multiple
 #' locations, and potentially from multiple variables in a multivariate analysis. 
 #' This arises in a univariate model, e.g., when calculating the integral under a predicted
 #' density function, which is approximated using a midpoint or Monte Carlo approximation
@@ -121,36 +124,42 @@ function( object,
 #' approximation point (supplied by argument `area`), 
 #' and summing across these area-expanded values.
 #'
-#' In more complicated cases, an analyst can then use `V_gz` and 
-#' `W_gz` to calculate the weighted average
+#' In more complicated cases, an analyst can then use `covariate` 
+#' to calculate the weighted average
 #' of a covariate (e.g., positional coordinates) for each Monte Carlo point. 
 #' Alternatively, an analyst fitting a multivariate model might weight one variable
-#' based on another, e.g., to calculate abundance-weighted average condition, or
+#' based on another using `weighting_index`, e.g., 
+#' to calculate abundance-weighted average condition, or
 #' predator-expanded stomach contents.
 #'
-#' In practice, supplying `V_gz` and `W_gz` requires two passes through the rows of
+#' In practice, spatial integration in a multivariate model requires two passes through the rows of
 #' `newdata` when calculating a total value.  In the following, we
-#' use write equations using C++ indexing conventions such that indexing starts with 0, 
+#' write equations using C++ indexing conventions such that indexing starts with 0, 
 #' to match the way that `integrate_output` expects indices to be supplied.  
-#' Given `mu_g` for each row of `newdata`,
+#' Given inverse-link-transformed predictor \eqn{ \mu_g }, 
+#' function argument `type` as \eqn{ type_g }
+#' function argument `area` as \eqn{ a_g },
+#' function argument `covariate` as \eqn{ x_g }, 
+#' function argument `weighting_index` as `\eqn{ h_g }`
+#' function argument `weighting_index` as `\eqn{ h_g }`
 #' the first pass calculates:
 #'
-#' \deqn{ \nu_g = \mu_g W_{g,0} }
+#' \deqn{ \nu_g = \mu_g a_g }
 #'
 #' where the total value from this first pass is calculated as:
 #'
 #' \deqn{ \nu^* = \sum_{g=0}^{G-1} \nu_g }
 #' 
-#' The second pass then applies a further weighting, which depends upon \eqn{ V_{g,0} },
-#' and potentially upon \eqn{ V_{g,1} } and \eqn{ W_{g,1} }.
+#' The second pass then applies a further weighting, which depends upon \eqn{ type_g },
+#' and potentially upon \eqn{ x_g } and \eqn{ h_g }.
 #'
-#' If \eqn{V_{g,0} = 0} then \eqn{\phi_g = 0}
+#' If \eqn{type_g = 0} then \eqn{\phi_g = 0}
 #'  
-#' If \eqn{V_{g,0} = 1} then \eqn{\phi_g = \nu_g}
+#' If \eqn{type_g = 1} then \eqn{\phi_g = \nu_g}
 #'  
-#' If \eqn{V_{g,0} = 2} then \eqn{\phi_g = W_{g,1} \frac{\nu_g}{\nu^*} }
+#' If \eqn{type_g = 2} then \eqn{\phi_g = x_g \frac{\nu_g}{\nu^*} }
 #'  
-#' If \eqn{V_{g,0} = 3} then \eqn{\phi_g = \frac{\nu_{V_{g,1}}}{\nu^*} \mu_g }
+#' If \eqn{type_g = 3} then \eqn{\phi_g = \frac{\nu_{h_g}}{\nu^*} \mu_g }
 #'  
 #' Finally, the total value from this second pass is calculated as:
 #'
@@ -165,9 +174,10 @@ function( object,
 integrate_output <-
 function( object,
           newdata,
-          V_gz,
           area,
-          W_gz,
+          type = rep(1,nrow(newdata)),
+          weighting_index,
+          covariate,
           bias.correct = TRUE,
           apply.epsilon = FALSE,
           intern = FALSE
@@ -180,25 +190,60 @@ function( object,
                                newdata = newdata ) # ,
                                # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
 
+  # Expansion area
+  if(missing(area)){
+    area = rep(1, nrow(newdata))
+  }else if(length(area)==1){
+    area = rep(area, nrow(newdata))
+  }  
+  checkNumeric( area, lower=0, len=nrow(newdata), any.missing=FALSE )
+
+  # Expansion type
+  if(missing(type)){
+    type = rep(1, nrow(newdata))
+  }else if(length(type)==1){
+    type = rep(type, nrow(type))
+  }  
+  checkInteger( type, lower=0, upper=3, len=nrow(newdata), any.missing=FALSE )
+  
+  # Index for variable-weighted value
+  if(missing(weighting_index)){
+    weighting_index = rep(0, nrow(newdata))
+  }
+  if( any(weighting_index>=seq_len(nrow(newdata))) ){
+    stop("Invalid `weighting_index`")
+  }
+  checkInteger( weighting_index, lower=0, len=nrow(newdata), any.missing=FALSE )
+  
+  # 
+  if(missing(covariate)){
+    type = rep(0, nrow(newdata))
+  }
+  checkNumeric( covariate, len=nrow(newdata), any.missing=FALSE )
+  
+  # Bundle
+  V_gz = cbind( type, weighting_index )
+  W_gz = cbind( area, covariate )
+  
   # Area-expanded sum
-  if(missing(W_gz)){
-    # Default for area
-    if(missing(area)){
-      area = rep(1, nrow(newdata))
-    }else if(length(area)==1){
-      area = rep(area, nrow(newdata))
-    }else if( length(area)!=nrow(newdata) ){
-      stop("Check length of `area`")
-    }
-    tmb_data2$W_gz = cbind(area, 0)
-  }else{
-    tmb_data2$W_gz = W_gz
-  }
-  if(missing(V_gz)){
-    tmb_data2$V_gz = cbind( rep(1,nrow(newdata)), 0 )
-  }else{
-    tmb_data2$V_gz = V_gz
-  }
+  #if(missing(W_gz)){
+  #  # Default for area
+  #  if(missing(area)){
+  #    area = rep(1, nrow(newdata))
+  #  }else if(length(area)==1){
+  #    area = rep(area, nrow(newdata))
+  #  }else if( length(area)!=nrow(newdata) ){
+  #    stop("Check length of `area`")
+  #  }
+  #  tmb_data2$W_gz = cbind(area, 0)
+  #}else{
+  #  tmb_data2$W_gz = W_gz
+  #}
+  #if(missing(V_gz)){
+  #  tmb_data2$V_gz = cbind( rep(1,nrow(newdata)), 0 )
+  #}else{
+  #  tmb_data2$V_gz = V_gz
+  #}
 
   # Abundance-weighted z
   #tmb_data2$W_gz = cbind( 1, newdata$x )
