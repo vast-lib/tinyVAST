@@ -217,13 +217,13 @@ function( object,
   
   # 
   if(missing(covariate)){
-    type = rep(0, nrow(newdata))
+    covariate = rep(0, nrow(newdata))
   }
   checkNumeric( covariate, len=nrow(newdata), any.missing=FALSE )
   
   # Bundle
-  V_gz = cbind( type, weighting_index )
-  W_gz = cbind( area, covariate )
+  tmb_data2$V_gz = cbind( type, weighting_index )
+  tmb_data2$W_gz = cbind( area, covariate )
   
   # Area-expanded sum
   #if(missing(W_gz)){
