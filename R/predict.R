@@ -66,7 +66,7 @@ function( object,
 #' @title Monte Carlo integration for abundance
 #'
 #' @description 
-#' Calculates an estimator by summing across multiple predictions, 
+#' Calculates an estimator for a derived quantity by summing across multiple predictions, 
 #' e.g., to approximate an integral when estimating area-expanded abundance.
 #'
 #' @inheritParams add_predictions
@@ -109,8 +109,8 @@ function( object,
 #'        standard methods in [TMB::sdreport()]
 #' @param intern Do Laplace approximation on C++ side? Passed to [TMB::MakeADFun()].
 #' @param apply.epsilon Apply epsilon bias correction using a manual calculation
-#'        rather than using the conventional method in [TMB::sdreport]?  Using
-#'        `apply.epsilon` is sometimes substantially faster.  
+#'        rather than using the conventional method in [TMB::sdreport]?  
+#'        See details for more information.  
 #'
 #' @details
 #' Analysts will often want to calculate some value by combiningg the predicted response at multiple
@@ -168,7 +168,15 @@ function( object,
 #' and \eqn{\phi^*} is outputted by `integrate_output`, 
 #' along with a standard error and potentially using
 #' the epsilon bias-correction estimator to correct for skewness and retransformation
-#' bias.  
+#' bias.
+#'
+#' Standard bias-correction using \code{bias.correct=TRUE} can be slow, and in 
+#' some cases it might be faster to do \code{apply.epsilon=TRUE} and \code{intern=TRUE}.
+#' However, that option is somewhat experimental, and a user might want to confirm
+#' that the two options give identical results. Similarly, using \code{bias.correct=TRUE}
+#' will still calculate the standard-error, whereas using
+#' \code{apply.epsilon=TRUE} and \code{intern=TRUE} will not.  
+#'
 #' 
 #' @export
 integrate_output <-
@@ -284,6 +292,12 @@ function( object,
     rep = newobj$report()
     out = c( "Estimate"=rep$Metric, "Std. Error"=NA, "Est. (bias.correct)"=NA, "Std. (bias.correct)"=NA )
   }
+  
+  # deal with memory internally
+  remove("newobj")
+  gc() 
+  
+  # return stuff
   return(out)
 }
 

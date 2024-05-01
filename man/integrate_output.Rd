@@ -28,7 +28,7 @@ then \code{integrate_output} is applying a midpoint approximation to the integra
 
 \item{area}{vector of values used for area-weighted expansion of
 estimated density surface for each row of \code{newdata}
-which must have same length as number of rows of \code{newdata}.}
+with length of \code{nrow(newdata)}.}
 
 \item{type}{Integer-vector indicating what type of expansion to apply to
 each row of \code{newdata}, with length of \code{nrow(newdata)}.
@@ -38,13 +38,13 @@ each row of \code{newdata}, with length of \code{nrow(newdata)}.
 proportion of total in each row of \code{newdata}}
 \item{\code{type=3}}{Abundance-weighted variable: weight predictor by
 proportion of total in a prior row of \code{newdata}.
-This 3rd option is used to weight a prediction for
+This option is used to weight a prediction for
 one category based on predicted density of another category, e.g.,
 to calculate abundance-weighted condition in a bivariate model.}
 \item{\code{type=0}}{Exclude from weighting: give weight of zero for
 a given row of \code{newdata}. Including a row of \code{newdata} with
-first-column of \code{0} is useful, e.g., when calculating abundance at that
-location, but where the eventual index uses abundance as weighting term
+\code{type=0} is useful, e.g., when calculating abundance at that
+location, where the eventual index uses abundance as weighting term
 but without otherwise using the predicted density in calculating a total
 value.}
 }}
@@ -54,7 +54,7 @@ that is used to calculate a weighted average that is then
 applied to the given row of \code{newdata}. Only used for when \code{type=3}.}
 
 \item{covariate}{numeric-vector used to provide a covariate
-that are specified for use in expansion, e.g., to provide positional
+that is used in expansion, e.g., to provide positional
 coordinates when calculating the abundance-weighted centroid with respect
 to that coordinate. Only used for when \code{type=2}.}
 
@@ -62,13 +62,14 @@ to that coordinate. Only used for when \code{type=2}.}
 standard methods in \code{\link[TMB:sdreport]{TMB::sdreport()}}}
 
 \item{apply.epsilon}{Apply epsilon bias correction using a manual calculation
-rather than using the conventional method in \link[TMB:sdreport]{TMB::sdreport}?  Using
-\code{apply.epsilon} is sometimes substantially faster.}
+rather than using the conventional method in \link[TMB:sdreport]{TMB::sdreport}?
+See details for more information.}
 
 \item{intern}{Do Laplace approximation on C++ side? Passed to \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \description{
-Applies Monte Carlo integration to approximate area-expanded abundance
+Calculates an estimator for a derived quantity by summing across multiple predictions,
+e.g., to approximate an integral when estimating area-expanded abundance.
 }
 \details{
 Analysts will often want to calculate some value by combiningg the predicted response at multiple
@@ -127,4 +128,11 @@ and \eqn{\phi^*} is outputted by \code{integrate_output},
 along with a standard error and potentially using
 the epsilon bias-correction estimator to correct for skewness and retransformation
 bias.
+
+Standard bias-correction using \code{bias.correct=TRUE} can be slow, and in
+some cases it might be faster to do \code{apply.epsilon=TRUE} and \code{intern=TRUE}.
+However, that option is somewhat experimental, and a user might want to confirm
+that the two options give identical results. Similarly, using \code{bias.correct=TRUE}
+will still calculate the standard-error, whereas using
+\code{apply.epsilon=TRUE} and \code{intern=TRUE} will not.
 }
