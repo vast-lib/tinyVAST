@@ -66,8 +66,10 @@ function( object,
 #' @title Monte Carlo integration for abundance
 #'
 #' @description 
-#' Calculates an estimator for a derived quantity by summing across multiple predictions, 
-#' e.g., to approximate an integral when estimating area-expanded abundance.
+#' Calculates an estimator for a derived quantity by summing across multiple predictions.
+#' This can be used to approximate an integral when estimating area-expanded abundance, 
+#' abundance-weighting a covariate to calculate distribution shifts, 
+#' and/or weighting one model variable by another.
 #'
 #' @inheritParams add_predictions
 #'
@@ -126,7 +128,9 @@ function( object,
 #'
 #' In more complicated cases, an analyst can then use `covariate` 
 #' to calculate the weighted average
-#' of a covariate (e.g., positional coordinates) for each Monte Carlo point. 
+#' of a covariate for each Monte Carlo point. For example, if the covariate is 
+#' positional coordinates or depth/elevation, then \code{type=2}
+#' measures shifts in the average habitat utilization with respect to that covariate.  
 #' Alternatively, an analyst fitting a multivariate model might weight one variable
 #' based on another using `weighting_index`, e.g., 
 #' to calculate abundance-weighted average condition, or

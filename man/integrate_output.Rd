@@ -68,8 +68,10 @@ See details for more information.}
 \item{intern}{Do Laplace approximation on C++ side? Passed to \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \description{
-Calculates an estimator for a derived quantity by summing across multiple predictions,
-e.g., to approximate an integral when estimating area-expanded abundance.
+Calculates an estimator for a derived quantity by summing across multiple predictions.
+This can be used to approximate an integral when estimating area-expanded abundance,
+abundance-weighting a covariate to calculate distribution shifts,
+and/or weighting one model variable by another.
 }
 \details{
 Analysts will often want to calculate some value by combiningg the predicted response at multiple
@@ -85,7 +87,9 @@ and summing across these area-expanded values.
 
 In more complicated cases, an analyst can then use \code{covariate}
 to calculate the weighted average
-of a covariate (e.g., positional coordinates) for each Monte Carlo point.
+of a covariate for each Monte Carlo point. For example, if the covariate is
+positional coordinates or depth/elevation, then \code{type=2}
+measures shifts in the average habitat utilization with respect to that covariate.
 Alternatively, an analyst fitting a multivariate model might weight one variable
 based on another using \code{weighting_index}, e.g.,
 to calculate abundance-weighted average condition, or
