@@ -44,11 +44,12 @@ constructing a space-variable interaction.
 \code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}.}
 
 \item{family}{A function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
-\code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}. Alternatively, can be a named list of
+\code{\link[=lognormal]{lognormal()}}, \code{\link[=tweedie]{tweedie()}},  \code{\link[=binomial]{binomial()}},  \code{\link[=Gamma]{Gamma()}}, or \code{\link[=poisson]{poisson()}}.
+Alternatively, can be a named list of
 these functions, with names that match levels of
 \code{data$distribution_column} to allow different
-families by row of data. Delta model families are possible.
-See \code{\link[tinyVAST:families]{Families}},}
+families by row of data. Delta model families are possible, and see
+\code{\link[tinyVAST:families]{Families}} for delta-model options,}
 
 \item{space_columns}{A string or character vector that indicates
 the column(s) of \code{data} indicating the location of each sample.

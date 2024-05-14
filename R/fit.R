@@ -20,11 +20,12 @@
 #'        `dsem=NULL` disables the space-variable interaction; see
 #'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param family A function returning a class \code{family}, including [gaussian()],
-#'        [lognormal()], or [tweedie()]. Alternatively, can be a named list of
+#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], or [poisson()]. 
+#'        Alternatively, can be a named list of
 #'        these functions, with names that match levels of
 #'        \code{data$distribution_column} to allow different
-#'        families by row of data. Delta model families are possible.
-#'        See \code{\link[tinyVAST:families]{Families}},
+#'        families by row of data. Delta model families are possible, and see
+#'        \code{\link[tinyVAST:families]{Families}} for delta-model options,
 #' @param space_columns A string or character vector that indicates
 #'        the column(s) of `data` indicating the location of each sample.
 #'        When `spatial_graph` is an `igraph` object, `space_columns` is a string with

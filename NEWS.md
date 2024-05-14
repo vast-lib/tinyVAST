@@ -3,6 +3,8 @@
 * Change `integrate_output` interface by splitting `W_gz` and `V_gz`
   into four vectors `area`, `type`, `covariate`, and `weighting_index`
   to simplify documentations and improve naming 
+* Fix bug where cloglog and logit links were not previously implemented 
+  for use in `predict` and `integrate_output`
 
 # tinyVAST 0.5.0
 

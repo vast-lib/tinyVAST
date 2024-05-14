@@ -759,6 +759,14 @@ Type objective_function<Type>::operator() (){
           case log_link:
             mu_g(g) = exp(p_g(g));
             break;
+          case logit_link:
+            mu_g(g) = invlogit(p_g(g));
+            break;
+          case cloglog_link:
+            mu_g(g) = Type(1.0) - exp( -1*exp(p_g(g)) );
+            break;
+          default:
+            error("Link not implemented.");
         }
       }
       if( components_e(e_g(g))==2 ){
