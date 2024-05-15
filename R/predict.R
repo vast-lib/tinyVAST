@@ -333,13 +333,19 @@ function( object,
     if( !(pred %in% colnames(newdata)) ){
       stop("Missing ", pred, " in newdata")
     }
-    # If predictor is a factor, make sure newdata has same levels and no new levels
+    #
+    if( is.factor(origdata[,pred]) ){
+      if( !all(unique(newdata[,pred]) %in% levels(origdata[,pred])) ){
+        stop("`newdata` column ", pred, "has new levels not present in the fitted data, which is not permitted")
+      }
+    }
+    # If predictor is a factor, make sure newdata has same level order
     if( is.factor(origdata[,pred]) ){
       newdata[,pred] = factor(newdata[,pred], levels=levels(origdata[,pred]))
     }
     # Check for NAs after factor(..., levels=levels(origdata)), which converts new levels to NAs
     if( any(is.na(newdata[,pred])) ){
-      stop("`newdata` column ", pred, " has NAs, whether because it's a factor with new levels or otherwise.")
+      stop("`newdata` column ", pred, " has NAs, which is not permitted")
     }
   }
 
