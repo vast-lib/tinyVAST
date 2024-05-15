@@ -333,8 +333,13 @@ function( object,
     if( !(pred %in% colnames(newdata)) ){
       stop("Missing ", pred, " in newdata")
     }
+    # If predictor is a factor, make sure newdata has same levels and no new levels
     if( is.factor(origdata[,pred]) ){
       newdata[,pred] = factor(newdata[,pred], levels=levels(origdata[,pred]))
+    }
+    # Check for NAs after factor(..., levels=levels(origdata)), which converts new levels to NAs
+    if( any(is.na(newdata[,pred])) ){
+      stop("`newdata` column ", pred, " has NAs, whether because it's a factor with new levels or otherwise.")
     }
   }
 
@@ -473,7 +478,7 @@ function( object,
     stop("Check output of `add_predictions` for variables with unexpected length")
   }
   if( any( sapply(tmb_data2[c('X_gj','Z_gk','X2_gj','Z2_gk')],FUN=nrow) != nrow(newdata) ) ){
-    stop("Check output of `add_predictions` for NAs")
+    stop("Check output of `add_predictions` for mismatch in dimensions")
   }
 
   return( tmb_data2 )
