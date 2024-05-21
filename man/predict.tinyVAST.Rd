@@ -8,7 +8,7 @@
   object,
   newdata,
   remove_origdata = FALSE,
-  what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g"),
+  what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g"),
   se.fit = FALSE,
   ...
 )
