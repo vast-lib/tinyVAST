@@ -764,7 +764,7 @@ function( nlminb_loops = 1,
           gmrf_parameterization = c("separable","projection"),
           estimate_delta0 = FALSE,
           getJointPrecision = FALSE,
-          calculate_deviance_explained = TRUE ){
+          calculate_deviance_explained = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
