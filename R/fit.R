@@ -203,13 +203,12 @@ function( formula,
   }
   if( length(variables) > 0 ){
     c_i = match( data[,variable_column], variables )
+    # variables can't have commas, because it conflicts with how `sem` and `dsem` are parsed
+    if( grepl(pattern=",", x=variables, fixed=TRUE) ){
+      stop("`variables` cannot include any commas")
+    }
   }else{
     c_i = integer(0)
-  }
-
-  # variables can't have commas, because it conflicts with how `sem` and `dsem` are parsed
-  if( grepl(pattern=",", x=variables, fixed=TRUE) ){
-    stop("`variables` cannot include any commas")
   }
 
   ##############
