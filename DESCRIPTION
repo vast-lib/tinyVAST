@@ -2,7 +2,7 @@ Type: Package
 Package: tinyVAST
 Title: Vector Autoregressive Spatio-Temporal Model Using Minimal
     Feature-Set
-Version: 0.6.1
+Version: 0.6.0
 Date: 2024-05-21
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
