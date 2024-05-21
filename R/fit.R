@@ -20,11 +20,12 @@
 #'        `dsem=NULL` disables the space-variable interaction; see
 #'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param family A function returning a class \code{family}, including [gaussian()],
-#'        [lognormal()], or [tweedie()]. Alternatively, can be a named list of
+#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], or [poisson()]. 
+#'        Alternatively, can be a named list of
 #'        these functions, with names that match levels of
 #'        \code{data$distribution_column} to allow different
-#'        families by row of data. Delta model families are possible.
-#'        See \code{\link[tinyVAST:families]{Families}},
+#'        families by row of data. Delta model families are possible, and see
+#'        \code{\link[tinyVAST:families]{Families}} for delta-model options,
 #' @param space_columns A string or character vector that indicates
 #'        the column(s) of `data` indicating the location of each sample.
 #'        When `spatial_graph` is an `igraph` object, `space_columns` is a string with
@@ -57,7 +58,7 @@
 #'        from `data$variables`.
 #' @param delta_options a named list with slots for \code{delta_formula},
 #'        \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
-#'        \code{family}, \code{sem}, and \code{dsem}, but specify options for the
+#'        \code{formula}, \code{sem}, and \code{dsem}, but specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
 #' @param control Output from [tinyVASTcontrol()], used to define user
@@ -75,7 +76,7 @@
 #'
 #' the default `dsem=NULL` turns off all multivariate and temporal indexing, such
 #' that `spatial_graph` is then ignored, and the model collapses
-#' to a standard model using \code{\link[mgcv]{gam}}.  To specify a univeriate spatial model,
+#' to a standard model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 #' the user must specify both `spatial_graph` and `dsem=""`, where the latter
 #' is then parsed to include a single exogenous variance for the single variable
 #'
@@ -96,7 +97,7 @@
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict
 #' @importFrom TMB MakeADFun sdreport
-#' @importFrom checkmate assertClass assertDataFrame
+#' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric
 #' @importFrom Matrix Cholesky solve
 #' @importFrom abind abind
 #'
@@ -156,6 +157,7 @@ function( formula,
   #if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
   assertClass(control, "tinyVASTcontrol")
   assertDataFrame(data)
+  if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   ##############
   # input telescoping
@@ -201,6 +203,10 @@ function( formula,
   }
   if( length(variables) > 0 ){
     c_i = match( data[,variable_column], variables )
+    # variables can't have commas, because it conflicts with how `sem` and `dsem` are parsed
+    if( any(grepl(pattern=",", x=variables, fixed=TRUE)) ){
+      stop("`variables` cannot include any commas")
+    }
   }else{
     c_i = integer(0)
   }
@@ -603,6 +609,9 @@ function( formula,
     tmb_map$log_kappa = factor(NA)
   }
 
+  # 
+  tmb_random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc")
+
   ##############
   # Fit model
   ##############
@@ -616,7 +625,7 @@ function( formula,
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
                    map = tmb_map,
-                   random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
+                   random = tmb_random,
                    DLL = "tinyVAST",
                    profile = control$profile,
                    silent = control$silent )  #
@@ -689,7 +698,7 @@ function( formula,
     opt = opt,
     rep = obj$report(obj$env$last.par.best),
     sdrep = sdrep,
-    tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map),
+    tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map, tmb_random=tmb_random),
     call = match.call(),
     spatial_graph = spatial_graph,
     run_time = Sys.time() - start_time,

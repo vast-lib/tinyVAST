@@ -226,7 +226,7 @@ mydelta2 = tinyVAST( data = Data,
                family = delta_lognormal(type="poisson-link"),
                spatial_graph = mesh )
 
-mydelta
+mydelta2
 ```
 
 And we can again use the `DHARMa` package to visualize simulation residuals:
@@ -249,7 +249,7 @@ knitr::kable( c("Tweedie"=AIC(mytinyVAST),"delta-lognormal"=AIC(mydelta2)), digi
 
 # Bivariate spatio-temporal autoregressive model
 
-We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.
+We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.  We first simulate artificial data for the sake of demonstration:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate settings
@@ -273,7 +273,11 @@ for( t in seq_len(n_t) ){
 # Shape into longform data-frame and add error
 Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")), z=exp(as.vector(d)))
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
+```
 
+We next set up inputs and run the model:
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 

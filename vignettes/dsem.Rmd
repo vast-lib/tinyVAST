@@ -33,7 +33,7 @@ options("tinyVAST.verbose" = FALSE)
 
 `tinyVAST` includes features to fit a dynamic structural equation model.  We here show this using a bivariate vector autoregressive model for wolf and moose abundance on Isle Royale.
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
 data(isle_royale, package="dsem")
 
 # Convert to long-form
@@ -59,6 +59,11 @@ mytiny = tinyVAST( dsem = dsem,
                  formula = logn ~ 0 + var )
 mytiny
 
+# Deviance explained relative to both intercepts
+# Note that a process-error-only estimate with have devexpl -> 1
+deviance_explained( mytiny, 
+                    null_formula = logn ~ 0 + var )
+
 # See summary
 knitr::kable( summary(mytiny,"dsem"), digits=3 )
 ```
@@ -73,7 +78,7 @@ knitr::kable( B, digits=3)
 
 We can then compare this with package `dsem`
 
-```{r, eval=requireNamespace("dsem"), echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r, eval=requireNamespace("dsem"), echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
 library(dsem)
 
 # Keep in wide-form

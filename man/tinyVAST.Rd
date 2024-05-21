@@ -44,11 +44,12 @@ constructing a space-variable interaction.
 \code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}.}
 
 \item{family}{A function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
-\code{\link[=lognormal]{lognormal()}}, or \code{\link[=tweedie]{tweedie()}}. Alternatively, can be a named list of
+\code{\link[=lognormal]{lognormal()}}, \code{\link[=tweedie]{tweedie()}},  \code{\link[=binomial]{binomial()}},  \code{\link[=Gamma]{Gamma()}}, or \code{\link[=poisson]{poisson()}}.
+Alternatively, can be a named list of
 these functions, with names that match levels of
 \code{data$distribution_column} to allow different
-families by row of data. Delta model families are possible.
-See \code{\link[tinyVAST:families]{Families}},}
+families by row of data. Delta model families are possible, and see
+\code{\link[tinyVAST:families]{Families}} for delta-model options,}
 
 \item{space_columns}{A string or character vector that indicates
 the column(s) of \code{data} indicating the location of each sample.
@@ -89,7 +90,7 @@ from \code{data$variables}.}
 
 \item{delta_options}{a named list with slots for \code{delta_formula},
 \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
-\code{family}, \code{sem}, and \code{dsem}, but specify options for the
+\code{formula}, \code{sem}, and \code{dsem}, but specify options for the
 second linear predictor of a delta model, and are only used (or estimable)
 when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
 
@@ -115,7 +116,7 @@ the space-variable interaction.
 
 the default \code{dsem=NULL} turns off all multivariate and temporal indexing, such
 that \code{spatial_graph} is then ignored, and the model collapses
-to a standard model using \code{\link[mgcv]{gam}}.  To specify a univeriate spatial model,
+to a standard model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 the user must specify both \code{spatial_graph} and \code{dsem=""}, where the latter
 is then parsed to include a single exogenous variance for the single variable\tabular{ll}{
    \strong{Model type} \tab \strong{How to specify} \cr

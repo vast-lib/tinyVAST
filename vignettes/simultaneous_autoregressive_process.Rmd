@@ -136,7 +136,7 @@ plot( adjacency_graph,
 ```
 
 We can then pass this adjacency graph to `tinyVAST` during fitting:
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
 # Fit tinyVAST model
 mytiny = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,

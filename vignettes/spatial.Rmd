@@ -30,6 +30,8 @@ knitr::opts_chunk$set(
 library(tinyVAST)
 library(mgcv)
 library(fmesher)
+library(pdp)  # approx = TRUE gives effects for average of other covariates
+library(lattice)
 set.seed(101)
 options("tinyVAST.verbose" = FALSE)
 ```
@@ -67,12 +69,17 @@ plot(mesh)
 
 Finally, we can fit these data using `tinyVAST`
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Define sem, with just one variance for the single variable
+sem = "
+  n <-> n, spatial_sd
+"
+
 # fit model
 out = tinyVAST( data = Data,
            formula = n ~ s(w),
            spatial_graph = mesh,
            control = tinyVASTcontrol(getsd=FALSE),
-           sem = "" )
+           sem = sem)
 ```
 
 We can then calculate the area-weighted total abundance:
@@ -92,15 +99,8 @@ sum( Data$z )
 We can compute deviance residuals and percent-deviance explained:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-R1 = sum( residuals(out, type="deviance")^2 )
-
-# tinyVAST null model with just a single intercept
-null = tinyVAST( data = Data,
-                 formula = n ~ 1 )
-R0 = sum( residuals(null, type="deviance")^2 )
-
 # Percent deviance explained
-1 - R1/R0
+out$deviance_explained
 ```
 
 We can then compare this with the PDE reported by `mgcv`
@@ -118,8 +118,9 @@ It is then easy to confirm that mgcv and tinyVAST give (essentially) identical P
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 out_reduced = tinyVAST( data = Data,
                         formula = n ~ s(w) + s(x,y) )
-R1_reduced = sum( residuals(out_reduced, type="deviance")^2 )
-1 - R1_reduced/R0
+
+# Extract PDE for GAM-style spatial smoother in tinyVAST
+out_reduced$deviance_explained
 ```
 
 # Visualize spatial response
@@ -143,10 +144,6 @@ image( x=1:n_x, y=1:n_y, z=matrix(Data$z,ncol=n_y), main="True response" )
 
 We can also compute the marginal effect of the cyclic confounder
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-library(pdp)  # approx = TRUE gives effects for average of other covariates
-library(lattice)
-#library(visreg)
-
 # compute partial dependence plot
 Partial = partial( object = out,
                    pred.var = "w",

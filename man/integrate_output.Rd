@@ -7,9 +7,10 @@
 integrate_output(
   object,
   newdata,
-  V_gz,
   area,
-  W_gz,
+  type = rep(1, nrow(newdata)),
+  weighting_index,
+  covariate,
   bias.correct = TRUE,
   apply.epsilon = FALSE,
   intern = FALSE
@@ -18,21 +19,124 @@ integrate_output(
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}.}
 
-\item{newdata}{New data-frame of independent variables used to predict the response.}
+\item{newdata}{New data-frame of independent variables used to predict the response,
+where a total value is calculated by combining across these individual predictions.
+If these locations are randomly drawn from a specified spatial domain, then
+\code{integrate_output} applies Monte Carlo integration to approximate the
+total over that area.  If locations are drawn sysmatically from a domain,
+then \code{integrate_output} is applying a midpoint approximation to the integral.}
 
-\item{V_gz}{Settings for expansion.}
+\item{area}{vector of values used for area-weighted expansion of
+estimated density surface for each row of \code{newdata}
+with length of \code{nrow(newdata)}.}
 
-\item{area}{value used for area-weighted expansion of estimated density surface
-for each row of \code{newdata}.}
+\item{type}{Integer-vector indicating what type of expansion to apply to
+each row of \code{newdata}, with length of \code{nrow(newdata)}.
+\describe{
+\item{\code{type=1}}{Area-weighting: weight predictor by argument \code{area}}
+\item{\code{type=2}}{Abundance-weighted covariate: weight \code{covariate} by
+proportion of total in each row of \code{newdata}}
+\item{\code{type=3}}{Abundance-weighted variable: weight predictor by
+proportion of total in a prior row of \code{newdata}.
+This option is used to weight a prediction for
+one category based on predicted density of another category, e.g.,
+to calculate abundance-weighted condition in a bivariate model.}
+\item{\code{type=0}}{Exclude from weighting: give weight of zero for
+a given row of \code{newdata}. Including a row of \code{newdata} with
+\code{type=0} is useful, e.g., when calculating abundance at that
+location, where the eventual index uses abundance as weighting term
+but without otherwise using the predicted density in calculating a total
+value.}
+}}
 
-\item{W_gz}{Covariates for expansion.}
+\item{weighting_index}{integer-vector used to indicate a previous row
+that is used to calculate a weighted average that is then
+applied to the given row of \code{newdata}. Only used for when \code{type=3}.}
 
-\item{bias.correct}{logical indicating if bias correction should be applied}
+\item{covariate}{numeric-vector used to provide a covariate
+that is used in expansion, e.g., to provide positional
+coordinates when calculating the abundance-weighted centroid with respect
+to that coordinate. Only used for when \code{type=2}.}
 
-\item{apply.epsilon}{Apply epsilon bias correction?}
+\item{bias.correct}{logical indicating if bias correction should be applied using
+standard methods in \code{\link[TMB:sdreport]{TMB::sdreport()}}}
+
+\item{apply.epsilon}{Apply epsilon bias correction using a manual calculation
+rather than using the conventional method in \link[TMB:sdreport]{TMB::sdreport}?
+See details for more information.}
 
 \item{intern}{Do Laplace approximation on C++ side? Passed to \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
 \description{
-Applies Monte Carlo integration to approximate area-expanded abundance
+Calculates an estimator for a derived quantity by summing across multiple predictions.
+This can be used to approximate an integral when estimating area-expanded abundance,
+abundance-weighting a covariate to calculate distribution shifts,
+and/or weighting one model variable by another.
+}
+\details{
+Analysts will often want to calculate some value by combiningg the predicted response at multiple
+locations, and potentially from multiple variables in a multivariate analysis.
+This arises in a univariate model, e.g., when calculating the integral under a predicted
+density function, which is approximated using a midpoint or Monte Carlo approximation
+by calculating the linear predictors at each location \code{newdata},
+applying the inverse-link-trainsformation,
+and calling this predicted response \code{mu_g}.  Total abundance is then be approximated
+by multiplying \code{mu_g} by the area associated with each midpoint or Monte Carlo
+approximation point (supplied by argument \code{area}),
+and summing across these area-expanded values.
+
+In more complicated cases, an analyst can then use \code{covariate}
+to calculate the weighted average
+of a covariate for each Monte Carlo point. For example, if the covariate is
+positional coordinates or depth/elevation, then \code{type=2}
+measures shifts in the average habitat utilization with respect to that covariate.
+Alternatively, an analyst fitting a multivariate model might weight one variable
+based on another using \code{weighting_index}, e.g.,
+to calculate abundance-weighted average condition, or
+predator-expanded stomach contents.
+
+In practice, spatial integration in a multivariate model requires two passes through the rows of
+\code{newdata} when calculating a total value.  In the following, we
+write equations using C++ indexing conventions such that indexing starts with 0,
+to match the way that \code{integrate_output} expects indices to be supplied.
+Given inverse-link-transformed predictor \eqn{ \mu_g },
+function argument \code{type} as \eqn{ type_g }
+function argument \code{area} as \eqn{ a_g },
+function argument \code{covariate} as \eqn{ x_g },
+function argument \code{weighting_index} as \verb{\eqn{ h_g }}
+function argument \code{weighting_index} as \verb{\eqn{ h_g }}
+the first pass calculates:
+
+\deqn{ \nu_g = \mu_g a_g }
+
+where the total value from this first pass is calculated as:
+
+\deqn{ \nu^* = \sum_{g=0}^{G-1} \nu_g }
+
+The second pass then applies a further weighting, which depends upon \eqn{ type_g },
+and potentially upon \eqn{ x_g } and \eqn{ h_g }.
+
+If \eqn{type_g = 0} then \eqn{\phi_g = 0}
+
+If \eqn{type_g = 1} then \eqn{\phi_g = \nu_g}
+
+If \eqn{type_g = 2} then \eqn{\phi_g = x_g \frac{\nu_g}{\nu^*} }
+
+If \eqn{type_g = 3} then \eqn{\phi_g = \frac{\nu_{h_g}}{\nu^*} \mu_g }
+
+Finally, the total value from this second pass is calculated as:
+
+\deqn{ \phi^* = \sum_{g=0}^{G-1} \phi_g }
+
+and \eqn{\phi^*} is outputted by \code{integrate_output},
+along with a standard error and potentially using
+the epsilon bias-correction estimator to correct for skewness and retransformation
+bias.
+
+Standard bias-correction using \code{bias.correct=TRUE} can be slow, and in
+some cases it might be faster to do \code{apply.epsilon=TRUE} and \code{intern=TRUE}.
+However, that option is somewhat experimental, and a user might want to confirm
+that the two options give identical results. Similarly, using \code{bias.correct=TRUE}
+will still calculate the standard-error, whereas using
+\code{apply.epsilon=TRUE} and \code{intern=TRUE} will not.
 }

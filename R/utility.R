@@ -190,7 +190,7 @@ function( x,
 
   # Ensure that last.par and last.par.best are right
   nll_new = obj$fn(x$opt$par)
-  if( isFALSE(nll_new==x$opt$obj) ){
+  if( abs(nll_new-x$opt$obj) > 0.01 ){
     stop("Model fit is not identical to recorded value: Something is not working as expected")
   }
 
@@ -206,6 +206,7 @@ function( x,
     }
   }
 
+  x$obj = obj
   return(x)
 }
 
@@ -322,7 +323,10 @@ function( x,
 #'
 #' This implementation conditions upon the maximum likelihood estimate of fixed effects
 #'      and the empirical Bayes ("plug-in") prediction of random effects.  It can 
-#'      be described as "conditional deviance explained". 
+#'      be described as "conditional deviance explained". A state-space model that 
+#'      estimates measurement error variance approaching zero (i.e., collapses to 
+#'      a process-error-only model) will have a conditional deviance explained
+#'      that approaches 1.0
 #'
 #' @param x output from `\code{tinyVAST()}`
 #' @param null_formula formula for the null model.  If missing, it uses

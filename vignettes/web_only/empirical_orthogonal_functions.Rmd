@@ -43,7 +43,6 @@ sf_pole = st_sfc( sf_pole, crs="+proj=longlat +datum=WGS84" )
 sf_pole = st_transform( sf_pole, crs=st_crs(sf_ice) )
 sf_pole = st_buffer( sf_pole, dist=3000 )
 sf_ice = st_intersection( sf_ice, sf_pole )
-#> Warning: attribute variables are assumed to be spatially constant throughout all geometries
 
 Data = data.frame( st_drop_geometry(sf_ice),
               st_coordinates(sf_ice),

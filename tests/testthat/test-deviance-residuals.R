@@ -105,7 +105,15 @@ test_that("deviance residuals for poisson works", {
                      data = data.frame(x=x, y=y),
                      family = poisson("log") )
   resid1 = residuals( mytiny, type="deviance" )
-
+  # resid1^2
+  # mu = mytiny$rep$mu_i; 
+  # 2*y*log(y/mu) - (y-mu)
+  # sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
+  # resid1
+  # pow = function(a,b) a^b
+  # Type = function(z)z
+  # sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
+  
   #
   myglm = glm( y ~ 1 + x,
                      data = data.frame(x=x, y=y),
