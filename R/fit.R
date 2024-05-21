@@ -842,7 +842,7 @@ function( x,
     cat( "\n")
   }
   if( !is.null(x$deviance_explained) ){
-    cat( "Proportion deviance explained: \n")
+    cat( "Proportion conditional deviance explained: \n")
     print(x$deviance_explained)
     cat( "\n")
   }
