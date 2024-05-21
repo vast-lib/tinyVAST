@@ -1,3 +1,7 @@
+# tinyVAST 0.7.0
+
+* Adding option for spatially-varying-coefficient (SVC) models
+
 # tinyVAST 0.6.0
 
 * Change `integrate_output` interface by splitting `W_gz` and `V_gz`
