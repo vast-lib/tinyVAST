@@ -22,7 +22,7 @@ predict.tinyVAST <-
 function( object,
           newdata,
           remove_origdata = FALSE,
-          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g"),
+          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g"),
           se.fit = FALSE,
           ... ){
 
@@ -378,6 +378,17 @@ function( object,
   }
   covariates = make_covariates( object$internal$gam_setup )
   covariates2 = make_covariates( object$internal$delta_gam_setup )
+  
+  make_spatial_varying <-
+  function( spatial_varying ){
+    if( is.null(spatial_varying) ){
+      spatial_varying = ~ 0
+    }
+    W_gl = model.matrix( spatial_varying, data = newdata )
+    return(W_gl)
+  }
+  W_gl = make_spatial_varying( object$internal$spatial_varying )
+  W2_gl = make_spatial_varying( object$internal$delta_spatial_varying )
 
   # Assemble A_gs
   if( is(object$spatial_graph, "fm_mesh_2d") ){
@@ -458,6 +469,9 @@ function( object,
   tmb_data2$c_g = c_g - 1 # Convert to CPP indexing
   tmb_data2$offset_g = covariates$offset_g
   tmb_data2$e_g = e_g - 1 # -1 to convert to CPP index
+  tmb_data2$A_gs = A_gs
+  tmb_data2$W_gl = W_gl
+  tmb_data2$W2_gl = W2_gl
 
   # Simplify by eliminating observations ... experimental
   if( isTRUE(remove_origdata) ){

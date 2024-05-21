@@ -1,5 +1,3 @@
-
-
 test_that("SVC works", {
   library(fmesher)
   set.seed(101)
@@ -45,4 +43,8 @@ test_that("SVC works", {
              control = tinyVASTcontrol() )
   expect_equal( my1$opt$objective, my2$opt$objective, tolerance=0.001 )
 
+  # Compare predictions
+  pred1 = predict(my1)
+  pred2 = predict(my2)
+  expect_equal( pred1, pred2, tolerance=0.001 )
 })

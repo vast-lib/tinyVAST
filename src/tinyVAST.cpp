@@ -783,13 +783,15 @@ Type objective_function<Type>::operator() (){
     vector<Type> pgamma_g = Z_gk*gamma_k;
     vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
     vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
+    vector<Type> pxi_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
+    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g + pxi_g;
     // Second linear predictor
     vector<Type> palpha2_g = X2_gj*alpha2_j;
     vector<Type> pgamma2_g = Z2_gk*gamma2_k;
     vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
     vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g;
+    vector<Type> pxi2_g = multiply_xi( A_gs, xi2_sl, W2_gl ) / exp(log_tau);
+    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g + pxi2_g;
     vector<Type> mu_g( p_g.size() );
     //for( int g=0; g<p_g.size(); g++ ){
     //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
@@ -883,11 +885,13 @@ Type objective_function<Type>::operator() (){
     REPORT( pgamma_g );
     REPORT( pepsilon_g );
     REPORT( pomega_g );
+    REPORT( pxi_g );
     REPORT( p2_g );
     REPORT( palpha2_g );
     REPORT( pgamma2_g );
     REPORT( pepsilon2_g );
     REPORT( pomega2_g );
+    REPORT( pxi2_g );
     REPORT( mu_g );
     ADREPORT( p_g );
   }
