@@ -157,6 +157,7 @@ function( formula,
   #if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
   assertClass(control, "tinyVASTcontrol")
   assertDataFrame(data)
+  if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   ##############
   # input telescoping
@@ -204,6 +205,11 @@ function( formula,
     c_i = match( data[,variable_column], variables )
   }else{
     c_i = integer(0)
+  }
+
+  # variables can't have commas, because it conflicts with how `sem` and `dsem` are parsed
+  if( grepl(pattern=",", x=variables, fixed=TRUE) ){
+    stop("`variables` cannot include any commas")
   }
 
   ##############
@@ -749,6 +755,7 @@ function( nlminb_loops = 1,
           newton_loops = 0,
           eval.max = 1000,
           iter.max = 1000,
+          steps = 10,
           getsd = TRUE,
           silent = getOption("tinyVAST.silent", TRUE),
           trace = getOption("tinyVAST.trace", 0),
@@ -768,6 +775,7 @@ function( nlminb_loops = 1,
     newton_loops = newton_loops,
     eval.max = eval.max,
     iter.max = iter.max,
+    steps = steps
     getsd = getsd,
     silent = silent,
     trace = trace,
