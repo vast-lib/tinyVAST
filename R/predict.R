@@ -107,6 +107,8 @@ function( object,
 #' @param weighting_index integer-vector used to indicate a previous row
 #'        that is used to calculate a weighted average that is then 
 #'        applied to the given row of `newdata`. Only used for when \code{type=3}.
+#' @param getsd logical indicating whether to get the standard error, where
+#'        \code{getsd=FALSE} is faster during initial exploration
 #' @param bias.correct logical indicating if bias correction should be applied using
 #'        standard methods in [TMB::sdreport()]
 #' @param intern Do Laplace approximation on C++ side? Passed to [TMB::MakeADFun()].
@@ -190,6 +192,7 @@ function( object,
           type = rep(1,nrow(newdata)),
           weighting_index,
           covariate,
+          getsd = TRUE,
           bias.correct = TRUE,
           apply.epsilon = FALSE,
           intern = FALSE
@@ -286,7 +289,7 @@ function( object,
     #Metric = newobj$report()$Metric
     grad = newobj$gr( newobj$par )[which(names(newobj$par)=="eps")]
     out = c( "Estimate"=NA, "Std. Error"=NA, "Est. (bias.correct)"=grad, "Std. (bias.correct)"=NA )
-  }else if( isTRUE(bias.correct) ){
+  }else if( isTRUE(getsd) | isTRUE(bias.correct) ){
     newsd = sdreport( obj = newobj,
                       par.fixed = object$opt$par,
                       hessian.fixed = object$internal$Hess_fixed,
