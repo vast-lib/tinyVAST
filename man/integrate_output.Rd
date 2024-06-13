@@ -11,6 +11,7 @@ integrate_output(
   type = rep(1, nrow(newdata)),
   weighting_index,
   covariate,
+  getsd = TRUE,
   bias.correct = TRUE,
   apply.epsilon = FALSE,
   intern = FALSE
@@ -57,6 +58,9 @@ applied to the given row of \code{newdata}. Only used for when \code{type=3}.}
 that is used in expansion, e.g., to provide positional
 coordinates when calculating the abundance-weighted centroid with respect
 to that coordinate. Only used for when \code{type=2}.}
+
+\item{getsd}{logical indicating whether to get the standard error, where
+\code{getsd=FALSE} is faster during initial exploration}
 
 \item{bias.correct}{logical indicating if bias correction should be applied using
 standard methods in \code{\link[TMB:sdreport]{TMB::sdreport()}}}

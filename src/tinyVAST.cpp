@@ -156,6 +156,24 @@ array<Type> omega_distribution( array<Type> omega_sc,
   return omega_sc;
 }
 
+// distribution/projection for omega
+template<class Type>
+Type xi_distribution( array<Type> xi_sl,
+                      vector<Type> log_sigmaxi_l,
+                      Eigen::SparseMatrix<Type> Q_ss ){
+
+  Type nll = 0;
+  if( xi_sl.size() > 0 ){
+    int n_l = xi_sl.dim(1);
+    using namespace density;
+    for( int l=0; l<n_l; l++ ){
+      nll += SCALE( GMRF(Q_ss), exp(log_sigmaxi_l(l)) )( xi_sl.col(l) );
+    }
+  }
+
+  return nll;
+}
+
 // distribution/projection for epsilon
 template<class Type>
 array<Type> epsilon_distribution( array<Type> epsilon_stc,
@@ -255,6 +273,19 @@ vector<Type> multiply_2d_sparse( matrix<int> A, vector<Type> weight, array<Type>
     for( int z=0; z<A.rows(); z++ ){
       out(A(z,0)) += weight(z) * x(A(z,1),A(z,2));
     }
+  }
+  return out;
+}
+template<class Type>
+vector<Type> multiply_xi( Eigen::SparseMatrix<Type> A_is, array<Type> xi_sl, matrix<Type> W_il ){
+  vector<Type> out( W_il.rows() );
+  out.setZero();
+  if( xi_sl.size() > 0 ){
+    matrix<Type> xi_il = A_is * xi_sl.matrix();
+    for( int i=0; i<xi_il.rows(); i++ ){
+    for( int l=0; l<xi_il.cols(); l++ ){
+      out(i) += xi_il(i,l) * W_il(i,l);
+    }}
   }
   return out;
 }
@@ -513,8 +544,10 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( y_i );        // The response
   DATA_MATRIX( X_ij );        // Design matrix for fixed covariates
   DATA_MATRIX( Z_ik );        // Design matrix for splines
+  DATA_MATRIX( W_il );        // Design matrix for SVCs
   DATA_MATRIX( X2_ij );        // Design matrix for fixed covariates
   DATA_MATRIX( Z2_ik );        // Design matrix for splines
+  DATA_MATRIX( W2_il );        // Design matrix for SVCs
   DATA_IVECTOR( t_i );
   DATA_IVECTOR( c_i );
   DATA_VECTOR( offset_i );
@@ -530,6 +563,7 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aomega_z );
+  DATA_SPARSE_MATRIX( A_is );    // Used for SVC
 
   // DSEM objects
   DATA_IMATRIX( ram_dsem );
@@ -544,12 +578,15 @@ Type objective_function<Type>::operator() (){
   // Prediction options
   DATA_MATRIX( X_gj );       // Design matrix for fixed covariates
   DATA_MATRIX( Z_gk );       // Design matrix for splines
+  DATA_MATRIX( W_gl );
   DATA_MATRIX( X2_gj );       // Design matrix for fixed covariates
   DATA_MATRIX( Z2_gk );       // Design matrix for splines
+  DATA_MATRIX( W2_gl );
   DATA_IMATRIX( AepsilonG_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
   DATA_VECTOR( AepsilonG_z );
   DATA_IMATRIX( AomegaG_zz );       // Design matrix for SPDE projection (must be dense for DATA_UPDATE)
   DATA_VECTOR( AomegaG_z );
+  DATA_SPARSE_MATRIX( A_gs );
   DATA_IVECTOR( t_g );
   DATA_IVECTOR( c_g );
   DATA_VECTOR( offset_g );
@@ -569,20 +606,24 @@ Type objective_function<Type>::operator() (){
   PARAMETER_VECTOR( beta_z ); // DSEM coefficients
   PARAMETER_VECTOR( theta_z ); // SEM coefficients
   PARAMETER_VECTOR( log_lambda ); //Penalization parameters
+  PARAMETER_VECTOR( log_sigmaxi_l ); // SVC logSD
 
   PARAMETER_VECTOR( alpha2_j ); // Fixed covariate parameters
   PARAMETER_VECTOR( gamma2_k ); // Spline regression parameters
   PARAMETER_VECTOR( beta2_z ); // DSEM coefficients
   PARAMETER_VECTOR( theta2_z ); // SEM coefficients
   PARAMETER_VECTOR( log_lambda2 ); //Penalization parameters
+  PARAMETER_VECTOR( log_sigmaxi2_l ); // delta_SVC logSD
 
   PARAMETER_VECTOR( log_sigma );
   PARAMETER_VECTOR( delta0_c );
   PARAMETER_ARRAY( epsilon_stc );
   PARAMETER_ARRAY( omega_sc );
+  PARAMETER_ARRAY( xi_sl );
 
   PARAMETER_ARRAY( epsilon2_stc );
   PARAMETER_ARRAY( omega2_sc );
+  PARAMETER_ARRAY( xi2_sl );
 
   PARAMETER_VECTOR( eps );     // manual epsilon bias-correction, empty to turn off
 
@@ -692,11 +733,16 @@ Type objective_function<Type>::operator() (){
   nll += gamma_distribution( gamma_k, Sdims, S_kk, log_lambda );
   nll += gamma_distribution( gamma2_k, S2dims, S2_kk, log_lambda2 );
 
+  // Distribution for SVC components
+  nll += xi_distribution( xi_sl, log_sigmaxi_l, Q_ss );
+  nll += xi_distribution( xi2_sl, log_sigmaxi2_l, Q_ss );
+
   // Linear predictor
   vector<Type> p_i( y_i.size() );
   p_i = X_ij*alpha_j + Z_ik*gamma_k + offset_i;
   p_i += multiply_3d_sparse( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
   p_i += multiply_2d_sparse( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
+  p_i += multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
   //for( int i=0; i<p_i.size(); i++ ){
   //  if( (n_h>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
   //    h = c_i(i)*n_t + t_i(i);
@@ -707,6 +753,7 @@ Type objective_function<Type>::operator() (){
   p2_i = X2_ij*alpha2_j + Z2_ik*gamma2_k;
   p2_i += multiply_3d_sparse( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
   p2_i += multiply_2d_sparse( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
+  p2_i += multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
 
   // Likelihood
   // relative_deviance != devresid^2 for hurdle model
@@ -736,13 +783,15 @@ Type objective_function<Type>::operator() (){
     vector<Type> pgamma_g = Z_gk*gamma_k;
     vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
     vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g;
+    vector<Type> pxi_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
+    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g + pxi_g;
     // Second linear predictor
     vector<Type> palpha2_g = X2_gj*alpha2_j;
     vector<Type> pgamma2_g = Z2_gk*gamma2_k;
     vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
     vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g;
+    vector<Type> pxi2_g = multiply_xi( A_gs, xi2_sl, W2_gl ) / exp(log_tau);
+    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g + pxi2_g;
     vector<Type> mu_g( p_g.size() );
     //for( int g=0; g<p_g.size(); g++ ){
     //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
@@ -836,11 +885,13 @@ Type objective_function<Type>::operator() (){
     REPORT( pgamma_g );
     REPORT( pepsilon_g );
     REPORT( pomega_g );
+    REPORT( pxi_g );
     REPORT( p2_g );
     REPORT( palpha2_g );
     REPORT( pgamma2_g );
     REPORT( pepsilon2_g );
     REPORT( pomega2_g );
+    REPORT( pxi2_g );
     REPORT( mu_g );
     ADREPORT( p_g );
   }

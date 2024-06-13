@@ -22,7 +22,7 @@ predict.tinyVAST <-
 function( object,
           newdata,
           remove_origdata = FALSE,
-          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g"),
+          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g"),
           se.fit = FALSE,
           ... ){
 
@@ -107,6 +107,8 @@ function( object,
 #' @param weighting_index integer-vector used to indicate a previous row
 #'        that is used to calculate a weighted average that is then 
 #'        applied to the given row of `newdata`. Only used for when \code{type=3}.
+#' @param getsd logical indicating whether to get the standard error, where
+#'        \code{getsd=FALSE} is faster during initial exploration
 #' @param bias.correct logical indicating if bias correction should be applied using
 #'        standard methods in [TMB::sdreport()]
 #' @param intern Do Laplace approximation on C++ side? Passed to [TMB::MakeADFun()].
@@ -190,6 +192,7 @@ function( object,
           type = rep(1,nrow(newdata)),
           weighting_index,
           covariate,
+          getsd = TRUE,
           bias.correct = TRUE,
           apply.epsilon = FALSE,
           intern = FALSE
@@ -286,7 +289,7 @@ function( object,
     #Metric = newobj$report()$Metric
     grad = newobj$gr( newobj$par )[which(names(newobj$par)=="eps")]
     out = c( "Estimate"=NA, "Std. Error"=NA, "Est. (bias.correct)"=grad, "Std. (bias.correct)"=NA )
-  }else if( isTRUE(bias.correct) ){
+  }else if( isTRUE(getsd) | isTRUE(bias.correct) ){
     newsd = sdreport( obj = newobj,
                       par.fixed = object$opt$par,
                       hessian.fixed = object$internal$Hess_fixed,
@@ -378,6 +381,17 @@ function( object,
   }
   covariates = make_covariates( object$internal$gam_setup )
   covariates2 = make_covariates( object$internal$delta_gam_setup )
+  
+  make_spatial_varying <-
+  function( spatial_varying ){
+    if( is.null(spatial_varying) ){
+      spatial_varying = ~ 0
+    }
+    W_gl = model.matrix( spatial_varying, data = newdata )
+    return(W_gl)
+  }
+  W_gl = make_spatial_varying( object$internal$spatial_varying )
+  W2_gl = make_spatial_varying( object$internal$delta_spatial_varying )
 
   # Assemble A_gs
   if( is(object$spatial_graph, "fm_mesh_2d") ){
@@ -458,6 +472,9 @@ function( object,
   tmb_data2$c_g = c_g - 1 # Convert to CPP indexing
   tmb_data2$offset_g = covariates$offset_g
   tmb_data2$e_g = e_g - 1 # -1 to convert to CPP index
+  tmb_data2$A_gs = A_gs
+  tmb_data2$W_gl = W_gl
+  tmb_data2$W2_gl = W2_gl
 
   # Simplify by eliminating observations ... experimental
   if( isTRUE(remove_origdata) ){

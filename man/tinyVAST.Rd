@@ -18,6 +18,7 @@ tinyVAST(
   variables = NULL,
   distribution_column = "dist",
   delta_options = list(delta_formula = ~1),
+  spatial_varying = NULL,
   control = tinyVASTcontrol(),
   ...
 )
@@ -93,6 +94,8 @@ from \code{data$variables}.}
 \code{formula}, \code{sem}, and \code{dsem}, but specify options for the
 second linear predictor of a delta model, and are only used (or estimable)
 when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
+
+\item{spatial_varying}{a formula specifying spatially varying coefficients.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings.}

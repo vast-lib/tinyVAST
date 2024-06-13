@@ -61,6 +61,7 @@
 #'        \code{formula}, \code{sem}, and \code{dsem}, but specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
+#' @param spatial_varying a formula specifying spatially varying coefficients.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings.
 #' @param ... Not used.
@@ -146,6 +147,7 @@ function( formula,
           variables = NULL,
           distribution_column = "dist",
           delta_options = list(delta_formula = ~ 1),
+          spatial_varying = NULL,
           control = tinyVASTcontrol(),
           ... ){
 
@@ -188,7 +190,7 @@ function( formula,
   if(is.null(times)) times = seq( min(data[,time_column]), max(data[,time_column]) )
 
   # Defaults for variables
-  if( is.null(dsem) & is.null(sem) & is.null(delta_options$delta_dsem) & is.null(delta_options$delta_sem) ){
+  if( is.null(dsem) & is.null(sem) & is.null(delta_options$delta_dsem) & is.null(delta_options$delta_sem) & is.null(spatial_varying) & is.null(delta_options$spatial_varying) ){
     variables = numeric(0)
     # Force spatial_graph = NULL so that estimate_kappa=FALSE
     spatial_graph = NULL
@@ -472,6 +474,23 @@ function( formula,
   distributions = build_distributions( family )
 
   ##############
+  # Build spatially varying
+  ##############
+
+  build_spatial_varying <-
+  function( spatial_varying ){
+    if( is.null(spatial_varying) ){
+      spatial_varying = ~ 0
+    }
+    W_il = model.matrix( spatial_varying, data = data )
+    
+    out = list( "W_il" = W_il )
+    return(out)
+  }
+  SVC = build_spatial_varying( spatial_varying )
+  delta_SVC = build_spatial_varying( delta_options$spatial_varying )
+
+  ##############
   # Build inputs
   # All interactions among features should come here
   ##############
@@ -482,8 +501,10 @@ function( formula,
     y_i = gam_basis$y_i,
     X_ij = gam_basis$X_ij,
     Z_ik = gam_basis$Z_ik,
+    W_il = SVC$W_il,
     X2_ij = delta_gam_basis$X_ij,
     Z2_ik = delta_gam_basis$Z_ik,
+    W2_il = delta_SVC$W_il,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     offset_i = gam_basis$offset_i,
@@ -501,6 +522,7 @@ function( formula,
     Aepsilon_z = Aepsilon_z,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
     Aomega_z = Aomega_z,
+    A_is = A_is,
     ram_sem = as.matrix(na.omit(sem_ram$output$ram[,1:4])),
     ram_sem_start = as.numeric(sem_ram$output$ram[,5]),
     ram_dsem = as.matrix(na.omit(dsem_ram$output$ram[,1:4])),
@@ -511,12 +533,15 @@ function( formula,
     ram2_dsem_start = as.numeric(delta_dsem_ram$output$ram[,5]),
     X2_gj = matrix(0,ncol=ncol(delta_gam_basis$X_ij),nrow=0),
     Z2_gk = matrix(0,ncol=ncol(delta_gam_basis$Z_ik),nrow=0),
+    W2_gl = matrix(0,ncol=ncol(delta_SVC$W_il),nrow=0),
     X_gj = matrix(0,ncol=ncol(gam_basis$X_ij),nrow=0),
     Z_gk = matrix(0,ncol=ncol(gam_basis$Z_ik),nrow=0),
+    W_gl = matrix(0,ncol=ncol(SVC$W_il),nrow=0),
     AepsilonG_zz = matrix(0,nrow=0,ncol=4),
     AepsilonG_z = numeric(0),
     AomegaG_zz = matrix(0,nrow=0,ncol=4),
     AomegaG_z = numeric(0),
+    A_gs = sparseMatrix(i=integer(), j=integer(), x=numeric(), dims=c(0,ncol(A_is))),
     t_g = integer(0),
     c_g = integer(0),
     offset_g = integer(0),
@@ -540,20 +565,24 @@ function( formula,
     beta_z = as.numeric(ifelse(dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta_z = as.numeric(ifelse(sem_ram$param_type==1, 0.01, 1)),
     log_lambda = rep(0,length(tmb_data$Sdims)), #Log spline penalization coefficients
+    log_sigmaxi_l = rep(0,ncol(tmb_data$W_il)),
 
     alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
     gamma2_k = rep(0,ncol(tmb_data$Z2_ik)),  # Spline coefficients
     beta2_z = as.numeric(ifelse(delta_dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta2_z = as.numeric(ifelse(delta_sem_ram$param_type==1, 0.01, 1)),
     log_lambda2 = rep(0,length(tmb_data$S2dims)), #Log spline penalization coefficients
+    log_sigmaxi2_l = rep(0,ncol(tmb_data$W2_il)),
 
     log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
     delta0_c = rep(0, length(variables)),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
+    xi_sl = array(0, dim=c(n_s, ncol(tmb_data$W_il))),
 
     epsilon2_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega2_sc = array(0, dim=c(n_s, length(variables))),
+    xi2_sl = array(0, dim=c(n_s, ncol(tmb_data$W2_il))),
 
     eps = numeric(0),
     log_kappa = log(1)
@@ -610,17 +639,17 @@ function( formula,
   }
 
   # 
-  tmb_random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc")
+  tmb_random = c("gamma_k","epsilon_stc","omega_sc","xi_sl","gamma2_k","epsilon2_stc","omega2_sc","xi2_sl")
 
   ##############
   # Fit model
   ##############
 
   if( FALSE ){
-    #setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
-    #dyn.unload(dynlib("tinyVAST"))
-    #compile("tinyVAST.cpp" , framework = "TMBad" )
-    #dyn.load(dynlib("tinyVAST"))
+    setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
+    dyn.unload(dynlib("tinyVAST"))
+    compile("tinyVAST.cpp" , framework = "TMBad" )
+    dyn.load(dynlib("tinyVAST"))
   }
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
@@ -675,6 +704,8 @@ function( formula,
     dsem = dsem,
     sem = sem,
     gam_setup = gam_basis$gam_setup,
+    spatial_varying = spatial_varying,
+    SVC = SVC,
     delta_dsem_ram = delta_dsem_ram,                                  # for `add_predictions`
     delta_sem_ram = delta_sem_ram,                                    # for `add_predictions`
     delta_dsem = delta_options$delta_dsem,
@@ -684,6 +715,8 @@ function( formula,
     variable_column = variable_column,
     distribution_column = distribution_column,
     delta_gam_setup = delta_gam_basis$gam_setup,
+    delta_spatial_varying = delta_options$spatial_varying,
+    delta_SVC = delta_SVC,
     times = times,
     variables = variables,
     parlist = obj$env$parList(par=obj$env$last.par.best),
@@ -811,7 +844,7 @@ function( x,
     cat( "\n")
   }
   if( !is.null(x$deviance_explained) ){
-    cat( "Proportion deviance explained: \n")
+    cat( "Proportion conditional deviance explained: \n")
     print(x$deviance_explained)
     cat( "\n")
   }
