@@ -16,7 +16,7 @@ and/or weighting one model variable by another."><!-- mathjax --><script src="ht
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,6 +83,7 @@ and/or weighting one model variable by another.</p>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="va">weighting_index</span>,</span>
 <span>  <span class="va">covariate</span>,</span>
+<span>  getsd <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  bias.correct <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  apply.epsilon <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  intern <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -149,6 +150,11 @@ applied to the given row of <code>newdata</code>. Only used for when <code>type=
 that is used in expansion, e.g., to provide positional
 coordinates when calculating the abundance-weighted centroid with respect
 to that coordinate. Only used for when <code>type=2</code>.</p></dd>
+
+
+<dt>getsd</dt>
+<dd><p>logical indicating whether to get the standard error, where
+<code>getsd=FALSE</code> is faster during initial exploration</p></dd>
 
 
 <dt>bias.correct</dt>

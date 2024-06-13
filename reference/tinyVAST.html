@@ -12,7 +12,7 @@ a minimal feature-set and a widely used interface."><!-- mathjax --><script src=
     
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,6 +84,7 @@ a minimal feature-set and a widely used interface.</p>
 <span>  variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  distribution_column <span class="op">=</span> <span class="st">"dist"</span>,</span>
 <span>  delta_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>delta_formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>  spatial_varying <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  control <span class="op">=</span> <span class="fu"><a href="tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -186,6 +187,10 @@ from <code>data$variables</code>.</p></dd>
 <code>formula</code>, <code>sem</code>, and <code>dsem</code>, but specify options for the
 second linear predictor of a delta model, and are only used (or estimable)
 when a <code>delta family</code> is used for some samples.</p></dd>
+
+
+<dt>spatial_varying</dt>
+<dd><p>a formula specifying spatially varying coefficients.</p></dd>
 
 
 <dt>control</dt>
