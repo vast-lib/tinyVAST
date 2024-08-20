@@ -54,7 +54,7 @@ Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), w=w, z=as.vector(z) + cos(w/n_
 Data$n = Data$z + rnorm(nrow(Data), sd=1)
 
 # Add columns for multivariate and temporal dimensions
-Data$var = "n"
+Data$var = "density"
 Data$time = 2020
 ```
 
@@ -72,7 +72,7 @@ Finally, we can fit these data using `tinyVAST`
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Define sem, with just one variance for the single variable
 sem = "
-  n <-> n, spatial_sd
+  density <-> density, spatial_sd
 "
 
 # fit model
@@ -128,7 +128,7 @@ out_reduced$deviance_explained
 
 `tinyVAST` then has a standard `predict` function:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-predict(out, newdata=data.frame(x=1, y=1, time=1, w=1, var="n") )
+predict(out, newdata=data.frame(x=1, y=1, time=1, w=1, var="density") )
 ```
 
 and this is used to compute the spatial response
@@ -136,7 +136,7 @@ and this is used to compute the spatial response
 # Prediction grid
 pred = outer( seq(1,n_x,len=51),
               seq(1,n_y,len=51),
-              FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,w=1,time=1,var="n")) )
+              FUN=\(x,y) predict(out,newdata=data.frame(x=x,y=y,w=1,time=1,var="density")) )
 image( x=seq(1,n_x,len=51), y=seq(1,n_y,len=51), z=pred, main="Predicted response" )
 
 # True value
