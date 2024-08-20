@@ -32,6 +32,7 @@ library(mgcv)
 library(fmesher)
 library(pdp)  # approx = TRUE gives effects for average of other covariates
 library(lattice)
+library(ggplot2)
 set.seed(101)
 options("tinyVAST.verbose" = FALSE)
 ```
@@ -153,4 +154,21 @@ Partial = partial( object = out,
 
 # Lattice plots as default option
 plotPartial( Partial )
+```
+
+Alternatively, we can use the `predict` function to plot confidence intervals for marginal effects:
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# create new data frame
+newdata <- data.frame(w = seq(min(Data$w), max(Data$w), length.out = 100))
+newdata = cbind( newdata, 'x'=13, 'y'=13, 'var'='n' )
+
+# make predictions
+p <- predict( out, newdata=newdata, se.fit=TRUE, what="p_g" )
+
+# Format as data frame and plot
+p = data.frame( newdata, as.data.frame(p) )
+ggplot(p, aes(x=w, y=fit,
+  ymin = fit - 1.96 * se.fit, ymax = fit + 1.96 * se.fit)) +
+  geom_line() + geom_ribbon(alpha = 0.4)
 ```
