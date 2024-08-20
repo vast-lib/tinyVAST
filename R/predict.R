@@ -28,6 +28,8 @@ function( object,
 
   # extract original X and Z
   if(missing(newdata)) newdata = object$data
+  assertDataFrame(newdata)
+  if(inherits(newdata,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
   what = match.arg(what)
 
   # Build new
@@ -328,6 +330,7 @@ function( object,
 
   tmb_data = object$tmb_inputs$tmb_data
   origdata = object$data
+  if(inherits(newdata,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   # Check newdata for missing variables and/or factors
   pred_set = unique(unlist(sapply( object$internal[c('gam_setup','delta_gam_setup')],
