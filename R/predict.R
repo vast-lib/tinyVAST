@@ -93,8 +93,13 @@ function( object,
 #'   \item{\code{type=3}}{Abundance-weighted variable: weight predictor by 
 #'   proportion of total in a prior row of `newdata`. 
 #'   This option is used to weight a prediction for 
-#'   one category based on predicted density of another category, e.g., 
+#'   one category based on predicted proportional density of another category, e.g.,
 #'   to calculate abundance-weighted condition in a bivariate model.}
+#'   \item{\code{type=4}}{Abundance-expanded variable: weight predictor by
+#'   density in a prior row of `newdata`.
+#'   This option is used to weight a prediction for
+#'   one category based on predicted density of another category, e.g.,
+#'   to calculate abundance-expanded consumption in a bivariate model.}
 #'   \item{\code{type=0}}{Exclude from weighting: give weight of zero for
 #'   a given row of `newdata`. Including a row of `newdata` with 
 #'   \code{type=0} is useful, e.g., when calculating abundance at that 
@@ -169,6 +174,8 @@ function( object,
 #'  
 #' If \eqn{type_g = 3} then \eqn{\phi_g = \frac{\nu_{h_g}}{\nu^*} \mu_g }
 #'  
+#' If \eqn{type_g = 4} then \eqn{\phi_g = \nu_{h_g} \mu_g }
+#'
 #' Finally, the total value from this second pass is calculated as:
 #'
 #' \deqn{ \phi^* = \sum_{g=0}^{G-1} \phi_g }
@@ -221,7 +228,7 @@ function( object,
   }else if(length(type)==1){
     type = rep(type, nrow(type))
   }  
-  checkInteger( type, lower=0, upper=3, len=nrow(newdata), any.missing=FALSE )
+  checkInteger( type, lower=0, upper=4, len=nrow(newdata), any.missing=FALSE )
   
   # Index for variable-weighted value
   if(missing(weighting_index)){

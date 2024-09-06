@@ -868,6 +868,10 @@ Type objective_function<Type>::operator() (){
           // density-weighted average of prediction
           phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
         }
+        if( (V_gz(g,0)==4) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
+          // density-weighted total of prediction
+          phi_g(g) = phi0_g(V_gz(g,1)) * mu_g(g);
+        }
       }
       //Type Metric = sum(phi_g);
       Type Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
