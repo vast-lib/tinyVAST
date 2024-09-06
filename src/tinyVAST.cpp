@@ -840,7 +840,7 @@ Type objective_function<Type>::operator() (){
       // First sweep
       vector<Type> phi0_g( mu_g.size() );
       for( int g=0; g<mu_g.size(); g++ ){
-        if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) ){
+        if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) || (V_gz(g,0)==4) ){
           // Area-weighted average
           phi0_g(g) = mu_g(g) * W_gz(g,0);
         }
