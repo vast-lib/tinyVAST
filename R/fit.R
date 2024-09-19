@@ -62,6 +62,9 @@
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_varying a formula specifying spatially varying coefficients.
+#' @param weights A numeric vector representing optional likelihood weights for the
+#'        data likelihood. Weights do not have to sum to one and are not internally modified.
+#'        Thee weights argument needs to be a vector and not a name of the variable in the data frame.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings.
 #' @param ... Not used.
@@ -98,7 +101,7 @@
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict
 #' @importFrom TMB MakeADFun sdreport
-#' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric
+#' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
 #' @importFrom Matrix Cholesky solve
 #' @importFrom abind abind
 #'
@@ -148,6 +151,7 @@ function( formula,
           distribution_column = "dist",
           delta_options = list(delta_formula = ~ 1),
           spatial_varying = NULL,
+          weights = NULL,
           control = tinyVASTcontrol(),
           ... ){
 
@@ -211,6 +215,14 @@ function( formula,
     }
   }else{
     c_i = integer(0)
+  }
+
+  # Deal with likelihood weights
+  if( is.null(weights) ){
+    weights_i = rep(1,nrow(data))
+  }else{
+    assertNumeric(weights, lower=0, finite=TRUE, len=nrow(data), any.missing=FALSE)
+    weights_i = weights
   }
 
   ##############
@@ -398,6 +410,9 @@ function( formula,
       stop("Found t2() or te() smoothers. These are not yet implemented.", call. = FALSE)
     }
     which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
+
+    # Extract and add names
+    colnames(gam_setup$X) = gam_setup$term.names
     X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
     Z_ik = gam_setup$X[,which_se,drop=FALSE]
 
@@ -508,6 +523,7 @@ function( formula,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     offset_i = gam_basis$offset_i,
+    weights_i = weights_i,
     family_ez = distributions$family_code,
     link_ez = distributions$link_code,
     components_e = distributions$components,

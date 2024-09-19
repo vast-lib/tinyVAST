@@ -19,6 +19,7 @@ tinyVAST(
   distribution_column = "dist",
   delta_options = list(delta_formula = ~1),
   spatial_varying = NULL,
+  weights = NULL,
   control = tinyVASTcontrol(),
   ...
 )
@@ -96,6 +97,10 @@ second linear predictor of a delta model, and are only used (or estimable)
 when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
 
 \item{spatial_varying}{a formula specifying spatially varying coefficients.}
+
+\item{weights}{A numeric vector representing optional likelihood weights for the
+data likelihood. Weights do not have to sum to one and are not internally modified.
+Thee weights argument needs to be a vector and not a name of the variable in the data frame.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings.}
