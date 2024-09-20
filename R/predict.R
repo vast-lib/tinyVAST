@@ -9,9 +9,20 @@
 #'        also eliminates information about random-effect variance, and is not
 #'        appropriate when requesting predictive standard errors or epsilon
 #'        bias-correction.
-#' @param what What REPORTed object to output, where \code{p_g} is the linear
-#'        predictor, \code{mu_g} is the inverse-linked transformed predictor.
-#'        and others are additive components of the linear predictor.
+#' @param what What REPORTed object to output, where
+#'        \code{mu_g} is the inverse-linked transformed predictor including both linear components,
+#'        \code{p_g} is the first linear predictor,
+#'        \code{palpha_g} is the first predictor from fixed covariates in \code{formula},
+#'        \code{pgamma_g} is the first predictor from random covariates in \code{formula} (e.g., splines),
+#'        \code{pomega_g} is the first predictor from spatial variation,
+#'        \code{pepsilon_g} is the first predictor from spatio-temporal variation,
+#'        \code{pxi_g} is the first predictor from spatially varying coefficients,
+#'        \code{p2_g} is the second linear predictor,
+#'        \code{palpha2_g} is the second predictor from fixed covariates in \code{formula},
+#'        \code{pgamma2_g} is the second predictor from random covariates in \code{formula} (e.g., splines),
+#'        \code{pomega2_g} is the second predictor from spatial variation,
+#'        \code{pepsilon2_g} is the second predictor from spatio-temporal variation, and
+#'        \code{pxi2_g} is the second predictor from spatially varying coefficients.
 #' @param se.fit Calculate standard errors?
 #' @param ... Not used.
 #' @importFrom Matrix Matrix sparseMatrix
@@ -22,7 +33,8 @@ predict.tinyVAST <-
 function( object,
           newdata,
           remove_origdata = FALSE,
-          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g"),
+          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g",
+                   "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pxi2_g"),
           se.fit = FALSE,
           ... ){
 
