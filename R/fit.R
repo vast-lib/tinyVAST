@@ -165,6 +165,12 @@ function( formula,
   assertDataFrame(data)
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
+  # Haven't tested for extra levels
+  tmpdata = droplevels(data)
+  if( !identical(tmpdata,data) ){
+    stop("`data` has some factor with extra levels. Please retry after running `data = droplevels(data)` on the input `data`")
+  }
+
   ##############
   # input telescoping
   ##############

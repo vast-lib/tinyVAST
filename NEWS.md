@@ -1,6 +1,9 @@
 # tinyVAST 0.7.0
 
 * Adding option for spatially-varying-coefficient (SVC) models
+* Add error-check for when `data` has a factor with extra levels, which
+  conflicted with the logic of adding all `origdata` levels to `newdata`
+  when calling `predict`, and hence caused an uniformative error previously
 
 # tinyVAST 0.6.0
 

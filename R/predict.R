@@ -39,7 +39,9 @@ function( object,
           ... ){
 
   # extract original X and Z
-  if(missing(newdata)) newdata = object$data
+  if(missing(newdata)){
+    newdata = object$data
+  }
   assertDataFrame(newdata)
   if(inherits(newdata,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
   what = match.arg(what)
