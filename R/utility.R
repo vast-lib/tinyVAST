@@ -375,29 +375,35 @@ function( x,
                        variables = x$internal$variables,
                        delta_options = list( delta_formula = null_delta_formula ),
                        distribution_column = x$internal$distribution_column) 
-  
-  # Run if some parameters remain
-  if( length(null_fit$obj$par)>0 ){
-    # null model
-    null_fit = tinyVAST( data = x$data,
-                         formula = null_formula, 
-                         control = control,
-                         family = x$internal$family,
-                         space_columns = x$internal$space_columns,
-                         time_column = x$internal$time_column,
-                         variable_column = x$internal$variable_column,
-                         times = x$internal$times,
-                         variables = x$internal$variables,
-                         delta_options = list( delta_formula = null_delta_formula ),
-                         distribution_column = x$internal$distribution_column) 
+  null_obj = null_fit$obj
 
-    # Calculate deviance explained
-    devexpl = 1 - x$rep$deviance / null_fit$rep$deviance
-    if( (devexpl<0) | (devexpl>1) ){
-      warning("Problem detected: deviance explained should be between 0 and 1")
-    }
+  # Run if some parameters remain
+  if( length(null_obj$par)>0 ){
+    # null model
+    #null_fit = tinyVAST( data = x$data,
+    #                     formula = null_formula,
+    #                     control = control,
+    #                     family = x$internal$family,
+    #                     space_columns = x$internal$space_columns,
+    #                     time_column = x$internal$time_column,
+    #                     variable_column = x$internal$variable_column,
+    #                     times = x$internal$times,
+    #                     variables = x$internal$variables,
+    #                     delta_options = list( delta_formula = null_delta_formula ),
+    #                     distribution_column = x$internal$distribution_column)
+    null_opt = nlminb( start = null_obj$par,
+                       objective = null_obj$fn,
+                       gradient = null_obj$gr )
   }else{
-    devexpl = "Not calculating deviance explained. Please try again without using `control$profile`"
+    #devexpl = "Not calculating deviance explained. Please try again without using `control$profile`"
+    null_obj$fn(null_obj$par)
+  }
+  null_rep = null_obj$report()
+
+  # Calculate deviance explained
+  devexpl = 1 - x$rep$deviance / null_rep$deviance
+  if( (devexpl<0) | (devexpl>1) ){
+    warning("Problem detected: deviance explained should be between 0 and 1")
   }
 
   # Return
