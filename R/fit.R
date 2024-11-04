@@ -370,6 +370,7 @@ function( formula,
     estimate_kappa = FALSE
   }
   Atriplet = Matrix::mat2triplet(A_is)
+  if(n_s>1000) warning("`spatial_graph` has over 1000 components, so the model may be extremely slow")
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
