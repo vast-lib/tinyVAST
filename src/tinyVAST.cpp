@@ -637,12 +637,12 @@ Type objective_function<Type>::operator() (){
   int n_s = epsilon_stc.dim(0);
   int n_t = epsilon_stc.dim(1);
   int n_c = epsilon_stc.dim(2);
-  int n_h = n_t * n_c;      
+  int n_h = n_t * n_c;
 
   // int n2_s = epsilon2_stc.dim(0);
   int n2_t = epsilon2_stc.dim(1);
   int n2_c = epsilon2_stc.dim(2);
-  int n2_h = n2_t * n2_c;      
+  int n2_h = n2_t * n2_c;
 
   // Spatial distribution
   PARAMETER( log_kappa );
@@ -688,7 +688,7 @@ Type objective_function<Type>::operator() (){
   Eigen::SparseMatrix<Type> Gammainv_cc = make_ram( ram_sem, ram_sem_start, theta_z, n_c, int(1) );
   Eigen::SparseMatrix<Type> Gamma_cc = make_ram( ram_sem, ram_sem_start, theta_z, n_c, int(2) );
 
-  // DSEM
+  // Delta DSEM
   Eigen::SparseMatrix<Type> Rho2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(0) );
   Eigen::SparseMatrix<Type> Gammainv2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(1) );
   Eigen::SparseMatrix<Type> Gamma2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(2) );
@@ -696,7 +696,7 @@ Type objective_function<Type>::operator() (){
   // Delta SEM
   Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(0) );
   Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(1) );
-  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_sem, ram2_sem_start, theta_z, n2_c, int(2) );
+  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(2) );
 
   // Calculate effect of initial condition -- SPARSE version
   // Where does x go later?
@@ -764,7 +764,7 @@ Type objective_function<Type>::operator() (){
   vector<Type> devresid_i( y_i.size() );
   Type devresid = 0.0;
   Type deviance = 0.0;
-  Type dev; 
+  Type dev;
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
@@ -775,8 +775,8 @@ Type objective_function<Type>::operator() (){
     }
     if( components_e(e_i(i))==2 ){
       mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), weights_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll, dev, this );
-      deviance += dev; 
-      devresid_i(i) = NAN; 
+      deviance += dev;
+      devresid_i(i) = NAN;
     }
   }
 
@@ -911,7 +911,7 @@ Type objective_function<Type>::operator() (){
   REPORT( devresid_i );
   REPORT( deviance );
   REPORT( nll );
-  SIMULATE{ 
+  SIMULATE{
     REPORT(y_i);
   }
   return nll;
