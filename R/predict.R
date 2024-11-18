@@ -228,6 +228,14 @@ function( object,
                                newdata = newdata ) # ,
                                # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
 
+  # Check for no random effects
+  if( length(vastfit$obj$env$random)==0 ){
+    if( isTRUE(bias.correct) || isTRUE(apply.epsilon) ){
+      stop("No random effects present, so set `bias.correct=FALSE` and `apply.epsilon=FALSE` in `integrate_output(.)`")
+    }
+  }
+
+
   # Expansion area
   if(missing(area)){
     area = rep(1, nrow(newdata))
