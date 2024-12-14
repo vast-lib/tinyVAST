@@ -16,7 +16,7 @@ tinyVASTcontrol(
   profile = c(),
   tmb_par = NULL,
   gmrf_parameterization = c("separable", "projection"),
-  estimate_delta0 = FALSE,
+  reml = FALSE,
   getJointPrecision = FALSE,
   calculate_deviance_explained = TRUE
 )
@@ -55,7 +55,9 @@ a full-rank and IID precision for variables over time, and then projects
 this using the inverse-cholesky of the precision, where this projection
 allows for rank-deficient covariance.}
 
-\item{estimate_delta0}{Estimate a delta model?}
+\item{reml}{Logical: use REML (restricted maximum likelihood) estimation rather than
+maximum likelihood? Internally, this adds the fixed effects to the
+list of random effects to integrate over.}
 
 \item{getJointPrecision}{whether to get the joint precision matrix.  Passed
 to \code{\link[TMB]{sdreport}}.}

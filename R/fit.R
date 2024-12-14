@@ -662,7 +662,11 @@ function( formula,
   }
 
   # 
-  tmb_random = c("gamma_k","epsilon_stc","omega_sc","xi_sl","gamma2_k","epsilon2_stc","omega2_sc","xi2_sl")
+  tmb_random = c("gamma_k","epsilon_stc","omega_sc","xi_sl",
+                 "gamma2_k","epsilon2_stc","omega2_sc","xi2_sl")
+  if( isTRUE(control$reml) ){
+    tmb_random = union( tmb_random, c("alpha_j","alpha2_j") )
+  }
 
   ##############
   # Fit model
@@ -798,7 +802,9 @@ function( formula,
 #'        a full-rank and IID precision for variables over time, and then projects
 #'        this using the inverse-cholesky of the precision, where this projection
 #'        allows for rank-deficient covariance.
-#' @param estimate_delta0 Estimate a delta model?
+#' @param reml Logical: use REML (restricted maximum likelihood) estimation rather than
+#'        maximum likelihood? Internally, this adds the fixed effects to the 
+#'        list of random effects to integrate over.
 #' @param getJointPrecision whether to get the joint precision matrix.  Passed
 #'        to \code{\link[TMB]{sdreport}}.
 #' @param calculate_deviance_explained whether to calculate proportion of deviance
@@ -817,7 +823,8 @@ function( nlminb_loops = 1,
           profile = c(),
           tmb_par = NULL,
           gmrf_parameterization = c("separable","projection"),
-          estimate_delta0 = FALSE,
+          #estimate_delta0 = FALSE,
+          reml = FALSE,
           getJointPrecision = FALSE,
           calculate_deviance_explained = TRUE ){
 
@@ -836,7 +843,8 @@ function( nlminb_loops = 1,
     profile = profile,
     tmb_par = tmb_par,
     gmrf_parameterization = gmrf_parameterization,
-    estimate_delta0 = estimate_delta0,
+    estimate_delta0 = FALSE,
+    reml = reml,
     getJointPrecision = getJointPrecision,
     calculate_deviance_explained = calculate_deviance_explained
   ), class = "tinyVASTcontrol" )
