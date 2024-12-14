@@ -229,7 +229,7 @@ function( object,
                                # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
 
   # Check for no random effects
-  if( length(vastfit$obj$env$random)==0 ){
+  if( length(object$obj$env$random)==0 ){
     if( isTRUE(bias.correct) || isTRUE(apply.epsilon) ){
       stop("No random effects present, so set `bias.correct=FALSE` and `apply.epsilon=FALSE` in `integrate_output(.)`")
     }
