@@ -803,7 +803,7 @@ Type objective_function<Type>::operator() (){
     //  }
     //}
     for( int g=0; g<p_g.size(); g++ ){
-      if( components_e(e_g(g))==1 ){
+      //if( components_e(e_g(g))==1 ){
         switch( link_ez(e_g(g),0) ){
           case identity_link:
             mu_g(g) = p_g(g);
@@ -820,9 +820,9 @@ Type objective_function<Type>::operator() (){
           default:
             error("Link not implemented.");
         }
-      }
+      //}
       if( components_e(e_g(g))==2 ){
-        mu_g(g) = invlogit( p_g(g) );
+        //mu_g(g) = invlogit( p_g(g) );
         // second link
         switch( link_ez(e_g(g),1) ){
           case identity_link:

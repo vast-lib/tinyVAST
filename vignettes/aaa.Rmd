@@ -1,0 +1,30 @@
+---
+title: "Overview of vignettes"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Overview of vignettes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{dsem}
+---
+
+```{r, include = FALSE}
+EVAL <- TRUE
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = EVAL,
+  purl = EVAL
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build and PDF
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/dsem.Rmd"); rmarkdown::render( "vignettes/dsem.Rmd", rmarkdown::pdf_document())
+```
+
+`tinyVAST` can implement many analyses as nested submodels.  For this reason, it can be difficult to organize materials to orient users who are interested in one or another type of analysis.  To improve organization, we summarize the different features that are available in vignettes:
+
+* Age composition expansion:  Shows how to fit a multivariate spatio-temporal model to standardize age composition data;
+* 
