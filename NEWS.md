@@ -1,6 +1,16 @@
+# tinyVAST 0.7.1
+
+* Fixed bug (wrong output) when using `predict(fit, what="mu_g")` and
+  a Poisson-linked delta model
+* Fixed bug (cryptic error message) when using `integrate_output`
+* Add `cAIC` (but disabling EDF calculation for now)
+
 # tinyVAST 0.7.0
 
 * Adding option for spatially-varying-coefficient (SVC) models
+* Add error-check for when `data` has a factor with extra levels, which
+  conflicted with the logic of adding all `origdata` levels to `newdata`
+  when calling `predict`, and hence caused an uniformative error previously
 
 # tinyVAST 0.6.0
 

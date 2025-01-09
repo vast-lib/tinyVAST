@@ -2,8 +2,8 @@ Type: Package
 Package: tinyVAST
 Title: Vector Autoregressive Spatio-Temporal Model Using Minimal
     Feature-Set
-Version: 0.7.0
-Date: 2024-05-21
+Version: 0.7.1
+Date: 2025-01-08
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
 	   role = c("aut", "cre"),
@@ -60,6 +60,6 @@ Config/testthat/parallel: true
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 URL: https://vast-lib.github.io/tinyVAST/
 BugReports: https://github.com/vast-lib/tinyVAST/issues

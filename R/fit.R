@@ -62,6 +62,9 @@
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_varying a formula specifying spatially varying coefficients.
+#' @param weights A numeric vector representing optional likelihood weights for the
+#'        data likelihood. Weights do not have to sum to one and are not internally modified.
+#'        Thee weights argument needs to be a vector and not a name of the variable in the data frame.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings.
 #' @param ... Not used.
@@ -98,8 +101,8 @@
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict
 #' @importFrom TMB MakeADFun sdreport
-#' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric
-#' @importFrom Matrix Cholesky solve
+#' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
+#' @importFrom Matrix Cholesky solve Matrix diag
 #' @importFrom abind abind
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
@@ -148,6 +151,7 @@ function( formula,
           distribution_column = "dist",
           delta_options = list(delta_formula = ~ 1),
           spatial_varying = NULL,
+          weights = NULL,
           control = tinyVASTcontrol(),
           ... ){
 
@@ -160,6 +164,12 @@ function( formula,
   assertClass(control, "tinyVASTcontrol")
   assertDataFrame(data)
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
+
+  # Haven't tested for extra levels
+  tmpdata = droplevels(data)
+  if( !identical(tmpdata,data) ){
+    stop("`data` has some factor with extra levels. Please retry after running `data = droplevels(data)` on the input `data`")
+  }
 
   ##############
   # input telescoping
@@ -211,6 +221,14 @@ function( formula,
     }
   }else{
     c_i = integer(0)
+  }
+
+  # Deal with likelihood weights
+  if( is.null(weights) ){
+    weights_i = rep(1,nrow(data))
+  }else{
+    assertNumeric(weights, lower=0, finite=TRUE, len=nrow(data), any.missing=FALSE)
+    weights_i = weights
   }
 
   ##############
@@ -352,6 +370,7 @@ function( formula,
     estimate_kappa = FALSE
   }
   Atriplet = Matrix::mat2triplet(A_is)
+  if(n_s>1000) warning("`spatial_graph` has over 1000 components, so the model may be extremely slow")
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
@@ -398,6 +417,9 @@ function( formula,
       stop("Found t2() or te() smoothers. These are not yet implemented.", call. = FALSE)
     }
     which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
+
+    # Extract and add names
+    colnames(gam_setup$X) = gam_setup$term.names
     X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
     Z_ik = gam_setup$X[,which_se,drop=FALSE]
 
@@ -508,6 +530,7 @@ function( formula,
     t_i = t_i - 1, # -1 to convert to CPP index
     c_i = c_i - 1, # -1 to convert to CPP index
     offset_i = gam_basis$offset_i,
+    weights_i = weights_i,
     family_ez = distributions$family_code,
     link_ez = distributions$link_code,
     components_e = distributions$components,
@@ -625,7 +648,7 @@ function( formula,
   }
 
   # Check for obvious issues ... no NAs except in RAMstart
-  if( any(is.na(tmb_data[-match(c("ram_sem_start","ram_dsem_start"),names(tmb_data))])) ){
+  if( any(is.na(tmb_data[-match(c("ram_sem_start","ram_dsem_start","ram2_sem_start","ram2_dsem_start"),names(tmb_data))])) ){
     stop("Check `tmb_data` for NAs")
   }
 
@@ -639,7 +662,11 @@ function( formula,
   }
 
   # 
-  tmb_random = c("gamma_k","epsilon_stc","omega_sc","xi_sl","gamma2_k","epsilon2_stc","omega2_sc","xi2_sl")
+  tmb_random = c("gamma_k","epsilon_stc","omega_sc","xi_sl",
+                 "gamma2_k","epsilon2_stc","omega2_sc","xi2_sl")
+  if( isTRUE(control$reml) ){
+    tmb_random = union( tmb_random, c("alpha_j","alpha2_j") )
+  }
 
   ##############
   # Fit model
@@ -775,7 +802,9 @@ function( formula,
 #'        a full-rank and IID precision for variables over time, and then projects
 #'        this using the inverse-cholesky of the precision, where this projection
 #'        allows for rank-deficient covariance.
-#' @param estimate_delta0 Estimate a delta model?
+#' @param reml Logical: use REML (restricted maximum likelihood) estimation rather than
+#'        maximum likelihood? Internally, this adds the fixed effects to the 
+#'        list of random effects to integrate over.
 #' @param getJointPrecision whether to get the joint precision matrix.  Passed
 #'        to \code{\link[TMB]{sdreport}}.
 #' @param calculate_deviance_explained whether to calculate proportion of deviance
@@ -794,7 +823,8 @@ function( nlminb_loops = 1,
           profile = c(),
           tmb_par = NULL,
           gmrf_parameterization = c("separable","projection"),
-          estimate_delta0 = FALSE,
+          #estimate_delta0 = FALSE,
+          reml = FALSE,
           getJointPrecision = FALSE,
           calculate_deviance_explained = TRUE ){
 
@@ -813,7 +843,8 @@ function( nlminb_loops = 1,
     profile = profile,
     tmb_par = tmb_par,
     gmrf_parameterization = gmrf_parameterization,
-    estimate_delta0 = estimate_delta0,
+    estimate_delta0 = FALSE,
+    reml = reml,
     getJointPrecision = getJointPrecision,
     calculate_deviance_explained = calculate_deviance_explained
   ), class = "tinyVASTcontrol" )

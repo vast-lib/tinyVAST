@@ -9,9 +9,20 @@
 #'        also eliminates information about random-effect variance, and is not
 #'        appropriate when requesting predictive standard errors or epsilon
 #'        bias-correction.
-#' @param what What REPORTed object to output, where \code{p_g} is the linear
-#'        predictor, \code{mu_g} is the inverse-linked transformed predictor.
-#'        and others are additive components of the linear predictor.
+#' @param what What REPORTed object to output, where
+#'        \code{mu_g} is the inverse-linked transformed predictor including both linear components,
+#'        \code{p_g} is the first linear predictor,
+#'        \code{palpha_g} is the first predictor from fixed covariates in \code{formula},
+#'        \code{pgamma_g} is the first predictor from random covariates in \code{formula} (e.g., splines),
+#'        \code{pomega_g} is the first predictor from spatial variation,
+#'        \code{pepsilon_g} is the first predictor from spatio-temporal variation,
+#'        \code{pxi_g} is the first predictor from spatially varying coefficients,
+#'        \code{p2_g} is the second linear predictor,
+#'        \code{palpha2_g} is the second predictor from fixed covariates in \code{formula},
+#'        \code{pgamma2_g} is the second predictor from random covariates in \code{formula} (e.g., splines),
+#'        \code{pomega2_g} is the second predictor from spatial variation,
+#'        \code{pepsilon2_g} is the second predictor from spatio-temporal variation, and
+#'        \code{pxi2_g} is the second predictor from spatially varying coefficients.
 #' @param se.fit Calculate standard errors?
 #' @param ... Not used.
 #' @importFrom Matrix Matrix sparseMatrix
@@ -22,12 +33,17 @@ predict.tinyVAST <-
 function( object,
           newdata,
           remove_origdata = FALSE,
-          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g"),
+          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g",
+                   "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pxi2_g"),
           se.fit = FALSE,
           ... ){
 
   # extract original X and Z
-  if(missing(newdata)) newdata = object$data
+  if(missing(newdata)){
+    newdata = object$data
+  }
+  assertDataFrame(newdata)
+  if(inherits(newdata,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
   what = match.arg(what)
 
   # Build new
@@ -91,8 +107,13 @@ function( object,
 #'   \item{\code{type=3}}{Abundance-weighted variable: weight predictor by 
 #'   proportion of total in a prior row of `newdata`. 
 #'   This option is used to weight a prediction for 
-#'   one category based on predicted density of another category, e.g., 
+#'   one category based on predicted proportional density of another category, e.g.,
 #'   to calculate abundance-weighted condition in a bivariate model.}
+#'   \item{\code{type=4}}{Abundance-expanded variable: weight predictor by
+#'   density in a prior row of `newdata`.
+#'   This option is used to weight a prediction for
+#'   one category based on predicted density of another category, e.g.,
+#'   to calculate abundance-expanded consumption in a bivariate model.}
 #'   \item{\code{type=0}}{Exclude from weighting: give weight of zero for
 #'   a given row of `newdata`. Including a row of `newdata` with 
 #'   \code{type=0} is useful, e.g., when calculating abundance at that 
@@ -167,6 +188,8 @@ function( object,
 #'  
 #' If \eqn{type_g = 3} then \eqn{\phi_g = \frac{\nu_{h_g}}{\nu^*} \mu_g }
 #'  
+#' If \eqn{type_g = 4} then \eqn{\phi_g = \nu_{h_g} \mu_g }
+#'
 #' Finally, the total value from this second pass is calculated as:
 #'
 #' \deqn{ \phi^* = \sum_{g=0}^{G-1} \phi_g }
@@ -205,6 +228,14 @@ function( object,
                                newdata = newdata ) # ,
                                # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
 
+  # Check for no random effects
+  if( length(object$obj$env$random)==0 ){
+    if( isTRUE(bias.correct) || isTRUE(apply.epsilon) ){
+      stop("No random effects present, so set `bias.correct=FALSE` and `apply.epsilon=FALSE` in `integrate_output(.)`")
+    }
+  }
+
+
   # Expansion area
   if(missing(area)){
     area = rep(1, nrow(newdata))
@@ -219,7 +250,7 @@ function( object,
   }else if(length(type)==1){
     type = rep(type, nrow(type))
   }  
-  checkInteger( type, lower=0, upper=3, len=nrow(newdata), any.missing=FALSE )
+  checkInteger( type, lower=0, upper=4, len=nrow(newdata), any.missing=FALSE )
   
   # Index for variable-weighted value
   if(missing(weighting_index)){
@@ -328,6 +359,7 @@ function( object,
 
   tmb_data = object$tmb_inputs$tmb_data
   origdata = object$data
+  if(inherits(newdata,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   # Check newdata for missing variables and/or factors
   pred_set = unique(unlist(sapply( object$internal[c('gam_setup','delta_gam_setup')],

@@ -2,6 +2,7 @@
 test_that("Basic sfnetworks works", {
   library(sf)
   library(sfnetworks)
+  set.seed(101)
 
   stream <- st_read( file.path(system.file("stream_network",package="tinyVAST"),
                     "East_Fork_Lewis_basin.shp"), quiet=TRUE )
@@ -48,6 +49,7 @@ test_that("Basic sfnetworks works", {
              time_column = "time",
              distribution_column = "dist",
              sem = "" )
+  expect_equal( out$opt$obj, 119.3909, tolerance=0.01 )
 
   #
   integrate_output( out,

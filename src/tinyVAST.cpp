@@ -328,6 +328,7 @@ Type devresid_tweedie( Type y,
 template<class Type>
 Type one_predictor_likelihood( Type &y,
                         Type p,
+                        Type weight,
                         int link,
                         int family,
                         vector<Type> log_sigma_segment,
@@ -365,28 +366,28 @@ Type one_predictor_likelihood( Type &y,
     // Distribution
     switch( family ){
       case gaussian_family:
-        nll -= dnorm( y, mu, exp(log_sigma_segment(0)), true );
+        nll -= weight * dnorm( y, mu, exp(log_sigma_segment(0)), true );
         devresid = y - mu;
         if(isDouble<Type>::value && of->do_simulate){
           y = rnorm( mu, exp(log_sigma_segment(0)) );
         }
         break;
       case tweedie_family:
-        nll -= dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+        nll -= weight * dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
         devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
         if(isDouble<Type>::value && of->do_simulate){
           y = rtweedie( mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
         }
         break;
       case lognormal_family:
-        nll -= dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+        nll -= weight * dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
         devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
         if(isDouble<Type>::value && of->do_simulate){
           y = exp(rnorm( logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
         }
         break;
       case poisson_family:
-        nll -= dpois( y, mu, true );
+        nll -= weight * dpois( y, mu, true );
         devresid = sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
         if(isDouble<Type>::value && of->do_simulate){
           y = rpois( mu );
@@ -394,9 +395,9 @@ Type one_predictor_likelihood( Type &y,
         break;
       case binomial_family:
         if(y==0){
-          nll -= log_one_minus_mu;
+          nll -= weight * log_one_minus_mu;
         }else{
-          nll -= logmu;
+          nll -= weight * logmu;
         }
         if(isDouble<Type>::value && of->do_simulate){
           y = rbinom( Type(1), mu );
@@ -404,7 +405,7 @@ Type one_predictor_likelihood( Type &y,
         devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
-        nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
+        nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
         devresid = sign(y - mu) * pow(2 * ( (y-mu)/mu - log(y/mu) ), 0.5);
         if(isDouble<Type>::value && of->do_simulate){
           y = rgamma( exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)) );
@@ -423,6 +424,7 @@ template<class Type>
 Type two_predictor_likelihood( Type y,
                                Type p1,
                                Type p2,
+                               Type weight,
                                vector<int> link,
                                vector<int> family,
                                vector<Type> log_sigma_segment,
@@ -460,40 +462,40 @@ Type two_predictor_likelihood( Type y,
   if( !R_IsNA(asDouble(y)) ){
     // Distribution
     if( y == 0 ){
-      nll -= log_one_minus_mu1;
+      nll -= weight * log_one_minus_mu1;
       dev = -2 * log_one_minus_mu1;
       if(isDouble<Type>::value && of->do_simulate){
         y = rbinom( Type(1), mu1 );
       }
     }
     if( y>0 ){  // Not if-else so y>0 triggered when simulating y>0
-      nll -= logmu1;
+      nll -= weight * logmu1;
       dev = -2 * logmu1;
       //deviance1_i(i) = -2 * log_mu1(i);
       switch( family(1) ){
         case gaussian_family:
-          nll -= dnorm( y, mu2, exp(log_sigma_segment(0)), true );
+          nll -= weight * dnorm( y, mu2, exp(log_sigma_segment(0)), true );
           dev += pow(y - mu2, 2.0);
           if(isDouble<Type>::value && of->do_simulate){
             y = rnorm( mu2, exp(log_sigma_segment(0)) );
           }
           break;
         //case tweedie_family:
-        //  nll -= dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+        //  nll -= weight * dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
         //  devresid += devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
         //  if(isDouble<Type>::value && of->do_simulate){
         //    y = rtweedie( mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
         //  }
         //  break;
         case lognormal_family:
-          nll -= dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+          nll -= weight * dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
           dev += pow( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), 2.0 );
           if(isDouble<Type>::value && of->do_simulate){
             y = exp(rnorm( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
           }
           break;
         //case poisson_family:
-        //  nll -= dpois( y, mu2, true );
+        //  nll -= weight * dpois( y, mu2, true );
         //  devresid += sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
         //  if(isDouble<Type>::value && of->do_simulate){
         //    y = rpois( mu2 );
@@ -501,7 +503,7 @@ Type two_predictor_likelihood( Type y,
         //  break;
         // case 4:  // Bernoulli
         case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
-          nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)), true );
+          nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)), true );
           dev += 2 * ( (y-mu2)/mu2 - log(y/mu2) );
           if(isDouble<Type>::value && of->do_simulate){
             y = rgamma( exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)) );
@@ -551,6 +553,7 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( t_i );
   DATA_IVECTOR( c_i );
   DATA_VECTOR( offset_i );
+  DATA_VECTOR( weights_i );
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
   DATA_SPARSE_MATRIX( S2_kk ); // Sparse penalization matrix
@@ -634,12 +637,12 @@ Type objective_function<Type>::operator() (){
   int n_s = epsilon_stc.dim(0);
   int n_t = epsilon_stc.dim(1);
   int n_c = epsilon_stc.dim(2);
-  int n_h = n_t * n_c;      
+  int n_h = n_t * n_c;
 
   // int n2_s = epsilon2_stc.dim(0);
   int n2_t = epsilon2_stc.dim(1);
   int n2_c = epsilon2_stc.dim(2);
-  int n2_h = n2_t * n2_c;      
+  int n2_h = n2_t * n2_c;
 
   // Spatial distribution
   PARAMETER( log_kappa );
@@ -685,7 +688,7 @@ Type objective_function<Type>::operator() (){
   Eigen::SparseMatrix<Type> Gammainv_cc = make_ram( ram_sem, ram_sem_start, theta_z, n_c, int(1) );
   Eigen::SparseMatrix<Type> Gamma_cc = make_ram( ram_sem, ram_sem_start, theta_z, n_c, int(2) );
 
-  // DSEM
+  // Delta DSEM
   Eigen::SparseMatrix<Type> Rho2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(0) );
   Eigen::SparseMatrix<Type> Gammainv2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(1) );
   Eigen::SparseMatrix<Type> Gamma2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(2) );
@@ -693,7 +696,7 @@ Type objective_function<Type>::operator() (){
   // Delta SEM
   Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(0) );
   Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(1) );
-  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_sem, ram2_sem_start, theta_z, n2_c, int(2) );
+  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(2) );
 
   // Calculate effect of initial condition -- SPARSE version
   // Where does x go later?
@@ -761,19 +764,19 @@ Type objective_function<Type>::operator() (){
   vector<Type> devresid_i( y_i.size() );
   Type devresid = 0.0;
   Type deviance = 0.0;
-  Type dev; 
+  Type dev;
   for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
     if( components_e(e_i(i))==1 ){
-      mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll, devresid, this );
+      mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), weights_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll, devresid, this );
       deviance += pow( devresid, 2.0 );
       devresid_i(i) = devresid;
     }
     if( components_e(e_i(i))==2 ){
-      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll, dev, this );
-      deviance += dev; 
-      devresid_i(i) = NAN; 
+      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), weights_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll, dev, this );
+      deviance += dev;
+      devresid_i(i) = NAN;
     }
   }
 
@@ -800,7 +803,7 @@ Type objective_function<Type>::operator() (){
     //  }
     //}
     for( int g=0; g<p_g.size(); g++ ){
-      if( components_e(e_g(g))==1 ){
+      //if( components_e(e_g(g))==1 ){
         switch( link_ez(e_g(g),0) ){
           case identity_link:
             mu_g(g) = p_g(g);
@@ -817,9 +820,9 @@ Type objective_function<Type>::operator() (){
           default:
             error("Link not implemented.");
         }
-      }
+      //}
       if( components_e(e_g(g))==2 ){
-        mu_g(g) = invlogit( p_g(g) );
+        //mu_g(g) = invlogit( p_g(g) );
         // second link
         switch( link_ez(e_g(g),1) ){
           case identity_link:
@@ -840,7 +843,7 @@ Type objective_function<Type>::operator() (){
       // First sweep
       vector<Type> phi0_g( mu_g.size() );
       for( int g=0; g<mu_g.size(); g++ ){
-        if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) ){
+        if( (V_gz(g,0)==0) || (V_gz(g,0)==1) || (V_gz(g,0)==2) || (V_gz(g,0)==3) || (V_gz(g,0)==4) ){
           // Area-weighted average
           phi0_g(g) = mu_g(g) * W_gz(g,0);
         }
@@ -867,6 +870,10 @@ Type objective_function<Type>::operator() (){
         if( (V_gz(g,0)==3) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
           // density-weighted average of prediction
           phi_g(g) = (phi0_g(V_gz(g,1)) / sumphi0) * mu_g(g);
+        }
+        if( (V_gz(g,0)==4) && (V_gz(g,1)>=0) && (V_gz(g,1)<=g) ){
+          // density-weighted total of prediction
+          phi_g(g) = phi0_g(V_gz(g,1)) * mu_g(g);
         }
       }
       //Type Metric = sum(phi_g);
@@ -904,7 +911,7 @@ Type objective_function<Type>::operator() (){
   REPORT( devresid_i );
   REPORT( deviance );
   REPORT( nll );
-  SIMULATE{ 
+  SIMULATE{
     REPORT(y_i);
   }
   return nll;
