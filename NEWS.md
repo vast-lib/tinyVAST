@@ -1,3 +1,9 @@
+# tinyVAST 0.7.1
+
+* Fixed bug (wrong output) when using `predict(fit, what="mu_g")` and
+  a Poisson-linked delta model
+* Fixed bug (cryptic error message) when using `integrate_output`
+
 # tinyVAST 0.7.0
 
 * Adding option for spatially-varying-coefficient (SVC) models
