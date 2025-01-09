@@ -57,6 +57,7 @@
 #'
 #' cAIC(fit)
 #'
+#' @export
 cAIC <-
 function( object ){
 
