@@ -3,6 +3,7 @@
 * Fixed bug (wrong output) when using `predict(fit, what="mu_g")` and
   a Poisson-linked delta model
 * Fixed bug (cryptic error message) when using `integrate_output`
+* Add `cAIC` (but disabling EDF calculation for now)
 
 # tinyVAST 0.7.0
 
