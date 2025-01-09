@@ -1,17 +1,17 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
-  age_composition_expansion: web_only/age_composition_expansion.html
-  condition: web_only/condition.html
+  aaa: aaa.html
+  web_only/age_composition_expansion: web_only/age_composition_expansion.html
+  web_only/condition: web_only/condition.html
   dsem: dsem.html
-  empirical_orthogonal_functions: web_only/empirical_orthogonal_functions.html
+  web_only/empirical_orthogonal_functions: web_only/empirical_orthogonal_functions.html
   mgcv: mgcv.html
   multiple_data: multiple_data.html
   simultaneous_autoregressive_process: simultaneous_autoregressive_process.html
   spatial_factor_analysis: spatial_factor_analysis.html
   spatial: spatial.html
-  stream_networks: web_only/stream_networks.html
-  VAST: web_only/VAST.html
-last_built: 2024-06-13T04:21Z
-
+  web_only/stream_networks: web_only/stream_networks.html
+  web_only/VAST: web_only/VAST.html
+last_built: 2025-01-09T18:29Z

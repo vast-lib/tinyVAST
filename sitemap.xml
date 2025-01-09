@@ -1,153 +1,55 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/articles/dsem.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/mgcv.html</loc>
-  </url>
-  <url>
-    <loc>/articles/multiple_data.html</loc>
-  </url>
-  <url>
-    <loc>/articles/simultaneous_autoregressive_process.html</loc>
-  </url>
-  <url>
-    <loc>/articles/spatial.html</loc>
-  </url>
-  <url>
-    <loc>/articles/spatial_factor_analysis.html</loc>
-  </url>
-  <url>
-    <loc>/articles/web_only/VAST.html</loc>
-  </url>
-  <url>
-    <loc>/articles/web_only/age_composition_expansion.html</loc>
-  </url>
-  <url>
-    <loc>/articles/web_only/condition.html</loc>
-  </url>
-  <url>
-    <loc>/articles/web_only/empirical_orthogonal_functions.html</loc>
-  </url>
-  <url>
-    <loc>/articles/web_only/stream_networks.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/header.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/add_predictions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bering_sea.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bering_sea_pollock_ages.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bering_sea_pollock_vast.html</loc>
-  </url>
-  <url>
-    <loc>/reference/classify_variables.html</loc>
-  </url>
-  <url>
-    <loc>/reference/condition_and_density.html</loc>
-  </url>
-  <url>
-    <loc>/reference/deviance_explained.html</loc>
-  </url>
-  <url>
-    <loc>/reference/families.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/integrate_output.html</loc>
-  </url>
-  <url>
-    <loc>/reference/make_dsem_ram.html</loc>
-  </url>
-  <url>
-    <loc>/reference/make_eof_ram.html</loc>
-  </url>
-  <url>
-    <loc>/reference/make_sem_ram.html</loc>
-  </url>
-  <url>
-    <loc>/reference/parse_path.html</loc>
-  </url>
-  <url>
-    <loc>/reference/predict.tinyVAST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/red_snapper.html</loc>
-  </url>
-  <url>
-    <loc>/reference/red_snapper_shapefile.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reexports.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reload_model.html</loc>
-  </url>
-  <url>
-    <loc>/reference/residuals.tinyVAST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rmvnorm_prec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rotate_pca.html</loc>
-  </url>
-  <url>
-    <loc>/reference/salmon_returns.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sample_variable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sea_ice.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sfnetwork_evaluator.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sfnetwork_mesh.html</loc>
-  </url>
-  <url>
-    <loc>/reference/simulate_sfnetwork.html</loc>
-  </url>
-  <url>
-    <loc>/reference/summary.tinyVAST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tinyVAST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tinyVASTcontrol.html</loc>
-  </url>
-  <url>
-    <loc>/reference/vcov.tinyVAST.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/articles/aaa.html</loc></url>
+<url><loc>/articles/dsem.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/mgcv.html</loc></url>
+<url><loc>/articles/multiple_data.html</loc></url>
+<url><loc>/articles/simultaneous_autoregressive_process.html</loc></url>
+<url><loc>/articles/spatial.html</loc></url>
+<url><loc>/articles/spatial_factor_analysis.html</loc></url>
+<url><loc>/articles/web_only/VAST.html</loc></url>
+<url><loc>/articles/web_only/age_composition_expansion.html</loc></url>
+<url><loc>/articles/web_only/condition.html</loc></url>
+<url><loc>/articles/web_only/empirical_orthogonal_functions.html</loc></url>
+<url><loc>/articles/web_only/stream_networks.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/header.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/add_predictions.html</loc></url>
+<url><loc>/reference/bering_sea.html</loc></url>
+<url><loc>/reference/bering_sea_pollock_ages.html</loc></url>
+<url><loc>/reference/bering_sea_pollock_vast.html</loc></url>
+<url><loc>/reference/cAIC.html</loc></url>
+<url><loc>/reference/classify_variables.html</loc></url>
+<url><loc>/reference/condition_and_density.html</loc></url>
+<url><loc>/reference/deviance_explained.html</loc></url>
+<url><loc>/reference/families.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/integrate_output.html</loc></url>
+<url><loc>/reference/make_dsem_ram.html</loc></url>
+<url><loc>/reference/make_eof_ram.html</loc></url>
+<url><loc>/reference/make_sem_ram.html</loc></url>
+<url><loc>/reference/parse_path.html</loc></url>
+<url><loc>/reference/predict.tinyVAST.html</loc></url>
+<url><loc>/reference/red_snapper.html</loc></url>
+<url><loc>/reference/red_snapper_shapefile.html</loc></url>
+<url><loc>/reference/reexports.html</loc></url>
+<url><loc>/reference/reload_model.html</loc></url>
+<url><loc>/reference/residuals.tinyVAST.html</loc></url>
+<url><loc>/reference/rmvnorm_prec.html</loc></url>
+<url><loc>/reference/rotate_pca.html</loc></url>
+<url><loc>/reference/salmon_returns.html</loc></url>
+<url><loc>/reference/sample_variable.html</loc></url>
+<url><loc>/reference/sea_ice.html</loc></url>
+<url><loc>/reference/sfnetwork_evaluator.html</loc></url>
+<url><loc>/reference/sfnetwork_mesh.html</loc></url>
+<url><loc>/reference/simulate_sfnetwork.html</loc></url>
+<url><loc>/reference/summary.tinyVAST.html</loc></url>
+<url><loc>/reference/tinyVAST.html</loc></url>
+<url><loc>/reference/tinyVASTcontrol.html</loc></url>
+<url><loc>/reference/vcov.tinyVAST.html</loc></url>
 </urlset>
+
