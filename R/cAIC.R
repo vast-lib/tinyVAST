@@ -62,7 +62,7 @@ cAIC <-
 function( object ){
 
   #what = match.arg(what)
-  require(Matrix)
+  #requireNamespace(Matrix)
   data = object$tmb_inputs$tmb_data
 
   # Make sure profile = NULL
@@ -95,13 +95,13 @@ function( object ){
 
   ## use - for Hess because model returns negative loglikelihood;
   #cov_Psi_inv = -Hess_new[indx,indx]; ## this is the marginal prec mat of REs;
-  Hess_new = -Matrix(obj_new$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
+  Hess_new = -Matrix::Matrix(obj_new$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
   Hess_new = Hess_new[indx,indx]
 
   ## Joint hessian etc
-  Hess = -Matrix(obj$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
+  Hess = -Matrix::Matrix(obj$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
   Hess = Hess[indx,indx]
-  negEDF = diag(solve(Hess, Hess_new))
+  negEDF = Matrix::diag(Matrix::solve(Hess, Hess_new))
 
   #if(what == "cAIC"){
     jnll = obj$env$f(parDataMode)
