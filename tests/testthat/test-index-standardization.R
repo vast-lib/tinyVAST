@@ -52,3 +52,82 @@ test_that("Basic index standardization works", {
   integrate_output( my1,
                     newdata = subset(Data,time==t) )
 })
+
+test_that("Index standardization results are identical in VAST and tinyVAST", {
+  skip_if_not(require(VAST))
+  library(fmesher)
+  set.seed(101)
+  options("tinyVAST.verbose" = FALSE)
+
+  #
+  data(red_snapper)
+  data(red_snapper_shapefile)
+
+  #
+  Data = subset( red_snapper, Data_type == "Biomass_KG")
+
+  #
+  settings = make_settings(
+    purpose = "index3",
+    Region = "Other",
+    n_x = 100,
+    use_anisotropy = FALSE
+  )
+  # Eliminate Omega/Epsilon for 2nd linear predictor because tinyVAST has only one kappa
+  settings$FieldConfig[c("Omega","Epsilon"),'Component_2'] = 0
+  vast = fit_model(
+    settings = settings,
+    Lat_i = Data[,'Lat'],
+    Lon_i = Data[,'Lon'],
+    t_i = Data[,'Year'],
+    b_i = Data[,'Response_variable'],
+    a_i = rep(1,nrow(Data)),
+    grid_dim_km = c(0.1,0.1),
+    projargs = "EPSG:4326",
+    observations_LL = cbind('Lat'=Data[,'Lat'], 'Lon'=Data[,'Lon'])
+  )
+
+  # fit model with random walk using standard GMRF
+  # Won't exactly match because using a single log_kappa for both linear predictors'
+  tv = tinyVAST(
+    dsem = "",
+    sem = "",
+    data = droplevels(Data),
+    space_columns = c("Lon","Lat"),
+    variable_column = "Data_type",
+    time_column = "Year",
+    formula = Response_variable ~ 0 + factor(Year),
+    spatial_graph = vast$spatial_list$Mesh$anisotropic_mesh,
+    family = delta_gamma(type="poisson-link"),
+    delta_options = list(
+      delta_formula = ~ 0 + factor(Year)
+    ),
+    control = tinyVASTcontrol( trace = 1 )
+  )
+
+  # Predicted index using VAST grid
+  extrap = vast$extrapolation_list
+  index = sapply(
+    sort(unique(Data$Year)),
+    FUN = \(t){
+      integrate_output(
+        tv,
+        newdata = data.frame( extrap$Data_Extrap,
+                              Year = t,
+                              Data_type = "Biomass_KG" ),
+        area = extrap$Area_km2,
+      )
+    }
+  )
+
+  #
+  index_vast = rbind(
+    "Estimate" = as.list(vast$par$SD, report=TRUE, what="Estimate")$Index_ctl[1,,1],
+    "Std. Error" = as.list(vast$par$SD, report=TRUE, what="Std. Error")$Index_ctl[1,,1],
+    "Est. (bias.correct)" = as.list(vast$par$SD, report=TRUE, what="Est. (bias.correct)")$Index_ctl[1,,1]
+  )
+  index_tv = as.matrix(index[1:3,])
+  expect_equal( index_vast, index_tv, tol = 1 )
+  expect_equal( tv$opt$obj, as.numeric(vast$parameter_estimates$obj), tol = 0.1 )
+})
+
