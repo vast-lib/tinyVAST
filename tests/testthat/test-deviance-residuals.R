@@ -56,8 +56,8 @@ test_that("nbinom1 and nbinom2 family matches glmmTMB", {
   tinyVAST2 = tinyVAST( Y ~ 1 + X, family = nbinom2(), data = data )
   expect_equal( as.numeric(glmmTMB2$fit$par), as.numeric(tinyVAST2$opt$par),
                 tolerance=1e-3 )
-  tmp = mgcv::gam( Y ~ 1 + X, family = nb() )
   if( FALSE ){
+    tmp = mgcv::gam( Y ~ 1 + X, family = nb() )
     y = Y
     mu = predict(tinyVAST2)
     theta = exp(tinyVAST2$opt$par[3])
