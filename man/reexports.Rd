@@ -4,6 +4,8 @@
 \name{reexports}
 \alias{reexports}
 \alias{lognormal}
+\alias{nbinom2}
+\alias{nbinom1}
 \alias{tweedie}
 \title{Objects exported from other packages}
 \keyword{internal}
@@ -12,6 +14,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{sdmTMB}{\code{\link[sdmTMB:families]{lognormal}}, \code{\link[sdmTMB:families]{tweedie}}}
+  \item{sdmTMB}{\code{\link[sdmTMB:families]{lognormal}}, \code{\link[sdmTMB:families]{nbinom1}}, \code{\link[sdmTMB:families]{nbinom2}}, \code{\link[sdmTMB:families]{tweedie}}}
 }}
 

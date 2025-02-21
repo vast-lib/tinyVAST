@@ -26,6 +26,14 @@ add_to_family <- function(x) {
 sdmTMB::lognormal
 
 #' @export
+#' @importFrom sdmTMB nbinom2
+sdmTMB::nbinom2
+
+#' @export
+#' @importFrom sdmTMB nbinom1
+sdmTMB::nbinom1
+
+#' @export
 #' @importFrom sdmTMB tweedie
 sdmTMB::tweedie
 

@@ -20,7 +20,8 @@
 #'        `dsem=NULL` disables the space-variable interaction; see
 #'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param family A function returning a class \code{family}, including [gaussian()],
-#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], or [poisson()]. 
+#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], [poisson()],
+#'        [nbinom1()], or [nbinom2()].
 #'        Alternatively, can be a named list of
 #'        these functions, with names that match levels of
 #'        \code{data$distribution_column} to allow different
@@ -455,6 +456,8 @@ function( formula,
                          "tweedie" = 2,
                          "lognormal" = 1,
                          "poisson" = 0,
+                         "nbinom2" = 1,
+                         "nbinom1" = 1,
                          "binomial" = 0,
                          "bernoulli" = 0,
                          "Gamma" = 1
@@ -472,7 +475,9 @@ function( formula,
                          "poisson" = 3,
                          "binomial" = 4,
                          "bernoulli" = 4,
-                         "Gamma" = 5)[x$family])
+                         "Gamma" = 5,
+                         "nbinom1" = 6,
+                         "nbinom2" = 7)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("identity" = 0,

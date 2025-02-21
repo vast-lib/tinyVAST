@@ -33,6 +33,43 @@ test_that("deviance residuals for Gamma match glm", {
                 tolerance=1e-3 )
 })
 
+test_that("nbinom1 and nbinom2 family matches glmmTMB", {
+  skip_on_cran()
+  #skip_on_ci()
+  library(glmmTMB)
+
+  set.seed(101)
+  X = rnorm(100)
+  eps = 0.5 * rnorm(100)
+  p = 2 + 1 * X + eps
+  Y = rpois( length(X), lambda = exp(p) )
+  data = data.frame(X=X, Y=Y)
+
+  #
+  glmmTMB1 = glmmTMB( Y ~ 1 + X, family = nbinom1(), data = data )
+  tinyVAST1 = tinyVAST( Y ~ 1 + X, family = nbinom1(), data = data )
+  expect_equal( as.numeric(glmmTMB1$fit$par), as.numeric(tinyVAST1$opt$par),
+                tolerance=1e-3 )
+
+  #
+  glmmTMB2 = glmmTMB( Y ~ 1 + X, family = nbinom2(), data = data )
+  tinyVAST2 = tinyVAST( Y ~ 1 + X, family = nbinom2(), data = data )
+  expect_equal( as.numeric(glmmTMB2$fit$par), as.numeric(tinyVAST2$opt$par),
+                tolerance=1e-3 )
+  tmp = mgcv::gam( Y ~ 1 + X, family = nb() )
+  if( FALSE ){
+    y = Y
+    mu = predict(tinyVAST2)
+    theta = exp(tinyVAST2$opt$par[3])
+    c1 = y * log(y / mu)
+    c2 = ( y + 1.0/theta ) * log( (1.0 + theta*y) / (1.0 + theta*mu) )
+    pow = function(a,b) a^b
+    deviance = 2.0 * (c1 - c2)
+    devresid = sign( y - mu ) * pow( deviance, 0.5 )
+  }
+
+})
+
 test_that("deviance residuals for lognormal match glm", {
   skip_on_cran()
   #skip_on_ci()

@@ -1,3 +1,7 @@
+# tinyVAST 0.8.0
+
+* Adding nbinom1 and nbinom2 families
+
 # tinyVAST 0.7.1
 
 * Fixed bug (wrong output) when using `predict(fit, what="mu_g")` and

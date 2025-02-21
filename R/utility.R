@@ -402,8 +402,10 @@ function( x,
 
   # Calculate deviance explained
   devexpl = 1 - x$rep$deviance / null_rep$deviance
-  if( (devexpl<0) | (devexpl>1) ){
+  if( isTRUE(devexpl<0) | isTRUE(devexpl>1) ){
     warning("Problem detected: deviance explained should be between 0 and 1")
+  }else{
+    warning("Deviance explained is NA, probably because it's not implemented for the family used")
   }
 
   # Return

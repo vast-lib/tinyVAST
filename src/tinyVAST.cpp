@@ -9,6 +9,8 @@ enum valid_family {
   bernoulli_family = 4,
   binomial_family = 4,
   gamma_family = 5,
+  nbinom1_family = 6,
+  nbinom2_family = 7
 };
 
 enum valid_link {
@@ -323,6 +325,22 @@ Type devresid_tweedie( Type y,
   return devresid;
 }
 
+// Deviance for the Negative binomial
+// https://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/glm.html#negative-binomial
+// Doesn't match deviance residuals from mgcv
+template<class Type>
+Type devresid_nbinom2( Type y,
+                       Type mu,
+                       Type theta ){
+
+  Type c1 = y * log(y / mu);
+  Type c2 = ( y + 1.0/theta ) * log( (1.0 + theta*y) / (1.0 + theta*mu) );
+  Type deviance = 2.0 * (c1 - c2);
+  Type devresid = sign( y - mu ) * pow( deviance, 0.5 );
+  return devresid;
+}
+
+
 // distribution/projection for epsilon
 // deviance = deviance1 + deviance2
 template<class Type>
@@ -409,6 +427,20 @@ Type one_predictor_likelihood( Type &y,
         devresid = sign(y - mu) * pow(2 * ( (y-mu)/mu - log(y/mu) ), 0.5);
         if(isDouble<Type>::value && of->do_simulate){
           y = rgamma( exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)) );
+        }
+        break;
+      case nbinom1_family:
+        nll -= weight * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
+        devresid = NAN;
+        if(isDouble<Type>::value && of->do_simulate){
+          y = rnbinom2( mu, mu * (Type(1.0) + exp(log_sigma_segment(0))) );
+        }
+        break;
+      case nbinom2_family:  // log(mu_i), log(var - mu)
+        nll -= weight * dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
+        devresid = NAN;
+        if(isDouble<Type>::value && of->do_simulate){
+          y = rnbinom2( mu, mu * (Type(1.0) + mu / exp(log_sigma_segment(0))) );
         }
         break;
       default:
