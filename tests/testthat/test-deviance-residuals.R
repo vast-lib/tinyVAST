@@ -46,14 +46,14 @@ test_that("nbinom1 and nbinom2 family matches glmmTMB", {
   data = data.frame(X=X, Y=Y)
 
   #
-  glmmTMB1 = glmmTMB( Y ~ 1 + X, family = nbinom1(), data = data )
+  glmmTMB1 = glmmTMB( Y ~ 1 + X, family = glmmTMB::nbinom1(), data = data )
   tinyVAST1 = tinyVAST( Y ~ 1 + X, family = nbinom1(), data = data )
   expect_equal( as.numeric(glmmTMB1$fit$par),
                 as.numeric(tinyVAST1$opt$par),
                 tolerance=1e-3 )
 
   #
-  glmmTMB2 = glmmTMB( Y ~ 1 + X, family = nbinom2(), data = data )
+  glmmTMB2 = glmmTMB( Y ~ 1 + X, family = glmmTMB::nbinom2(), data = data )
   tinyVAST2 = tinyVAST( Y ~ 1 + X, family = nbinom2(), data = data )
   expect_equal( as.numeric(glmmTMB2$fit$par),
                 as.numeric(tinyVAST2$opt$par),
