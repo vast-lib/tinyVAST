@@ -325,18 +325,30 @@ Type devresid_tweedie( Type y,
   return devresid;
 }
 
+
 // Deviance for the Negative binomial
-// https://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/glm.html#negative-binomial
-// Doesn't match deviance residuals from mgcv
+//template<class Type>
+//Type devresid_nbinom1( Type y,
+//                       Type logmu,
+//                       Type logtheta ){
+//
+//  // var - mu = exp( log(mu) + log(theta) ) = theta * mu  -->  var = (theta+1) * mu
+//  Type logp1 = dnbinom_robust( y, log(y + Type(1e-10)), log(y + Type(1e-10)) + logtheta, true );
+//  Type logp2 = dnbinom_robust( y, logmu, logmu + logtheta, true );
+//  Type deviance = 2 * (logp1 - logp2);
+//  Type devresid = sign( y - exp(logmu) ) * pow( deviance, 0.5 );
+//  return devresid;
+//}
 template<class Type>
 Type devresid_nbinom2( Type y,
-                       Type mu,
-                       Type theta ){
+                       Type logmu,
+                       Type logtheta ){
 
-  Type c1 = y * log(y / mu);
-  Type c2 = ( y + 1.0/theta ) * log( (1.0 + theta*y) / (1.0 + theta*mu) );
-  Type deviance = 2.0 * (c1 - c2);
-  Type devresid = sign( y - mu ) * pow( deviance, 0.5 );
+  // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
+  Type logp1 = dnbinom_robust( y, log(y + Type(1e-10)), Type(2.0) * log(y + Type(1e-10)) - logtheta, true );
+  Type logp2 = dnbinom_robust( y, logmu, Type(2.0) * logmu - logtheta, true );
+  Type deviance = 2 * (logp1 - logp2);
+  Type devresid = sign( y - exp(logmu) ) * pow( deviance, 0.5 );
   return devresid;
 }
 
@@ -429,17 +441,21 @@ Type one_predictor_likelihood( Type &y,
           y = rgamma( exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)) );
         }
         break;
-      case nbinom1_family:
+      case nbinom1_family:   // dnbinom_robust( x, log(mu_i), log(var - mu) )
+        // var - mu = exp( log(mu) + log(theta) ) = theta * mu  -->  var = (theta+1) * mu
         nll -= weight * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
         devresid = NAN;
         if(isDouble<Type>::value && of->do_simulate){
+          // rnbinom2( mu, var )
           y = rnbinom2( mu, mu * (Type(1.0) + exp(log_sigma_segment(0))) );
         }
         break;
-      case nbinom2_family:  // log(mu_i), log(var - mu)
+      case nbinom2_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
+        // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
         nll -= weight * dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
-        devresid = NAN;
+        devresid = devresid_nbinom2( y, logmu, log_sigma_segment(0) );
         if(isDouble<Type>::value && of->do_simulate){
+          // rnbinom2( mu, var )
           y = rnbinom2( mu, mu * (Type(1.0) + mu / exp(log_sigma_segment(0))) );
         }
         break;

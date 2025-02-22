@@ -48,24 +48,40 @@ test_that("nbinom1 and nbinom2 family matches glmmTMB", {
   #
   glmmTMB1 = glmmTMB( Y ~ 1 + X, family = nbinom1(), data = data )
   tinyVAST1 = tinyVAST( Y ~ 1 + X, family = nbinom1(), data = data )
-  expect_equal( as.numeric(glmmTMB1$fit$par), as.numeric(tinyVAST1$opt$par),
+  expect_equal( as.numeric(glmmTMB1$fit$par),
+                as.numeric(tinyVAST1$opt$par),
                 tolerance=1e-3 )
 
   #
   glmmTMB2 = glmmTMB( Y ~ 1 + X, family = nbinom2(), data = data )
   tinyVAST2 = tinyVAST( Y ~ 1 + X, family = nbinom2(), data = data )
-  expect_equal( as.numeric(glmmTMB2$fit$par), as.numeric(tinyVAST2$opt$par),
+  expect_equal( as.numeric(glmmTMB2$fit$par),
+                as.numeric(tinyVAST2$opt$par),
+                tolerance=1e-3 )
+  expect_equal( as.numeric(resid(glmmTMB2,type="deviance")),
+                as.numeric(resid(tinyVAST2,type="deviance")),
                 tolerance=1e-3 )
   if( FALSE ){
-    tmp = mgcv::gam( Y ~ 1 + X, family = nb() )
+    # nbinom2 matches
+    plot( x = tinyVAST2$rep$devresid_i,
+          y = resid(glmmTMB2, type="deviance") )
+    # nbinom1 does not match
+    plot( x = tinyVAST1$rep$devresid_i,
+          y = resid(glmmTMB1, type="deviance") )
+
+    # Manually calculate
     y = Y
-    mu = predict(tinyVAST2)
-    theta = exp(tinyVAST2$opt$par[3])
-    c1 = y * log(y / mu)
-    c2 = ( y + 1.0/theta ) * log( (1.0 + theta*y) / (1.0 + theta*mu) )
-    pow = function(a,b) a^b
-    deviance = 2.0 * (c1 - c2)
-    devresid = sign( y - mu ) * pow( deviance, 0.5 )
+    mu = predict(tinyVAST1)
+    theta = exp(tinyVAST1$opt$par[3])
+    dnbinom = function( x, mu, var, log=FALSE ){
+      size = mu^2 / (var - mu)
+      prob = size / (size + mu)
+      stats::dnbinom( x=x, size=size, prob=prob, log=log )
+    }
+    dev_i = 2 * ( dnbinom(x=y, mu=y, var = (y)*(theta+1), log=TRUE) - dnbinom(x=y, mu=mu, var = mu*(theta+1), log=TRUE) )
+    devresid_i = sign( y - mu ) * sqrt(dev_i)
+    plot( x = resid(glmmTMB1, type="deviance"),
+          y =  devresid_i )
   }
 
 })
@@ -119,6 +135,14 @@ test_that("deviance residuals for tweedie match mgcv", {
             family = tweedie(link = "log") )
   resid1 = residuals(mytiny, type="deviance")
 
+  if( FALSE ){
+    mu = predict(mytiny)
+    phi = exp(mytiny$opt$par[2])
+    power = 1 + plogis(mytiny$opt$par[3])
+    mytiny$rep$devresid_i^2
+    2 * log( dtweedie(y=y, mu=y+1e-10, phi=phi, power=power) / dtweedie(y=y, mu=mu, phi=phi, power=power) )
+  }
+
   #
   library(mgcv)
   mygam = gam( y ~ 1, family=tw(link="log"))
@@ -142,15 +166,21 @@ test_that("deviance residuals for poisson works", {
                      data = data.frame(x=x, y=y),
                      family = poisson("log") )
   resid1 = residuals( mytiny, type="deviance" )
-  # resid1^2
-  # mu = mytiny$rep$mu_i; 
-  # 2*y*log(y/mu) - (y-mu)
-  # sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
-  # resid1
-  # pow = function(a,b) a^b
-  # Type = function(z)z
-  # sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
-  
+  if( FALSE ){
+    resid1^2
+    mu = mytiny$rep$mu_i;
+    2*y*log(y/mu) - (y-mu)
+    sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
+    resid1
+    pow = function(a,b) a^b
+    Type = function(z)z
+    sign(y - mu) * pow(2*(y*log((1e-10 + y)/mu) - (y-mu)), 0.5)
+
+    # Compare log-ratio vs.
+    plot( x = 2 * log(dpois(y, lambda=y) / dpois(y, lambda=mu)),
+          y = mytiny$rep$devresid_i^2 )
+  }
+
   #
   myglm = glm( y ~ 1 + x,
                      data = data.frame(x=x, y=y),
