@@ -51,6 +51,9 @@ test_that("nbinom1 and nbinom2 family matches glmmTMB", {
   expect_equal( as.numeric(glmmTMB1$fit$par),
                 as.numeric(tinyVAST1$opt$par),
                 tolerance=1e-3 )
+  expect_equal( as.numeric(resid(glmmTMB1,type="deviance")),
+                as.numeric(resid(tinyVAST1,type="deviance")),
+                tolerance=1e-3 )
 
   #
   glmmTMB2 = glmmTMB( Y ~ 1 + X, family = glmmTMB::nbinom2(), data = data )
@@ -65,23 +68,40 @@ test_that("nbinom1 and nbinom2 family matches glmmTMB", {
     # nbinom2 matches
     plot( x = tinyVAST2$rep$devresid_i,
           y = resid(glmmTMB2, type="deviance") )
-    # nbinom1 does not match
+    # nbinom1 does match
     plot( x = tinyVAST1$rep$devresid_i,
           y = resid(glmmTMB1, type="deviance") )
 
     # Manually calculate
     y = Y
-    mu = predict(tinyVAST1)
-    theta = exp(tinyVAST1$opt$par[3])
     dnbinom = function( x, mu, var, log=FALSE ){
-      size = mu^2 / (var - mu)
+      size = mu^2 / (var - mu)  # number of successful trials
       prob = size / (size + mu)
       stats::dnbinom( x=x, size=size, prob=prob, log=log )
     }
-    dev_i = 2 * ( dnbinom(x=y, mu=y, var = (y)*(theta+1), log=TRUE) - dnbinom(x=y, mu=mu, var = mu*(theta+1), log=TRUE) )
+
+    # Matches
+    mu = predict(tinyVAST1)
+    phi = exp(tinyVAST1$opt$par[3])
+    theta = mu / phi           # log_theta = log_mu - log_phi
+    logp1_i = dnbinom(x=y, mu=(y+1e-10), var = (y+1e-10)*(1 + (y+1e-10)/theta), log=TRUE)
+    logp2_i = dnbinom(x=y, mu=mu, var = mu*(1 + mu/theta), log=TRUE)
+    dev_i = 2 * ( logp1_i - logp2_i )
     devresid_i = sign( y - mu ) * sqrt(dev_i)
     plot( x = resid(glmmTMB1, type="deviance"),
           y =  devresid_i )
+
+    # Matches
+    mu = predict(tinyVAST2)
+    theta = exp(tinyVAST2$opt$par[3])
+    logp1_i = dnbinom(x=y, mu=(y+1e-10), var = (y+1e-10)*(1 + (y+1e-10)/theta), log=TRUE)
+    logp2_i = dnbinom(x=y, mu=mu, var = mu*(1 + mu/theta), log=TRUE)
+    dev_i = 2 * ( logp1_i - logp2_i )
+    devresid_i = sign( y - mu ) * sqrt(dev_i)
+    plot( x = resid(glmmTMB2, type="deviance"),
+          y =  devresid_i )
+    cbind( y, mu, logp1_i, logp2_i, dev_i, devresid_i )
+
   }
 
 })

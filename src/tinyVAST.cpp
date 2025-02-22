@@ -444,7 +444,7 @@ Type one_predictor_likelihood( Type &y,
       case nbinom1_family:   // dnbinom_robust( x, log(mu_i), log(var - mu) )
         // var - mu = exp( log(mu) + log(theta) ) = theta * mu  -->  var = (theta+1) * mu
         nll -= weight * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
-        devresid = NAN;
+        devresid = devresid_nbinom2( y, logmu, logmu - log_sigma_segment(0) );    // theta = mu / phi
         if(isDouble<Type>::value && of->do_simulate){
           // rnbinom2( mu, var )
           y = rnbinom2( mu, mu * (Type(1.0) + exp(log_sigma_segment(0))) );
