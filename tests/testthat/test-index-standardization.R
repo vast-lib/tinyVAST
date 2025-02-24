@@ -119,6 +119,7 @@ test_that("Index standardization results are identical in VAST and tinyVAST", {
       )
     }
   )
+  # cbind( tv$rep$mu_i, vast$Report$D_i )
 
   #
   index_vast = rbind(

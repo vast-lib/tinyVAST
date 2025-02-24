@@ -426,15 +426,15 @@ function( object,
   W2_gl = make_spatial_varying( object$internal$delta_spatial_varying )
 
   # Assemble A_gs
-  if( is(object$spatial_graph, "fm_mesh_2d") ){
-    A_gs = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,object$internal$space_columns]) )$proj$A
-  }else if( is(object$spatial_graph, "igraph") ) {
+  if( is(object$spatial_domain, "fm_mesh_2d") ){
+    A_gs = fm_evaluator( object$spatial_domain, loc=as.matrix(newdata[,object$internal$space_columns]) )$proj$A
+  }else if( is(object$spatial_domain, "igraph") ) {
     Match = match( newdata[,object$internal$space_columns], rownames(object$tmb_inputs$tmb_data$Adj) )
-    if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
+    if(any(is.na(Match))) stop("Check `spatial_domain` for SAR")
     A_gs = sparseMatrix( i=seq_len(nrow(newdata)), j=Match, x=rep(1,nrow(newdata)) )
-  }else if( is(object$spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
+  }else if( is(object$spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(sem) )
     # stream network
-    A_gs = sfnetwork_evaluator( stream = object$spatial_graph$stream,
+    A_gs = sfnetwork_evaluator( stream = object$spatial_domain$stream,
                                 loc = as.matrix(newdata[,object$internal$space_columns]) )
   }else{
     A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
