@@ -245,7 +245,7 @@ function( formula,
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("path","lag","name","start","parameter","first","second","direction")) )
       )
-      class(output) = "spacetime_term_ram"   # Define class for summary.tinyVAST
+      class(output) = "dsem_ram"   # Define class for summary.tinyVAST
     }else if( isTRUE(is.character(spacetime_term)) ){
       output = make_dsem_ram( spacetime_term, times=times, variables=variables, quiet=isFALSE(control$verbose), covs=variables )
     }else if( is(spacetime_term,"spacetime_term_ram") | is(spacetime_term,"eof_ram") ){
@@ -260,7 +260,7 @@ function( formula,
                         INDEX=output$ram[which_nonzero,4], FUN=max)
 
     # Error checks
-    if( is(output, "spacetime_term_ram") ){
+    if( is(output, "dsem_ram") ){
       if( any((output$model[,'direction']==2) & (output$model[,2]!=0)) ){
         stop("All two-headed arrows should have lag=0")
       }
@@ -299,7 +299,7 @@ function( formula,
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
-      class(output) = "space_term_ram" # Define class for summary.tinyVAST
+      class(output) = "sem_ram" # Define class for summary.tinyVAST
     }else if( isTRUE(is.character(space_term)) ){
       output = make_sem_ram( space_term, variables=as.character(variables), quiet=isFALSE(control$verbose), covs=as.character(variables) )
     } else {
