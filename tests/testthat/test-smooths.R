@@ -13,6 +13,7 @@ test_that("Basic splines work", {
   m_m <- mgcv::gam(y ~ s(x2) + s(fac, bs = "re"), data = dat, REML = FALSE)
   m_s <- sdmTMB::sdmTMB(y ~ s(x2) + (1 | fac), data = dat, reml = FALSE, spatial = "off")
   m_v <- tinyVAST(formula = y ~ s(x2) + s(fac, bs = "re"), data = dat)
+  m_wrong <- tinyVAST(formula = y ~ s(x2), data = dat)
 
   # logLik(m_g4$mer)
   # logLik(m_gt)
@@ -25,8 +26,10 @@ test_that("Basic splines work", {
   p_m <- predict(m_m)
   p_s <- predict(m_s)$est
   p_v <- predict(m_v)
+  p_wrong <- predict(m_wrong)
   expect_gt(cor(p_m, p_v), 0.999)
   expect_gt(cor(p_s, p_v), 0.999)
+  # cor( p_v, p_wrong )
 
   # m_g4 <- gamm4::gamm4(y ~ s(x2), data = dat, REML = FALSE)
   # m_gt <- glmmTMB::glmmTMB(y ~ s(x2), data = dat)
