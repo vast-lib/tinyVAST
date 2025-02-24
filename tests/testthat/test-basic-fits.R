@@ -21,8 +21,8 @@ test_that("Basic tinyVAST works", {
   out <- tinyVAST(
     data = dat,
     formula = n ~ s(w),
-    spatial_graph = mesh,
-    sem = "",
+    spatial_domain = mesh,
+    space_term = "",
     control = tinyVASTcontrol(
       verbose = TRUE,
       newton_loops = 1,
@@ -39,7 +39,7 @@ test_that("Basic tinyVAST works", {
 #   expect_error({out <- tinyVAST(
 #     data = dat,
 #     formula = n ~ s(w),
-#     spatial_graph = mesh,
+#     spatial_domain = mesh,
 #     control = tinyVASTcontrol(quiet = TRUE, trace = 0),
 #     data_colnames = list(
 #       space = c("x", "y"),
@@ -47,7 +47,7 @@ test_that("Basic tinyVAST works", {
 #       time = "time",
 #       distribution = "dist"
 #     ),
-#     sem = ""
+#     space_term = ""
 #   )
 #   }, regexp = "variable")
   #
@@ -55,12 +55,12 @@ test_that("Basic tinyVAST works", {
 #  expect_error({out <- tinyVAST(
 #    data = dat,
 #    formula = n ~ s(w),
-#    spatial_graph = mesh,
+#    spatial_domain = mesh,
 #    space_columns = c("x", "y"),
 #    variable_column = "var",
 #    time_column = "time",
 #    distribution_column = "dist",
-#    sem = ""
+#    space_term = ""
 #  )
 #  }, regexp = "data_colnames")
 # })

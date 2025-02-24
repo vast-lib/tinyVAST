@@ -4,12 +4,12 @@
 \alias{summary.tinyVAST}
 \title{summarize tinyVAST}
 \usage{
-\method{summary}{tinyVAST}(object, what = c("sem", "dsem", "fixed"), ...)
+\method{summary}{tinyVAST}(object, what = c("space_term", "spacetime_term", "fixed"), ...)
 }
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}}
 
-\item{what}{What component to summarize, whether \code{sem}, \code{dsem}, or
+\item{what}{What component to summarize, whether \code{space_term}, \code{spacetime_term}, or
 \code{fixed} for the fixed effects included in the GAM formula}
 
 \item{...}{Not used}

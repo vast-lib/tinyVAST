@@ -28,17 +28,17 @@ test_that("SVC works", {
   mesh = fm_mesh_2d( Data[,c('x','y')] )
 
   # fit model with random walk using GMRF-projection
-  my1 = tinyVAST( sem = "logn <-> logn, sd",
+  my1 = tinyVAST( space_term = "logn <-> logn, sd",
              data = Data,
              formula = n ~ 1,
-             spatial_graph = mesh,
+             spatial_domain = mesh,
              family = tweedie(),
              control = tinyVASTcontrol() )
   # fit model with random walk using standard GMRF
   my2 = tinyVAST( spatial_varying = ~ 1,
              data = Data,
              formula = n ~ 1,
-             spatial_graph = mesh,
+             spatial_domain = mesh,
              family = tweedie(),
              control = tinyVASTcontrol() )
   expect_equal( my1$opt$objective, my2$opt$objective, tolerance=0.001 )

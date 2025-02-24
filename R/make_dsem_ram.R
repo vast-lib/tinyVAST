@@ -5,6 +5,10 @@
 #'
 #' @description \code{make_dsem_ram} converts SEM arrow notation to \code{ram} describing SEM parameters
 #'
+#' @param dsem dynamic structural equation model structure,
+#'        passed to either \code{\link[sem]{specifyModel}}
+#'        or \code{\link[sem]{specifyEquations}} and then parsed to control
+#'        the set of path coefficients and variance-covariance parameters
 #' @param times A character vector listing the set of times in order
 #' @param variables A character vector listing the set of variables
 #' @param quiet Boolean indicating whether to print messages to terminal
@@ -74,7 +78,7 @@
 #' allows the user to specify both simultaneous effects (effects among variables within
 #' year \eqn{T}) and lagged effects (effects among variables among years \eqn{T}).
 #' As one example, consider a univariate and first-order autoregressive process where \eqn{T=4}.
-#' with independent errors.  This is specified by passing \code{ sem = X -> X, 1, rho; X <-> X, 0, sigma } to \code{make_dsem_ram}.
+#' with independent errors.  This is specified by passing \code{ dsem = X -> X, 1, rho; X <-> X, 0, sigma } to \code{make_dsem_ram}.
 #' This is then parsed to a RAM:
 #'
 #' \tabular{rrrrr}{
@@ -123,22 +127,22 @@
 #'
 #' @examples
 #' # Univariate AR1
-#' sem = "
+#' dsem = "
 #'   X -> X, 1, rho
 #'   X <-> X, 0, sigma
 #' "
-#' make_dsem_ram( sem=sem, variables="X", times=1:4 )
+#' make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
 #'
 #' # Univariate AR2
-#' sem = "
+#' dsem = "
 #'   X -> X, 1, rho1
 #'   X -> X, 2, rho2
 #'   X <-> X, 0, sigma
 #' "
-#' make_dsem_ram( sem=sem, variables="X", times=1:4 )
+#' make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
 #'
 #' # Bivariate VAR
-#' sem = "
+#' dsem = "
 #'   X -> X, 1, XtoX
 #'   X -> Y, 1, XtoY
 #'   Y -> X, 1, YtoX
@@ -146,39 +150,39 @@
 #'   X <-> X, 0, sdX
 #'   Y <-> Y, 0, sdY
 #' "
-#' make_dsem_ram( sem=sem, variables=c("X","Y"), times=1:4 )
+#' make_dsem_ram( dsem=dsem, variables=c("X","Y"), times=1:4 )
 #'
 #' # Dynamic factor analysis with one factor and two manifest variables
 #' # (specifies a random-walk for the factor, and miniscule residual SD)
-#' sem = "
+#' dsem = "
 #'   factor -> X, 0, loadings1
 #'   factor -> Y, 0, loadings2
 #'   factor -> factor, 1, NA, 1
 #'   X <-> X, 0, NA, 0           # No additional variance
 #'   Y <-> Y, 0, NA, 0           # No additional variance
 #' "
-#' make_dsem_ram( sem=sem, variables=c("X","Y","factor"), times=1:4 )
+#' make_dsem_ram( dsem=dsem, variables=c("X","Y","factor"), times=1:4 )
 #'
 #' # ARIMA(1,1,0)
-#' sem = "
+#' dsem = "
 #'   factor -> factor, 1, rho1 # AR1 component
 #'   X -> X, 1, NA, 1          # Integrated component
 #'   factor -> X, 0, NA, 1
 #'   X <-> X, 0, NA, 0         # No additional variance
 #' "
-#' make_dsem_ram( sem=sem, variables=c("X","factor"), times=1:4 )
+#' make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
 #'
 #' # ARIMA(0,0,1)
-#' sem = "
+#' dsem = "
 #'   factor -> X, 0, NA, 1
 #'   factor -> X, 1, rho1     # MA1 component
 #'   X <-> X, 0, NA, 0        # No additional variance
 #' "
-#' make_dsem_ram( sem=sem, variables=c("X","factor"), times=1:4 )
+#' make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
 #'
 #' @export
 make_dsem_ram <-
-function( sem,
+function( dsem,
           times,
           variables,
           covs = NULL,
@@ -240,7 +244,7 @@ function( sem,
 
   ####### Step 2 -- Make RAM
   # convert to data frame
-  model = scan( text = sem,
+  model = scan( text = dsem,
                 what = list(path = "", lag = 1, par = "", start = 1, dump = ""),
                 sep = ",",
                 strip.white = TRUE,

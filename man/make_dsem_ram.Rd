@@ -5,7 +5,7 @@
 \title{Make a RAM (Reticular Action Model)}
 \usage{
 make_dsem_ram(
-  sem,
+  dsem,
   times,
   variables,
   covs = NULL,
@@ -14,10 +14,10 @@ make_dsem_ram(
 )
 }
 \arguments{
-\item{sem}{Specification for structural equation model structure for
-constructing a space-variable interaction.
-\code{sem=NULL} disables the space-variable interaction;
-see \code{\link[=make_sem_ram]{make_sem_ram()}}.}
+\item{dsem}{dynamic structural equation model structure,
+passed to either \code{\link[sem]{specifyModel}}
+or \code{\link[sem]{specifyEquations}} and then parsed to control
+the set of path coefficients and variance-covariance parameters}
 
 \item{times}{A character vector listing the set of times in order}
 

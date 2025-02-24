@@ -251,7 +251,7 @@ test_that("delta-gamma works", {
                      data = data.frame(x=x, y=y),
                      family = delta_gamma(),
                      delta_options = list(
-                       delta_formula = ~ 1 + x
+                       formula = ~ 1 + x
                      ) )
 
   # separate GLMs
@@ -291,7 +291,7 @@ test_that("Poisson-link delta-gamma works", {
                      data = data.frame(x=x, y=y),
                      family = delta_gamma(type="poisson-link"),
                      delta_options = list(
-                       delta_formula = ~ 1 + x
+                       formula = ~ 1 + x
                      ),
                      control = tinyVASTcontrol(verbose=FALSE) )
 

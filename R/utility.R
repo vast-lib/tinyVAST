@@ -373,7 +373,7 @@ function( x,
                        variable_column = x$internal$variable_column,
                        times = x$internal$times,
                        variables = x$internal$variables,
-                       delta_options = list( delta_formula = null_delta_formula ),
+                       delta_options = list( formula = null_delta_formula ),
                        distribution_column = x$internal$distribution_column) 
   null_obj = null_fit$obj
 

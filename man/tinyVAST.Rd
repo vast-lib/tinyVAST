@@ -7,17 +7,17 @@
 tinyVAST(
   formula,
   data,
-  sem = NULL,
-  dsem = NULL,
+  space_term = NULL,
+  spacetime_term = NULL,
   family = gaussian(),
   space_columns = c("x", "y"),
-  spatial_graph = NULL,
+  spatial_domain = NULL,
   time_column = "time",
   times = NULL,
   variable_column = "var",
   variables = NULL,
   distribution_column = "dist",
-  delta_options = list(delta_formula = ~1),
+  delta_options = list(formula = ~1),
   spatial_varying = NULL,
   weights = NULL,
   control = tinyVASTcontrol(),
@@ -34,15 +34,15 @@ variables that specify space, time, variables, and the distribution for samples,
 as identified by arguments \code{variable_column}, \code{time_column}, \code{space_columns},
 and \code{distribution_column}.}
 
-\item{sem}{Specification for structural equation model structure for
+\item{space_term}{Specification for structural equation model structure for
 constructing a space-variable interaction.
-\code{sem=NULL} disables the space-variable interaction;
-see \code{\link[=make_sem_ram]{make_sem_ram()}}.}
+\code{space_term=NULL} disables the space-variable interaction;
+see \code{\link[=make_sem_ram]{make_sem_ram()}} for notation.}
 
-\item{dsem}{Specification for time-series structural equation model structure
+\item{spacetime_term}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects for
 constructing a space-variable interaction.
-\code{dsem=NULL} disables the space-variable interaction; see
+\code{spacetime_term=NULL} disables the space-variable interaction; see
 \code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}.}
 
 \item{family}{A function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
@@ -56,18 +56,20 @@ families by row of data. Delta model families are possible, and see
 
 \item{space_columns}{A string or character vector that indicates
 the column(s) of \code{data} indicating the location of each sample.
-When \code{spatial_graph} is an \code{igraph} object, \code{space_columns} is a string with
+When \code{spatial_domain} is an \code{igraph} object, \code{space_columns} is a string with
 with levels matching the names of vertices of that object.
-When \code{spatial_graph} is an \code{fmesher} or \code{sfnetwork} object,
+When \code{spatial_domain} is an \code{fmesher} or \code{sfnetwork} object,
 space_columns is a character vector indicating columns of \code{data} with
 coordinates for each sample.}
 
-\item{spatial_graph}{Object that represents spatial relationships, either using
+\item{spatial_domain}{Object that represents spatial relationships, either using
 \code{\link[fmesher:fm_mesh_2d]{fmesher::fm_mesh_2d()}} to apply the SPDE method,
 \code{\link[igraph:make_empty_graph]{igraph::make_empty_graph()}} for independent time-series,
 \code{\link[igraph:make_graph]{igraph::make_graph()}} to apply a simultaneous autoregressive (SAR)
 process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
-or \code{NULL} to specify a single site.}
+or \code{NULL} to specify a single site.  If using \code{igraph} then the
+graph must have vertex names \code{V(graph)$name} that match
+levels of data\link{,'space_columns'}}
 
 \item{time_column}{A character string indicating the column of \code{data}
 listing the time-interval for each sample, from the set of times
@@ -91,9 +93,8 @@ in argument \code{family}.
 if \code{variables=NULL}, then it is filled in as the unique values
 from \code{data$variables}.}
 
-\item{delta_options}{a named list with slots for \code{delta_formula},
-\code{delta_sem}, and \code{delta_dsem}. These follow the same format as
-\code{formula}, \code{sem}, and \code{dsem}, but specify options for the
+\item{delta_options}{a named list with slots for \code{formula},
+\code{space_term}, and \code{spacetime_term}. These specify options for the
 second linear predictor of a delta model, and are only used (or estimable)
 when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
 
@@ -116,24 +117,24 @@ a minimal feature-set and a widely used interface.
 \code{tinyVAST} includes four basic inputs that specify the model structure:
 \itemize{
 \item \code{formula} specifies covariates and splines in a Generalized Additive Model;
-\item \code{dsem} specifies interactions among variables and over time, constructing
+\item \code{spacetime_term} specifies interactions among variables and over time, constructing
 the space-time-variable interaction.
-\item \code{sem} specifies interactions among variables and over time, constructing
+\item \code{space_term} specifies interactions among variables and over time, constructing
 the space-variable interaction.
-\item \code{spatial_graph} specifies spatial correlations
+\item \code{spatial_domain} specifies spatial correlations
 }
 
-the default \code{dsem=NULL} turns off all multivariate and temporal indexing, such
-that \code{spatial_graph} is then ignored, and the model collapses
+the default \code{spacetime_term=NULL} \code{space_term=NULL} turns off all multivariate and temporal indexing, such
+that \code{spatial_domain} is then ignored, and the model collapses
 to a standard model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
-the user must specify both \code{spatial_graph} and \code{dsem=""}, where the latter
+the user must specify \code{spatial_domain} and either \code{space_term=""} or \code{spacetime_term=""}, where the latter
 is then parsed to include a single exogenous variance for the single variable\tabular{ll}{
    \strong{Model type} \tab \strong{How to specify} \cr
-   Generalized additive model \tab specify \code{spatial_graph=NULL} and \code{dsem=""}, and then use \code{formula} to specify splines and covariates \cr
-   Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) \tab specify \code{spatial_graph=NULL} and use \code{dsem} to specify interactions among variables and over time \cr
-   Univariate spatial model \tab specify \code{spatial_graph} and \code{dsem=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
-   Multivariate spatial model \tab specify \code{spatial_graph} and use \code{dsem} (without any lagged effects) to specify spatial interactions \cr
-   Vector autoregressive spatio-temporal model \tab specify \code{spatial_graph} and use \code{dsem=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{dsem} and \code{spatial_graph} \cr
+   Generalized additive model \tab specify \code{spatial_domain=NULL} and \code{spacetime_term=""}, and then use \code{formula} to specify splines and covariates \cr
+   Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) \tab specify \code{spatial_domain=NULL} and use \code{spacetime_term} to specify interactions among variables and over time \cr
+   Univariate spatial model \tab specify \code{spatial_domain} and \code{spacetime_term=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+   Multivariate spatial model \tab specify \code{spatial_domain} and use \code{spacetime_term} (without any lagged effects) to specify spatial interactions \cr
+   Vector autoregressive spatio-temporal model \tab specify \code{spatial_domain} and use \code{spacetime_term=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{spacetime_term} and \code{spatial_domain} \cr
 }
 }
 \examples{
@@ -158,8 +159,8 @@ mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 # fit model
 out = tinyVAST( data = Data,
                 formula = n ~ s(w),
-                spatial_graph = mesh,
-                sem = "n <-> n, sd_n" )
+                spatial_domain = mesh,
+                space_term = "n <-> n, sd_n" )
 
 }
 \seealso{

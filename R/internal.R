@@ -1,9 +1,4 @@
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("###########################################################################################")
-  packageStartupMessage("Loading package tinyVAST version ", utils::packageVersion("tinyVAST") )
-  packageStartupMessage("This package is under development, and the interface may change at any time")
-  packageStartupMessage("The authors hope to establish a stable interface by end of 2024")
-  packageStartupMessage("###########################################################################################")
 }
 
 rm_wsp <- function (x) {

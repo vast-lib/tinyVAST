@@ -70,6 +70,7 @@ test_that("A model with s(x, bs = 'fs') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   d$yearf <- as.factor(d$year)
   m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, by = year, bs = "fs"), data = d, method = "REML")
   m_v <- tinyVAST(
@@ -95,6 +96,7 @@ test_that("A model with s(x, bs = 'gp') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
   m_v <- tinyVAST(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
   m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "gp"), data = d, spatial = "off")
@@ -111,6 +113,7 @@ test_that("A model with s(x, bs = 'ds') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_s <- sdmTMB::sdmTMB(
     log(density) ~ s(depth_scaled, bs = "ds"),
     data = d, spatial = "off"
@@ -130,6 +133,7 @@ test_that("A model with s(x, bs = 'cr') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "cr"), data = d, spatial = "off")
   m_m <- mgcv::gam(data = d, formula = log(density) ~ s(depth_scaled, bs = "cr"))
   m_v <- tinyVAST(data = d, formula = log(density) ~ s(depth_scaled, bs = "cr"))

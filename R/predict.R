@@ -454,7 +454,7 @@ function( object,
   AepsilonG_zz = cbind(predAtriplet$i, predAtriplet$j, t_g[predAtriplet$i], c_g[predAtriplet$i])
   which_Arows = which(apply( AepsilonG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( (nrow(object$internal$dsem_ram$output$ram)==0) & (nrow(object$internal$delta_dsem_ram$output$ram)==0) ){
+  if( (nrow(object$internal$spacetime_term_ram$output$ram)==0) & (nrow(object$internal$delta_spacetime_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   AepsilonG_zz = AepsilonG_zz[which_Arows,,drop=FALSE]
@@ -464,7 +464,7 @@ function( object,
   AomegaG_zz = cbind(predAtriplet$i, predAtriplet$j, c_g[predAtriplet$i])
   which_Arows = which(apply( AomegaG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( (nrow(object$internal$sem_ram$output$ram)==0) & (nrow(object$internal$delta_sem_ram$output$ram)==0) ){
+  if( (nrow(object$internal$space_term_ram$output$ram)==0) & (nrow(object$internal$delta_space_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   AomegaG_zz = AomegaG_zz[which_Arows,,drop=FALSE]
@@ -524,7 +524,7 @@ function( object,
   }
 
   # Check for obvious issues ... no NAs except in RAMstart
-  index_drop = match(c("ram_sem_start","ram_dsem_start","ram2_sem_start","ram2_dsem_start"),names(tmb_data2))
+  index_drop = match(c("ram_space_term_start","ram_spacetime_term_start","ram2_space_term_start","ram2_spacetime_term_start"),names(tmb_data2))
   if( any(is.na(tmb_data2[-index_drop])) ){
     stop("Check output of `add_predictions` for NAs")
   }

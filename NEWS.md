@@ -1,6 +1,9 @@
 # tinyVAST 0.8.0
 
 * Adding nbinom1 and nbinom2 families
+* Simplify argument names, by changing `sem` to `space_term`, `dsem` to `spacetime_term`
+  and `spatial_graph` to `spatial_domain`, and eliminating `delta_` in the names
+  for arguments to `delta_options`
 
 # tinyVAST 0.7.1
 

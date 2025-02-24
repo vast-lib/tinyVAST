@@ -10,14 +10,14 @@
 #'        variables that specify space, time, variables, and the distribution for samples,
 #'        as identified by arguments `variable_column`, `time_column`, `space_columns`,
 #'        and `distribution_column`.
-#' @param sem Specification for structural equation model structure for
+#' @param space_term Specification for structural equation model structure for
 #'        constructing a space-variable interaction.
-#'        \code{sem=NULL} disables the space-variable interaction;
-#'        see [make_sem_ram()].
-#' @param dsem Specification for time-series structural equation model structure
+#'        \code{space_term=NULL} disables the space-variable interaction;
+#'        see [make_sem_ram()] for notation.
+#' @param spacetime_term Specification for time-series structural equation model structure
 #'        including lagged or simultaneous effects for
 #'        constructing a space-variable interaction.
-#'        `dsem=NULL` disables the space-variable interaction; see
+#'        `spacetime_term=NULL` disables the space-variable interaction; see
 #'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param family A function returning a class \code{family}, including [gaussian()],
 #'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], [poisson()],
@@ -29,12 +29,12 @@
 #'        \code{\link[tinyVAST:families]{Families}} for delta-model options,
 #' @param space_columns A string or character vector that indicates
 #'        the column(s) of `data` indicating the location of each sample.
-#'        When `spatial_graph` is an `igraph` object, `space_columns` is a string with
+#'        When `spatial_domain` is an `igraph` object, `space_columns` is a string with
 #'        with levels matching the names of vertices of that object.
-#'        When `spatial_graph` is an `fmesher` or `sfnetwork` object,
+#'        When `spatial_domain` is an `fmesher` or `sfnetwork` object,
 #'        space_columns is a character vector indicating columns of `data` with
 #'        coordinates for each sample.
-#' @param spatial_graph Object that represents spatial relationships, either using
+#' @param spatial_domain Object that represents spatial relationships, either using
 #'        [fmesher::fm_mesh_2d()] to apply the SPDE method,
 #'        [igraph::make_empty_graph()] for independent time-series,
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
@@ -59,9 +59,8 @@
 #'        in argument `family`.
 #'        if `variables=NULL`, then it is filled in as the unique values
 #'        from `data$variables`.
-#' @param delta_options a named list with slots for \code{delta_formula},
-#'        \code{delta_sem}, and \code{delta_dsem}. These follow the same format as
-#'        \code{formula}, \code{sem}, and \code{dsem}, but specify options for the
+#' @param delta_options a named list with slots for \code{formula},
+#'        \code{space_term}, and \code{spacetime_term}. These specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_varying a formula specifying spatially varying coefficients.
@@ -75,25 +74,25 @@
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:
 #' * `formula` specifies covariates and splines in a Generalized Additive Model;
-#' * `dsem` specifies interactions among variables and over time, constructing
+#' * `spacetime_term` specifies interactions among variables and over time, constructing
 #'   the space-time-variable interaction.
-#' * `sem` specifies interactions among variables and over time, constructing
+#' * `space_term` specifies interactions among variables and over time, constructing
 #'   the space-variable interaction.
-#' * `spatial_graph` specifies spatial correlations
+#' * `spatial_domain` specifies spatial correlations
 #'
-#' the default `dsem=NULL` turns off all multivariate and temporal indexing, such
-#' that `spatial_graph` is then ignored, and the model collapses
+#' the default `spacetime_term=NULL` `space_term=NULL` turns off all multivariate and temporal indexing, such
+#' that `spatial_domain` is then ignored, and the model collapses
 #' to a standard model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
-#' the user must specify both `spatial_graph` and `dsem=""`, where the latter
+#' the user must specify `spatial_domain` and either `space_term=""` or `spacetime_term=""`, where the latter
 #' is then parsed to include a single exogenous variance for the single variable
 #'
 #' | \strong{Model type} | \strong{How to specify} |
 #' | --- | --- |
-#' | Generalized additive model | specify `spatial_graph=NULL` and `dsem=""`, and then use `formula` to specify splines and covariates |
-#' | Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_graph=NULL` and use `dsem` to specify interactions among variables and over time |
-#' | Univariate spatial model | specify `spatial_graph` and `dsem=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
-#' | Multivariate spatial model | specify `spatial_graph` and use `dsem` (without any lagged effects) to specify spatial interactions |
-#' | Vector autoregressive spatio-temporal model | specify `spatial_graph` and use `dsem=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `dsem` and `spatial_graph` |
+#' | Generalized additive model | specify `spatial_domain=NULL` and `spacetime_term=""`, and then use `formula` to specify splines and covariates |
+#' | Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_domain=NULL` and use `spacetime_term` to specify interactions among variables and over time |
+#' | Univariate spatial model | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
+#' | Multivariate spatial model | specify `spatial_domain` and use `spacetime_term` (without any lagged effects) to specify spatial interactions |
+#' | Vector autoregressive spatio-temporal model | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
 #'
 #' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations
@@ -134,25 +133,25 @@
 #' # fit model
 #' out = tinyVAST( data = Data,
 #'                 formula = n ~ s(w),
-#'                 spatial_graph = mesh,
-#'                 sem = "n <-> n, sd_n" )
+#'                 spatial_domain = mesh,
+#'                 space_term = "n <-> n, sd_n" )
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
 tinyVAST <-
 function( formula,
           data,
-          sem = NULL,
-          dsem = NULL,
+          space_term = NULL,
+          spacetime_term = NULL,
           family = gaussian(),
           space_columns = c("x","y"),
-          spatial_graph = NULL,
+          spatial_domain = NULL,
           time_column = "time",
           times = NULL,
           variable_column = "var",
           variables = NULL,
           distribution_column = "dist",
-          delta_options = list(delta_formula = ~ 1),
+          delta_options = list(formula = ~ 1),
           spatial_varying = NULL,
           weights = NULL,
           control = tinyVASTcontrol(),
@@ -197,16 +196,16 @@ function( formula,
   }
 
   # Defaults for times
-  if( is.null(dsem) & is.null(delta_options$delta_dsem) ){
+  if( is.null(spacetime_term) & is.null(delta_options$spacetime_term) ){
     times = numeric(0)
   }
   if(is.null(times)) times = seq( min(data[,time_column]), max(data[,time_column]) )
 
   # Defaults for variables
-  if( is.null(dsem) & is.null(sem) & is.null(delta_options$delta_dsem) & is.null(delta_options$delta_sem) & is.null(spatial_varying) & is.null(delta_options$spatial_varying) ){
+  if( is.null(spacetime_term) & is.null(space_term) & is.null(delta_options$spacetime_term) & is.null(delta_options$space_term) & is.null(spatial_varying) & is.null(delta_options$spatial_varying) ){
     variables = numeric(0)
-    # Force spatial_graph = NULL so that estimate_kappa=FALSE
-    spatial_graph = NULL
+    # Force spatial_domain = NULL so that estimate_kappa=FALSE
+    spatial_domain = NULL
   }
   if(is.null(variables)) variables = unique( data[,variable_column] )
 
@@ -218,7 +217,7 @@ function( formula,
   }
   if( length(variables) > 0 ){
     c_i = match( data[,variable_column], variables )
-    # variables can't have commas, because it conflicts with how `sem` and `dsem` are parsed
+    # variables can't have commas, because it conflicts with how `space_term` and `spacetime_term` are parsed
     if( any(grepl(pattern=",", x=variables, fixed=TRUE)) ){
       stop("`variables` cannot include any commas")
     }
@@ -238,21 +237,21 @@ function( formula,
   # DSEM RAM constructor
   ##############
 
-  build_dsem <-
-  function( dsem ){
+  build_spacetime_term <-
+  function( spacetime_term ){
     # (I-Rho)^-1 * Gamma * (I-Rho)^-1
-    if( is.null(dsem) ){
+    if( is.null(spacetime_term) ){
       output = list(
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("path","lag","name","start","parameter","first","second","direction")) )
       )
-      class(output) = "dsem_ram"   # Define class for summary.tinyVAST
-    }else if( isTRUE(is.character(dsem)) ){
-      output = make_dsem_ram( dsem, times=times, variables=variables, quiet=isFALSE(control$verbose), covs=variables )
-    }else if( is(dsem,"dsem_ram") | is(dsem,"eof_ram") ){
-      output = dsem
+      class(output) = "spacetime_term_ram"   # Define class for summary.tinyVAST
+    }else if( isTRUE(is.character(spacetime_term)) ){
+      output = make_dsem_ram( spacetime_term, times=times, variables=variables, quiet=isFALSE(control$verbose), covs=variables )
+    }else if( is(spacetime_term,"spacetime_term_ram") | is(spacetime_term,"eof_ram") ){
+      output = spacetime_term
     }else{
-      stop("`dsem` must be either `NULL` or a character-string", call. = FALSE)
+      stop("`spacetime_term` must be either `NULL` or a character-string", call. = FALSE)
     }
 
     # Identify arrow-type for each beta_j estimated in RAM
@@ -261,12 +260,12 @@ function( formula,
                         INDEX=output$ram[which_nonzero,4], FUN=max)
 
     # Error checks
-    if( is(output, "dsem_ram") ){
+    if( is(output, "spacetime_term_ram") ){
       if( any((output$model[,'direction']==2) & (output$model[,2]!=0)) ){
         stop("All two-headed arrows should have lag=0")
       }
       if( isFALSE(all(c(output$model[,'first'],output$model[,'second']) %in% variables)) ){
-        stop("Some variable in `dsem` is not in `tsdata`")
+        stop("Some variable in `spacetime_term` is not in `tsdata`")
       }
     }
 
@@ -279,32 +278,32 @@ function( formula,
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram_rho$start), 1, ram_rho$start)),
             INDEX = ram_rho$from, FUN=\(x)sum(abs(x)) )
     if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
-      stop("Must use gmrf_parameterization=`projection` for the dsem RAM supplied")
+      stop("Must use gmrf_parameterization=`projection` for the spacetime_term RAM supplied")
     }
 
     # out
     out = list("output"=output, "param_type"=param_type)
     return(out)
   }
-  dsem_ram = build_dsem(dsem)
-  delta_dsem_ram = build_dsem( delta_options$delta_dsem )
+  spacetime_term_ram = build_spacetime_term(spacetime_term)
+  delta_spacetime_term_ram = build_spacetime_term( delta_options$spacetime_term )
 
   ##############
   # SEM RAM constructor
   ##############
 
-  build_sem <-
-  function( sem ){
-    if( is.null(sem) ){
+  build_space_term <-
+  function( space_term ){
+    if( is.null(space_term) ){
       output = list(
         ram = array( 0, dim=c(0,5), dimnames=list(NULL,c("heads","to","from","parameter","start")) ),
         model = array( 0, dim=c(0,8), dimnames=list(NULL,c("","","","","parameter","first","second","direction")) )
       )
-      class(output) = "sem_ram" # Define class for summary.tinyVAST
-    }else if( isTRUE(is.character(sem)) ){
-      output = make_sem_ram( sem, variables=as.character(variables), quiet=isFALSE(control$verbose), covs=as.character(variables) )
+      class(output) = "space_term_ram" # Define class for summary.tinyVAST
+    }else if( isTRUE(is.character(space_term)) ){
+      output = make_sem_ram( space_term, variables=as.character(variables), quiet=isFALSE(control$verbose), covs=as.character(variables) )
     } else {
-      stop("`sem` must be either `NULL` or a character-string")
+      stop("`space_term` must be either `NULL` or a character-string")
     }
 
     # Identify arrow-type for each beta_j estimated in RAM
@@ -321,44 +320,44 @@ function( formula,
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
             INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
     if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
-      stop("Must use options$gmrf_parameterization=`projection` for the sem RAM supplied")
+      stop("Must use options$gmrf_parameterization=`projection` for the space_term RAM supplied")
     }
 
     # out
     out = list("output"=output, "param_type"=param_type)
     return(out)
   }
-  sem_ram = build_sem(sem)
-  delta_sem_ram = build_sem( delta_options$delta_sem )
+  space_term_ram = build_space_term(space_term)
+  delta_space_term_ram = build_space_term( delta_options$space_term )
 
   ##############
   # Spatial domain constructor
   ##############
 
-  if( is(spatial_graph,"fm_mesh_2d") ){
+  if( is(spatial_domain,"fm_mesh_2d") ){
     # SPDE
-    n_s = spatial_graph$n
+    n_s = spatial_domain$n
     spatial_method_code = 1
-    spatial_list = fm_fem( spatial_graph )
+    spatial_list = fm_fem( spatial_domain )
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
-    A_is = fm_evaluator( spatial_graph, loc=as.matrix(data[,space_columns]) )$proj$A
+    A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     estimate_kappa = TRUE
-  }else if( is(spatial_graph,"igraph") ) {
+  }else if( is(spatial_domain,"igraph") ) {
     # SAR
     spatial_method_code = 2
-    Adj = as_adjacency_matrix( spatial_graph, sparse=TRUE )
+    Adj = as_adjacency_matrix( spatial_domain, sparse=TRUE )
     n_s = nrow(Adj)
     Match = match( data[,space_columns], rownames(Adj) )
-    if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
+    if(any(is.na(Match))) stop("Check `spatial_domain` for SAR")
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
-    estimate_kappa = ifelse( ecount(spatial_graph)>0, TRUE, FALSE )
-  }else if( is(spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
+    estimate_kappa = ifelse( ecount(spatial_domain)>0, TRUE, FALSE )
+  }else if( is(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
     # stream network
     spatial_method_code = 4
-    n_s = spatial_graph$n
-    spatial_list = spatial_graph$table
-    A_is = sfnetwork_evaluator( stream = spatial_graph$stream,
+    n_s = spatial_domain$n
+    spatial_list = spatial_domain$table
+    A_is = sfnetwork_evaluator( stream = spatial_domain$stream,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
   }else{
@@ -373,13 +372,13 @@ function( formula,
     estimate_kappa = FALSE
   }
   Atriplet = Matrix::mat2triplet(A_is)
-  if(n_s>1000) warning("`spatial_graph` has over 1000 components, so the model may be extremely slow")
+  if(n_s>1000) warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
   which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( (nrow(dsem_ram$output$ram)==0) & (nrow(delta_dsem_ram$output$ram)==0) ){
+  if( (nrow(spacetime_term_ram$output$ram)==0) & (nrow(delta_spacetime_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   Aepsilon_zz = Aepsilon_zz[which_Arows,,drop=FALSE]
@@ -389,7 +388,7 @@ function( formula,
   Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
   which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
-  if( (nrow(sem_ram$output$ram)==0) & (nrow(delta_sem_ram$output$ram)==0) ){
+  if( (nrow(space_term_ram$output$ram)==0) & (nrow(delta_space_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   Aomega_zz = Aomega_zz[which_Arows,,drop=FALSE]
@@ -433,7 +432,7 @@ function( formula,
   }
   gam_basis = build_gam_basis( formula )
   delta_formula_with_response = update.formula( formula,
-                                  paste(".", paste0(as.character(delta_options$delta_formula),collapse="")) )
+                                  paste(".", paste0(as.character(delta_options$formula),collapse="")) )
   delta_gam_basis = build_gam_basis( delta_formula_with_response )
 
   ##############
@@ -553,14 +552,14 @@ function( formula,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
     Aomega_z = Aomega_z,
     A_is = A_is,
-    ram_sem = as.matrix(na.omit(sem_ram$output$ram[,1:4])),
-    ram_sem_start = as.numeric(sem_ram$output$ram[,5]),
-    ram_dsem = as.matrix(na.omit(dsem_ram$output$ram[,1:4])),
-    ram_dsem_start = as.numeric(dsem_ram$output$ram[,5]),
-    ram2_sem = as.matrix(na.omit(delta_sem_ram$output$ram[,1:4])),
-    ram2_sem_start = as.numeric(delta_sem_ram$output$ram[,5]),
-    ram2_dsem = as.matrix(na.omit(delta_dsem_ram$output$ram[,1:4])),
-    ram2_dsem_start = as.numeric(delta_dsem_ram$output$ram[,5]),
+    ram_space_term = as.matrix(na.omit(space_term_ram$output$ram[,1:4])),
+    ram_space_term_start = as.numeric(space_term_ram$output$ram[,5]),
+    ram_spacetime_term = as.matrix(na.omit(spacetime_term_ram$output$ram[,1:4])),
+    ram_spacetime_term_start = as.numeric(spacetime_term_ram$output$ram[,5]),
+    ram2_space_term = as.matrix(na.omit(delta_space_term_ram$output$ram[,1:4])),
+    ram2_space_term_start = as.numeric(delta_space_term_ram$output$ram[,5]),
+    ram2_spacetime_term = as.matrix(na.omit(delta_spacetime_term_ram$output$ram[,1:4])),
+    ram2_spacetime_term_start = as.numeric(delta_spacetime_term_ram$output$ram[,5]),
     X2_gj = matrix(0,ncol=ncol(delta_gam_basis$X_ij),nrow=0),
     Z2_gk = matrix(0,ncol=ncol(delta_gam_basis$Z_ik),nrow=0),
     W2_gl = matrix(0,ncol=ncol(delta_SVC$W_il),nrow=0),
@@ -592,15 +591,15 @@ function( formula,
   tmb_par = list(
     alpha_j = rep(0,ncol(tmb_data$X_ij)),  # Spline coefficients
     gamma_k = rep(0,ncol(tmb_data$Z_ik)),  # Spline coefficients
-    beta_z = as.numeric(ifelse(dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
-    theta_z = as.numeric(ifelse(sem_ram$param_type==1, 0.01, 1)),
+    beta_z = as.numeric(ifelse(spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    theta_z = as.numeric(ifelse(space_term_ram$param_type==1, 0.01, 1)),
     log_lambda = rep(0,length(tmb_data$Sdims)), #Log spline penalization coefficients
     log_sigmaxi_l = rep(0,ncol(tmb_data$W_il)),
 
     alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
     gamma2_k = rep(0,ncol(tmb_data$Z2_ik)),  # Spline coefficients
-    beta2_z = as.numeric(ifelse(delta_dsem_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
-    theta2_z = as.numeric(ifelse(delta_sem_ram$param_type==1, 0.01, 1)),
+    beta2_z = as.numeric(ifelse(delta_spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    theta2_z = as.numeric(ifelse(delta_space_term_ram$param_type==1, 0.01, 1)),
     log_lambda2 = rep(0,length(tmb_data$S2dims)), #Log spline penalization coefficients
     log_sigmaxi2_l = rep(0,ncol(tmb_data$W2_il)),
 
@@ -619,16 +618,16 @@ function( formula,
   )
 
   # Telescoping
-  if( nrow(dsem_ram$output$ram)==0 ){
+  if( nrow(spacetime_term_ram$output$ram)==0 ){
     tmb_par$epsilon_stc = tmb_par$epsilon_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
   }
-  if( nrow(sem_ram$output$ram)==0 ){
+  if( nrow(space_term_ram$output$ram)==0 ){
     tmb_par$omega_sc = tmb_par$omega_sc[,numeric(0),drop=FALSE]
   }
-  if( nrow(delta_dsem_ram$output$ram)==0 ){
+  if( nrow(delta_spacetime_term_ram$output$ram)==0 ){
     tmb_par$epsilon2_stc = tmb_par$epsilon2_stc[,numeric(0),,drop=FALSE]   # Keep c original length so n_c is detected correctly
   }
-  if( nrow(delta_sem_ram$output$ram)==0 ){
+  if( nrow(delta_space_term_ram$output$ram)==0 ){
     tmb_par$omega2_sc = tmb_par$omega2_sc[,numeric(0),drop=FALSE]
   }
 
@@ -655,7 +654,7 @@ function( formula,
   }
 
   # Check for obvious issues ... no NAs except in RAMstart
-  if( any(is.na(tmb_data[-match(c("ram_sem_start","ram_dsem_start","ram2_sem_start","ram2_dsem_start"),names(tmb_data))])) ){
+  if( any(is.na(tmb_data[-match(c("ram_space_term_start","ram_spacetime_term_start","ram2_space_term_start","ram2_spacetime_term_start"),names(tmb_data))])) ){
     stop("Check `tmb_data` for NAs")
   }
 
@@ -733,17 +732,17 @@ function( formula,
 
   # bundle and return output
   internal = list(
-    dsem_ram = dsem_ram,                                  # for `add_predictions`
-    sem_ram = sem_ram,                                    # for `add_predictions`
-    dsem = dsem,
-    sem = sem,
+    spacetime_term_ram = spacetime_term_ram,                                  # for `add_predictions`
+    space_term_ram = space_term_ram,                                    # for `add_predictions`
+    spacetime_term = spacetime_term,
+    space_term = space_term,
     gam_setup = gam_basis$gam_setup,
     spatial_varying = spatial_varying,
     SVC = SVC,
-    delta_dsem_ram = delta_dsem_ram,                                  # for `add_predictions`
-    delta_sem_ram = delta_sem_ram,                                    # for `add_predictions`
-    delta_dsem = delta_options$delta_dsem,
-    delta_sem = delta_options$delta_sem,
+    delta_spacetime_term_ram = delta_spacetime_term_ram,                                  # for `add_predictions`
+    delta_space_term_ram = delta_space_term_ram,                                    # for `add_predictions`
+    delta_spacetime_term = delta_options$spacetime_term,
+    delta_space_term = delta_options$space_term,
     space_columns = space_columns,
     time_column = time_column,
     variable_column = variable_column,
@@ -767,7 +766,7 @@ function( formula,
     sdrep = sdrep,
     tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map, tmb_random=tmb_random),
     call = match.call(),
-    spatial_graph = spatial_graph,
+    spatial_domain = spatial_domain,
     run_time = Sys.time() - start_time,
     internal = internal
   )
@@ -887,14 +886,14 @@ function( x,
     cat( "\n")
   }
   
-  out = summary( x, "sem")
+  out = summary( x, "space_term")
   if( nrow(out)>0 ){
     cat( "SEM terms: \n")
     print(out)
     cat( "\n")
   }
 
-  out = summary( x, "dsem")
+  out = summary( x, "spacetime_term")
   if( nrow(out)>0 ){
     cat( "DSEM terms: \n")
     print(out)
@@ -939,7 +938,7 @@ function( x,
 #' comparing the estimate divided by standard error against a standard normal distribution).
 #'
 #' @param object Output from [tinyVAST()]
-#' @param what What component to summarize, whether \code{sem}, \code{dsem}, or
+#' @param what What component to summarize, whether \code{space_term}, \code{spacetime_term}, or
 #'        \code{fixed} for the fixed effects included in the GAM formula
 #' @param ... Not used
 #'
@@ -947,7 +946,7 @@ function( x,
 #' @export
 summary.tinyVAST <-
 function( object,
-          what = c("sem","dsem","fixed"),
+          what = c("space_term","spacetime_term","fixed"),
           ... ){
 
   #
@@ -958,8 +957,8 @@ function( object,
   }
 
   # SEM component
-  if( what=="sem" ){
-    model = object$internal$sem_ram$output$ram
+  if( what=="space_term" ){
+    model = object$internal$space_term_ram$output$ram
     if(nrow(model)>0){
       model$to = as.character(object$internal$variables)[model$to]
       model$from = as.character(object$internal$variables)[model$from]
@@ -976,18 +975,18 @@ function( object,
   }
 
   # DSEM component
-  if( what=="dsem" ){
-    if( is(object$internal$dsem_ram$output,"dsem_ram") ){
-      model = object$internal$dsem_ram$output$model
+  if( what=="spacetime_term" ){
+    if( is(object$internal$spacetime_term_ram$output,"dsem_ram") ){
+      model = object$internal$spacetime_term_ram$output$model
       model = data.frame( heads = model[,'direction'],
                           to = model[,'second'],
                           from = model[,'first'],
                           parameter = model[,'parameter'],
                           start = model[,'start'],
                           lag = model[,'lag'] )
-    }else if( is(object$internal$dsem_ram$output,"eof_ram") ){
-      model = object$internal$dsem_ram$output$model
-      vars = object$internal$dsem_ram$output$variances
+    }else if( is(object$internal$spacetime_term_ram$output,"eof_ram") ){
+      model = object$internal$spacetime_term_ram$output$model
+      vars = object$internal$spacetime_term_ram$output$variances
       model = data.frame( heads = c( rep(1,nrow(model)), rep(2,nrow(vars)) ),
                           to = c( as.character(model$to), as.character(vars$to) ),
                           from = c( as.character(model$from), as.character(vars$from) ),
@@ -995,7 +994,7 @@ function( object,
                           start = NA,
                           lag = NA )
     }else{
-      stop("Class for what=`dsem` not implemented for `summary(.)`")
+      stop("Class for what=`spacetime_term` not implemented for `summary(.)`")
     }
 
     #

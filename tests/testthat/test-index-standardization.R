@@ -33,17 +33,17 @@ test_that("Basic index standardization works", {
   mesh = fm_mesh_2d( Data[,c('x','y')] )
 
   # fit model with random walk using GMRF-projection
-  my1 = tinyVAST( dsem = "logn -> logn, 1, NA, 1",
+  my1 = tinyVAST( spacetime_term = "logn -> logn, 1, NA, 1",
              data = Data,
              formula = n ~ 0 + factor(time),
-             spatial_graph = mesh,
+             spatial_domain = mesh,
              family = delta_gamma(type="poisson-link"),
              control = tinyVASTcontrol(gmrf="proj") )
   # fit model with random walk using standard GMRF
-  my2 = tinyVAST( dsem = "logn -> logn, 1, NA, 1",
+  my2 = tinyVAST( spacetime_term = "logn -> logn, 1, NA, 1",
              data = Data,
              formula = n ~ 0 + factor(time),
-             spatial_graph = mesh,
+             spatial_domain = mesh,
              family = delta_gamma(type="poisson-link"),
              control = tinyVASTcontrol(gmrf="sep") )
   expect_equal( my1$opt, my2$opt, tolerance=0.001 )
@@ -90,17 +90,17 @@ test_that("Index standardization results are identical in VAST and tinyVAST", {
   # fit model with random walk using standard GMRF
   # Won't exactly match because using a single log_kappa for both linear predictors'
   tv = tinyVAST(
-    dsem = "",
-    sem = "",
+    spacetime_term = "",
+    space_term = "",
     data = droplevels(Data),
     space_columns = c("Lon","Lat"),
     variable_column = "Data_type",
     time_column = "Year",
     formula = Response_variable ~ 0 + factor(Year),
-    spatial_graph = vast$spatial_list$Mesh$anisotropic_mesh,
+    spatial_domain = vast$spatial_list$Mesh$anisotropic_mesh,
     family = delta_gamma(type="poisson-link"),
     delta_options = list(
-      delta_formula = ~ 0 + factor(Year)
+      formula = ~ 0 + factor(Year)
     ),
     control = tinyVASTcontrol( trace = 1 )
   )

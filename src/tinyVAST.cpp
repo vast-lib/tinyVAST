@@ -574,7 +574,7 @@ Type two_predictor_likelihood( Type y,
 // 3. Name objects with [var]_[indices] so that number of indices indicates
 //    dimensionality
 // 4. spatial_graph always has dimension 1+, but DSEM functionality is removed if
-//    sem=NULL such that nrow(ram_dsem)=0
+//    sem=NULL such that nrow(ram_spacetime_term)=0
 
 template<class Type>
 Type objective_function<Type>::operator() (){
@@ -617,14 +617,14 @@ Type objective_function<Type>::operator() (){
   DATA_SPARSE_MATRIX( A_is );    // Used for SVC
 
   // DSEM objects
-  DATA_IMATRIX( ram_dsem );
-  DATA_VECTOR( ram_dsem_start );
-  DATA_IMATRIX( ram_sem );
-  DATA_VECTOR( ram_sem_start );
-  DATA_IMATRIX( ram2_dsem );
-  DATA_VECTOR( ram2_dsem_start );
-  DATA_IMATRIX( ram2_sem );
-  DATA_VECTOR( ram2_sem_start );
+  DATA_IMATRIX( ram_spacetime_term );
+  DATA_VECTOR( ram_spacetime_term_start );
+  DATA_IMATRIX( ram_space_term );
+  DATA_VECTOR( ram_space_term_start );
+  DATA_IMATRIX( ram2_spacetime_term );
+  DATA_VECTOR( ram2_spacetime_term_start );
+  DATA_IMATRIX( ram2_space_term );
+  DATA_VECTOR( ram2_space_term_start );
 
   // Prediction options
   DATA_MATRIX( X_gj );       // Design matrix for fixed covariates
@@ -727,24 +727,24 @@ Type objective_function<Type>::operator() (){
   }
 
   // DSEM
-  Eigen::SparseMatrix<Type> Rho_hh = make_ram( ram_dsem, ram_dsem_start, beta_z, n_h, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv_hh = make_ram( ram_dsem, ram_dsem_start, beta_z, n_h, int(1) );
-  Eigen::SparseMatrix<Type> Gamma_hh = make_ram( ram_dsem, ram_dsem_start, beta_z, n_h, int(2) );
+  Eigen::SparseMatrix<Type> Rho_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(0) );
+  Eigen::SparseMatrix<Type> Gammainv_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(1) );
+  Eigen::SparseMatrix<Type> Gamma_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(2) );
 
   // SEM
-  Eigen::SparseMatrix<Type> Rho_cc = make_ram( ram_sem, ram_sem_start, theta_z, n_c, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv_cc = make_ram( ram_sem, ram_sem_start, theta_z, n_c, int(1) );
-  Eigen::SparseMatrix<Type> Gamma_cc = make_ram( ram_sem, ram_sem_start, theta_z, n_c, int(2) );
+  Eigen::SparseMatrix<Type> Rho_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(0) );
+  Eigen::SparseMatrix<Type> Gammainv_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(1) );
+  Eigen::SparseMatrix<Type> Gamma_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(2) );
 
   // Delta DSEM
-  Eigen::SparseMatrix<Type> Rho2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(1) );
-  Eigen::SparseMatrix<Type> Gamma2_hh = make_ram( ram2_dsem, ram2_dsem_start, beta2_z, n2_h, int(2) );
+  Eigen::SparseMatrix<Type> Rho2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(0) );
+  Eigen::SparseMatrix<Type> Gammainv2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(1) );
+  Eigen::SparseMatrix<Type> Gamma2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(2) );
 
   // Delta SEM
-  Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(1) );
-  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_sem, ram2_sem_start, theta2_z, n2_c, int(2) );
+  Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(0) );
+  Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(1) );
+  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(2) );
 
   // Calculate effect of initial condition -- SPARSE version
   // Where does x go later?
