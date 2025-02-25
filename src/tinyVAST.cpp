@@ -83,7 +83,7 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
   return out_cc;
 }
 
-// distribution/projection for omega
+// distribution/projection for gamma
 template<class Type>
 Type gamma_distribution( vector<Type> gamma_k,
                          vector<int> Sdims,
@@ -196,56 +196,116 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
     I_hh.setIdentity();
     int h;
 
-    if( epsilon_stc.size()>0 ){ // PARALLEL_REGION
-      // Reshape for either spatial_options
-      array<Type> epsilon_hs( n_h, n_s );
+    //if( epsilon_stc.size()>0 ){ // PARALLEL_REGION
+    // Reshape for either spatial_options
+    array<Type> epsilon_hs( n_h, n_s );
+    for( int s=0; s<n_s; s++ ){
+    for( int t=0; t<n_t; t++ ){
+    for( int c=0; c<n_c; c++ ){
+      h = c*n_t + t;
+      epsilon_hs(h,s) = epsilon_stc(s,t,c);
+    }}}
+    Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
+
+    if( spatial_options(1) == 0 ){
+      // Separable precision ... Option-1
+      //Eigen::SparseMatrix<Type> Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
+      //Eigen::SparseMatrix<Type> Q_hh = Linv_hh.transpose() * Linv_hh;
+
+      // Separable precision ... Option-2
+      // Only compute Vinv_kk if Gamma_kk is full rank
+      Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
+      matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
+      Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
+      Eigen::SparseMatrix<Type> Q_hh = IminusRho_hh.transpose() * Vinv2_hh * IminusRho_hh;
+
+      // GMRF for DSEM:  non-separable time-variable, with separable space
+      nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
+    }else{
+      // Rank-deficient (projection) method
+      nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
+
+      // Sparse inverse-product
+      //Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
+      Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > inverseIminusRho_hh;
+      inverseIminusRho_hh.compute(IminusRho_hh);
+
+      // (I-Rho)^{-1} * Gamma * Epsilon
+      matrix<Type> e2_hs = Gamma_hh * epsilon_hs.matrix();
+      matrix<Type> e3_hs = inverseIminusRho_hh.solve(e2_hs);
+
+      // Transformations
       for( int s=0; s<n_s; s++ ){
       for( int t=0; t<n_t; t++ ){
       for( int c=0; c<n_c; c++ ){
         h = c*n_t + t;
-        epsilon_hs(h,s) = epsilon_stc(s,t,c);
+        epsilon_stc(s,t,c) = e3_hs(h,s);
       }}}
-      Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
-
-      if( spatial_options(1) == 0 ){
-        // Separable precision ... Option-1
-        //Eigen::SparseMatrix<Type> Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
-        //Eigen::SparseMatrix<Type> Q_hh = Linv_hh.transpose() * Linv_hh;
-
-        // Separable precision ... Option-2
-        // Only compute Vinv_kk if Gamma_kk is full rank
-        Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
-        matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
-        Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
-        Eigen::SparseMatrix<Type> Q_hh = IminusRho_hh.transpose() * Vinv2_hh * IminusRho_hh;
-
-        // GMRF for DSEM:  non-separable time-variable, with separable space
-        nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
-      }else{
-        // Rank-deficient (projection) method
-        nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
-
-        // Sparse inverse-product
-        //Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
-        Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > inverseIminusRho_hh;
-        inverseIminusRho_hh.compute(IminusRho_hh);
-
-        // (I-Rho)^{-1} * Gamma * Epsilon
-        matrix<Type> e2_hs = Gamma_hh * epsilon_hs.matrix();
-        matrix<Type> e3_hs = inverseIminusRho_hh.solve(e2_hs);
-
-        // Transformations
-        for( int s=0; s<n_s; s++ ){
-        for( int t=0; t<n_t; t++ ){
-        for( int c=0; c<n_c; c++ ){
-          h = c*n_t + t;
-          epsilon_stc(s,t,c) = e3_hs(h,s);
-        }}}
-      }
     }
+    //}
   }
 
   return epsilon_stc;
+}
+
+// distribution/projection for epsilon
+template<class Type>
+array<Type> delta_distribution( array<Type> delta_tc,
+                                  vector<int> spatial_options,
+                                  Eigen::SparseMatrix<Type> Rho_hh,
+                                  Eigen::SparseMatrix<Type> Gamma_hh,
+                                  Eigen::SparseMatrix<Type> Gammainv_hh,
+                                  Type &nll ){
+
+  if( delta_tc.size() > 0 ){
+    int n_t = delta_tc.dim(0);
+    int n_c = delta_tc.dim(1);
+    int n_h = n_t * n_c;
+    using namespace density;
+    Eigen::SparseMatrix<Type> I_hh( n_h, n_h );
+    I_hh.setIdentity();
+    int h;
+
+    // Reshape for either spatial_options
+    array<Type> delta_h1( n_h, 1 );
+    for( int t=0; t<n_t; t++ ){
+    for( int c=0; c<n_c; c++ ){
+      h = c*n_t + t;
+      delta_h1(h,0) = delta_tc(t,c);
+    }}
+    Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
+
+    if( spatial_options(1) == 0 ){
+      Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
+      matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
+      Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
+      Eigen::SparseMatrix<Type> Q_hh = IminusRho_hh.transpose() * Vinv2_hh * IminusRho_hh;
+
+      // GMRF for DSEM:  non-separable time-variable, with separable space
+      nll += GMRF(Q_hh)( delta_h1 );
+    }else{
+      // Rank-deficient (projection) method
+      nll += GMRF(I_hh)( delta_h1 );
+
+      // Sparse inverse-product
+      //Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
+      Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > inverseIminusRho_hh;
+      inverseIminusRho_hh.compute(IminusRho_hh);
+
+      // (I-Rho)^{-1} * Gamma * Epsilon
+      matrix<Type> e2_h1 = Gamma_hh * delta_h1.matrix();
+      matrix<Type> e3_h1 = inverseIminusRho_hh.solve(e2_h1);
+
+      // Transformations
+      for( int t=0; t<n_t; t++ ){
+      for( int c=0; c<n_c; c++ ){
+        h = c*n_t + t;
+        delta_tc(t,c) = e3_h1(h,0);
+      }}
+    }
+  }
+
+  return delta_tc;
 }
 
 // Function for detecting NAs
@@ -257,7 +317,7 @@ bool isNA(Type x){
 // Sparse array * matrix
 // NAs in IVECTOR or IMATRIX get converted to -2147483648, so isNA doesn't work ... instead drop NAs from A prior to passing to TMB
 template<class Type>
-vector<Type> multiply_3d_sparse( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
+vector<Type> multiply_epsilon( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
   vector<Type> out( n_i );
   out.setZero();
   if( x.size() > 0 ){
@@ -268,7 +328,7 @@ vector<Type> multiply_3d_sparse( matrix<int> A, vector<Type> weight, array<Type>
   return out;
 }
 template<class Type>
-vector<Type> multiply_2d_sparse( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
+vector<Type> multiply_omega( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
   vector<Type> out( n_i );
   out.setZero();
   if( x.size() > 0 ){
@@ -290,6 +350,17 @@ vector<Type> multiply_xi( Eigen::SparseMatrix<Type> A_is, array<Type> xi_sl, mat
     }}
   }
   return out;
+}
+template<class Type>
+vector<Type> multiply_delta( array<Type> delta_tc, vector<int> t_i, vector<int> c_i, int n_i ){
+  vector<Type> delta_i( n_i );
+  delta_i.setZero();
+  if( delta_tc.size() > 0 ){
+    for( int i=0; i<n_i; i++ ){
+      delta_i(i) += delta_tc( t_i(i), c_i(i) );
+    }
+  }
+  return delta_i;
 }
 
 // get sign of double, only for REPORT use
@@ -617,14 +688,18 @@ Type objective_function<Type>::operator() (){
   DATA_SPARSE_MATRIX( A_is );    // Used for SVC
 
   // DSEM objects
-  DATA_IMATRIX( ram_spacetime_term );
-  DATA_VECTOR( ram_spacetime_term_start );
   DATA_IMATRIX( ram_space_term );
   DATA_VECTOR( ram_space_term_start );
-  DATA_IMATRIX( ram2_spacetime_term );
-  DATA_VECTOR( ram2_spacetime_term_start );
+  DATA_IMATRIX( ram_time_term );
+  DATA_VECTOR( ram_time_term_start );
+  DATA_IMATRIX( ram_spacetime_term );
+  DATA_VECTOR( ram_spacetime_term_start );
   DATA_IMATRIX( ram2_space_term );
   DATA_VECTOR( ram2_space_term_start );
+  DATA_IMATRIX( ram2_time_term );
+  DATA_VECTOR( ram2_time_term_start );
+  DATA_IMATRIX( ram2_spacetime_term );
+  DATA_VECTOR( ram2_spacetime_term_start );
 
   // Prediction options
   DATA_MATRIX( X_gj );       // Design matrix for fixed covariates
@@ -656,6 +731,7 @@ Type objective_function<Type>::operator() (){
   PARAMETER_VECTOR( gamma_k ); // Spline regression parameters
   PARAMETER_VECTOR( beta_z ); // DSEM coefficients
   PARAMETER_VECTOR( theta_z ); // SEM coefficients
+  PARAMETER_VECTOR( nu_z ); // SEM coefficients
   PARAMETER_VECTOR( log_lambda ); //Penalization parameters
   PARAMETER_VECTOR( log_sigmaxi_l ); // SVC logSD
 
@@ -663,17 +739,19 @@ Type objective_function<Type>::operator() (){
   PARAMETER_VECTOR( gamma2_k ); // Spline regression parameters
   PARAMETER_VECTOR( beta2_z ); // DSEM coefficients
   PARAMETER_VECTOR( theta2_z ); // SEM coefficients
+  PARAMETER_VECTOR( nu2_z ); // SEM coefficients
   PARAMETER_VECTOR( log_lambda2 ); //Penalization parameters
   PARAMETER_VECTOR( log_sigmaxi2_l ); // delta_SVC logSD
 
   PARAMETER_VECTOR( log_sigma );
-  PARAMETER_VECTOR( delta0_c );
   PARAMETER_ARRAY( epsilon_stc );
   PARAMETER_ARRAY( omega_sc );
+  PARAMETER_ARRAY( delta_tc );
   PARAMETER_ARRAY( xi_sl );
 
   PARAMETER_ARRAY( epsilon2_stc );
   PARAMETER_ARRAY( omega2_sc );
+  PARAMETER_ARRAY( delta2_tc );
   PARAMETER_ARRAY( xi2_sl );
 
   PARAMETER_VECTOR( eps );     // manual epsilon bias-correction, empty to turn off
@@ -686,6 +764,8 @@ Type objective_function<Type>::operator() (){
   int n_t = epsilon_stc.dim(1);
   int n_c = epsilon_stc.dim(2);
   int n_h = n_t * n_c;
+  int n_i = y_i.size();
+  int n_g = X_gj.rows();
 
   // int n2_s = epsilon2_stc.dim(0);
   int n2_t = epsilon2_stc.dim(1);
@@ -726,59 +806,54 @@ Type objective_function<Type>::operator() (){
     REPORT( Q_ss );
   }
 
-  // DSEM
+  // spacetime_term
   Eigen::SparseMatrix<Type> Rho_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(0) );
   Eigen::SparseMatrix<Type> Gammainv_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(1) );
   Eigen::SparseMatrix<Type> Gamma_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(2) );
 
-  // SEM
+  // time_term
+  Eigen::SparseMatrix<Type> Rho_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, n_h, int(0) );
+  Eigen::SparseMatrix<Type> Gammainv_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, n_h, int(1) );
+  Eigen::SparseMatrix<Type> Gamma_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, n_h, int(2) );
+
+  // space_term
   Eigen::SparseMatrix<Type> Rho_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(0) );
   Eigen::SparseMatrix<Type> Gammainv_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(1) );
   Eigen::SparseMatrix<Type> Gamma_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(2) );
 
-  // Delta DSEM
+  // Delta spacetime_term
   Eigen::SparseMatrix<Type> Rho2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(0) );
   Eigen::SparseMatrix<Type> Gammainv2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(1) );
   Eigen::SparseMatrix<Type> Gamma2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(2) );
 
-  // Delta SEM
+  // Delta time_term
+  Eigen::SparseMatrix<Type> Rho2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, n2_h, int(0) );
+  Eigen::SparseMatrix<Type> Gammainv2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, n2_h, int(1) );
+  Eigen::SparseMatrix<Type> Gamma2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, n2_h, int(2) );
+
+  // Delta space_term
   Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(0) );
   Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(1) );
   Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(2) );
 
-  // Calculate effect of initial condition -- SPARSE version
-  // Where does x go later?
-  if( delta0_c.size() > 0 ){
-    //vector<Type> delta_h( n_h );
-    //delta_h.setZero();
-    error("delta0 not currently working.");
-    //// Compute delta_k
-    //matrix<Type> delta0_h1( n_h, 1 );
-    //delta0_h1.setZero();
-    //for(int c=0; c<n_c; c++){
-    //  h = c * n_t;
-    //  delta0_h1(h,0) = delta0_c(c);
-    //}
-    //
-    //// Sparse product
-    //matrix<Type> x = inverseIminusRho_hh.solve(delta0_h1);
-    //
-    //// Resize
-    //delta_h = delta0_h1.array();
-    //REPORT( delta_h );
-  }
-
-  // Space-variable interaction
+  // space_term
   omega_sc = omega_distribution( omega_sc, spatial_options, Rho_cc,
                                    Gamma_cc, Gammainv_cc, Q_ss, nll );
   omega2_sc = omega_distribution( omega2_sc, spatial_options, Rho2_cc,
                                    Gamma2_cc, Gammainv2_cc, Q_ss, nll );
 
-  // Space-time-variable interaction
+  // spacetime_term
   epsilon_stc = epsilon_distribution( epsilon_stc, spatial_options, Rho_hh,
                                      Gamma_hh, Gammainv_hh, Q_ss, nll );
   epsilon2_stc = epsilon_distribution( epsilon2_stc, spatial_options, Rho2_hh,
                                        Gamma2_hh, Gammainv2_hh, Q_ss, nll );
+
+  // time_term
+  delta_tc = delta_distribution( delta_tc, spatial_options, Rho_time_hh,
+                                     Gamma_time_hh, Gammainv_time_hh, nll );
+  delta2_tc = delta_distribution( delta2_tc, spatial_options, Rho2_time_hh,
+                                       Gamma2_time_hh, Gammainv2_time_hh, nll );
+
 
   // Distribution for spline components
   nll += gamma_distribution( gamma_k, Sdims, S_kk, log_lambda );
@@ -789,31 +864,28 @@ Type objective_function<Type>::operator() (){
   nll += xi_distribution( xi2_sl, log_sigmaxi2_l, Q_ss );
 
   // Linear predictor
-  vector<Type> p_i( y_i.size() );
+  vector<Type> p_i( n_i );
   p_i = X_ij*alpha_j + Z_ik*gamma_k + offset_i;
-  p_i += multiply_3d_sparse( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
-  p_i += multiply_2d_sparse( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
+  p_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
+  p_i += multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
   p_i += multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
-  //for( int i=0; i<p_i.size(); i++ ){
-  //  if( (n_h>0) ){     // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
-  //    h = c_i(i)*n_t + t_i(i);
-  //    p_i(i) -= delta_h(h);
-  //  }
-  //}
-  vector<Type> p2_i( y_i.size() );
+  p_i += multiply_delta( delta_tc, t_i, c_i, n_i );
+  // 2nd linear predictor
+  vector<Type> p2_i( n_i );
   p2_i = X2_ij*alpha2_j + Z2_ik*gamma2_k;
-  p2_i += multiply_3d_sparse( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
-  p2_i += multiply_2d_sparse( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
+  p2_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
+  p2_i += multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
   p2_i += multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
+  p2_i += multiply_delta( delta2_tc, t_i, c_i, n_i );
 
   // Likelihood
   // relative_deviance != devresid^2 for hurdle model
-  vector<Type> mu_i( y_i.size() );
-  vector<Type> devresid_i( y_i.size() );
+  vector<Type> mu_i( n_i );
+  vector<Type> devresid_i( n_i );
   Type devresid = 0.0;
   Type deviance = 0.0;
   Type dev;
-  for( int i=0; i<y_i.size(); i++ ) {       // PARALLEL_REGION
+  for( int i=0; i<n_i; i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
     if( components_e(e_i(i))==1 ){
@@ -829,48 +901,41 @@ Type objective_function<Type>::operator() (){
   }
 
   // Predictions
-  if( X_gj.rows() > 0 ){
+  if( n_g > 0 ){
     vector<Type> palpha_g = X_gj*alpha_j;
     vector<Type> pgamma_g = Z_gk*gamma_k;
-    vector<Type> pepsilon_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pomega_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pepsilon_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pomega_g = multiply_omega( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
     vector<Type> pxi_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
-    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g + pxi_g;
+    vector<Type> pdelta_g = multiply_delta( delta_tc, t_g, c_g, n_g );
+    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g + pdelta_g + pxi_g;
     // Second linear predictor
     vector<Type> palpha2_g = X2_gj*alpha2_j;
     vector<Type> pgamma2_g = Z2_gk*gamma2_k;
-    vector<Type> pepsilon2_g = multiply_3d_sparse( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pomega2_g = multiply_2d_sparse( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pepsilon2_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pomega2_g = multiply_omega( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
     vector<Type> pxi2_g = multiply_xi( A_gs, xi2_sl, W2_gl ) / exp(log_tau);
-    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g + pxi2_g;
+    vector<Type> pdelta2_g = multiply_delta( delta2_tc, t_g, c_g, n_g );
+    vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g + pdelta2_g + pxi2_g;
     vector<Type> mu_g( p_g.size() );
-    //for( int g=0; g<p_g.size(); g++ ){
-    //  if( (n_h>0) ){                       // (!isNA(c_i(i))) & (!isNA(t_i(i))) &
-    //    h = c_g(g)*n_t + t_g(g);
-    //    p_g(g) -= delta_h(h);
-    //  }
-    //}
     for( int g=0; g<p_g.size(); g++ ){
-      //if( components_e(e_g(g))==1 ){
-        switch( link_ez(e_g(g),0) ){
-          case identity_link:
-            mu_g(g) = p_g(g);
-            break;
-          case log_link:
-            mu_g(g) = exp(p_g(g));
-            break;
-          case logit_link:
-            mu_g(g) = invlogit(p_g(g));
-            break;
-          case cloglog_link:
-            mu_g(g) = Type(1.0) - exp( -1*exp(p_g(g)) );
-            break;
-          default:
-            error("Link not implemented.");
-        }
-      //}
+      switch( link_ez(e_g(g),0) ){
+        case identity_link:
+          mu_g(g) = p_g(g);
+          break;
+        case log_link:
+          mu_g(g) = exp(p_g(g));
+          break;
+        case logit_link:
+          mu_g(g) = invlogit(p_g(g));
+          break;
+        case cloglog_link:
+          mu_g(g) = Type(1.0) - exp( -1*exp(p_g(g)) );
+          break;
+        default:
+          error("Link not implemented.");
+      }
       if( components_e(e_g(g))==2 ){
-        //mu_g(g) = invlogit( p_g(g) );
         // second link
         switch( link_ez(e_g(g),1) ){
           case identity_link:
@@ -940,12 +1005,14 @@ Type objective_function<Type>::operator() (){
     REPORT( pgamma_g );
     REPORT( pepsilon_g );
     REPORT( pomega_g );
+    REPORT( pdelta_g );
     REPORT( pxi_g );
     REPORT( p2_g );
     REPORT( palpha2_g );
     REPORT( pgamma2_g );
     REPORT( pepsilon2_g );
     REPORT( pomega2_g );
+    REPORT( pdelta2_g );
     REPORT( pxi2_g );
     REPORT( mu_g );
     ADREPORT( p_g );

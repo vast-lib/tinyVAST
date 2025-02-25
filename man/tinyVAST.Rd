@@ -7,6 +7,7 @@
 tinyVAST(
   formula,
   data,
+  time_term = NULL,
   space_term = NULL,
   spacetime_term = NULL,
   family = gaussian(),
@@ -34,6 +35,12 @@ variables that specify space, time, variables, and the distribution for samples,
 as identified by arguments \code{variable_column}, \code{time_column}, \code{space_columns},
 and \code{distribution_column}.}
 
+\item{time_term}{Specification for time-series structural equation model structure for
+constructing a time-variable interaction that defines a time-varying intercept
+for each variable (i.e., applies uniformly across space).
+\code{time_term=NULL} disables the space-variable interaction;
+see \code{\link[=make_dsem_ram]{make_dsem_ram()}} for notation.}
+
 \item{space_term}{Specification for structural equation model structure for
 constructing a space-variable interaction.
 \code{space_term=NULL} disables the space-variable interaction;
@@ -41,7 +48,9 @@ see \code{\link[=make_sem_ram]{make_sem_ram()}} for notation.}
 
 \item{spacetime_term}{Specification for time-series structural equation model structure
 including lagged or simultaneous effects for
-constructing a space-variable interaction.
+constructing a time-variable interaction, which is then combined in
+a separable process with the spatial correlation to form a
+space-time-variable interaction (i.e., the interaction occurs locally at each site).
 \code{spacetime_term=NULL} disables the space-variable interaction; see
 \code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}.}
 

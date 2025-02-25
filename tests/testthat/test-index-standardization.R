@@ -12,17 +12,19 @@ test_that("Basic index standardization works", {
   n_t = 5
   rho = 0.8
   spatial_sd = 0.5
+  time_sd = 0.5
 
   # Simulate GMRFs
   R_s = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
   V_ss = spatial_sd^2*kronecker(R_s, R_s)
   d = mvtnorm::rmvnorm(n_t, sigma=V_ss )
+  nu_t = rnorm( n_t, mean=0.5, sd = time_sd)
 
   # Project through time and add mean
   for( t in seq_len(n_t) ){
     if(t>1) d[t,] = rho*d[t-1,] + d[t,]
   }
-  #d = d + 0.5
+  d = sweep( d, MARGIN=1, FUN="+", STATS=nu_t)
 
   # Shape into longform data-frame and add error
   Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), "var"="logn", z=exp(as.vector(d)))
@@ -32,7 +34,7 @@ test_that("Basic index standardization works", {
   # make mesh
   mesh = fm_mesh_2d( Data[,c('x','y')] )
 
-  # fit model with random walk using GMRF-projection
+  # fit with spacetime random-walk using GMRF-projection
   my1 = tinyVAST( spacetime_term = "logn -> logn, 1, NA, 1",
              data = Data,
              formula = n ~ 0 + factor(time),
@@ -51,6 +53,24 @@ test_that("Basic index standardization works", {
   # Predicted sample-weighted total
   integrate_output( my1,
                     newdata = subset(Data,time==t) )
+
+  # fit with time & spacetime random-walk using GMRF-projection
+  my3 = tinyVAST( spacetime_term = "logn -> logn, 1, NA, 1",
+             time_term = "logn -> logn, 1, NA, 0",
+             data = Data,
+             formula = n ~ 1,
+             spatial_domain = mesh,
+             family = delta_gamma(type="poisson-link"),
+             control = tinyVASTcontrol(gmrf="proj") )
+  # fit with time & spacetime random walk using standard GMRF
+  my4 = tinyVAST( spacetime_term = "logn -> logn, 1, NA, 1",
+             time_term = "logn -> logn, 1, NA, 0",
+             data = Data,
+             formula = n ~ 1,
+             spatial_domain = mesh,
+             family = delta_gamma(type="poisson-link"),
+             control = tinyVASTcontrol(gmrf="sep") )
+  expect_equal( my3$opt, my4$opt, tolerance=0.001 )
 })
 
 test_that("Index standardization results are identical in VAST and tinyVAST", {

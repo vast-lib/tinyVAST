@@ -4,6 +4,7 @@
 * Simplify argument names, by changing `sem` to `space_term`, `dsem` to `spacetime_term`
   and `spatial_graph` to `spatial_domain`, and eliminating `delta_` in the names
   for arguments to `delta_options`
+* Add `time_term` to allow time-variable interaction (e.g., AR1 intercepts)
 
 # tinyVAST 0.7.1
 

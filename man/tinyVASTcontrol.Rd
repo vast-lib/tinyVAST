@@ -18,7 +18,8 @@ tinyVASTcontrol(
   gmrf_parameterization = c("separable", "projection"),
   reml = FALSE,
   getJointPrecision = FALSE,
-  calculate_deviance_explained = TRUE
+  calculate_deviance_explained = TRUE,
+  run_model = TRUE
 )
 }
 \arguments{
@@ -64,6 +65,9 @@ to \code{\link[TMB]{sdreport}}.}
 
 \item{calculate_deviance_explained}{whether to calculate proportion of deviance
 explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
+
+\item{run_model}{whether to run the model of export TMB objects prior to compilation
+(useful for debugging)}
 }
 \description{
 Control parameters for tinyVAST

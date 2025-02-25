@@ -4,7 +4,11 @@
 \alias{summary.tinyVAST}
 \title{summarize tinyVAST}
 \usage{
-\method{summary}{tinyVAST}(object, what = c("space_term", "spacetime_term", "fixed"), ...)
+\method{summary}{tinyVAST}(
+  object,
+  what = c("space_term", "time_term", "spacetime_term", "fixed"),
+  ...
+)
 }
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}}
