@@ -12,7 +12,7 @@ vignette: >
 
 
 
-```r
+``` r
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
@@ -26,7 +26,7 @@ generalize an empirical orthogonal function analysis.
 To start, we reformat data on September Sea ice concentrations:
 
 
-```r
+``` r
 data( sea_ice )
 library(sf)
 library(rnaturalearth)
@@ -52,7 +52,7 @@ Data = data.frame( st_drop_geometry(sf_ice),
 Next, we construct the various inputs to _tinyVAST_
 
 
-```r
+``` r
 n_eof = 2
 dsem = make_eof_ram( variables = "Ice",
                      times = sort(unique(Data[,'year'])),
@@ -61,11 +61,11 @@ dsem = make_eof_ram( variables = "Ice",
 mesh = fm_mesh_2d( Data[,c('X','Y')], cutoff=1.5 )
 
 # fit model
-out = tinyVAST( dsem = dsem,
-           sem = "",
+out = tinyVAST( spacetime_term = dsem,
+           space_term = "",
            data = as.data.frame(Data),
            formula = ice_concentration ~ 1,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            space_column = c("X","Y"),
            variable_column = "var",
            time_column = "year",
@@ -73,12 +73,14 @@ out = tinyVAST( dsem = dsem,
            times = c(paste0("EOF_",seq_len(n_eof)), sort(unique(Data[,'year']))),
            control = tinyVASTcontrol( profile="alpha_j",
                                       gmrf_parameterization="projection") )
+#> Warning in tinyVAST(spacetime_term = dsem, space_term = "", data = as.data.frame(Data), : `spatial_domain` has over 1000 components, so
+#> the model may be extremely slow
 ```
 
 Finally, we can extract, rotate, and plot the dominant modes of variability and associated spatial responses:
 
 
-```r
+``` r
 # Country shapefiles for plotting
 sf_maps = ne_countries( return="sf", scale="medium", continent=c("north america","europe","asia") )
 sf_maps = st_transform( sf_maps, crs=st_crs(sf_ice) )

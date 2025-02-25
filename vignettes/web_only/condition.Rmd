@@ -12,7 +12,7 @@ vignette: >
 
 
 
-```r
+``` r
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -26,7 +26,7 @@ This replicates a similar vignette provided for the VAST package, but showcases 
 We first load and combine the two data sets:
 
 
-```r
+``` r
 data( condition_and_density )
 
 # Combine both parts
@@ -50,14 +50,14 @@ formed_data = cbind( combo_data[,c("Year","Lat","Lon")],
 
 We then construct the SPDE mesh
 
-```r
+``` r
 # make mesh
 mesh = fm_mesh_2d( formed_data[,c('Lon','Lat')], cutoff=1 )
 ```
 
 Next, we specify spatial and spatio-temporal variance in both condition and density. 
 
-```r
+``` r
 #
 sem = "
   Biomass <-> Biomass, sdB
@@ -75,7 +75,7 @@ dsem = "
 
 Finally, we define the distribution for each data set using the `family` argument:
 
-```r
+``` r
 #
 family = list(
   Biomass = tweedie(),
@@ -85,14 +85,14 @@ family = list(
 
 Finally, we fit the model using tinyVAST
 
-```r
+``` r
 # fit model
 fit = tinyVAST( data = formed_data,
            formula = Response ~ interaction(Year,Type) + log_length,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            control = tinyVASTcontrol( trace=0, verbose=TRUE, profile="alpha_j" ),
-           sem = sem,
-           dsem = dsem,
+           space_term = sem,
+           spacetime_term = dsem,
            family = family,
            variables = c("Biomass","Condition"),
            variable_column = "Type",
@@ -104,20 +104,20 @@ fit = tinyVAST( data = formed_data,
 
 We can look at structural parameters using summary functions:
 
-```r
+``` r
 # spatial terms
-summary(fit, "sem")
+summary(fit, "space_term")
 #>   heads        to      from parameter start      Estimate   Std_Error     z_value      p_value
-#> 1     2   Biomass   Biomass         1  <NA>  1.423877e+00 0.133046685 10.70208186 9.951682e-27
-#> 2     2 Condition Condition         2  <NA> -3.316273e-02 0.004167567 -7.95733630 1.757825e-15
-#> 3     1 Condition   Biomass         3  <NA>  9.292899e-05 0.004855089  0.01914053 9.847290e-01
+#> 1     2   Biomass   Biomass         1  <NA>  1.423877e+00 0.133046888 10.70207257 9.952681e-27
+#> 2     2 Condition Condition         2  <NA> -3.316228e-02 0.004167473 -7.95740912 1.756791e-15
+#> 3     1 Condition   Biomass         3  <NA>  9.320889e-05 0.004855054  0.01919832 9.846829e-01
 
 # spatio-temporal terms
-summary(fit, "dsem")
+summary(fit, "spacetime_term")
 #>   heads        to      from parameter start lag     Estimate   Std_Error    z_value      p_value
-#> 1     2   Biomass   Biomass         1  <NA>   0  0.966426764 0.024274856  39.811844 0.000000e+00
-#> 2     2 Condition Condition         2  <NA>   0 -0.040541910 0.002723401 -14.886499 4.033460e-50
-#> 3     1 Condition   Biomass         3  <NA>   0  0.008201997 0.003339314   2.456192 1.404181e-02
+#> 1     2   Biomass   Biomass         1  <NA>   0  0.966428902 0.024274955  39.811769 0.000000e+00
+#> 2     2 Condition Condition         2  <NA>   0 -0.040541656 0.002723390 -14.886465 4.035502e-50
+#> 3     1 Condition   Biomass         3  <NA>   0  0.008201844 0.003339305   2.456153 1.404335e-02
 ```
 
 # Abundance-weighted expansion
@@ -125,7 +125,7 @@ summary(fit, "dsem")
 To explore output, we can plot output using the survey extent:
 
 
-```r
+``` r
 # Extract shapefile
 region = condition_and_density$eastern_bering_sea
 
@@ -168,7 +168,7 @@ plot( plot_grid, border=NA )
 Finally, we can calculate density-weighted condition
 
 
-```r
+``` r
 # 
 expand_data = rbind( newdata2, newdata )
 W_gz = cbind( c(as.numeric(areas_km2),rep(0,length(areas_km2))), 0 )
@@ -185,11 +185,13 @@ for( yearI in seq_len(nrow(cond_tz)) ){
                           bias.correct = TRUE ) 
   cond_tz[yearI,c("Est","SE")] = out[c("Estimate","Std. Error")]
 }
+#> Error in integrate_output(fit, newdata = expand_data, V_gz = V_gz, W_gz = W_gz, : unused arguments (V_gz = V_gz, W_gz = W_gz)
 
 # plot time-series
 ggplot( cond_tz ) +
   geom_line( aes(x=Year, y=Est) ) +
   geom_ribbon( aes(x=Year, ymin=Est-SE, ymax=Est+SE), alpha=0.2 )
+#> Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning -Inf
 ```
 
 ![plot of chunk condition-timeseries](figure/condition-timeseries-1.png)

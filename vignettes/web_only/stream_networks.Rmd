@@ -13,7 +13,7 @@ vignette: >
 
 
 
-```r
+``` r
 library(sf)
 library(sfnetworks)
 library(tinyVAST)
@@ -28,7 +28,7 @@ We here show how it can fit a stream network model, where spatial correlations a
 First, we load a shapefile representing a stream network, and convert it to _sfnetwork_ format.  This format includes
 edges representing stream segments, and nodes where edges connect.
 
-```r
+``` r
 stream <- st_read( file.path(system.file("stream_network",package="tinyVAST"),
                    "East_Fork_Lewis_basin.shp"), quiet=TRUE )
 stream = as_sfnetwork(stream)
@@ -41,7 +41,7 @@ We then convert it to an S3 class "sfnetwork_mesh" defined by _tinyVAST_ for str
 and rescale distances to 1000 ft (to ensure that distances are 0.01 to 100, avoiding
 issues of numerical under or overflow).
 
-```r
+``` r
 # Rescale
 graph = sfnetwork_mesh( stream )
 graph$table$dist = graph$table$dist / 1000  # Convert distance scale
@@ -52,7 +52,7 @@ sample evenly spaced locations along the stream using `st_line_sample`,
 project the GMRF to those locations using `sfnetwork_evaluator`, and
 simulate data at those locations:
 
-```r
+``` r
 # Parameters
 alpha = 2
 kappa = 0.05
@@ -84,7 +84,7 @@ Data = data.frame( Count = Count_i,
 
 We can visualize the GMRF at those locations using _sfnetwork_
 
-```r
+``` r
 # Plot stream
 plot(stream)
 # Extract nodes and plot on network
@@ -98,16 +98,16 @@ Finally, we can fit the model, interpolate the GMRF along at dense locations alo
 the stream network, and plot those with the true (simulated) values at the
 location of simulated samples.
 
-```r
+``` r
 # fit model
 out = tinyVAST( data = Data,
            formula = Count ~ 1,
-           spatial_graph = graph,
+           spatial_domain = graph,
            space_column = c("X","Y"),
            variable_column = "var",
            time_column = "time",
            distribution_column = "dist",
-           sem = "" )
+           space_term = "" )
 
 #
 sf_plot = st_union( st_line_sample( activate(stream,"edges"), density=1/1000))

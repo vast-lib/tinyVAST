@@ -13,7 +13,7 @@ vignette: >
 
 
 
-```r
+``` r
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
@@ -27,7 +27,7 @@ We here explore the capacity to specify the vector-autoregressive spatio-tempora
 We first explore the ability to specify a first-order autoregressive spatio-temporal process:
 
 
-```r
+``` r
 # Simulate settings
 theta_xy = 0.4
 n_x = n_y = 10
@@ -56,18 +56,18 @@ mean(Data$n==0)
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # fit model
-mytinyVAST = tinyVAST( dsem = "logn -> logn, 1, rho",
+mytinyVAST = tinyVAST( spacetime_term = "logn -> logn, 1, rho",
            data = Data,
            formula = n ~ 0 + factor(time),
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            family = tweedie() )
 mytinyVAST
 #> Call: 
-#> tinyVAST(formula = n ~ 0 + factor(time), data = Data, dsem = "logn -> logn, 1, rho", 
-#>     family = tweedie(), spatial_graph = mesh)
+#> tinyVAST(formula = n ~ 0 + factor(time), data = Data, spacetime_term = "logn -> logn, 1, rho", 
+#>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 32.35395 secs
+#> Time difference of 19.98727 secs
 #> 
 #> Family: 
 #> $obs
@@ -102,7 +102,7 @@ mytinyVAST
 #> log_kappa  0.07228542 0.10755269
 #> Maximum gradient component: 0.006315957 
 #> 
-#> Proportion deviance explained: 
+#> Proportion conditional deviance explained: 
 #> [1] 0.6800908
 #> 
 #> DSEM terms: 
@@ -133,7 +133,7 @@ The estimated values for `beta_z` then correspond to the simulated value for `rh
 We can compare the true densities:
 
 
-```r
+``` r
 library(sf)
 data_wide = reshape( Data[,c('x','y','time','z')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
@@ -147,7 +147,7 @@ plot(sf_plot, max.plot=n_t )
 
 with the estimated densities:
 
-```r
+``` r
 Data$z_hat = predict(mytinyVAST)
 data_wide = reshape( Data[,c('x','y','time','z_hat')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
@@ -160,7 +160,7 @@ plot(sf_plot, max.plot=n_t )
 
 where a scatterplot shows that they are highly correlated:
 
-```r
+``` r
 plot( x=Data$z, y=Data$z_hat )
 ```
 
@@ -168,7 +168,7 @@ plot( x=Data$z, y=Data$z_hat )
 
 We can also use the `DHARMa` package to visualize simulation residuals:
 
-```r
+``` r
 # simulate new data conditional on fixed and random effects
 y_ir = replicate( n = 100, 
            expr = mytinyVAST$obj$simulate()$y_i )
@@ -184,7 +184,7 @@ plot(res)
 
 We can then calculate the area-weighted total abundance and compare it with its true value:
 
-```r
+``` r
 # Predicted sample-weighted total
 (Est = sapply( seq_len(n_t),
    FUN=\(t) integrate_output(mytinyVAST, newdata=subset(Data,time==t)) ))
@@ -227,10 +227,10 @@ ggplot(Index, aes(time, Estimate)) +
 Next, we compare this against the current version of VAST
 
 ```
-#> Warning: package 'marginaleffects' was built under R version 4.3.3
+#> Warning: package 'marginaleffects' was built under R version 4.4.2
 ```
 
-```r
+``` r
 settings = make_settings( purpose="index3",
                           n_x = n_x*n_y,
                           Region = "Other",
@@ -256,16 +256,16 @@ myVAST = fit_model( settings=settings,
                  control = list(eval.max = 10000, iter.max = 10000, trace = 0) )
 ```
 
-```r
+``` r
 myVAST
 #> fit_model(.) result
 #> $par
 #>       beta1_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft 
-#>    -0.58930072     0.51556558     0.46458132     0.49054914     0.46815469     0.22995166     0.39666648     0.19322487    -0.07072451 
+#>    -0.58930071     0.51556559     0.46458132     0.49054916     0.46815467     0.22995164     0.39666649     0.19322488    -0.07072451 
 #>       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft   L_epsilon2_z      logkappa2 
-#>     0.11680346     0.47101097     0.77135916     0.40831806     0.42839443     0.79998249     0.91170565     0.49266122    -4.30062282 
+#>     0.11680344     0.47101096     0.77135917     0.40831807     0.42839443     0.79998248     0.91170567     0.49266122    -4.30062281 
 #> Epsilon_rho2_f      logSigmaM 
-#>     0.85035928     0.10422306 
+#>     0.85035928     0.10422305 
 #> 
 #> $objective
 #> [1] 1738.337
@@ -278,10 +278,10 @@ myVAST
 #>       12        7 
 #> 
 #> $time_for_MLE
-#> Time difference of 1.733057 secs
+#> Time difference of 1.111809 secs
 #> 
 #> $max_gradient
-#> [1] 0.0005693192
+#> [1] 0.0005698621
 #> 
 #> $Convergence_check
 #> [1] "The model is likely not converged"
@@ -295,63 +295,63 @@ myVAST
 #> 
 #> $diagnostics
 #>             Param starting_value     Lower         MLE     Upper final_gradient
-#> 1        beta1_ft    -0.58930212      -Inf -0.58930072       Inf  -2.544080e-04
-#> 2        beta2_ft     0.51556564      -Inf  0.51556558       Inf   5.379535e-06
-#> 3        beta2_ft     0.46458076      -Inf  0.46458132       Inf  -1.711880e-05
-#> 4        beta2_ft     0.49055249      -Inf  0.49054914       Inf   2.249599e-04
-#> 5        beta2_ft     0.46815184      -Inf  0.46815469       Inf  -2.146493e-04
-#> 6        beta2_ft     0.22994932      -Inf  0.22995166       Inf  -1.963291e-04
-#> 7        beta2_ft     0.39666756      -Inf  0.39666648       Inf   7.352745e-05
-#> 8        beta2_ft     0.19322632      -Inf  0.19322487       Inf   1.263052e-04
-#> 9        beta2_ft    -0.07072357      -Inf -0.07072451       Inf   8.061085e-05
-#> 10       beta2_ft     0.11680236      -Inf  0.11680346       Inf  -8.984282e-05
-#> 11       beta2_ft     0.47100950      -Inf  0.47101097       Inf  -1.175670e-04
-#> 12       beta2_ft     0.77135978      -Inf  0.77135916       Inf   3.317524e-05
-#> 13       beta2_ft     0.40831857      -Inf  0.40831806       Inf   3.594733e-05
-#> 14       beta2_ft     0.42839428      -Inf  0.42839443       Inf  -2.828227e-05
-#> 15       beta2_ft     0.79997983      -Inf  0.79998249       Inf  -1.675174e-04
-#> 16       beta2_ft     0.91170839      -Inf  0.91170565       Inf   1.978155e-04
-#> 17   L_epsilon2_z     0.49266060      -Inf  0.49266122       Inf  -3.409419e-04
-#> 18      logkappa2    -4.30062178 -6.214608 -4.30062282 -3.565449   1.061017e-04
-#> 19 Epsilon_rho2_f     0.85035619 -0.990000  0.85035928  0.990000  -5.693192e-04
-#> 20      logSigmaM     0.10422369      -Inf  0.10422306 10.000000   8.657499e-05
+#> 1        beta1_ft    -0.58930212      -Inf -0.58930071       Inf  -2.487369e-04
+#> 2        beta2_ft     0.51556564      -Inf  0.51556559       Inf   5.768295e-06
+#> 3        beta2_ft     0.46458076      -Inf  0.46458132       Inf  -1.755968e-05
+#> 4        beta2_ft     0.49055249      -Inf  0.49054916       Inf   2.270911e-04
+#> 5        beta2_ft     0.46815184      -Inf  0.46815467       Inf  -2.161939e-04
+#> 6        beta2_ft     0.22994932      -Inf  0.22995164       Inf  -1.974896e-04
+#> 7        beta2_ft     0.39666756      -Inf  0.39666649       Inf   7.423225e-05
+#> 8        beta2_ft     0.19322632      -Inf  0.19322488       Inf   1.269739e-04
+#> 9        beta2_ft    -0.07072356      -Inf -0.07072451       Inf   8.114063e-05
+#> 10       beta2_ft     0.11680236      -Inf  0.11680344       Inf  -9.055540e-05
+#> 11       beta2_ft     0.47100950      -Inf  0.47101096       Inf  -1.183556e-04
+#> 12       beta2_ft     0.77135979      -Inf  0.77135917       Inf   3.375506e-05
+#> 13       beta2_ft     0.40831857      -Inf  0.40831807       Inf   3.648168e-05
+#> 14       beta2_ft     0.42839428      -Inf  0.42839443       Inf  -2.836921e-05
+#> 15       beta2_ft     0.79997983      -Inf  0.79998248       Inf  -1.691510e-04
+#> 16       beta2_ft     0.91170838      -Inf  0.91170567       Inf   1.992897e-04
+#> 17   L_epsilon2_z     0.49266060      -Inf  0.49266122       Inf  -3.444313e-04
+#> 18      logkappa2    -4.30062178 -6.214608 -4.30062281 -3.565449   1.077671e-04
+#> 19 Epsilon_rho2_f     0.85035619 -0.990000  0.85035928  0.990000  -5.698621e-04
+#> 20      logSigmaM     0.10422370      -Inf  0.10422305 10.000000   8.251730e-05
 #> 
 #> $SD
 #> sdreport(.) result
 #>                   Estimate Std. Error
-#> beta1_ft       -0.58930072 0.05080467
-#> beta2_ft        0.51556558 0.14414517
-#> beta2_ft        0.46458132 0.17371754
-#> beta2_ft        0.49054914 0.19200615
-#> beta2_ft        0.46815469 0.20433942
-#> beta2_ft        0.22995166 0.21476799
-#> beta2_ft        0.39666648 0.21934845
-#> beta2_ft        0.19322487 0.22481460
+#> beta1_ft       -0.58930071 0.05080467
+#> beta2_ft        0.51556559 0.14414517
+#> beta2_ft        0.46458132 0.17371753
+#> beta2_ft        0.49054916 0.19200615
+#> beta2_ft        0.46815467 0.20433941
+#> beta2_ft        0.22995164 0.21476798
+#> beta2_ft        0.39666649 0.21934844
+#> beta2_ft        0.19322488 0.22481460
 #> beta2_ft       -0.07072451 0.22973075
-#> beta2_ft        0.11680346 0.23059099
-#> beta2_ft        0.47101097 0.22964743
-#> beta2_ft        0.77135916 0.22895295
-#> beta2_ft        0.40831806 0.23199191
+#> beta2_ft        0.11680344 0.23059098
+#> beta2_ft        0.47101096 0.22964743
+#> beta2_ft        0.77135917 0.22895295
+#> beta2_ft        0.40831807 0.23199191
 #> beta2_ft        0.42839443 0.23305157
-#> beta2_ft        0.79998249 0.23091834
-#> beta2_ft        0.91170565 0.23072495
+#> beta2_ft        0.79998248 0.23091833
+#> beta2_ft        0.91170567 0.23072494
 #> L_epsilon2_z    0.49266122 0.04727208
-#> logkappa2      -4.30062282 0.13652887
+#> logkappa2      -4.30062281 0.13652887
 #> Epsilon_rho2_f  0.85035928 0.03527714
-#> logSigmaM       0.10422306 0.07108160
-#> Maximum gradient component: 0.0005693192 
+#> logSigmaM       0.10422305 0.07108160
+#> Maximum gradient component: 0.0005698621 
 #> 
 #> $time_for_sdreport
-#> Time difference of 6.984021 secs
+#> Time difference of 4.689575 secs
 #> 
 #> $time_for_run
-#> Time difference of 33.26514 secs
+#> Time difference of 21.1067 secs
 ```
 
 Or with sdmTMB
 
 
-```r
+``` r
 library(sdmTMB)
 mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
@@ -371,7 +371,7 @@ sdmTMBtime = Sys.time() - start_time
 
 The models all have similar runtimes
 
-```r
+``` r
 Times = c( "tinyVAST" = mytinyVAST$run_time,
            "VAST" = myVAST$total_time,
            "sdmTMB" = sdmTMBtime )
@@ -382,9 +382,9 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 |         | run times (sec.)|
 |:--------|----------------:|
-|tinyVAST |             32.4|
-|VAST     |            167.4|
-|sdmTMB   |             29.9|
+|tinyVAST |             20.0|
+|VAST     |             23.1|
+|sdmTMB   |             19.3|
 
 
 
@@ -393,24 +393,77 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 We can also fit these data using a delta model
 
 
-```r
+``` r
 # fit model
 mydelta2 = tinyVAST( data = Data,
                formula = n ~ 1,
                delta_options = list(
-                 delta_formula = ~ 0 + factor(time),
-                 delta_dsem = "logn -> logn, 1, rho"),
+                 formula = ~ 0 + factor(time),
+                 spacetime_term = "logn -> logn, 1, rho"),
                family = delta_lognormal(type="poisson-link"),
-               spatial_graph = mesh )
+               spatial_domain = mesh )
 #> Warning in deviance_explained(out): Problem detected: deviance explained should be between 0 and 1
 
-mydelta
-#> Error in eval(expr, envir, enclos): object 'mydelta' not found
+mydelta2
+#> Call: 
+#> tinyVAST(formula = n ~ 1, data = Data, family = delta_lognormal(type = "poisson-link"), 
+#>     spatial_domain = mesh, delta_options = list(formula = ~0 + 
+#>         factor(time), spacetime_term = "logn -> logn, 1, rho"))
+#> 
+#> Run time: 
+#> Time difference of 0.1223099 secs
+#> 
+#> Family: 
+#> $obs
+#> 
+#> Family: binomial lognormal 
+#> Link function: log log 
+#> 
+#> 
+#> 
+#> 
+#> sdreport(.) result
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#>                Estimate Std. Error
+#> alpha_j    1.124638e+00 0.03818771
+#> alpha2_j  -7.250156e-01 0.13939634
+#> alpha2_j  -7.604114e-01 0.13875144
+#> alpha2_j  -6.663565e-01 0.13875143
+#> alpha2_j  -8.022574e-01 0.13811687
+#> alpha2_j  -1.099183e+00 0.13811688
+#> alpha2_j  -8.380341e-01 0.13875150
+#> alpha2_j  -1.046448e+00 0.14005174
+#> alpha2_j  -1.307804e+00 0.13939636
+#> alpha2_j  -9.369022e-01 0.14422141
+#> alpha2_j  -7.295805e-01 0.14071797
+#> alpha2_j  -4.303412e-01 0.13939636
+#> alpha2_j  -6.392139e-01 0.14071798
+#> alpha2_j  -8.851780e-01 0.14278427
+#> alpha2_j  -3.803459e-01 0.13875151
+#> alpha2_j  -1.880579e-01 0.13939633
+#> beta2_z    1.259704e+00        NaN
+#> beta2_z   -2.774145e-08        NaN
+#> log_sigma  2.565058e-01 0.01869239
+#> Warning:
+#> Hessian of fixed effects was not positive definite.
+#> Maximum gradient component: 0.007302403 
+#> 
+#> Proportion conditional deviance explained: 
+#> [1] -0.1358365
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Fixed terms: 
+#>             Estimate  Std_Error  z_value       p_value
+#> (Intercept) 1.124638 0.03818771 29.45027 1.248915e-190
 ```
 
 And we can again use the `DHARMa` package to visualize simulation residuals:
 
-```r
+``` r
 # simulate new data conditional on fixed and random effects
 y_ir = replicate( n = 100, 
            expr = mydelta2$obj$simulate()$y_i )
@@ -426,7 +479,7 @@ plot(res)
 
 We can then use AIC to compare the fit of the delta-model and Tweedie distribution:
 
-```r
+``` r
 knitr::kable( c("Tweedie"=AIC(mytinyVAST),"delta-lognormal"=AIC(mydelta2)), digits=3)
 ```
 
@@ -441,10 +494,10 @@ knitr::kable( c("Tweedie"=AIC(mytinyVAST),"delta-lognormal"=AIC(mydelta2)), digi
 
 # Bivariate spatio-temporal autoregressive model
 
-We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.
+We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.  We first simulate artificial data for the sake of demonstration:
 
 
-```r
+``` r
 # Simulate settings
 theta_xy = 0.2
 n_x = n_y = 10
@@ -466,7 +519,12 @@ for( t in seq_len(n_t) ){
 # Shape into longform data-frame and add error
 Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")), z=exp(as.vector(d)))
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
+```
 
+We next set up inputs and run the model:
+
+
+``` r
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
@@ -481,18 +539,18 @@ dsem = "
 "
 
 # fit model
-out = tinyVAST( dsem = dsem,
+out = tinyVAST( spacetime_term = dsem,
            data = Data,
            formula = n ~ 0 + var,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            family = tweedie() )
 out
 #> Call: 
-#> tinyVAST(formula = n ~ 0 + var, data = Data, dsem = dsem, family = tweedie(), 
-#>     spatial_graph = mesh)
+#> tinyVAST(formula = n ~ 0 + var, data = Data, spacetime_term = dsem, 
+#>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 3.236934 mins
+#> Time difference of 1.158983 mins
 #> 
 #> Family: 
 #> $obs
@@ -505,25 +563,25 @@ out
 #> 
 #> sdreport(.) result
 #>               Estimate Std. Error
-#> alpha_j   -0.135067087 0.11243172
-#> alpha_j   -0.050931911 0.09302442
-#> beta_z     0.537678543 0.06461591
+#> alpha_j   -0.135067088 0.11243172
+#> alpha_j   -0.050931912 0.09302442
+#> beta_z     0.537678541 0.06461591
 #> beta_z     0.471060516 0.07549660
 #> beta_z    -0.268664647 0.07225850
 #> beta_z    -0.080655517 0.06157438
-#> beta_z     0.355720082 0.01973953
+#> beta_z     0.355720083 0.01973953
 #> log_sigma -0.675048462 0.02959907
 #> log_sigma  0.004059747 0.04917005
 #> log_kappa -0.566274473 0.09138031
-#> Maximum gradient component: 0.002923743 
+#> Maximum gradient component: 0.002923714 
 #> 
-#> Proportion deviance explained: 
+#> Proportion conditional deviance explained: 
 #> [1] 0.4630639
 #> 
 #> DSEM terms: 
 #>   heads to from parameter start lag    Estimate  Std_Error   z_value      p_value
-#> 1     1 d1   d1         1  <NA>   1  0.53767854 0.06461591  8.321148 8.711554e-17
-#> 2     1 d2   d2         2  <NA>   1  0.47106052 0.07549660  6.239493 4.389917e-10
+#> 1     1 d1   d1         1  <NA>   1  0.53767854 0.06461591  8.321148 8.711558e-17
+#> 2     1 d2   d2         2  <NA>   1  0.47106052 0.07549660  6.239493 4.389918e-10
 #> 3     1 d1   d2         3  <NA>   1 -0.26866465 0.07225850 -3.718104 2.007234e-04
 #> 4     1 d2   d1         4  <NA>   1 -0.08065552 0.06157438 -1.309888 1.902338e-01
 #> 5     2 d1   d1         5  <NA>   0  0.35572008 0.01973953 18.020697 1.340448e-72
@@ -539,7 +597,7 @@ The values for `beta_z` again correspond to the specified value for interaction-
 
 We can again calculate the area-weighted total abundance and compare it with its true value:
 
-```r
+``` r
 # Predicted sample-weighted total
 Est1 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d1")) )
 Est2 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d2")) )
