@@ -18,8 +18,15 @@
 summarize parameters from a fitted tinyVAST
 }
 \details{
-\code{tinyVAST} includes three components: a structural equation model (SEM),
-a dynamic structural equation model (DSEM), and a generalized additive model (GAM).
+\code{tinyVAST} includes three components:
+\describe{
+\item{Space-variable interaction}{a separable Gaussian Markov random field (GMRF)
+constructed from a structural equation model (SEM) and a spatial variable}
+\item{Space-variable-time interaction}{a separable GMRF constructed from a
+a dynamic SEM (a nonseparable time-variable interaction) and a spatial variable}
+\item{Additive variation}{a generalized additive model (GAM), representing exogenous
+covariates }
+}
 Each of these are summarized and interpreted differently, and \code{summary.tinyVAST}
 facilitates this.
 

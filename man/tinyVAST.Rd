@@ -110,35 +110,35 @@ settings.}
 \item{...}{Not used.}
 }
 \description{
-Fits a vector autoregressive spatio-temporal model using
+Fits a vector autoregressive spatio-temporal (VAST) model using
 a minimal feature-set and a widely used interface.
 }
 \details{
 \code{tinyVAST} includes four basic inputs that specify the model structure:
 \itemize{
 \item \code{formula} specifies covariates and splines in a Generalized Additive Model;
-\item \code{spacetime_term} specifies interactions among variables and over time, constructing
-the space-time-variable interaction.
 \item \code{space_term} specifies interactions among variables and over time, constructing
 the space-variable interaction.
+\item \code{spacetime_term} specifies interactions among variables and over time, constructing
+the space-time-variable interaction.
 \item \code{spatial_domain} specifies spatial correlations
 }
 
-the default \code{spacetime_term=NULL} \code{space_term=NULL} turns off all multivariate and temporal indexing, such
-that \code{spatial_domain} is then ignored, and the model collapses
-to a standard model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
+the default \code{spacetime_term=NULL} and \code{space_term=NULL} turns off all multivariate
+and temporal indexing, such that \code{spatial_domain} is then ignored, and the model collapses
+to a generalized additive model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 the user must specify \code{spatial_domain} and either \code{space_term=""} or \code{spacetime_term=""}, where the latter
-is then parsed to include a single exogenous variance for the single variable\tabular{ll}{
+two are then parsed to include a single exogenous variance for the single variable\tabular{ll}{
    \strong{Model type} \tab \strong{How to specify} \cr
-   Generalized additive model \tab specify \code{spatial_domain=NULL} and \code{spacetime_term=""}, and then use \code{formula} to specify splines and covariates \cr
+   Generalized additive model \tab specify \code{spatial_domain=NULL} \code{space_term=""} and \code{spacetime_term=""}, and then use \code{formula} to specify splines and covariates \cr
    Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) \tab specify \code{spatial_domain=NULL} and use \code{spacetime_term} to specify interactions among variables and over time \cr
-   Univariate spatial model \tab specify \code{spatial_domain} and \code{spacetime_term=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
-   Multivariate spatial model \tab specify \code{spatial_domain} and use \code{spacetime_term} (without any lagged effects) to specify spatial interactions \cr
-   Vector autoregressive spatio-temporal model \tab specify \code{spatial_domain} and use \code{spacetime_term=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{spacetime_term} and \code{spatial_domain} \cr
+   Univariate spatio-temporal model, or multiple independence spatio-temporal variables \tab specify \code{spatial_domain} and \code{spacetime_term=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
+   Multivariate spatial model including interactions \tab specify \code{spatial_domain} and use \code{space_term} to specify spatial interactions \cr
+   Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) \tab specify \code{spatial_domain} and use \code{spacetime_term=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{spacetime_term} and \code{spatial_domain} \cr
 }
 }
 \examples{
-# Simulate a 2D AR1 spatial process with a cyclic confounder w
+# Simulate a seperable two-dimensional AR1 spatial process
 n_x = n_y = 25
 n_w = 10
 R_xx = exp(-0.4 * abs(outer(1:n_x, 1:n_x, FUN="-")) )
@@ -150,13 +150,13 @@ w = sample(1:n_w, replace=TRUE, size=length(z))
 Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), w=w, z=as.vector(z) + cos(w/n_w*2*pi))
 Data$n = Data$z + rnorm(nrow(Data), sd=1)
 
-# Add columns for multivariate and temporal dimensions
+# Add columns for multivariate and/or temporal dimensions
 Data$var = "n"
 
-# make mesh
+# make SPDE mesh for spatial term
 mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 
-# fit model
+# fit model with cyclic confounder as GAM term
 out = tinyVAST( data = Data,
                 formula = n ~ s(w),
                 spatial_domain = mesh,

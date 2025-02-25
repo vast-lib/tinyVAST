@@ -1,6 +1,6 @@
 #' @title Fit vector autoregressive spatio-temporal model
 #'
-#' @description Fits a vector autoregressive spatio-temporal model using
+#' @description Fits a vector autoregressive spatio-temporal (VAST) model using
 #'  a minimal feature-set and a widely used interface.
 #'
 #' @param formula Formula with response on left-hand-side and predictors on right-hand-side,
@@ -74,25 +74,25 @@
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:
 #' * `formula` specifies covariates and splines in a Generalized Additive Model;
-#' * `spacetime_term` specifies interactions among variables and over time, constructing
-#'   the space-time-variable interaction.
 #' * `space_term` specifies interactions among variables and over time, constructing
 #'   the space-variable interaction.
+#' * `spacetime_term` specifies interactions among variables and over time, constructing
+#'   the space-time-variable interaction.
 #' * `spatial_domain` specifies spatial correlations
 #'
-#' the default `spacetime_term=NULL` `space_term=NULL` turns off all multivariate and temporal indexing, such
-#' that `spatial_domain` is then ignored, and the model collapses
-#' to a standard model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
+#' the default `spacetime_term=NULL` and `space_term=NULL` turns off all multivariate
+#' and temporal indexing, such that `spatial_domain` is then ignored, and the model collapses
+#' to a generalized additive model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 #' the user must specify `spatial_domain` and either `space_term=""` or `spacetime_term=""`, where the latter
-#' is then parsed to include a single exogenous variance for the single variable
+#' two are then parsed to include a single exogenous variance for the single variable
 #'
 #' | \strong{Model type} | \strong{How to specify} |
 #' | --- | --- |
-#' | Generalized additive model | specify `spatial_domain=NULL` and `spacetime_term=""`, and then use `formula` to specify splines and covariates |
+#' | Generalized additive model | specify `spatial_domain=NULL` `space_term=""` and `spacetime_term=""`, and then use `formula` to specify splines and covariates |
 #' | Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_domain=NULL` and use `spacetime_term` to specify interactions among variables and over time |
-#' | Univariate spatial model | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
-#' | Multivariate spatial model | specify `spatial_domain` and use `spacetime_term` (without any lagged effects) to specify spatial interactions |
-#' | Vector autoregressive spatio-temporal model | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
+#' | Univariate spatio-temporal model, or multiple independence spatio-temporal variables | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
+#' | Multivariate spatial model including interactions | specify `spatial_domain` and use `space_term` to specify spatial interactions |
+#' | Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
 #'
 #' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations
@@ -112,7 +112,7 @@
 #' @seealso [summary.tinyVAST()] to visualize parameter estimates related to SEM and DSEM model components
 #'
 #' @examples
-#' # Simulate a 2D AR1 spatial process with a cyclic confounder w
+#' # Simulate a seperable two-dimensional AR1 spatial process
 #' n_x = n_y = 25
 #' n_w = 10
 #' R_xx = exp(-0.4 * abs(outer(1:n_x, 1:n_x, FUN="-")) )
@@ -124,13 +124,13 @@
 #' Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), w=w, z=as.vector(z) + cos(w/n_w*2*pi))
 #' Data$n = Data$z + rnorm(nrow(Data), sd=1)
 #'
-#' # Add columns for multivariate and temporal dimensions
+#' # Add columns for multivariate and/or temporal dimensions
 #' Data$var = "n"
 #'
-#' # make mesh
+#' # make SPDE mesh for spatial term
 #' mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 #'
-#' # fit model
+#' # fit model with cyclic confounder as GAM term
 #' out = tinyVAST( data = Data,
 #'                 formula = n ~ s(w),
 #'                 spatial_domain = mesh,
@@ -466,9 +466,6 @@ function( formula,
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
     #
-    # family = list("obs"=gaussian(),"y"=poisson())
-    # family = list("obs"=independent_delta(),"y"=independent_delta())
-    # family = list("obs"=gaussian(),"y"=independent_delta())
     family_code = t(rbind(sapply( family, FUN=\(x){
                        pad_length(c("gaussian" = 0,
                          "tweedie" = 1,
@@ -775,7 +772,7 @@ function( formula,
   if( isTRUE(control$calculate_deviance_explained) ){
     out$deviance_explained = deviance_explained( out )
   }else{
-    out$deviance_explained = "Not run; please use `deviance_explained()`"
+    out$deviance_explained = "Not run; use `deviance_explained()` to calculate"
   }
 
   class(out) = "tinyVAST"
@@ -914,8 +911,15 @@ function( x,
 #' @description summarize parameters from a fitted tinyVAST
 #'
 #' @details
-#' \code{tinyVAST} includes three components: a structural equation model (SEM),
-#' a dynamic structural equation model (DSEM), and a generalized additive model (GAM).
+#' \code{tinyVAST} includes three components:
+#' \describe{
+#'   \item{Space-variable interaction}{a separable Gaussian Markov random field (GMRF)
+#'   constructed from a structural equation model (SEM) and a spatial variable}
+#'   \item{Space-variable-time interaction}{a separable GMRF constructed from a
+#'   a dynamic SEM (a nonseparable time-variable interaction) and a spatial variable}
+#'   \item{Additive variation}{a generalized additive model (GAM), representing exogenous
+#'   covariates }
+#' }
 #' Each of these are summarized and interpreted differently, and \code{summary.tinyVAST}
 #' facilitates this. 
 #'
