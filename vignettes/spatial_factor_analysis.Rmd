@@ -102,10 +102,10 @@ sem = "
 "
 
 # fit model
-out = tinyVAST( sem = sem,
+out = tinyVAST( space_term = sem,
            data = Data,
            formula = n ~ 0 + factor(species),
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            family = tweedie(),
            variables = c( "f1", "f2", 1:n_c ),
            space_columns = c("x","y"),
@@ -168,10 +168,10 @@ sem = "
 "
 
 # fit model
-out = tinyVAST( sem = sem,
+out = tinyVAST( space_term = sem,
            data = Data,
            formula = n ~ 0 + factor(species),
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            family = list( "obs"=tweedie() ),
            variables = c( "f1", "f2", 1:n_c ),
            space_columns = c("x","y"),

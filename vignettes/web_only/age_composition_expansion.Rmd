@@ -12,7 +12,7 @@ vignette: >
 
 
 
-```r
+``` r
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -25,7 +25,7 @@ We here explore the capacity to use area-expansion to calculate proportion-at-ag
 To start, we load sampling data that has undergone first-stage expansion.  This arises when each primary sampling unit includes secondary subsampling of ages, and the subsampled proporrtion-at-age in each primary unit has been expanded to the total abundance in that primary sample:
 
 
-```r
+``` r
 data( bering_sea_pollock_ages )
 
 # subset to Years 2010-2023 (to speed up the example)
@@ -48,7 +48,7 @@ Data = cbind( st_drop_geometry(Data), st_coordinates(Data) )
 Next, we construct the various inputs to _tinyVAST_
 
 
-```r
+``` r
 # adds different variances for each age
 sem = ""
 
@@ -82,7 +82,7 @@ control = tinyVASTcontrol( getsd = FALSE,
 We could run the model with a log-linked Tweedie distribution and a single linear predictor:
 
 
-```r
+``` r
 family = list(
   Age_1 = tweedie(),
   Age_2 = tweedie(),
@@ -104,7 +104,7 @@ family = list(
 #Data$Year = factor(Data$Year)
 myfit = tinyVAST(
   data = Data,
-  formula = Catch_KG ~ 0 + Year_Age,
+  formula = Abundance_per_hectare ~ 0 + Year_Age,
   sem = sem,
   dsem = dsem,
   family = family,
@@ -112,7 +112,7 @@ myfit = tinyVAST(
   variable_column = "Age",
   time_column = "Year",
   distribution_column = "Age",
-  spatial_graph = mesh,
+  spatial_domain = mesh,
   control = control
 )
 ```
@@ -120,7 +120,7 @@ myfit = tinyVAST(
 After the model is fitted, we then apply area-expansion and the epsilon bias-correction method to predict abundance-at-age, and convert that to a proportion:
 
 
-```r
+``` r
 # Get shapefile for survey extent
 data( bering_sea )
 
@@ -139,6 +139,7 @@ areas = set_units(st_area(grid), "hectares") #  / 100^2 # Hectares
 # Get abundance
 N_jz = expand.grid( Age=myfit$internal$variables, Year=sort(unique(Data$Year)) )
 N_jz = cbind( N_jz, "Biomass"=NA, "SE"=NA )
+#> Error in data.frame(..., check.names = FALSE): arguments imply differing number of rows: 0, 1
 for( j in seq_len(nrow(N_jz)) ){
   if( N_jz[j,'Age']==1 ){
     message( "Integrating ", N_jz[j,'Year'], " ", N_jz[j,'Age'], ": ", Sys.time() )
@@ -158,7 +159,9 @@ for( j in seq_len(nrow(N_jz)) ){
 }
 N_ct = array( N_jz$Biomass, dim=c(length(myfit$internal$variables),length(unique(Data$Year))),
               dimnames=list(myfit$internal$variables,sort(unique(Data$Year))) )
+#> Error in array(N_jz$Biomass, dim = c(length(myfit$internal$variables), : 'data' must be of a vector type, was 'NULL'
 N_ct = N_ct / outer( rep(1,nrow(N_ct)), colSums(N_ct) )
+#> Error: object 'N_ct' not found
 ```
 
 Finally, we can compare these estimates with those from package _VAST_.  Estimates differ somewhat
@@ -166,7 +169,7 @@ because VAST used a delta-gamma distribution with spatio-temporal variation in t
 and also used a different mesh.  
 
 
-```r
+``` r
 # Load VAST results for same data
 data(bering_sea_pollock_vast)
 myvast = bering_sea_pollock_vast
@@ -174,20 +177,23 @@ rownames(myvast) = 1:15
 
 # Reformat tinyVAST output with same dimnames
 mytiny = N_ct
+#> Error: object 'N_ct' not found
 rownames(mytiny) = 1:15
+#> Error: object 'mytiny' not found
 
 #
 longvast = cbind( expand.grid(dimnames(myvast)), "p"=as.numeric(myvast), "method"="VAST" )
 longtiny = cbind( expand.grid(dimnames(mytiny)), "p"=as.numeric(mytiny), "method"="tinyVAST" )
+#> Error: object 'mytiny' not found
 long = rbind( longvast, longtiny )
+#> Error: object 'longtiny' not found
 
 library(ggplot2)
 ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
   facet_grid( rows=vars(Var1), scales="free" ) +
   geom_point( ) +
   scale_y_log10()
+#> Error: object 'long' not found
 ```
-
-![plot of chunk agecomp](figure/agecomp-1.png)
 
 

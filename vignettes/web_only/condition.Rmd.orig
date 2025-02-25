@@ -97,10 +97,10 @@ Finally, we fit the model using tinyVAST
 # fit model
 fit = tinyVAST( data = formed_data,
            formula = Response ~ interaction(Year,Type) + log_length,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            control = tinyVASTcontrol( trace=0, verbose=TRUE, profile="alpha_j" ),
-           sem = sem,
-           dsem = dsem,
+           space_term = sem,
+           spacetime_term = dsem,
            family = family,
            variables = c("Biomass","Condition"),
            variable_column = "Type",
@@ -113,10 +113,10 @@ fit = tinyVAST( data = formed_data,
 We can look at structural parameters using summary functions:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # spatial terms
-summary(fit, "sem")
+summary(fit, "space_term")
 
 # spatio-temporal terms
-summary(fit, "dsem")
+summary(fit, "spacetime_term")
 ```
 
 # Abundance-weighted expansion

@@ -75,7 +75,7 @@ dsem = "
 mytiny0 = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,
      data = Data,
-     dsem = dsem,
+     spacetime_term = dsem,
      variable_column = "Species",
      time_column = "Year",
      space_column = "Region",
@@ -83,11 +83,11 @@ mytiny0 = tinyVAST(
      family = list( "chum" = lognormal(),
                           "pink" = lognormal(),
                           "sockeye" = lognormal() ),
-     spatial_graph = unconnected_graph,
+     spatial_domain = unconnected_graph,
      control = tinyVASTcontrol( profile="alpha_j" ) )
 
 # Summarize output
-Summary = summary(mytiny0, what="dsem")
+Summary = summary(mytiny0, what="spacetime_term")
 knitr::kable( Summary, digits=3)
 ```
 
@@ -141,7 +141,7 @@ We can then pass this adjacency graph to `tinyVAST` during fitting:
 mytiny = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,
      data = Data,
-     dsem = dsem,
+     spacetime_term = dsem,
      variable_column = "Species",
      time_column = "Year",
      space_column = "Region",
@@ -149,11 +149,11 @@ mytiny = tinyVAST(
      family = list( "chum" = lognormal(),
                           "pink" = lognormal(),
                           "sockeye" = lognormal() ),
-     spatial_graph = adjacency_graph,
+     spatial_domain = adjacency_graph,
      control = tinyVASTcontrol( profile="alpha_j" ) )
 
 # Summarize output
-Summary = summary(mytiny, what="dsem")
+Summary = summary(mytiny, what="spacetime_term")
 knitr::kable( Summary, digits=3)
 ```
 

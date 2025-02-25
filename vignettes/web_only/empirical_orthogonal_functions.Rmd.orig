@@ -71,11 +71,11 @@ dsem = make_eof_ram( variables = "Ice",
 mesh = fm_mesh_2d( Data[,c('X','Y')], cutoff=1.5 )
 
 # fit model
-out = tinyVAST( dsem = dsem,
-           sem = "",
+out = tinyVAST( spacetime_term = dsem,
+           space_term = "",
            data = as.data.frame(Data),
            formula = ice_concentration ~ 1,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            space_column = c("X","Y"),
            variable_column = "var",
            time_column = "year",

@@ -78,9 +78,9 @@ sem = "
 # fit model
 out = tinyVAST( data = Data,
            formula = n ~ s(w),
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            control = tinyVASTcontrol(getsd=FALSE),
-           sem = sem)
+           space_term = sem)
 ```
 
 We can then calculate the area-weighted total abundance:

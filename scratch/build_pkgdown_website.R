@@ -17,7 +17,7 @@ if( FALSE ){
   setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\vignettes)')
 
   knitr::knit( "web_only/age_composition_expansion.Rmd.orig",
-               output = "vignettes/web_only/age_composition_expansion.Rmd" )
+               output = "web_only/age_composition_expansion.Rmd" )
 
   knitr::knit( "web_only/empirical_orthogonal_functions.Rmd.orig",
                output = "web_only/empirical_orthogonal_functions.Rmd" )

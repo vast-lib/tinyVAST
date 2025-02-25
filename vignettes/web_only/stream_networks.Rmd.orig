@@ -105,12 +105,12 @@ location of simulated samples.
 # fit model
 out = tinyVAST( data = Data,
            formula = Count ~ 1,
-           spatial_graph = graph,
+           spatial_domain = graph,
            space_column = c("X","Y"),
            variable_column = "var",
            time_column = "time",
            distribution_column = "dist",
-           sem = "" )
+           space_term = "" )
 
 #
 sf_plot = st_union( st_line_sample( activate(stream,"edges"), density=1/1000))

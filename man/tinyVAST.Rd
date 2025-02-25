@@ -69,7 +69,7 @@ coordinates for each sample.}
 process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
 or \code{NULL} to specify a single site.  If using \code{igraph} then the
 graph must have vertex names \code{V(graph)$name} that match
-levels of data\link{,'space_columns'}}
+levels of \code{data[,'space_columns']}}
 
 \item{time_column}{A character string indicating the column of \code{data}
 listing the time-interval for each sample, from the set of times

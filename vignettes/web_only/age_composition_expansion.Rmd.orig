@@ -114,14 +114,14 @@ family = list(
 myfit = tinyVAST(
   data = Data,
   formula = Abundance_per_hectare ~ 0 + Year_Age,
-  sem = sem,
-  dsem = dsem,
+  space_term = sem,
+  spacetime_term = dsem,
   family = family,
   space_column = c("X", "Y"), 
   variable_column = "Age",
   time_column = "Year",
   distribution_column = "Age",
-  spatial_graph = mesh,
+  spatial_domain = mesh,
   control = control
 )
 ```

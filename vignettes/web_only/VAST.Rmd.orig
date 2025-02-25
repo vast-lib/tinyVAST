@@ -73,10 +73,10 @@ mean(Data$n==0)
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # fit model
-mytinyVAST = tinyVAST( dsem = "logn -> logn, 1, rho",
+mytinyVAST = tinyVAST( spacetime_term = "logn -> logn, 1, rho",
            data = Data,
            formula = n ~ 0 + factor(time),
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            family = tweedie() )
 mytinyVAST
 ```
@@ -221,10 +221,10 @@ We can also fit these data using a delta model
 mydelta2 = tinyVAST( data = Data,
                formula = n ~ 1,
                delta_options = list(
-                 delta_formula = ~ 0 + factor(time),
-                 delta_dsem = "logn -> logn, 1, rho"),
+                 formula = ~ 0 + factor(time),
+                 spacetime_term = "logn -> logn, 1, rho"),
                family = delta_lognormal(type="poisson-link"),
-               spatial_graph = mesh )
+               spatial_domain = mesh )
 
 mydelta2
 ```
@@ -292,10 +292,10 @@ dsem = "
 "
 
 # fit model
-out = tinyVAST( dsem = dsem,
+out = tinyVAST( spacetime_term = dsem,
            data = Data,
            formula = n ~ 0 + var,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            family = tweedie() )
 out
 ```

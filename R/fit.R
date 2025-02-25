@@ -41,7 +41,7 @@
 #'        process, [sfnetwork_mesh()] for stream networks,
 #'        or `NULL` to specify a single site.  If using `igraph` then the
 #'        graph must have vertex names \code{V(graph)$name} that match
-#'        levels of data[,'space_columns']
+#'        levels of \code{data[,'space_columns']}
 #' @param time_column A character string indicating the column of `data`
 #'        listing the time-interval for each sample, from the set of times
 #'        in argument `times`.
