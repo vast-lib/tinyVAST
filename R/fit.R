@@ -905,57 +905,60 @@ function( nlminb_loops = 1,
 print.tinyVAST <-
 function( x,
           ... ){
+  out = NULL
+
   #
   cat( "Call: \n")
-  print(x$call)
+  out$call = print(x$call)
   cat( "\n")
   
   cat( "Run time: \n")
-  print(x$run_time)
+  out$run_time = print(x$run_time)
   cat( "\n")
 
   cat( "Family: \n")
-  print(x$internal$family)
+  out$family = print(x$internal$family)
   cat( "\n")
 
   if( !is.null(x$sdrep) ){
     cat( "\n")
-    print(x$sdrep)
+    out$sdrep = print(x$sdrep)
     cat( "\n")
   }
   if( !is.null(x$deviance_explained) ){
     cat( "Proportion conditional deviance explained: \n")
-    print(x$deviance_explained)
+    out$deviance_explained = print(x$deviance_explained)
     cat( "\n")
   }
   
-  out = summary( x, "space_term")
-  if( nrow(out)>0 ){
+  out$space_term = summary( x, "space_term")
+  if( nrow(out$space_term)>0 ){
     cat( "space_term: \n")
-    print(out)
+    print(out$space_term)
     cat( "\n")
   }
 
-  out = summary( x, "time_term")
-  if( nrow(out)>0 ){
+  out$time_term = summary( x, "time_term")
+  if( nrow(out$time_term)>0 ){
     cat( "time_term: \n")
-    print(out)
+    print(out$time_term)
     cat( "\n")
   }
 
-  out = summary( x, "spacetime_term")
-  if( nrow(out)>0 ){
+  out$spacetime_term = summary( x, "spacetime_term")
+  if( nrow(out$spacetime_term)>0 ){
     cat( "spacetime_term: \n")
-    print(out)
+    print(out$spacetime_term)
     cat( "\n")
   }
 
-  out = summary( x, "fixed")
-  if( nrow(out)>0 ){
+  out$fixed = summary( x, "fixed")
+  if( nrow(out$fixed)>0 ){
     cat( "Fixed terms: \n")
-    print(out)
+    print(out$fixed)
     cat( "\n")
   }
+  return(invisible(out))
 }
 
 
