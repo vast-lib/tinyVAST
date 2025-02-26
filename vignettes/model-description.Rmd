@@ -1,0 +1,235 @@
+---
+title: "tinyVAST model description"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{tinyVAST model description}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, echo=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = FALSE,
+  error = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build and PDF
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/model-description.Rmd"); rmarkdown::render( "vignettes/model-description.Rmd", rmarkdown::pdf_document())
+```
+
+\newcommand{\B}{\mathbf}   <!-- math bold nonitalic -->  
+\newcommand{\PL}{\mathrm}   <!-- math nonitalic -->   
+\newcommand{\s}{\boldsymbol{s}}
+
+We include tables of all major indices (Table 1) and symbols (Table 2).
+
+```{r indices}
+subscripts <- tibble::tribble(
+  ~Symbol, ~Description,
+  "$i$", "Index for each sample, $i$ in $(1,2,...,I)$",
+  "$s[i]$", "spatial coordinate for sample $i$, $s$ in $(1,2,...,S)$",
+  "$t[i]$", "time-interval for sample $i$, $t$ in $(1,2,...,T)$",
+  "$c[i]$", "category for sample $i$, $c$ in $(1,2,...,C)$",
+  "$e[i]$", "error distribution and link function for sample $i$"
+)
+knitr::kable(subscripts, caption = "Table 1: Subscript notation", escape = FALSE, booktabs = TRUE)
+```
+
+```{r symbols, results='asis'}
+symbols <- tibble::tribble(
+   ~Symbol, ~Code, ~Description,
+  "$y$", "`y_i`", "Observed response data",
+  "$p_1$", "`p_i`", "first linear predictor",
+  "$p_2$", "`p2_i`", "second linear predictor",
+)
+knitr::kable(symbols, caption = "Table 2: Symbol notation, code representation (in model output or in model template code), and descriptions.", escape = FALSE, booktabs = TRUE,
+   linesep = c(
+    rep('', 7), # y, mean etc.
+    '\\addlinespace',
+    rep('', 7), # fields
+    '\\addlinespace',
+    rep('', 5), # covariance stuff
+    '\\addlinespace',
+    rep('', 5), # more covariance stuff
+    '\\addlinespace',
+    rep('', 99) # end
+  ))
+```
+
+# Bivariate genearlized linear mixed model structure
+
+tinyVAST is a generalized linear mixed model, which includes four additive components:
+
+1. Spatial interactions among variables:  The user can specify interactions among variables at a given site (or for spatially correlated latent variables) using arrow notation derived from path analysis, based on the interface from R package sem;
+
+2. Temporal interaction among variables:  The user can specify simultaneous and lagged interactions among variables over time using an expanded arrow-and-lag notation that is derived from R package dsem, where these interactions the annual intercept for a given variable therefore apply uniformly for all locations.
+
+3. Spatio-temporal interactions among variables:  The user can specify simultaneous and lagged interactions among variables over time, where these interactions occur on a site-by-site basis.
+
+4. Generalized additive model:  The user specifies a formula for a generalized additive model (GAM) that is interpreted by R package mgcv.  If other model components are missing, tinyVAST estimates parameters that are similar to mgcv, with small differences resulting from different methods for parameter estimation;
+
+These four components are assembled into two linear predictors:
+
+$$
+\begin{aligned}
+p_{\PL 1,i} &= \B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1} + \B A_{i} \B \Omega_{\PL 1,c[i]} + \B D_{\PL 1,c[i],t[i]} + \B A_i \B E_{\PL 1,c[i],t[i]}  \\
+p_{\PL 2,i} &= \B X_{\PL 2,i} \B \alpha_{\PL 2} + \B Z_{\PL 2,i} \B \gamma_{\PL 2} + \B A_{i} \B \Omega_{\PL 2,c[i]} + \B D_{\PL 2,c[i],t[i]} + \B A_i \B E_{\PL 2,c[i],t[i]}
+\end{aligned}
+$$
+
+where
+
+-   $p_{\PL 1,i}$ is the first linear predictor;
+-   $\B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1}$ is the GAM component 
+-   $\B \alpha_{\PL 1}$ is the GAM fixed effects with associated design matrix $\B X_{\PL 1}$, where $\B X_{\PL 1,i}$ is the row of the design matrix for sample $i$;
+-   $\B \gamma_{\PL 1}$ is the GAM random effects with associated design matrix $\B Z$, where $\B Z_{\PL 1,i}$ is the row of the design matrix;
+-   $\B A_{i} \B \Omega_{\PL 1,c[i]}$ is the projection of the space-veriable interaction $\B \Omega$ to sample $i$;
+-   $\B D_{\PL 1,c[i],t[i]}$ is the time-variable interaction $\B D$ for sample $i$;
+-   $\B A_i \B E_{\PL 1,c[i],t[i]}$ is the projection of the space-variable-time interaction $\B E$ to sample $i$;
+-   $p_{\PL 2,i}$ is the second linear predictor, and terms are defined similarly but using subscript-2;
+
+The linear predictors are then passed through an inverse-link function to specify the distribution for errors:
+
+$$
+y_i \sim f_{e[i]}( g_{e[i]}^{-1} (p_{\PL 1,i}, p_{\PL 2,i}), \theta_{e[i]} )
+$$
+ 
+where
+
+-   $f_{e[i]}$ probability density or mass function for sample $i$;
+-   $g_{e[i]}^{-1} (p_{\PL 1,i}, p_{\PL 2,i})$ is the bivariate inverse-link function that transforms linear predictors to the central tendancy parameters of the distribution;
+-   $\theta_{e[i]}$ is the dispersion parameters for distribution $e[i]$;
+
+In the simple case, the distribution only requires a single linear predictor such that $p_{\PL 2,i}$ drops out of the model.  In this case, the model collapses to a generalized linear mixed model.  For example we might have a log-linked Poisson distribution, $y_i \sim \mathrm{Poisson}(e^{p_{\PL 1,i}})$.
+
+However, tinyVAST can also handle a delta-model using either logit-log or Poisson-linked link functions:
+
+$$
+g_{e[i]}^{-1} (p_{\PL 1,i}, p_{\PL 2,i}) = ( \mu_{\PL 1,i}, \mu_{\PL 2,i}  )
+$$
+
+where
+
+-   $\mu_{\PL 1,i}$ and $\mu_{\PL 2,i}$ are the two linear predictors, such that $\mathbb{E}[y_i] = \mu_{\PL 1,i} \mu_{\PL 2,i}$;
+
+For the conventional logit-log bivariate link function we obtain:
+
+$$
+\begin{aligned}
+\mu_{\PL 1,i} &= \frac{e^{p_{\PL 1,i}}}{1+e^{p_{\PL 1,i}}}  \\
+\mu_{\PL 2,i} &= e^{p_{\PL 2,i}}
+\end{aligned}
+$$
+
+while for the Poisson-linked link function we obtain:
+
+$$
+\begin{aligned}
+\mu_{\PL 1,i} &= 1 - e^{-p_{\PL 1,i}} \\
+\mu_{\PL 2,i} &= \frac{e^{p_{\PL 1,i}}}{\mu_{\PL 1,i}} e^{p_{\PL 2,i}}
+\end{aligned}
+$$
+
+# Spatial domains
+
+tinyVAST estimates spatially autocorrelated latent variables.  These variables are treated as Gaussian Markov random fields (GMRFs), and evaluating the probability density of GMRFs involves calculating the precision matrix $\B Q_{\PL{domain}} = \B \Sigma^{-1}$ as the inverse of the spatial covariance matrix.  tinyVAST involves three options for specifying this spatial precision:
+
+* Stochastic partial differentiaul equation (SPDE):  The analyst can approximate spatial variation over a continuous two-dimensional surface by constructing finite element mesh (FEM), treating the value at vertices as a GMRF, and then using bilinear interpolation (i.e., a piecewise linear approximation) to interpolate from vertices to the spatial domain.  In this case, the precision is constructred as:
+
+$$
+\B Q_{\PL{domain}} = \tau^2 ( \kappa^4 \B M_{\PL 0} + 2\kappa^2 \B M_{\PL 1} + \B M_{\PL 2} )
+$$
+
+* Simultaneous autoregressive (SAR):  Alternatively, the analyst can specify an areal model representing the value within spatial strata:
+
+$$
+\B Q_{\PL{domain}} = \tau^2 (\B I - \kappa \B A)^{-2} 
+$$
+where $\B A$ is the adjacency matrix specified by the analyst.
+
+* Stream networks:  Finally, the analyst can specify that sites are partially correlated if they are adjacent along a stream network (while ignoring flow direction).  This results in an Onstein-Uhlenbeck process along the stream network, or an exponential `tail-down` model.
+
+# Structural equation models
+
+tinyVAST also involves specifying a structural equation model (SEM).  This SEM be viewed either:
+
+1. Weak interpretation: as a flexible way to parameterize the correlation among variables; or
+2. Strong interpretation: as a structural causal model, allowing inference about counterfactual changes to the system.
+
+To specify a SEM, the user uses *arrow notation*.  For example, to specify a linear model this involves:
+
+```{r echo=TRUE, eval=FALSE}
+w1 -> w2, b_12
+```
+
+This then estimates a single slope parameter.  In a more complicated case, $W_1$ might cause $W_2$, which in turn causes $W_3$.  This is then represented as:
+
+```{r arrow notation, echo=TRUE, eval=FALSE}
+w1 -> w2, b_12
+w2 -> w3, b_23
+```
+
+These path coefficients then define path matrix $\B P$ and exogenous covariance matrix $\B G^2$, which is  used in a simultaneous equation model
+
+$$
+\mathbf{ w = P w + \epsilon} \\
+\B \epsilon \sim \mathrm{MVN}( \B 0, \B G^2 )
+$$
+where the variance $\mathrm{Var}(\B w) = (\mathbf{I - P})^{-1} \B G^2 (\mathbf{I - P}^T)^{-1}$.  This then results in a sparse precision matrix:
+
+$$
+\B Q = (\mathbf{I - P}^T) \B G^{-2} (\mathbf{I - P})
+$$
+
+# Dynamic structural equation models
+
+Similarly, tinyVAST involves specifying dynamic structural equation models (DSEM).  To specify a DSEM, the user uses *arrow-and-lag notation*.  For example, to specify a first order autoregressive process:
+
+```{r echo=TRUE, eval=FALSE}
+w1 -> w2, 1, rho
+```
+
+This DSEM defines a GMRF over a nonseparable interaction of time and variables, represented by a matrix $\B Q_{\PL{time\_term}}$ with dimension $CT \times CT$.  The user can specify a separate *arrow-and-lag* notation to define the precision matrix for the time-variable interaction $\B Q_{\PL{time\_term}}$ and for the space-time-variable interaction $\B Q_{\PL{spacetime\_term}}$
+
+# Spatial interactions for SEM and DSEM
+
+tinyVAST then uses the SEM and DSEM notation to construct the joint precision for the space-variable interaction $\B \Omega$ with dimension $S \times C$, and the space-time-variable interaction $\B E$ with dimension $S \times C \times T$.  To do so, it constructs the separable precision for each process:
+
+$$
+\mathrm{vec}(\B E) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{spacetime\_term}} \otimes \B Q_{\PL{domain}})
+$$
+and 
+$$
+\mathrm{vec}(\B D) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{time\_term}})
+$$
+
+and 
+$$
+\mathrm{vec}(\B \Omega) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{space\_term}} \otimes \B Q_{\PL{domain}})
+$$
+
+# Generalized additive model
+
+Finally, the analyst can specify a generalized additive model using syntax from package mgcv.  For example this might involve:
+
+```{r echo=TRUE, eval=FALSE}
+count ~ year + offset(log_area) + s(depth) + s(species, bs="re")
+```
+
+If `year` and `species` are factors and `depth` and `log_area` are continuous, then this would specify a fixed effect for each level `year`, a spline smoother for `depth`, using `log_area` as an offset, and estimating a random intercept for each level of `species`.  This formula is parsed internally to assemble fixed effects in design matrix $\B X$ and the basis functions for spline smoothers and random effects in design matrix $\B Z$.  The coefficients $\B \gamma$ associated with smoothers and random effects are then specified to follow a GMRF:
+
+$$
+\B \gamma \sim \mathrm{GMRF}( \B 0, \B Q_{\PL{gam}})
+$$
+where $\B Q_{\PL{gam}}$ is a blockwise diagonal matrix, assembled from estimated variance parameters and matrices constructed by mgcv.  
+
