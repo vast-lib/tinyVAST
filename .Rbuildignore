@@ -13,3 +13,7 @@
 ^vignettes/web_only$
 ^codecov\.yml$
 ^figure$
+^README\.Rmd$
+^README\.md$
+^README\.html$
+^header\.md$
