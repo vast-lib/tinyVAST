@@ -7,7 +7,7 @@ vignette: >
   %\VignetteIndexEntry{Simultaneous autoregressive process}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{ggraph2}
+  %\VignetteDepends{rnaturalearth}
 ---
 
 ```{r, include = FALSE}

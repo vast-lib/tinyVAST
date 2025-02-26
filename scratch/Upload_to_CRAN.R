@@ -1,7 +1,7 @@
 
 
 library(devtools)
-setwd( R'(C:\Users\James.Thorson\Desktop\Git\dsem)' )
+setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
 
 # Compile
 if( FALSE ){
