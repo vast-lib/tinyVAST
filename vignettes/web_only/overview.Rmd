@@ -7,7 +7,6 @@ vignette: >
   %\VignetteIndexEntry{Overview of vignettes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{dsem}
 ---
 
 ```{r, include = FALSE}

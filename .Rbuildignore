@@ -11,6 +11,7 @@
 ^cran-comments\.md$
 ^LICENSE$
 ^vignettes/web_only$
+^vignettes/figure$
 ^codecov\.yml$
 ^figure$
 ^README\.Rmd$

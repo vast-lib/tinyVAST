@@ -4,7 +4,7 @@ author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{VAST}
+  %\VignetteIndexEntry{Vector autoregressive spatio-temporal models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{pdp}
@@ -67,7 +67,7 @@ mytinyVAST
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 19.98727 secs
+#> Time difference of 19.10228 secs
 #> 
 #> Family: 
 #> $obs
@@ -105,7 +105,7 @@ mytinyVAST
 #> Proportion conditional deviance explained: 
 #> [1] 0.6800908
 #> 
-#> DSEM terms: 
+#> spacetime_term: 
 #>   heads   to from parameter start lag  Estimate  Std_Error  z_value       p_value
 #> 1     1 logn logn         1  <NA>   1 0.8122911 0.03708631 21.90272 2.447223e-106
 #> 2     2 logn logn         2  <NA>   0 0.4098891 0.03291043 12.45469  1.318626e-35
@@ -278,7 +278,7 @@ myVAST
 #>       12        7 
 #> 
 #> $time_for_MLE
-#> Time difference of 1.111809 secs
+#> Time difference of 1.03204 secs
 #> 
 #> $max_gradient
 #> [1] 0.0005698621
@@ -342,10 +342,10 @@ myVAST
 #> Maximum gradient component: 0.0005698621 
 #> 
 #> $time_for_sdreport
-#> Time difference of 4.689575 secs
+#> Time difference of 4.403014 secs
 #> 
 #> $time_for_run
-#> Time difference of 21.1067 secs
+#> Time difference of 19.97827 secs
 ```
 
 Or with sdmTMB
@@ -382,9 +382,9 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 |         | run times (sec.)|
 |:--------|----------------:|
-|tinyVAST |             20.0|
-|VAST     |             23.1|
-|sdmTMB   |             19.3|
+|tinyVAST |             19.1|
+|VAST     |             24.1|
+|sdmTMB   |             18.8|
 
 
 
@@ -411,7 +411,7 @@ mydelta2
 #>         factor(time), spacetime_term = "logn -> logn, 1, rho"))
 #> 
 #> Run time: 
-#> Time difference of 0.1223099 secs
+#> Time difference of 0.1212499 secs
 #> 
 #> Family: 
 #> $obs
@@ -450,6 +450,8 @@ mydelta2
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] -0.1358365
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
 #> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
 #> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
 #> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
@@ -550,7 +552,7 @@ out
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 1.158983 mins
+#> Time difference of 1.110194 mins
 #> 
 #> Family: 
 #> $obs
@@ -578,7 +580,7 @@ out
 #> Proportion conditional deviance explained: 
 #> [1] 0.4630639
 #> 
-#> DSEM terms: 
+#> spacetime_term: 
 #>   heads to from parameter start lag    Estimate  Std_Error   z_value      p_value
 #> 1     1 d1   d1         1  <NA>   1  0.53767854 0.06461591  8.321148 8.711558e-17
 #> 2     1 d2   d2         2  <NA>   1  0.47106052 0.07549660  6.239493 4.389918e-10

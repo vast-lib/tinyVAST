@@ -123,7 +123,7 @@ where every row $\B A_i$ of the interpolation matrix $\B A$ is nonzero for only 
 * Simultaneous autoregressive (SAR):  Alternatively, the analyst can specify an areal model representing the value within spatial strata:
 
 $$
-\B Q_{\PL{domain}} = \tau^2 (\B I - \kappa \B A^*)^{-2} 
+\B Q_{\PL{domain}} = \tau^2 (\B I - \kappa \B A^*)^2 
 $$
 where $\B A^*$ is the adjacency matrix of the graph specified by the analyst, and each row $\B A_i$ of interpolation matrix $\B A$ is nonzero only for the single spatial stratum containing sample $i$ (and noting that adjacency matrix $\B A^*$ is different from interpolation matrix $\B A$, but we use the same term for both due to a collision in standard notation).
 
@@ -199,7 +199,7 @@ w1 -> w1, 1, rho
 If there were four time-intervals ($T=4$) this would then result in the path matrix:
 
 $$
-\B G = 
+\B P = 
 \begin{pmatrix}
   0 & 0 & 0 & 0 \\
   \rho & 0 & 0 & 0 \\
@@ -208,24 +208,27 @@ $$
 \end{pmatrix}
 $$
 
-This DSEM defines a GMRF over a nonseparable interaction of time and variables, represented by a matrix $\B Q_{\PL{time\_term}}$ with dimension $CT \times CT$.  The user can specify a separate *arrow-and-lag* notation to define the precision matrix for the time-variable interaction $\B Q_{\PL{time\_term}}$ and for the space-time-variable interaction $\B Q_{\PL{spacetime\_term}}$
+and when the DSEM involves multiple times and variables, the sparse precision is formed by summing across the Kronecker product of time-lag and interaction matrices.  This DSEM defines a GMRF over a nonseparable interaction of time and variables, represented by a matrix $\B Q_{\PL{time\_term}}$ with dimension $CT \times CT$.  The user can specify a separate *arrow-and-lag* notation to define the precision matrix for the time-variable interaction $\B Q_{\PL{time\_term}}$ and for the space-time-variable interaction $\B Q_{\PL{spacetime\_term}}$.  The time term $\B Q_{\PL{time\_term}}$ is used to define the time-varying intercept for each variable:
+ 
+$$
+\mathrm{vec}(\B D) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{time\_term}})
+$$
+Meanwhile, the space-time term $\B Q_{\PL{spacetime\_term}}$ is combined with the spatial precision $\B Q_{\PL{space\_term}}$ as we explain next.
 
 # Spatial interactions for SEM and DSEM
 
-tinyVAST then uses the SEM and DSEM notation to construct the joint precision for the space-variable interaction $\B \Omega$ with dimension $S \times C$, and the space-time-variable interaction $\B E$ with dimension $S \times C \times T$.  To do so, it constructs the separable precision for each process:
+tinyVAST uses the SEM and DSEM notation to construct the joint precision for the space-variable interaction $\B \Omega$ with dimension $S \times C$, and the space-time-variable interaction $\B E$ with dimension $S \times C \times T$.  To do so, it constructs the separable precision for each process:
 
 $$
 \mathrm{vec}(\B E) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{spacetime\_term}} \otimes \B Q_{\PL{domain}})
 $$
-and 
-$$
-\mathrm{vec}(\B D) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{time\_term}})
-$$
 
-and 
+where the precision matrix $\B Q_{\PL{spacetime\_term}} \otimes \B Q_{\PL{domain}}$ has dimension $STC \times STC$ to match the length of $\mathrm{vec}(\B E)$, and 
 $$
 \mathrm{vec}(\B \Omega) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{space\_term}} \otimes \B Q_{\PL{domain}})
 $$
+
+where the precision matrix $\B Q_{\PL{space\_term}} \otimes \B Q_{\PL{domain}}$ has dimension $SC \times SC$, to match the length of $\mathrm{vec}(\B \Omega)$.
 
 # Generalized additive model
 

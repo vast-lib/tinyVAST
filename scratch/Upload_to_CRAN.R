@@ -65,7 +65,7 @@ if( FALSE ){
 }
 
 # Build for uploading via web interface
-root_dir = R'(C:\Users\James.Thorson\Desktop\Git\dsem\scratch)'
+root_dir = R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\scratch)'
 # https://cran.r-project.org/submit.html
 build( path=root_dir, manual=TRUE )
 

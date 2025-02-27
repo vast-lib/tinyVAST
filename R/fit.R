@@ -680,7 +680,9 @@ function( formula,
   }
 
   # Check for obvious issues ... no NAs except in RAMstart
-  if( any(is.na(tmb_data[-match(c("ram_space_term_start","ram_time_term_start","ram_spacetime_term_start","ram2_space_term_start","ram2_time_term_start","ram2_spacetime_term_start"),names(tmb_data))])) ){
+  name_set = c( "ram_space_term_start", "ram_time_term_start", "ram_spacetime_term_start",
+                "ram2_space_term_start", "ram2_time_term_start", "ram2_spacetime_term_start")
+  if( any(is.na(tmb_data[-match(name_set,names(tmb_data))])) ){
     stop("Check `tmb_data` for NAs")
   }
 

@@ -4,7 +4,7 @@ author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{VAST}
+  %\VignetteIndexEntry{Vector autoregressive spatio-temporal models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{pdp}
@@ -51,31 +51,45 @@ theta_xy = 0.4
 n_x = n_y = 10
 n_t = 15
 rho = 0.8
-spatial_sd = 0.5
+spacetime_sd = 0.5
+space_sd = 0.5
+gamma = 0
 
 # Simulate GMRFs
 R_s = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
-V_ss = spatial_sd^2*kronecker(R_s, R_s)
-d = mvtnorm::rmvnorm(n_t, sigma=V_ss )
+R_ss = kronecker(R_s, R_s)
+Vspacetime_ss = spacetime_sd^2 * R_ss 
+Vspace_ss = space_sd^2 * R_ss
 
-# Project through time and add mean
+# make spacetime AR1 over time
+eps_ts = mvtnorm::rmvnorm( n_t, sigma=Vspacetime_ss )
 for( t in seq_len(n_t) ){
-  if(t>1) d[t,] = rho*d[t-1,] + d[t,]
+  if(t>1) eps_ts[t,] = rho*eps_ts[t-1,] + eps_ts[t,]/(1 + rho^2)
 }
-#d = d + 0.5
+
+# make space term
+omega_s = mvtnorm::rmvnorm( 1, sigma=Vspace_ss )[1,]
+
+# linear predictor
+p_ts = gamma + outer( rep(1,n_t),omega_s ) + eps_ts
 
 # Shape into longform data-frame and add error
-Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), "var"="logn", z=exp(as.vector(d)))
-Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
+Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y), 
+                   var = "logn", 
+                   mu = exp(as.vector(p_ts)) )
+Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$mu, phi=0.5, power=1.5 )
 mean(Data$n==0)
 
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # fit model
-mytinyVAST = tinyVAST( spacetime_term = "logn -> logn, 1, rho",
+mytinyVAST = tinyVAST( 
+           space_term = "logn <-> logn, sd_space",
+           spacetime_term = "logn -> logn, 1, rho
+                             logn <-> logn, 0, sd_spacetime",
            data = Data,
-           formula = n ~ 0 + factor(time),
+           formula = n ~ 1,
            spatial_domain = mesh,
            family = tweedie() )
 mytinyVAST
@@ -86,7 +100,7 @@ We can compare the true densities:
 
 ```{r VAST-true-dens, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 library(sf)
-data_wide = reshape( Data[,c('x','y','time','z')],
+data_wide = reshape( Data[,c('x','y','time','mu')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
 sf_data = st_as_sf( data_wide, coords=c("x","y"))
 sf_grid = sf::st_make_grid( sf_data )
@@ -96,8 +110,8 @@ plot(sf_plot, max.plot=n_t )
 
 with the estimated densities:
 ```{r VAST-est-dens, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-Data$z_hat = predict(mytinyVAST)
-data_wide = reshape( Data[,c('x','y','time','z_hat')],
+Data$mu_hat = predict(mytinyVAST)
+data_wide = reshape( Data[,c('x','y','time','mu_hat')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
 sf_data = st_as_sf( data_wide, coords=c("x","y"))
 sf_plot = st_sf(sf_grid, st_drop_geometry(sf_data) )
@@ -106,7 +120,7 @@ plot(sf_plot, max.plot=n_t )
 
 where a scatterplot shows that they are highly correlated:
 ```{r VAST-scatterplot, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-plot( x=Data$z, y=Data$z_hat )
+plot( x=Data$mu, y=Data$mu_hat )
 ```
 
 We can also use the `DHARMa` package to visualize simulation residuals:
@@ -129,7 +143,7 @@ We can then calculate the area-weighted total abundance and compare it with its 
    FUN=\(t) integrate_output(mytinyVAST, newdata=subset(Data,time==t)) ))
 
 # True (latent) sample-weighted total
-(True = tapply( Data$z, INDEX=Data$time, FUN=sum ))
+(True = tapply( Data$mu, INDEX=Data$time, FUN=sum ))
 
 #
 Index = data.frame( time=seq_len(n_t), t(Est), True )
@@ -158,9 +172,9 @@ settings = make_settings( purpose="index3",
                           bias.correct = FALSE,
                           use_anisotropy = FALSE )
 settings$FieldConfig['Epsilon','Component_1'] = 0
-settings$FieldConfig['Omega',] = 0
+settings$FieldConfig['Omega','Component_1'] = 0
 settings$RhoConfig['Epsilon2'] = 4
-settings$RhoConfig['Beta1'] = 3
+settings$RhoConfig[c('Beta1','Beta2')] = 3
 settings$ObsModel = c(10,2)
 
 # Run VAST
@@ -190,10 +204,10 @@ mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
 start_time = Sys.time()
 mysdmTMB = sdmTMB(
-  formula = n ~ 0 + factor(time),
+  formula = n ~ 1,
   data = Data,
   mesh = mesh,
-  spatial = "off",
+  spatial = "on",
   spatiotemporal = "ar1",
   time = "time",
   family = tweedie()
@@ -272,7 +286,7 @@ for( t in seq_len(n_t) ){
 
 # Shape into longform data-frame and add error
 Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")), z=exp(as.vector(d)))
-Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
+Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$mu, phi=0.5, power=1.5 )
 ```
 
 We next set up inputs and run the model:
@@ -309,7 +323,7 @@ Est1 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,
 Est2 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d2")) )
 
 # True (latent) sample-weighted total
-True = tapply( Data$z, INDEX=list("time"=Data$time,"var"=Data$var), FUN=sum )
+True = tapply( Data$mu, INDEX=list("time"=Data$time,"var"=Data$var), FUN=sum )
 
 #
 Index = data.frame( expand.grid(dimnames(True)), "True"=as.vector(True) )

@@ -79,7 +79,7 @@ function( object,
   return( out )
 }
 
-#' @title Monte Carlo integration for abundance
+#' @title Integration for target variable
 #'
 #' @description 
 #' Calculates an estimator for a derived quantity by summing across multiple predictions.
@@ -92,7 +92,7 @@ function( object,
 #' @param newdata New data-frame of independent variables used to predict the response,
 #'        where a total value is calculated by combining across these individual predictions.
 #'        If these locations are randomly drawn from a specified spatial domain, then 
-#'        `integrate_output` applies Monte Carlo integration to approximate the
+#'        `integrate_output` applies midpoint integration to approximate the
 #'        total over that area.  If locations are drawn sysmatically from a domain,
 #'        then `integrate_output` is applying a midpoint approximation to the integral.
 #' @param area vector of values used for area-weighted expansion of 
@@ -138,7 +138,7 @@ function( object,
 #'        See details for more information.  
 #'
 #' @details
-#' Analysts will often want to calculate some value by combiningg the predicted response at multiple
+#' Analysts will often want to calculate some value by combining the predicted response at multiple
 #' locations, and potentially from multiple variables in a multivariate analysis. 
 #' This arises in a univariate model, e.g., when calculating the integral under a predicted
 #' density function, which is approximated using a midpoint or Monte Carlo approximation
@@ -151,7 +151,7 @@ function( object,
 #'
 #' In more complicated cases, an analyst can then use `covariate` 
 #' to calculate the weighted average
-#' of a covariate for each Monte Carlo point. For example, if the covariate is 
+#' of a covariate for each midpoint location. For example, if the covariate is 
 #' positional coordinates or depth/elevation, then \code{type=2}
 #' measures shifts in the average habitat utilization with respect to that covariate.  
 #' Alternatively, an analyst fitting a multivariate model might weight one variable

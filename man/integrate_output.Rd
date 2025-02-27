@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.R
 \name{integrate_output}
 \alias{integrate_output}
-\title{Monte Carlo integration for abundance}
+\title{Integration for target variable}
 \usage{
 integrate_output(
   object,
@@ -23,7 +23,7 @@ integrate_output(
 \item{newdata}{New data-frame of independent variables used to predict the response,
 where a total value is calculated by combining across these individual predictions.
 If these locations are randomly drawn from a specified spatial domain, then
-\code{integrate_output} applies Monte Carlo integration to approximate the
+\code{integrate_output} applies midpoint integration to approximate the
 total over that area.  If locations are drawn sysmatically from a domain,
 then \code{integrate_output} is applying a midpoint approximation to the integral.}
 
@@ -83,7 +83,7 @@ abundance-weighting a covariate to calculate distribution shifts,
 and/or weighting one model variable by another.
 }
 \details{
-Analysts will often want to calculate some value by combiningg the predicted response at multiple
+Analysts will often want to calculate some value by combining the predicted response at multiple
 locations, and potentially from multiple variables in a multivariate analysis.
 This arises in a univariate model, e.g., when calculating the integral under a predicted
 density function, which is approximated using a midpoint or Monte Carlo approximation
@@ -96,7 +96,7 @@ and summing across these area-expanded values.
 
 In more complicated cases, an analyst can then use \code{covariate}
 to calculate the weighted average
-of a covariate for each Monte Carlo point. For example, if the covariate is
+of a covariate for each midpoint location. For example, if the covariate is
 positional coordinates or depth/elevation, then \code{type=2}
 measures shifts in the average habitat utilization with respect to that covariate.
 Alternatively, an analyst fitting a multivariate model might weight one variable

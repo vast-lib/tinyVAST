@@ -2,6 +2,24 @@ url: https://vast-lib.github.io/tinyVAST/
 template:
   bootstrap: 5
 
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - web_only/overview
+  - model-description
+  - mgcv 
+  - spatial
+  - multiple_data
+  - dsem
+  - simultaneous_autoregressive_process
+  - web_only/stream_networks
+  - web_only/age_composition_expansion
+  - web_only/condition
+  - web_only/empirical_orthogonal_functions
+  - spatial_factor_analysis
+  - web_only/VAST
+
 reference:
 - title: internal
   contents:
