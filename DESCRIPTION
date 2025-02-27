@@ -50,7 +50,8 @@ Suggests:
     visreg,
     plyr,
     DHARMa,
-    glmmTMB
+    glmmTMB,
+    tibble
 LinkingTo:
     RcppEigen,
     TMB

@@ -1,4 +1,60 @@
-url: ~
+url: https://vast-lib.github.io/tinyVAST/
 template:
   bootstrap: 5
+
+reference:
+- title: internal
+  contents:
+  - rmvnorm_prec
+  - add_predictions
+  - classify_variables
+  - parse_path
+
+- title: 'Fitting and predicting'
+  desc: |
+    Core tools for model fitting, prediction, and inspection.
+  contents:
+  - tinyVAST
+  - tinyVASTcontrol
+  - predict.tinyVAST
+  - summary.tinyVAST
+  - residuals.tinyVAST
+  - integrate_output
+  - cAIC
+  - deviance_explained
+  - Families
+  - reload_model
+  - rotate_pca
+  - sample_variable
+  - vcov.tinyVAST
+
+- title: 'Graph constructors'
+  desc: |
+    Tools to specify interactions.
+  contents:
+  - make_sem_ram
+  - make_dsem_ram
+  - make_eof_ram
+
+- title: 'Stream network utilities'
+  desc: |
+    Tools to work with stream networks.
+  contents:
+  - sfnetwork_evaluator
+  - sfnetwork_mesh
+  - simulate_sfnetwork
+
+- title: 'Data sets'
+  desc: |
+    Data sets used for illustration and testing.
+  contents:
+  - sea_ice
+  - salmon_returns
+  - condition_and_density
+  - bering_sea_pollock_ages
+  - bering_sea
+  - bering_sea_pollock_vast
+  - red_snapper
+  - red_snapper_shapefile
+
 
