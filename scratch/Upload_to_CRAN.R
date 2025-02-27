@@ -11,7 +11,7 @@ if( FALSE ){
 # Test install
 install_local(force=TRUE, dep=TRUE, build_vignettes=TRUE, upgrade=FALSE)
 #install_local(force=TRUE, dep=TRUE, build_vignettes=FALSE, upgrade=FALSE)
-browseVignettes("dsem")
+browseVignettes("tinyVAST")
 
 #
 if( FALSE ){
