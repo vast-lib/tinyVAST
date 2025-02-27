@@ -1,9 +1,9 @@
 Type: Package
 Package: tinyVAST
-Title: Vector Autoregressive Spatio-Temporal Model Using Minimal
-    Feature-Set
-Version: 0.8.0
-Date: 2025-02-21
+Title: Multivariate Spatio-Temporal Models using Dynamic Structural Equations
+	as Expressive Interface
+Version: 1.0.0
+Date: 2025-02-26
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
 	   role = c("aut", "cre"),
@@ -12,10 +12,14 @@ Authors@R: c(
            role = c("aut"),
            comment = c(ORCID = "0000-0001-9563-1937")) 
     )
-Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
-    using a minimal feature-set, including using dynamic structural
-    equation model (DSEM) to specify the space-time-variable interactions
-    and the mgcv package to specify splines via the formula interface.
+Description: Fits a wide variety of multivariate spatio-temporal models
+    with simultaneous and lagged interactions among variables (including
+    vector autoregressive spatio-temporal (VAST) dynamics)
+    for areal, continuous, or network spatial domains.  
+    It includes time-variable, space-variable, and space-time-variable 
+    interactions using dynamic structural equation models (DSEM) 
+    as expressive interface, and the mgcv package to specify splines 
+    via the formula interface.
 License: GPL-3
 Depends:
     R (>= 4.1.0)
