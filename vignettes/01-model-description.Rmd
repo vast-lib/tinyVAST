@@ -1,5 +1,6 @@
 ---
 title: "tinyVAST model description"
+author: "James T. Thorson"
 output:
   rmarkdown::html_vignette:
     toc: true

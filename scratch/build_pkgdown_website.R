@@ -16,20 +16,20 @@ library(pkgdown)
 if( FALSE ){
   setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\vignettes)')
 
-  knitr::knit( "web_only/age_composition_expansion.Rmd.orig",
-               output = "web_only/age_composition_expansion.Rmd" )
+  knitr::knit( "web_only/07-stream_networks.Rmd.orig",
+               output = "web_only/07-stream_networks.Rmd" )
 
-  knitr::knit( "web_only/empirical_orthogonal_functions.Rmd.orig",
-               output = "web_only/empirical_orthogonal_functions.Rmd" )
+  knitr::knit( "web_only/08-age_composition_expansion.Rmd.orig",
+               output = "web_only/08-age_composition_expansion.Rmd" )
 
-  knitr::knit( "web_only/VAST.Rmd.orig",
-               output = "web_only/VAST.Rmd" )
+  knitr::knit( "web_only/09-condition.Rmd.orig",
+               output = "web_only/09-condition.Rmd" )
 
-  knitr::knit( "web_only/stream_networks.Rmd.orig",
-               output = "web_only/stream_networks.Rmd" )
+  knitr::knit( "web_only/10-empirical_orthogonal_functions.Rmd.orig",
+               output = "web_only/10-empirical_orthogonal_functions.Rmd" )
 
-  knitr::knit( "web_only/condition.Rmd.orig",
-               output = "web_only/condition.Rmd" )
+  knitr::knit( "web_only/12-VAST.Rmd.orig",
+               output = "web_only//12-VAST.Rmd" )
 }
 
 setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')

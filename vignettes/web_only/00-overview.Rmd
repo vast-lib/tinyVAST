@@ -1,0 +1,46 @@
+---
+title: "Overview of vignettes"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Overview of vignettes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{dsem}
+---
+
+```{r, include = FALSE}
+EVAL <- TRUE
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = EVAL,
+  purl = EVAL
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build and PDF
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/aaa.Rmd"); rmarkdown::render( "vignettes/aaa.Rmd", rmarkdown::pdf_document())
+```
+
+`tinyVAST` can implement many analyses as nested submodels.  For this reason, it can be difficult to organize materials to orient users who are interested in one or another type of analysis.  To improve organization, we summarize the different features that are available in vignettes:
+
+### Background materials:
+* *tinyVAST Model description*:  Describes equations and notation
+* *Comparison with mgcv*:  Shows that tinyVAST smoothers are (approximately) identical to those using package mgcv, despite replacing the generalized additive model wiggliness parameter with a mixed-effects variance parameter (i.e., replacing the* Spatial modeling:  Shows how to fit a simple spatial model, including covariates, and then visualize model output, deviance explained, and other diagnostics;
+* *Spatial models*
+* *Multiple data types*:  Shows how to integrate data following different distributions, in this case showing presence/absence, count, and biomass samples for red snapper;
+* *Dynamic structural equation models*:  Shows how tinyVAST can be reduced down to a time-series model with simultaneous and lagged effects (e.g., a vector autoregressive model)
+
+### Alternative spatial domains
+* *Simulatenous autoregressive process*:  Shows how to to use an areal spatial domain (a simultaneous autoregressive SAR process) instead of the two-dimensional smoother;
+* *Stream network models*:  Shows how to use a stream network spatial domain (i.e., an Ornstein-Uhlenbeck process on flow-unconnected sites in an acyclic graph);
+
+### Multivariate spatio-temporal models
+* *Age composition expansion*:  Shows how to fit a multivariate spatio-temporal model to standardize age composition data;
+* *Condition and density*:  Shows how to jointly analyze different types of data which are then combined in a single estimator.  In this case, we use a joint analysis of numerical density and animal condition to calculate per-capita average condition
+* *Empirical orthogonal functions*:  Shows how to fit an empirical orthogonal function (EOF) analysis, i.e., a model where spatio-temporal variation is the product of one or more time-series, each associated with a spatial response map
+ additive penalty in a generalized additive model with the log-determinant of the Hessian for the approximated marginal likelihood)
+* *Spatial factor analysis*:  Shows how to specify spatial factors to represent the covariance among multiple variables, including the identifiability requirement and the post-hoc rotation of estimated loadings;
+* *Vector autoregressive spatio-temporal*:  Shows how to fit a simple (two-variable) spatial version of a vector autoregressive model.
