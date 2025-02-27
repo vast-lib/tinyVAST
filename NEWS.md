@@ -1,4 +1,4 @@
-# tinyVAST 0.8.0
+# tinyVAST 1.0.0
 
 * Adding nbinom1 and nbinom2 families
 * Simplify argument names, by changing `sem` to `space_term`, `dsem` to `spacetime_term`
