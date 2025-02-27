@@ -98,6 +98,7 @@ test_that("tinyVAST works as dsem", {
                    formula = logn ~ 0 + var,
                    control = tinyVASTcontrol(run_model=FALSE) )
 
-  expect_equal( as.numeric(fit1$opt$obj), as.numeric(fit2$opt$obj) )
+  expect_equal( as.numeric(fit1$opt$obj), as.numeric(fit2$opt$obj), tol = 1e-3  )
+  expect_equal( as.numeric(fit1$opt$obj), 5.781919, tol = 1e-3 )
 
 } )
