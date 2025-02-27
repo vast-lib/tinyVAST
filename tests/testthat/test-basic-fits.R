@@ -64,3 +64,40 @@ test_that("Basic tinyVAST works", {
 #  )
 #  }, regexp = "data_colnames")
 # })
+
+test_that("tinyVAST works as dsem", {
+  library(tinyVAST)
+  data(isle_royale, package="dsem")
+  
+  # Convert to long-form
+  data = expand.grid( "time"=isle_royale[,1], "var"=colnames(isle_royale[,2:3]) )
+  data$logn = unlist(log(isle_royale[2:3]))
+  
+  # Define cross-lagged DSEM
+  dsem = "
+    # Link, lag, param_name
+    wolves -> wolves, 1, arW
+    moose -> wolves, 1, MtoW
+    wolves -> moose, 1, WtoM
+    moose -> moose, 1, arM
+    #wolves -> moose, 0, corr
+    wolves <-> moose, 0, corr
+  "
+  
+  # fit model ... spacetime_term
+  fit1 = tinyVAST( spacetime_term = dsem,
+                   data = data,
+                   times = isle_royale[,1],
+                   variables = colnames(isle_royale[,2:3]),
+                   formula = logn ~ 0 + var )
+  # fit model ... time_term
+  fit2 = tinyVAST( time_term = dsem,
+                   data = data,
+                   times = isle_royale[,1],
+                   variables = colnames(isle_royale[,2:3]),
+                   formula = logn ~ 0 + var,
+                   control = tinyVASTcontrol(run_model=FALSE) )
+
+  expect_equal( as.numeric(fit1$opt$obj), as.numeric(fit2$opt$obj) )
+
+} )

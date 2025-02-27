@@ -759,18 +759,10 @@ Type objective_function<Type>::operator() (){
   // Globals
   Type nll = 0.0;
 
-  // dimensions
+  // dimensions .. define minimally, to avoid later conflicts between object dimensions
   int n_s = epsilon_stc.dim(0);
-  int n_t = epsilon_stc.dim(1);
-  int n_c = epsilon_stc.dim(2);
-  int n_h = n_t * n_c;
   int n_i = y_i.size();
   int n_g = X_gj.rows();
-
-  // int n2_s = epsilon2_stc.dim(0);
-  int n2_t = epsilon2_stc.dim(1);
-  int n2_c = epsilon2_stc.dim(2);
-  int n2_h = n2_t * n2_c;
 
   // Spatial distribution
   PARAMETER( log_kappa );
@@ -807,34 +799,34 @@ Type objective_function<Type>::operator() (){
   }
 
   // spacetime_term
-  Eigen::SparseMatrix<Type> Rho_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(1) );
-  Eigen::SparseMatrix<Type> Gamma_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, n_h, int(2) );
+  Eigen::SparseMatrix<Type> Rho_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, epsilon_stc.dim(1)*epsilon_stc.dim(2), int(0) );
+  Eigen::SparseMatrix<Type> Gammainv_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, epsilon_stc.dim(1)*epsilon_stc.dim(2), int(1) );
+  Eigen::SparseMatrix<Type> Gamma_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, epsilon_stc.dim(1)*epsilon_stc.dim(2), int(2) );
 
   // time_term
-  Eigen::SparseMatrix<Type> Rho_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, n_h, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, n_h, int(1) );
-  Eigen::SparseMatrix<Type> Gamma_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, n_h, int(2) );
+  Eigen::SparseMatrix<Type> Rho_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, delta_tc.dim(0)*delta_tc.dim(1), int(0) );
+  Eigen::SparseMatrix<Type> Gammainv_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, delta_tc.dim(0)*delta_tc.dim(1), int(1) );
+  Eigen::SparseMatrix<Type> Gamma_time_hh = make_ram( ram_time_term, ram_time_term_start, nu_z, delta_tc.dim(0)*delta_tc.dim(1), int(2) );
 
   // space_term
-  Eigen::SparseMatrix<Type> Rho_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(1) );
-  Eigen::SparseMatrix<Type> Gamma_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, n_c, int(2) );
+  Eigen::SparseMatrix<Type> Rho_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, omega_sc.dim(1), int(0) );
+  Eigen::SparseMatrix<Type> Gammainv_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, omega_sc.dim(1), int(1) );
+  Eigen::SparseMatrix<Type> Gamma_cc = make_ram( ram_space_term, ram_space_term_start, theta_z, omega_sc.dim(1), int(2) );
 
   // Delta spacetime_term
-  Eigen::SparseMatrix<Type> Rho2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(1) );
-  Eigen::SparseMatrix<Type> Gamma2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, n2_h, int(2) );
+  Eigen::SparseMatrix<Type> Rho2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, epsilon2_stc.dim(1)*epsilon2_stc.dim(2), int(0) );
+  Eigen::SparseMatrix<Type> Gammainv2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, epsilon2_stc.dim(1)*epsilon2_stc.dim(2), int(1) );
+  Eigen::SparseMatrix<Type> Gamma2_hh = make_ram( ram2_spacetime_term, ram2_spacetime_term_start, beta2_z, epsilon2_stc.dim(1)*epsilon2_stc.dim(2), int(2) );
 
   // Delta time_term
-  Eigen::SparseMatrix<Type> Rho2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, n2_h, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, n2_h, int(1) );
-  Eigen::SparseMatrix<Type> Gamma2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, n2_h, int(2) );
+  Eigen::SparseMatrix<Type> Rho2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, delta2_tc.dim(0)*delta2_tc.dim(1), int(0) );
+  Eigen::SparseMatrix<Type> Gammainv2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, delta2_tc.dim(0)*delta2_tc.dim(1), int(1) );
+  Eigen::SparseMatrix<Type> Gamma2_time_hh = make_ram( ram2_time_term, ram2_time_term_start, nu2_z, delta2_tc.dim(0)*delta2_tc.dim(1), int(2) );
 
   // Delta space_term
-  Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(0) );
-  Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(1) );
-  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, n2_c, int(2) );
+  Eigen::SparseMatrix<Type> Rho2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(0) );
+  Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(1) );
+  Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(2) );
 
   // space_term
   omega_sc = omega_distribution( omega_sc, spatial_options, Rho_cc,
