@@ -51,8 +51,8 @@ These four components are assembled into two linear predictors:
 
 $$
 \begin{aligned}
-p_{\PL 1,i} &= \B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1} + \B A_{i} \B \Omega_{\PL 1,c[i]} + \B D_{\PL 1,c[i],t[i]} + \B A_i \B E_{\PL 1,c[i],t[i]}  \\
-p_{\PL 2,i} &= \B X_{\PL 2,i} \B \alpha_{\PL 2} + \B Z_{\PL 2,i} \B \gamma_{\PL 2} + \B A_{i} \B \Omega_{\PL 2,c[i]} + \B D_{\PL 2,c[i],t[i]} + \B A_i \B E_{\PL 2,c[i],t[i]}
+p_{\PL 1,i} &= \underbrace{\B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1}}_\text{GAM} + \underbrace{\B A_{i} \B \Omega_{\PL 1,c[i]}}_\text{space_term} + \underbrace{\B D_{\PL 1,c[i],t[i]}}_\text{time_term} + \underbrace{\B A_i \B E_{\PL 1,c[i],t[i]}}_\text{spacetime_term}  \\
+p_{\PL 2,i} &= \underbrace{\B X_{\PL 2,i} \B \alpha_{\PL 2} + \B Z_{\PL 2,i} \B \gamma_{\PL 2}}_\text{GAM} + \underbrace{\B A_{i} \B \Omega_{\PL 2,c[i]}}_\text{space_term} + \underbrace{\B D_{\PL 2,c[i],t[i]}}_\text{time_term} + \underbrace{\B A_i \B E_{\PL 2,c[i],t[i]}}_\text{spacetime_term}
 \end{aligned}
 $$
 
@@ -62,12 +62,11 @@ where
 -   $\B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1}$ is the GAM component 
 -   $\B \alpha_{\PL 1}$ is the GAM fixed effects with associated design matrix $\B X_{\PL 1}$, where $\B X_{\PL 1,i}$ is the row of the design matrix for sample $i$;
 -   $\B \gamma_{\PL 1}$ is the GAM random effects with associated design matrix $\B Z$, where $\B Z_{\PL 1,i}$ is the row of the design matrix;
--   $\B A_{i} \B \Omega_{\PL 1,c[i]}$ is the projection of the space-veriable interaction $\B \Omega$ to sample $i$;
+-   $\B A_{i} \B \Omega_{\PL 1,c[i]}$ is the projection of the space-veriable interaction $\B \Omega$ to sample $i$, where $\B A$ is the interpolation matrix with dimension $I \times S$ such that row $\B A_{i}$ interpolates spatial vector $\B \Omega_{\PL 1,c[i]}$ for sample $i$ and variable $c[i]$;
 -   $\B D_{\PL 1,c[i],t[i]}$ is the time-variable interaction $\B D$ for sample $i$;
 -   $\B A_i \B E_{\PL 1,c[i],t[i]}$ is the projection of the space-variable-time interaction $\B E$ to sample $i$;
--   $p_{\PL 2,i}$ is the second linear predictor, and terms are defined similarly but using subscript-2;
 
-The linear predictors are then passed through a bivariate inverse-link function to specify the distribution for errors:
+and  terms are defined similarly for the second linear predictor $p_{\PL 2,i}$ except using subscript-2. The linear predictors are then passed through a bivariate inverse-link function to specify the distribution for errors:
 
 $$
 y_i \sim f_{e[i]}( g_{e[i]}^{-1} (p_{\PL 1,i}, p_{\PL 2,i}), \theta_{e[i]} )
@@ -77,7 +76,7 @@ where
 
 -   $f_{e[i]}$ probability density or mass function for sample $i$;
 -   $g_{e[i]}^{-1} (p_{\PL 1,i}, p_{\PL 2,i})$ is the bivariate inverse-link function that transforms linear predictors to the central tendancy parameters of the distribution;
--   $\theta_{e[i]}$ is the dispersion parameters for distribution $e[i]$;
+-   $\theta_{e[i]}$ is the dispersion parameters for distribution $e[i]$ for sample $i$;
 
 In the simple case, the distribution only requires a single linear predictor such that $\B p_{\PL 2} = \B 0$ by construction and drops out of the model.  In this case, the model collapses to a generalized linear mixed model.  For example we might have a log-link and Poisson distribution, such that it collapses to a log-linked Poisson GLMM, $y_i \sim \mathrm{Poisson}(e^{p_{\PL 1,i}})$.
 
@@ -125,18 +124,20 @@ where every row $\B A_i$ of the interpolation matrix $\B A$ is nonzero for only 
 $$
 \B Q_{\PL{domain}} = \tau^2 (\B I - \kappa \B A^*)^2 
 $$
-where $\B A^*$ is the adjacency matrix of the graph specified by the analyst, and each row $\B A_i$ of interpolation matrix $\B A$ is nonzero only for the single spatial stratum containing sample $i$ (and noting that adjacency matrix $\B A^*$ is different from interpolation matrix $\B A$, but we use the same term for both due to a collision in standard notation).
+where $\B A^*$ is the adjacency matrix of the graph specified by the analyst, and each row $\B A_i$ of interpolation matrix $\B A$ is nonzero only for the single spatial stratum containing sample $i$ (and noting that adjacency matrix $\B A^*$ is different from interpolation matrix $\B A$, but we use the same notation for both due to a collision in notational standards).
 
-* Stream networks:  Finally, the analyst can specify that sites are partially correlated if they are adjacent along a stream network (while ignoring flow direction).  This results in an Onstein-Uhlenbeck process along the stream network, or an exponential `tail-down` model.
+* Stream networks:  Finally, the analyst can specify that sites are partially correlated if they are adjacent along a stream network (while ignoring flow direction).  This results in an Onstein-Uhlenbeck process along the stream network, or an *exponential tail-down* model.
+
+For each spatial domain, the term $\tau$ is defined such that precision $\B Q_{\PL{domain}}$ has unit variance.  This is done because the spatial domain always arises in combination with other parameters, which are used to define the variance of the associated spatial variable.
 
 # Structural equation models
 
 tinyVAST also involves specifying a structural equation model (SEM).  This SEM be viewed either:
 
-1. Weak interpretation: as a flexible way to parameterize the correlation among variables; or
-2. Strong interpretation: as a structural causal model, allowing inference about counterfactual changes to the system.
+1. *Weak interpretation*: as an expressive interface to parameterize the correlation among variables, using as many or few parameters as might be appropriate; or
+2. *Strong interpretation*: as a structural causal model, allowing predictions about the consequence of counterfactual changes to the system.
 
-To specify a SEM, the user uses *arrow notation*.  For example, to specify a linear model this involves:
+To specify a SEM, the user uses *arrow notation* derived from package `sem`.  For example, to specify a linear model this involves:
 
 ```{r echo=TRUE, eval=FALSE}
 w1 -> w2, b_12
@@ -147,14 +148,21 @@ w2 <-> w2, sd_2
 This then estimates a single slope parameter (represented with a one-headed arrow), as well as the variance of $W_1$ and $W_2$ (specified with two-headed arrows).  In a more complicated case, $W_1$ might cause $W_2$, which in turn causes $W_3$.  This is then represented as:
 
 ```{r arrow notation, echo=TRUE, eval=FALSE}
-w1 -> w2, b_12
-w2 -> w3, b_23
-w1 <-> w1, s_1
-w2 <-> w2, s_2
-w3 <-> w3, s_3
+# Path, parameter_name, start value
+w1 -> w2, b_12, 0
+w2 -> w3, b_23, 0
+w1 <-> w1, s_1, 1
+w2 <-> w2, s_2, 1
+w3 <-> w3, s_3, 1
 ```
 
-Path coefficients for one-headed arrows then define path matrix $\B P$: 
+SEM interactions can be as complicated or simple as desired, and can include:
+
+1.  Latent variables and loops (i.e., they are not restricted to directed acyclic graphs);
+2.  Values that are fixed a priori, where the `parameter_name` is provided as `NA` and the starting value that follows is the fixed value;
+3.  Values that are mirrored among path coefficients, where the same `parameter_name` is provided for multiple rows of the text file.
+
+In this preceding example, path coefficients for one-headed arrows then define path matrix $\B P$: 
 
 $$
 \B P = 
@@ -188,12 +196,14 @@ $$
 \B Q = (\mathbf{I - P}^T) \B G^{-1} \B G^{-T} (\mathbf{I - P})
 $$
 
+where this precision matrix $\B Q$ is then used as a modular component in the larger tinyVAST model.  
+
 # Dynamic structural equation models
 
 Similarly, tinyVAST involves specifying dynamic structural equation models (DSEM).  To specify a DSEM, the user uses *arrow-and-lag notation*.  For example, to specify a univariate first-order autoregressive process:
 
 ```{r echo=TRUE, eval=FALSE}
-w1 -> w1, 1, rho
+w1 -> w1, 1, rho, 0.8
 ```
 
 If there were four time-intervals ($T=4$) this would then result in the path matrix:
@@ -208,7 +218,9 @@ $$
 \end{pmatrix}
 $$
 
-and when the DSEM involves multiple times and variables, the sparse precision is formed by summing across the Kronecker product of time-lag and interaction matrices.  This DSEM defines a GMRF over a nonseparable interaction of time and variables, represented by a matrix $\B Q_{\PL{time\_term}}$ with dimension $CT \times CT$.  The user can specify a separate *arrow-and-lag* notation to define the precision matrix for the time-variable interaction $\B Q_{\PL{time\_term}}$ and for the space-time-variable interaction $\B Q_{\PL{spacetime\_term}}$.  The time term $\B Q_{\PL{time\_term}}$ is used to define the time-varying intercept for each variable:
+and when the DSEM involves multiple times and variables, the sparse precision is formed by summing across the Kronecker product of time-lag and interaction matrices.  This DSEM defines a GMRF over a nonseparable interaction of time and variables, represented by a matrix $\B Q_{\PL{time\_term}}$ with dimension $CT \times CT$.  The user can specify a separate *arrow-and-lag* notation to define the precision matrix for the time-variable interaction $\B Q_{\PL{time\_term}}$ and for the space-time-variable interaction $\B Q_{\PL{spacetime\_term}}$.  
+
+The precision matrix $\B Q_{\PL{time\_term}}$ for the time term $\B D$ is used to define the time-varying intercept for each variable:
  
 $$
 \mathrm{vec}(\B D) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{time\_term}})

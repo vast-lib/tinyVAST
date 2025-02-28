@@ -285,7 +285,8 @@ for( t in seq_len(n_t) ){
 }
 
 # Shape into longform data-frame and add error
-Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")), z=exp(as.vector(d)))
+Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2")),
+                   mu = exp(as.vector(d)))
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$mu, phi=0.5, power=1.5 )
 ```
 
