@@ -1,7 +1,10 @@
 
 
 library(devtools)
-setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
+#pandoc::pandoc_install()
+
+#setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
+setwd( R'(C:\Users\james\OneDrive\Desktop\Git\tinyVAST)')
 
 # Compile
 if( FALSE ){
