@@ -1,17 +1,21 @@
-pandoc: 3.1.11
+pandoc: 3.1.1
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
-  aaa: aaa.html
   web_only/age_composition_expansion: web_only/age_composition_expansion.html
   web_only/condition: web_only/condition.html
   dsem: dsem.html
   web_only/empirical_orthogonal_functions: web_only/empirical_orthogonal_functions.html
   mgcv: mgcv.html
+  model-description: model-description.html
   multiple_data: multiple_data.html
+  web_only/overview: web_only/overview.html
   simultaneous_autoregressive_process: simultaneous_autoregressive_process.html
-  spatial_factor_analysis: spatial_factor_analysis.html
   spatial: spatial.html
+  spatial_factor_analysis: spatial_factor_analysis.html
   web_only/stream_networks: web_only/stream_networks.html
   web_only/VAST: web_only/VAST.html
-last_built: 2025-01-22T01:20Z
+last_built: 2025-02-28T15:04Z
+urls:
+  reference: https://vast-lib.github.io/tinyVAST/reference
+  article: https://vast-lib.github.io/tinyVAST/articles

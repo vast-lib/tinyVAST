@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,20 +30,21 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/aaa.html">Overview of vignettes</a></li>
+<li><a class="dropdown-item" href="../articles/web_only/overview.html">Overview of vignettes</a></li>
+    <li><a class="dropdown-item" href="../articles/model-description.html">tinyVAST model description</a></li>
+    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
+    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
+    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
+    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
-    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
-    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
-    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
   </ul>
 </li>
@@ -72,14 +73,14 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/vignettes/dsem.Rmd" class="external-link"><code>vignettes/dsem.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/dsem.Rmd" class="external-link"><code>vignettes/dsem.Rmd</code></a></small>
       <div class="d-none name"><code>dsem.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/" class="external-link">tinyVAST</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/">tinyVAST</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"tinyVAST.verbose"</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><code>tinyVAST</code> includes features to fit a dynamic structural
@@ -104,19 +105,19 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="st">"</span></span>
 <span></span>
 <span><span class="co"># fit model</span></span>
-<span><span class="va">mytiny</span> <span class="op">=</span> <span class="fu"><a href="../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> dsem <span class="op">=</span> <span class="va">dsem</span>,</span>
+<span><span class="va">mytiny</span> <span class="op">=</span> <span class="fu"><a href="../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
 <span>                 data <span class="op">=</span> <span class="va">data</span>,</span>
 <span>                 times <span class="op">=</span> <span class="va">isle_royale</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
 <span>                 variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">isle_royale</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>                 formula <span class="op">=</span> <span class="va">logn</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">var</span> <span class="op">)</span></span>
 <span><span class="va">mytiny</span></span>
 <span><span class="co">#&gt; Call: </span></span>
-<span><span class="co">#&gt; tinyVAST(formula = logn ~ 0 + var, data = data, dsem = dsem, </span></span>
+<span><span class="co">#&gt; tinyVAST(formula = logn ~ 0 + var, data = data, spacetime_term = dsem, </span></span>
 <span><span class="co">#&gt;     times = isle_royale[, 1], variables = colnames(isle_royale[, </span></span>
 <span><span class="co">#&gt;         2:3]))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 0.5816684 secs</span></span>
+<span><span class="co">#&gt; Time difference of 0.390975 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -138,13 +139,13 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; beta_z     -0.01285890 5.063467e-02</span></span>
 <span><span class="co">#&gt; beta_z      0.37727131 3.504314e-02</span></span>
 <span><span class="co">#&gt; beta_z      0.17062266 1.584742e-02</span></span>
-<span><span class="co">#&gt; log_sigma -12.62531823 2.008272e+04</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 3.635293e-05 </span></span>
+<span><span class="co">#&gt; log_sigma -12.62352160 2.012258e+04</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 3.60018e-05 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; DSEM terms: </span></span>
+<span><span class="co">#&gt; spacetime_term: </span></span>
 <span><span class="co">#&gt;   heads     to   from parameter start lag    Estimate  Std_Error    z_value</span></span>
 <span><span class="co">#&gt; 1     1 wolves wolves         1  &lt;NA&gt;   1  0.89304266 0.08420632 10.6054118</span></span>
 <span><span class="co">#&gt; 2     1 wolves  moose         2  &lt;NA&gt;   1  0.01420908 0.12791496  0.1110823</span></span>
@@ -154,7 +155,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; 6     2 wolves wolves         6  &lt;NA&gt;   0  0.37727131 0.03504314 10.7659099</span></span>
 <span><span class="co">#&gt; 7     2  moose  moose         7  &lt;NA&gt;   0  0.17062266 0.01584742 10.7665881</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 2.812224e-26</span></span>
+<span><span class="co">#&gt; 1 2.812223e-26</span></span>
 <span><span class="co">#&gt; 2 9.115511e-01</span></span>
 <span><span class="co">#&gt; 3 1.270389e-04</span></span>
 <span><span class="co">#&gt; 4 8.189516e-34</span></span>
@@ -165,7 +166,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; Fixed terms: </span></span>
 <span><span class="co">#&gt;           Estimate Std_Error  z_value       p_value</span></span>
 <span><span class="co">#&gt; varwolves 3.325262 0.2483494 13.38945  6.969636e-41</span></span>
-<span><span class="co">#&gt; varmoose  6.441653 0.2116035 30.44210 1.524035e-203</span></span>
+<span><span class="co">#&gt; varmoose  6.441653 0.2116035 30.44210 1.524034e-203</span></span>
 <span></span>
 <span><span class="co"># Deviance explained relative to both intercepts</span></span>
 <span><span class="co"># Note that a process-error-only estimate with have devexpl -&gt; 1</span></span>
@@ -174,7 +175,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span></span>
 <span><span class="co"># See summary</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mytiny</span>,<span class="st">"dsem"</span><span class="op">)</span>, digits<span class="op">=</span><span class="fl">3</span> <span class="op">)</span></span></code></pre></div>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mytiny</span>,<span class="st">"spacetime_term"</span><span class="op">)</span>, digits<span class="op">=</span><span class="fl">3</span> <span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="8%">
@@ -331,7 +332,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;        beta_z        beta_z        beta_z        beta_z        beta_z </span></span>
 <span><span class="co">#&gt;   0.895834720   0.007358847  -0.124879928   0.874884847  -0.014394603 </span></span>
 <span><span class="co">#&gt;        beta_z        beta_z     lnsigma_j     lnsigma_j </span></span>
-<span><span class="co">#&gt;   0.378522244   0.172997994 -16.141398482 -12.488408401 </span></span>
+<span><span class="co">#&gt;   0.378522244   0.172997994 -17.248978101 -12.636038113 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
 <span><span class="co">#&gt; [1] 7.739638</span></span>
@@ -342,11 +343,11 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 76</span></span>
+<span><span class="co">#&gt; [1] 74</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       99       77 </span></span>
+<span><span class="co">#&gt;       96       75 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "relative convergence (4)"</span></span>
@@ -367,10 +368,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 </colgroup>
 <thead><tr class="header">
 <th align="left">path</th>
-<th align="left">lag</th>
+<th align="right">lag</th>
 <th align="left">name</th>
-<th align="left">start</th>
-<th align="left">parameter</th>
+<th align="right">start</th>
+<th align="right">parameter</th>
 <th align="left">first</th>
 <th align="left">second</th>
 <th align="left">direction</th>
@@ -379,10 +380,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <tbody>
 <tr class="odd">
 <td align="left">wolves -&gt; wolves</td>
-<td align="left">1</td>
+<td align="right">1</td>
 <td align="left">arW</td>
-<td align="left">NA</td>
-<td align="left">1</td>
+<td align="right">NA</td>
+<td align="right">1</td>
 <td align="left">wolves</td>
 <td align="left">wolves</td>
 <td align="left">1</td>
@@ -390,10 +391,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 </tr>
 <tr class="even">
 <td align="left">moose -&gt; wolves</td>
-<td align="left">1</td>
+<td align="right">1</td>
 <td align="left">MtoW</td>
-<td align="left">NA</td>
-<td align="left">2</td>
+<td align="right">NA</td>
+<td align="right">2</td>
 <td align="left">moose</td>
 <td align="left">wolves</td>
 <td align="left">1</td>
@@ -401,10 +402,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 </tr>
 <tr class="odd">
 <td align="left">wolves -&gt; moose</td>
-<td align="left">1</td>
+<td align="right">1</td>
 <td align="left">WtoM</td>
-<td align="left">NA</td>
-<td align="left">3</td>
+<td align="right">NA</td>
+<td align="right">3</td>
 <td align="left">wolves</td>
 <td align="left">moose</td>
 <td align="left">1</td>
@@ -412,10 +413,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 </tr>
 <tr class="even">
 <td align="left">moose -&gt; moose</td>
-<td align="left">1</td>
+<td align="right">1</td>
 <td align="left">arM</td>
-<td align="left">NA</td>
-<td align="left">4</td>
+<td align="right">NA</td>
+<td align="right">4</td>
 <td align="left">moose</td>
 <td align="left">moose</td>
 <td align="left">1</td>
@@ -423,10 +424,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 </tr>
 <tr class="odd">
 <td align="left">wolves &lt;-&gt; moose</td>
-<td align="left">0</td>
+<td align="right">0</td>
 <td align="left">corr</td>
-<td align="left">NA</td>
-<td align="left">5</td>
+<td align="right">NA</td>
+<td align="right">5</td>
 <td align="left">wolves</td>
 <td align="left">moose</td>
 <td align="left">2</td>
@@ -434,10 +435,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 </tr>
 <tr class="even">
 <td align="left">wolves &lt;-&gt; wolves</td>
-<td align="left">0</td>
+<td align="right">0</td>
 <td align="left">V[wolves]</td>
-<td align="left">NA</td>
-<td align="left">6</td>
+<td align="right">NA</td>
+<td align="right">6</td>
 <td align="left">wolves</td>
 <td align="left">wolves</td>
 <td align="left">2</td>
@@ -445,10 +446,10 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 </tr>
 <tr class="odd">
 <td align="left">moose &lt;-&gt; moose</td>
-<td align="left">0</td>
+<td align="right">0</td>
 <td align="left">V[moose]</td>
-<td align="left">NA</td>
-<td align="left">7</td>
+<td align="right">NA</td>
+<td align="right">7</td>
 <td align="left">moose</td>
 <td align="left">moose</td>
 <td align="left">2</td>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,17 +18,18 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/aaa.html">Overview of vignettes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/web_only/overview.html">Overview of vignettes</a></li>
+    <li><a class="dropdown-item" href="../articles/model-description.html">tinyVAST model description</a></li>
+    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
+    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
+    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
+    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
-    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
-    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
-    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -47,9 +48,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="fitting-and-predicting">Fitting and predicting<a class="anchor" aria-label="anchor" href="#fitting-and-predicting"></a></h2>
 
-
+      <div class="section-desc"><p>Core tools for model fitting, prediction, and inspection.</p></div>
 
 
     </div><div class="section level2">
@@ -59,46 +60,46 @@
 
       <dl><dt>
 
-          <code><a href="add_predictions.html">add_predictions()</a></code>
+          <code><a href="tinyVAST.html">tinyVAST()</a></code>
 
         </dt>
-        <dd>Add predictions to data-list</dd>
+        <dd>Fit vector autoregressive spatio-temporal model</dd>
       </dl><dl><dt>
 
-          <code><a href="bering_sea.html">bering_sea</a></code>
+          <code><a href="tinyVASTcontrol.html">tinyVASTcontrol()</a></code>
 
         </dt>
-        <dd>Survey domain for the eastern and northern Bering Sea surveys</dd>
+        <dd>Control parameters for tinyVAST</dd>
       </dl><dl><dt>
 
-          <code><a href="bering_sea_pollock_ages.html">bering_sea_pollock_ages</a></code>
+          <code><a href="predict.tinyVAST.html">predict(<i>&lt;tinyVAST&gt;</i>)</a></code>
 
         </dt>
-        <dd>Survey catch-rates at age for Alaska pollock in the Eastern and Northern Bering Sea</dd>
+        <dd>Predict using vector autoregressive spatio-temporal model</dd>
       </dl><dl><dt>
 
-          <code><a href="bering_sea_pollock_vast.html">bering_sea_pollock_vast</a></code>
+          <code><a href="summary.tinyVAST.html">summary(<i>&lt;tinyVAST&gt;</i>)</a></code>
 
         </dt>
-        <dd>Estimated proportion-at-age for Alaska pollock using VAST</dd>
+        <dd>summarize tinyVAST</dd>
+      </dl><dl><dt>
+
+          <code><a href="residuals.tinyVAST.html">residuals(<i>&lt;tinyVAST&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Calculate deviance or response residuals for tinyVAST</dd>
+      </dl><dl><dt>
+
+          <code><a href="integrate_output.html">integrate_output()</a></code>
+
+        </dt>
+        <dd>Integration for target variable</dd>
       </dl><dl><dt>
 
           <code><a href="cAIC.html">cAIC()</a></code>
 
         </dt>
         <dd>Calculate conditional AIC</dd>
-      </dl><dl><dt>
-
-          <code><a href="classify_variables.html">classify_variables()</a></code>
-
-        </dt>
-        <dd>Classify variables path</dd>
-      </dl><dl><dt>
-
-          <code><a href="condition_and_density.html">condition_and_density</a></code>
-
-        </dt>
-        <dd>Condition and density example</dd>
       </dl><dl><dt>
 
           <code><a href="deviance_explained.html">deviance_explained()</a></code>
@@ -113,10 +114,45 @@
         <dd>Additional families</dd>
       </dl><dl><dt>
 
-          <code><a href="integrate_output.html">integrate_output()</a></code>
+          <code><a href="reload_model.html">reload_model()</a></code>
 
         </dt>
-        <dd>Monte Carlo integration for abundance</dd>
+        <dd>Reload a previously fitted model</dd>
+      </dl><dl><dt>
+
+          <code><a href="rotate_pca.html">rotate_pca()</a></code>
+
+        </dt>
+        <dd>Rotate factors to match Principal-Components Analysis</dd>
+      </dl><dl><dt>
+
+          <code><a href="sample_variable.html">sample_variable()</a></code>
+
+        </dt>
+        <dd>Sample from predictive distribution of a variable</dd>
+      </dl><dl><dt>
+
+          <code><a href="vcov.tinyVAST.html">vcov(<i>&lt;tinyVAST&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extract Variance-Covariance Matrix</dd>
+      </dl></div><div class="section level2">
+      <h2 id="graph-constructors">Graph constructors<a class="anchor" aria-label="anchor" href="#graph-constructors"></a></h2>
+
+      <div class="section-desc"><p>Tools to specify interactions.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="make_sem_ram.html">make_sem_ram()</a></code>
+
+        </dt>
+        <dd>Make a RAM (Reticular Action Model) from a SEM (structural equation model)</dd>
       </dl><dl><dt>
 
           <code><a href="make_dsem_ram.html">make_dsem_ram()</a></code>
@@ -129,79 +165,18 @@
 
         </dt>
         <dd>Make a RAM (Reticular Action Model)</dd>
-      </dl><dl><dt>
+      </dl></div><div class="section level2">
+      <h2 id="stream-network-utilities">Stream network utilities<a class="anchor" aria-label="anchor" href="#stream-network-utilities"></a></h2>
 
-          <code><a href="make_sem_ram.html">make_sem_ram()</a></code>
+      <div class="section-desc"><p>Tools to work with stream networks.</p></div>
 
-        </dt>
-        <dd>Make a RAM (Reticular Action Model) from a SEM (structural equation model)</dd>
-      </dl><dl><dt>
 
-          <code><a href="parse_path.html">parse_path()</a></code>
+    </div><div class="section level2">
 
-        </dt>
-        <dd>Parse path</dd>
-      </dl><dl><dt>
 
-          <code><a href="predict.tinyVAST.html">predict(<i>&lt;tinyVAST&gt;</i>)</a></code>
 
-        </dt>
-        <dd>Predict using vector autoregressive spatio-temporal model</dd>
-      </dl><dl><dt>
 
-          <code><a href="red_snapper.html">red_snapper</a></code>
-
-        </dt>
-        <dd>Presence/absence, count, and biomass data for red snapper</dd>
-      </dl><dl><dt>
-
-          <code><a href="red_snapper_shapefile.html">red_snapper_shapefile</a></code>
-
-        </dt>
-        <dd>Shapefile for red snapper analysis</dd>
-      </dl><dl><dt>
-
-          <code><a href="reload_model.html">reload_model()</a></code>
-
-        </dt>
-        <dd>Reload a previously fitted model</dd>
-      </dl><dl><dt>
-
-          <code><a href="residuals.tinyVAST.html">residuals(<i>&lt;tinyVAST&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Calculate deviance or response residuals for tinyVAST</dd>
-      </dl><dl><dt>
-
-          <code><a href="rmvnorm_prec.html">rmvnorm_prec()</a></code>
-
-        </dt>
-        <dd>Multivariate Normal Random Deviates using Sparse Precision</dd>
-      </dl><dl><dt>
-
-          <code><a href="rotate_pca.html">rotate_pca()</a></code>
-
-        </dt>
-        <dd>Rotate factors to match Principal-Components Analysis</dd>
-      </dl><dl><dt>
-
-          <code><a href="salmon_returns.html">salmon_returns</a></code>
-
-        </dt>
-        <dd>North Pacific salmon returns</dd>
-      </dl><dl><dt>
-
-          <code><a href="sample_variable.html">sample_variable()</a></code>
-
-        </dt>
-        <dd>Sample from predictive distribution of a variable</dd>
-      </dl><dl><dt>
-
-          <code><a href="sea_ice.html">sea_ice</a></code>
-
-        </dt>
-        <dd>Arctic September sea ice concentrations</dd>
-      </dl><dl><dt>
+      <dl><dt>
 
           <code><a href="sfnetwork_evaluator.html">sfnetwork_evaluator()</a></code>
 
@@ -219,32 +194,68 @@
 
         </dt>
         <dd>Simulate GMRF for stream network</dd>
-      </dl><dl><dt>
+      </dl></div><div class="section level2">
+      <h2 id="data-sets">Data sets<a class="anchor" aria-label="anchor" href="#data-sets"></a></h2>
 
-          <code><a href="summary.tinyVAST.html">summary(<i>&lt;tinyVAST&gt;</i>)</a></code>
+      <div class="section-desc"><p>Data sets used for illustration and testing.</p></div>
 
-        </dt>
-        <dd>summarize tinyVAST</dd>
-      </dl><dl><dt>
 
-          <code><a href="tinyVAST.html">tinyVAST()</a></code>
+    </div><div class="section level2">
 
-        </dt>
-        <dd>Fit vector autoregressive spatio-temporal model</dd>
-      </dl><dl><dt>
 
-          <code><a href="tinyVASTcontrol.html">tinyVASTcontrol()</a></code>
 
-        </dt>
-        <dd>Control parameters for tinyVAST</dd>
-      </dl><dl><dt>
 
-          <code><a href="vcov.tinyVAST.html">vcov(<i>&lt;tinyVAST&gt;</i>)</a></code>
+      <dl><dt>
+
+          <code><a href="sea_ice.html">sea_ice</a></code>
 
         </dt>
-        <dd>Extract Variance-Covariance Matrix</dd>
+        <dd>Arctic September sea ice concentrations</dd>
+      </dl><dl><dt>
+
+          <code><a href="salmon_returns.html">salmon_returns</a></code>
+
+        </dt>
+        <dd>North Pacific salmon returns</dd>
+      </dl><dl><dt>
+
+          <code><a href="condition_and_density.html">condition_and_density</a></code>
+
+        </dt>
+        <dd>Condition and density example</dd>
+      </dl><dl><dt>
+
+          <code><a href="bering_sea_pollock_ages.html">bering_sea_pollock_ages</a></code>
+
+        </dt>
+        <dd>Survey catch-rates at age for Alaska pollock in the Eastern and Northern Bering Sea</dd>
+      </dl><dl><dt>
+
+          <code><a href="bering_sea.html">bering_sea</a></code>
+
+        </dt>
+        <dd>Survey domain for the eastern and northern Bering Sea surveys</dd>
+      </dl><dl><dt>
+
+          <code><a href="bering_sea_pollock_vast.html">bering_sea_pollock_vast</a></code>
+
+        </dt>
+        <dd>Estimated proportion-at-age for Alaska pollock using VAST</dd>
+      </dl><dl><dt>
+
+          <code><a href="red_snapper.html">red_snapper</a></code>
+
+        </dt>
+        <dd>Presence/absence, count, and biomass data for red snapper</dd>
+      </dl><dl><dt>
+
+          <code><a href="red_snapper_shapefile.html">red_snapper_shapefile</a></code>
+
+        </dt>
+        <dd>Shapefile for red snapper analysis</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

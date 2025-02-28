@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,17 +18,18 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/aaa.html">Overview of vignettes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/web_only/overview.html">Overview of vignettes</a></li>
+    <li><a class="dropdown-item" href="../articles/model-description.html">tinyVAST model description</a></li>
+    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
+    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
+    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
+    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
-    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
-    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
-    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -44,9 +45,17 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="tinyvast-100">tinyVAST 1.0.0<a class="anchor" aria-label="anchor" href="#tinyvast-100"></a></h2>
+<ul><li>Adding nbinom1 and nbinom2 families</li>
+<li>Simplify argument names, by changing <code>sem</code> to <code>space_term</code>, <code>dsem</code> to <code>spacetime_term</code> and <code>spatial_graph</code> to <code>spatial_domain</code>, and eliminating <code>delta_</code> in the names for arguments to <code>delta_options</code>
+</li>
+<li>Add <code>time_term</code> to allow time-variable interaction (e.g., AR1 intercepts)</li>
+<li>Adding overview and model-description vignettes</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.1" id="tinyvast-071">tinyVAST 0.7.1<a class="anchor" aria-label="anchor" href="#tinyvast-071"></a></h2>
 <ul><li>Fixed bug (wrong output) when using <code>predict(fit, what="mu_g")</code> and a Poisson-linked delta model</li>

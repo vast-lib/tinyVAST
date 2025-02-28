@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,20 +30,21 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../../articles/aaa.html">Overview of vignettes</a></li>
+<li><a class="dropdown-item" href="../../articles/web_only/overview.html">Overview of vignettes</a></li>
+    <li><a class="dropdown-item" href="../../articles/model-description.html">tinyVAST model description</a></li>
+    <li><a class="dropdown-item" href="../../articles/mgcv.html">Comparison with mgcv</a></li>
+    <li><a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a></li>
+    <li><a class="dropdown-item" href="../../articles/multiple_data.html">Multiple data types</a></li>
+    <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
+    <li><a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a></li>
-    <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
-    <li><a class="dropdown-item" href="../../articles/mgcv.html">Comparison with mgcv</a></li>
-    <li><a class="dropdown-item" href="../../articles/multiple_data.html">Multiple data types</a></li>
-    <li><a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
-    <li><a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a></li>
-    <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
   </ul>
 </li>
@@ -72,14 +73,14 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/vignettes/web_only/age_composition_expansion.Rmd" class="external-link"><code>vignettes/web_only/age_composition_expansion.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/web_only/age_composition_expansion.Rmd" class="external-link"><code>vignettes/web_only/age_composition_expansion.Rmd</code></a></small>
       <div class="d-none name"><code>age_composition_expansion.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/" class="external-link">tinyVAST</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/">tinyVAST</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://inlabru-org.github.io/fmesher/" class="external-link">fmesher</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span></code></pre></div>
 <p>tinyVAST is an R package for fitting vector autoregressive
@@ -166,15 +167,15 @@ single linear predictor:</p>
 <span><span class="co">#Data$Year = factor(Data$Year)</span></span>
 <span><span class="va">myfit</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>  formula <span class="op">=</span> <span class="va">Catch_KG</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Year_Age</span>,</span>
-<span>  sem <span class="op">=</span> <span class="va">sem</span>,</span>
-<span>  dsem <span class="op">=</span> <span class="va">dsem</span>,</span>
+<span>  formula <span class="op">=</span> <span class="va">Abundance_per_hectare</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Year_Age</span>,</span>
+<span>  space_term <span class="op">=</span> <span class="va">sem</span>,</span>
+<span>  spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
 <span>  family <span class="op">=</span> <span class="va">family</span>,</span>
 <span>  space_column <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>, <span class="st">"Y"</span><span class="op">)</span>, </span>
 <span>  variable_column <span class="op">=</span> <span class="st">"Age"</span>,</span>
 <span>  time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
 <span>  distribution_column <span class="op">=</span> <span class="st">"Age"</span>,</span>
-<span>  spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
+<span>  spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
 <span>  control <span class="op">=</span> <span class="va">control</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>After the model is fitted, we then apply area-expansion and the
@@ -243,9 +244,7 @@ and also used a different mesh.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Var1</span><span class="op">)</span>, scales<span class="op">=</span><span class="st">"free"</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2Fagecomp-1.png" alt="plot of chunk agecomp"><div class="figcaption">plot of chunk agecomp</div>
-</div>
+<p><img src="age_composition_expansion_files/figure-html/agecomp-1.png" width="576"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,20 +30,21 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../../articles/aaa.html">Overview of vignettes</a></li>
+<li><a class="dropdown-item" href="../../articles/web_only/overview.html">Overview of vignettes</a></li>
+    <li><a class="dropdown-item" href="../../articles/model-description.html">tinyVAST model description</a></li>
+    <li><a class="dropdown-item" href="../../articles/mgcv.html">Comparison with mgcv</a></li>
+    <li><a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a></li>
+    <li><a class="dropdown-item" href="../../articles/multiple_data.html">Multiple data types</a></li>
+    <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
+    <li><a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a></li>
-    <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
-    <li><a class="dropdown-item" href="../../articles/mgcv.html">Comparison with mgcv</a></li>
-    <li><a class="dropdown-item" href="../../articles/multiple_data.html">Multiple data types</a></li>
-    <li><a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
-    <li><a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a></li>
-    <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
   </ul>
 </li>
@@ -72,14 +73,14 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/vignettes/web_only/VAST.Rmd" class="external-link"><code>vignettes/web_only/VAST.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/web_only/VAST.Rmd" class="external-link"><code>vignettes/web_only/VAST.Rmd</code></a></small>
       <div class="d-none name"><code>VAST.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/" class="external-link">tinyVAST</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vast-lib.github.io/tinyVAST/">tinyVAST</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://inlabru-org.github.io/fmesher/" class="external-link">fmesher</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"tinyVAST.verbose"</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
@@ -98,41 +99,56 @@ spatio-temporal process:</p>
 <span><span class="va">n_x</span> <span class="op">=</span> <span class="va">n_y</span> <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="va">n_t</span> <span class="op">=</span> <span class="fl">15</span></span>
 <span><span class="va">rho</span> <span class="op">=</span> <span class="fl">0.8</span></span>
-<span><span class="va">spatial_sd</span> <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="va">spacetime_sd</span> <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="va">space_sd</span> <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="va">gamma</span> <span class="op">=</span> <span class="fl">0</span></span>
 <span></span>
 <span><span class="co"># Simulate GMRFs</span></span>
 <span><span class="va">R_s</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">theta_xy</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_y</span>, FUN<span class="op">=</span><span class="st">"-"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="va">V_ss</span> <span class="op">=</span> <span class="va">spatial_sd</span><span class="op">^</span><span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/kronecker.html" class="external-link">kronecker</a></span><span class="op">(</span><span class="va">R_s</span>, <span class="va">R_s</span><span class="op">)</span></span>
-<span><span class="va">d</span> <span class="op">=</span> <span class="fu">mvtnorm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html" class="external-link">rmvnorm</a></span><span class="op">(</span><span class="va">n_t</span>, sigma<span class="op">=</span><span class="va">V_ss</span> <span class="op">)</span></span>
+<span><span class="va">R_ss</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/kronecker.html" class="external-link">kronecker</a></span><span class="op">(</span><span class="va">R_s</span>, <span class="va">R_s</span><span class="op">)</span></span>
+<span><span class="va">Vspacetime_ss</span> <span class="op">=</span> <span class="va">spacetime_sd</span><span class="op">^</span><span class="fl">2</span> <span class="op">*</span> <span class="va">R_ss</span> </span>
+<span><span class="va">Vspace_ss</span> <span class="op">=</span> <span class="va">space_sd</span><span class="op">^</span><span class="fl">2</span> <span class="op">*</span> <span class="va">R_ss</span></span>
 <span></span>
-<span><span class="co"># Project through time and add mean</span></span>
+<span><span class="co"># make spacetime AR1 over time</span></span>
+<span><span class="va">eps_ts</span> <span class="op">=</span> <span class="fu">mvtnorm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html" class="external-link">rmvnorm</a></span><span class="op">(</span> <span class="va">n_t</span>, sigma<span class="op">=</span><span class="va">Vspacetime_ss</span> <span class="op">)</span></span>
 <span><span class="kw">for</span><span class="op">(</span> <span class="va">t</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_t</span><span class="op">)</span> <span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="kw">if</span><span class="op">(</span><span class="va">t</span><span class="op">&gt;</span><span class="fl">1</span><span class="op">)</span> <span class="va">d</span><span class="op">[</span><span class="va">t</span>,<span class="op">]</span> <span class="op">=</span> <span class="va">rho</span><span class="op">*</span><span class="va">d</span><span class="op">[</span><span class="va">t</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span> <span class="op">+</span> <span class="va">d</span><span class="op">[</span><span class="va">t</span>,<span class="op">]</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="va">t</span><span class="op">&gt;</span><span class="fl">1</span><span class="op">)</span> <span class="va">eps_ts</span><span class="op">[</span><span class="va">t</span>,<span class="op">]</span> <span class="op">=</span> <span class="va">rho</span><span class="op">*</span><span class="va">eps_ts</span><span class="op">[</span><span class="va">t</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span> <span class="op">+</span> <span class="va">eps_ts</span><span class="op">[</span><span class="va">t</span>,<span class="op">]</span><span class="op">/</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">rho</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#d = d + 0.5</span></span>
+<span></span>
+<span><span class="co"># make space term</span></span>
+<span><span class="va">omega_s</span> <span class="op">=</span> <span class="fu">mvtnorm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html" class="external-link">rmvnorm</a></span><span class="op">(</span> <span class="fl">1</span>, sigma<span class="op">=</span><span class="va">Vspace_ss</span> <span class="op">)</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span>
+<span></span>
+<span><span class="co"># linear predictor</span></span>
+<span><span class="va">p_ts</span> <span class="op">=</span> <span class="va">gamma</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">n_t</span><span class="op">)</span>,<span class="va">omega_s</span> <span class="op">)</span> <span class="op">+</span> <span class="va">eps_ts</span></span>
 <span></span>
 <span><span class="co"># Shape into longform data-frame and add error</span></span>
-<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>time<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_t</span>, x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span><span class="op">)</span>, <span class="st">"var"</span><span class="op">=</span><span class="st">"logn"</span>, z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/dtweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">z</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span>
+<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>time<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_t</span>, x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span><span class="op">)</span>, </span>
+<span>                   var <span class="op">=</span> <span class="st">"logn"</span>, </span>
+<span>                   mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">p_ts</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/dtweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">n</span><span class="op">==</span><span class="fl">0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.046</span></span>
+<span><span class="co">#&gt; [1] 0.072</span></span>
 <span></span>
 <span><span class="co"># make mesh</span></span>
 <span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># fit model</span></span>
-<span><span class="va">mytinyVAST</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> dsem <span class="op">=</span> <span class="st">"logn -&gt; logn, 1, rho"</span>,</span>
+<span><span class="va">mytinyVAST</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> </span>
+<span>           space_term <span class="op">=</span> <span class="st">"logn &lt;-&gt; logn, sd_space"</span>,</span>
+<span>           spacetime_term <span class="op">=</span> <span class="st">"logn -&gt; logn, 1, rho</span></span>
+<span><span class="st">                             logn &lt;-&gt; logn, 0, sd_spacetime"</span>,</span>
 <span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>,</span>
-<span>           spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
+<span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">1</span>,</span>
+<span>           spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
 <span>           family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">mytinyVAST</span></span>
 <span><span class="co">#&gt; Call: </span></span>
-<span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + factor(time), data = Data, dsem = "logn -&gt; logn, 1, rho", </span></span>
-<span><span class="co">#&gt;     family = tweedie(), spatial_graph = mesh)</span></span>
+<span><span class="co">#&gt; tinyVAST(formula = n ~ 1, data = Data, space_term = "logn &lt;-&gt; logn, sd_space", </span></span>
+<span><span class="co">#&gt;     spacetime_term = "logn -&gt; logn, 1, rho\n                             logn &lt;-&gt; logn, 0, sd_spacetime", </span></span>
+<span><span class="co">#&gt;     family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 32.35395 secs</span></span>
+<span><span class="co">#&gt; Time difference of 20.17429 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -145,84 +161,59 @@ spatio-temporal process:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;              Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j   -0.08323604 0.15196456</span></span>
-<span><span class="co">#&gt; alpha_j   -0.13549104 0.18670340</span></span>
-<span><span class="co">#&gt; alpha_j   -0.10579217 0.20529851</span></span>
-<span><span class="co">#&gt; alpha_j   -0.14499114 0.21780791</span></span>
-<span><span class="co">#&gt; alpha_j   -0.37823869 0.22691800</span></span>
-<span><span class="co">#&gt; alpha_j   -0.21633307 0.23026450</span></span>
-<span><span class="co">#&gt; alpha_j   -0.41489959 0.23456777</span></span>
-<span><span class="co">#&gt; alpha_j   -0.67168423 0.23833635</span></span>
-<span><span class="co">#&gt; alpha_j   -0.49463135 0.23869331</span></span>
-<span><span class="co">#&gt; alpha_j   -0.13968720 0.23733095</span></span>
-<span><span class="co">#&gt; alpha_j    0.14836187 0.23640201</span></span>
-<span><span class="co">#&gt; alpha_j   -0.21516693 0.23873590</span></span>
-<span><span class="co">#&gt; alpha_j   -0.20120058 0.23979214</span></span>
-<span><span class="co">#&gt; alpha_j    0.16887045 0.23708655</span></span>
-<span><span class="co">#&gt; alpha_j    0.30040122 0.23660035</span></span>
-<span><span class="co">#&gt; beta_z     0.81229112 0.03708631</span></span>
-<span><span class="co">#&gt; beta_z     0.40988915 0.03291043</span></span>
-<span><span class="co">#&gt; log_sigma -0.64868475 0.05422114</span></span>
-<span><span class="co">#&gt; log_sigma  0.04394543 0.07275797</span></span>
-<span><span class="co">#&gt; log_kappa  0.07228542 0.10755269</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.006315957 </span></span>
+<span><span class="co">#&gt; alpha_j   -0.51042312 0.20682192</span></span>
+<span><span class="co">#&gt; beta_z     0.84975372 0.07526572</span></span>
+<span><span class="co">#&gt; beta_z    -0.25841774 0.03730119</span></span>
+<span><span class="co">#&gt; theta_z    0.44410419 0.06898295</span></span>
+<span><span class="co">#&gt; log_sigma -0.64811502 0.05006806</span></span>
+<span><span class="co">#&gt; log_sigma  0.01446398 0.06494080</span></span>
+<span><span class="co">#&gt; log_kappa -0.15608154 0.16446880</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.005583973 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Proportion deviance explained: </span></span>
-<span><span class="co">#&gt; [1] 0.6800908</span></span>
+<span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
+<span><span class="co">#&gt; [1] 0.543224</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; DSEM terms: </span></span>
-<span><span class="co">#&gt;   heads   to from parameter start lag  Estimate  Std_Error  z_value       p_value</span></span>
-<span><span class="co">#&gt; 1     1 logn logn         1  &lt;NA&gt;   1 0.8122911 0.03708631 21.90272 2.447223e-106</span></span>
-<span><span class="co">#&gt; 2     2 logn logn         2  &lt;NA&gt;   0 0.4098891 0.03291043 12.45469  1.318626e-35</span></span>
+<span><span class="co">#&gt; space_term: </span></span>
+<span><span class="co">#&gt;   heads   to from parameter start  Estimate  Std_Error  z_value      p_value</span></span>
+<span><span class="co">#&gt; 1     2 logn logn         1  &lt;NA&gt; 0.4441042 0.06898295 6.437883 1.211509e-10</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; spacetime_term: </span></span>
+<span><span class="co">#&gt;   heads   to from parameter start lag   Estimate  Std_Error   z_value</span></span>
+<span><span class="co">#&gt; 1     1 logn logn         1  &lt;NA&gt;   1  0.8497537 0.07526572 11.290049</span></span>
+<span><span class="co">#&gt; 2     2 logn logn         2  &lt;NA&gt;   0 -0.2584177 0.03730119 -6.927869</span></span>
+<span><span class="co">#&gt;        p_value</span></span>
+<span><span class="co">#&gt; 1 1.469548e-29</span></span>
+<span><span class="co">#&gt; 2 4.272276e-12</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
-<span><span class="co">#&gt;                   Estimate Std_Error    z_value     p_value</span></span>
-<span><span class="co">#&gt; factor(time)1  -0.08323604 0.1519646 -0.5477333 0.583875070</span></span>
-<span><span class="co">#&gt; factor(time)2  -0.13549104 0.1867034 -0.7257021 0.468021440</span></span>
-<span><span class="co">#&gt; factor(time)3  -0.10579217 0.2052985 -0.5153090 0.606337104</span></span>
-<span><span class="co">#&gt; factor(time)4  -0.14499114 0.2178079 -0.6656835 0.505613407</span></span>
-<span><span class="co">#&gt; factor(time)5  -0.37823869 0.2269180 -1.6668518 0.095543872</span></span>
-<span><span class="co">#&gt; factor(time)6  -0.21633307 0.2302645 -0.9394981 0.347475054</span></span>
-<span><span class="co">#&gt; factor(time)7  -0.41489959 0.2345678 -1.7687834 0.076930020</span></span>
-<span><span class="co">#&gt; factor(time)8  -0.67168423 0.2383363 -2.8182199 0.004829073</span></span>
-<span><span class="co">#&gt; factor(time)9  -0.49463135 0.2386933 -2.0722464 0.038242472</span></span>
-<span><span class="co">#&gt; factor(time)10 -0.13968720 0.2373310 -0.5885756 0.556146036</span></span>
-<span><span class="co">#&gt; factor(time)11  0.14836187 0.2364020  0.6275830 0.530277181</span></span>
-<span><span class="co">#&gt; factor(time)12 -0.21516693 0.2387359 -0.9012760 0.367441605</span></span>
-<span><span class="co">#&gt; factor(time)13 -0.20120058 0.2397921 -0.8390624 0.401434274</span></span>
-<span><span class="co">#&gt; factor(time)14  0.16887045 0.2370866  0.7122734 0.476295482</span></span>
-<span><span class="co">#&gt; factor(time)15  0.30040122 0.2366004  1.2696567 0.204206943</span></span></code></pre></div>
+<span><span class="co">#&gt;               Estimate Std_Error   z_value    p_value</span></span>
+<span><span class="co">#&gt; (Intercept) -0.5104231 0.2068219 -2.467935 0.01358949</span></span></code></pre></div>
 <p>The estimated values for <code>beta_z</code> then correspond to the
 simulated value for <code>rho</code> and <code>spatial_sd</code>.</p>
 <p>We can compare the true densities:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
-<span><span class="va">data_wide</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span>,<span class="st">'time'</span>,<span class="st">'z'</span><span class="op">)</span><span class="op">]</span>,</span>
+<span><span class="co">#&gt; Warning: package 'sf' was built under R version 4.4.2</span></span>
+<span><span class="va">data_wide</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span>,<span class="st">'time'</span>,<span class="st">'mu'</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>                     direction <span class="op">=</span> <span class="st">"wide"</span>, idvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span>, timevar <span class="op">=</span> <span class="st">"time"</span><span class="op">)</span></span>
 <span><span class="va">sf_data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span> <span class="va">data_wide</span>, coords<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sf_grid</span> <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_make_grid.html" class="external-link">st_make_grid</a></span><span class="op">(</span> <span class="va">sf_data</span> <span class="op">)</span></span>
 <span><span class="va">sf_plot</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">sf_grid</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="va">sf_data</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sf_plot</span>, max.plot<span class="op">=</span><span class="va">n_t</span> <span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2FVAST-true-dens-1.png" alt="plot of chunk VAST-true-dens"><div class="figcaption">plot of chunk VAST-true-dens</div>
-</div>
+<p><img src="VAST_files/figure-html/VAST-true-dens-1.png" width="576"></p>
 <p>with the estimated densities:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">Data</span><span class="op">$</span><span class="va">z_hat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mytinyVAST</span><span class="op">)</span></span>
-<span><span class="va">data_wide</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span>,<span class="st">'time'</span>,<span class="st">'z_hat'</span><span class="op">)</span><span class="op">]</span>,</span>
+<code class="sourceCode R"><span><span class="va">Data</span><span class="op">$</span><span class="va">mu_hat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mytinyVAST</span><span class="op">)</span></span>
+<span><span class="va">data_wide</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span>,<span class="st">'time'</span>,<span class="st">'mu_hat'</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>                     direction <span class="op">=</span> <span class="st">"wide"</span>, idvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span>, timevar <span class="op">=</span> <span class="st">"time"</span><span class="op">)</span></span>
 <span><span class="va">sf_data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span> <span class="va">data_wide</span>, coords<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sf_plot</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">sf_grid</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="va">sf_data</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sf_plot</span>, max.plot<span class="op">=</span><span class="va">n_t</span> <span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2FVAST-est-dens-1.png" alt="plot of chunk VAST-est-dens"><div class="figcaption">plot of chunk VAST-est-dens</div>
-</div>
+<p><img src="VAST_files/figure-html/VAST-est-dens-1.png" width="576"></p>
 <p>where a scatterplot shows that they are highly correlated:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> x<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">z</span>, y<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">z_hat</span> <span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2FVAST-scatterplot-1.png" alt="plot of chunk VAST-scatterplot"><div class="figcaption">plot of chunk VAST-scatterplot</div>
-</div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> x<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, y<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu_hat</span> <span class="op">)</span></span></code></pre></div>
+<p><img src="VAST_files/figure-html/VAST-scatterplot-1.png" width="576"></p>
 <p>We can also use the <code>DHARMa</code> package to visualize
 simulation residuals:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -235,32 +226,35 @@ simulation residuals:</p>
 <span>                            observedResponse <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">n</span>, </span>
 <span>                            fittedPredictedResponse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">mytinyVAST</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2FVAST-DHARMa-1.png" alt="plot of chunk VAST-DHARMa"><div class="figcaption">plot of chunk VAST-DHARMa</div>
-</div>
+<p><img src="VAST_files/figure-html/VAST-DHARMa-1.png" width="576"></p>
 <p>We can then calculate the area-weighted total abundance and compare
 it with its true value:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predicted sample-weighted total</span></span>
 <span><span class="op">(</span><span class="va">Est</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_t</span><span class="op">)</span>,</span>
 <span>   FUN<span class="op">=</span>\<span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="../../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">mytinyVAST</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">Data</span>,<span class="va">time</span><span class="op">==</span><span class="va">t</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                           [,1]       [,2]       [,3]       [,4]      [,5]       [,6]      [,7]      [,8]      [,9]      [,10]     [,11]</span></span>
-<span><span class="co">#&gt; Estimate             97.164902  96.643634  98.362458 101.517620 84.760587  97.538110 77.520820 59.565797 75.752785 113.562128 159.66734</span></span>
-<span><span class="co">#&gt; Std. Error            7.194683   7.216494   7.309313   7.572241  6.643419   7.406226  6.207919  5.090533  6.144821   8.454587  11.09945</span></span>
-<span><span class="co">#&gt; Est. (bias.correct) 102.324275 102.850496 105.043004 108.373176 90.604659 104.258111 83.102278 64.065173 81.166864 120.921460 169.20673</span></span>
-<span><span class="co">#&gt; Std. (bias.correct)         NA         NA         NA         NA        NA         NA        NA        NA        NA         NA        NA</span></span>
-<span><span class="co">#&gt;                          [,12]     [,13]     [,14]     [,15]</span></span>
-<span><span class="co">#&gt; Estimate            120.156809 137.80745 192.64174 187.86973</span></span>
-<span><span class="co">#&gt; Std. Error            9.107852  10.39448  13.68245  12.88189</span></span>
-<span><span class="co">#&gt; Est. (bias.correct) 127.519259 145.78500 203.55063 200.54754</span></span>
-<span><span class="co">#&gt; Std. (bias.correct)         NA        NA        NA        NA</span></span>
+<span><span class="co">#&gt;                          [,1]      [,2]     [,3]      [,4]      [,5]      [,6]</span></span>
+<span><span class="co">#&gt; Estimate            69.774342 68.167115 68.24959 64.038611 58.736780 60.506542</span></span>
+<span><span class="co">#&gt; Std. Error           4.733476  4.404922  4.32475  4.092695  3.880481  3.887897</span></span>
+<span><span class="co">#&gt; Est. (bias.correct) 72.867322 71.288122 71.44284 67.062705 61.536991 63.391199</span></span>
+<span><span class="co">#&gt; Std. (bias.correct)        NA        NA       NA        NA        NA        NA</span></span>
+<span><span class="co">#&gt;                          [,7]      [,8]      [,9]     [,10]     [,11]     [,12]</span></span>
+<span><span class="co">#&gt; Estimate            54.977480 58.463756 64.523920 74.895696 84.490757 76.981720</span></span>
+<span><span class="co">#&gt; Std. Error           3.772127  3.863062  4.166782  4.702731  5.335555  5.141678</span></span>
+<span><span class="co">#&gt; Est. (bias.correct) 57.610639 61.214950 67.544399 78.336996 88.253689 80.405085</span></span>
+<span><span class="co">#&gt; Std. (bias.correct)        NA        NA        NA        NA        NA        NA</span></span>
+<span><span class="co">#&gt;                         [,13]      [,14]     [,15]</span></span>
+<span><span class="co">#&gt; Estimate            87.189025  96.106379 93.626461</span></span>
+<span><span class="co">#&gt; Std. Error           5.514166   6.001112  6.338951</span></span>
+<span><span class="co">#&gt; Est. (bias.correct) 91.106042 100.570708 98.734105</span></span>
+<span><span class="co">#&gt; Std. (bias.correct)        NA         NA        NA</span></span>
 <span></span>
 <span><span class="co"># True (latent) sample-weighted total</span></span>
-<span><span class="op">(</span><span class="va">True</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">$</span><span class="va">z</span>, INDEX<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">time</span>, FUN<span class="op">=</span><span class="va">sum</span> <span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;         1         2         3         4         5         6         7         8         9        10        11        12        13 </span></span>
-<span><span class="co">#&gt;  99.21643 100.10603 101.66846 109.52622  85.76973 100.97116  80.99847  68.60738  85.39974 119.62380 147.41437 122.00580 158.26179 </span></span>
-<span><span class="co">#&gt;        14        15 </span></span>
-<span><span class="co">#&gt; 200.56813 203.37545</span></span>
+<span><span class="op">(</span><span class="va">True</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, INDEX<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">time</span>, FUN<span class="op">=</span><span class="va">sum</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         1         2         3         4         5         6         7         8 </span></span>
+<span><span class="co">#&gt;  70.98033  70.14925  68.40932  68.70763  58.38332  65.95801  60.52297  55.14115 </span></span>
+<span><span class="co">#&gt;         9        10        11        12        13        14        15 </span></span>
+<span><span class="co">#&gt;  60.02083  74.91768  86.40811  77.73359  85.88998  98.33442 105.16020</span></span>
 <span></span>
 <span><span class="co">#</span></span>
 <span><span class="va">Index</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> time<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_t</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">Est</span><span class="op">)</span>, <span class="va">True</span> <span class="op">)</span></span>
@@ -276,11 +270,9 @@ it with its true value:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span> color <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>            linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">True</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span> <span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2FVAST-abundance-1.png" alt="plot of chunk VAST-abundance"><div class="figcaption">plot of chunk VAST-abundance</div>
-</div>
+<p><img src="VAST_files/figure-html/VAST-abundance-1.png" width="576"></p>
 <p>Next, we compare this against the current version of VAST</p>
-<pre><code><span><span class="co">#&gt; Warning: package 'marginaleffects' was built under R version 4.3.3</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: package 'marginaleffects' was built under R version 4.4.2</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">settings</span> <span class="op">=</span> <span class="fu">make_settings</span><span class="op">(</span> purpose<span class="op">=</span><span class="st">"index3"</span>,</span>
 <span>                          n_x <span class="op">=</span> <span class="va">n_x</span><span class="op">*</span><span class="va">n_y</span>,</span>
@@ -288,9 +280,9 @@ it with its true value:</p>
 <span>                          bias.correct <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                          use_anisotropy <span class="op">=</span> <span class="cn">FALSE</span> <span class="op">)</span></span>
 <span><span class="va">settings</span><span class="op">$</span><span class="va">FieldConfig</span><span class="op">[</span><span class="st">'Epsilon'</span>,<span class="st">'Component_1'</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="va">settings</span><span class="op">$</span><span class="va">FieldConfig</span><span class="op">[</span><span class="st">'Omega'</span>,<span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="va">settings</span><span class="op">$</span><span class="va">FieldConfig</span><span class="op">[</span><span class="st">'Omega'</span>,<span class="st">'Component_1'</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="va">settings</span><span class="op">$</span><span class="va">RhoConfig</span><span class="op">[</span><span class="st">'Epsilon2'</span><span class="op">]</span> <span class="op">=</span> <span class="fl">4</span></span>
-<span><span class="va">settings</span><span class="op">$</span><span class="va">RhoConfig</span><span class="op">[</span><span class="st">'Beta1'</span><span class="op">]</span> <span class="op">=</span> <span class="fl">3</span></span>
+<span><span class="va">settings</span><span class="op">$</span><span class="va">RhoConfig</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Beta1'</span>,<span class="st">'Beta2'</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="va">settings</span><span class="op">$</span><span class="va">ObsModel</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Run VAST</span></span>
@@ -309,92 +301,72 @@ it with its true value:</p>
 <code class="sourceCode R"><span><span class="va">myVAST</span></span>
 <span><span class="co">#&gt; fit_model(.) result</span></span>
 <span><span class="co">#&gt; $par</span></span>
-<span><span class="co">#&gt;       beta1_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft </span></span>
-<span><span class="co">#&gt;    -0.58930072     0.51556558     0.46458132     0.49054914     0.46815469     0.22995166     0.39666648     0.19322487    -0.07072451 </span></span>
-<span><span class="co">#&gt;       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft       beta2_ft   L_epsilon2_z      logkappa2 </span></span>
-<span><span class="co">#&gt;     0.11680346     0.47101097     0.77135916     0.40831806     0.42839443     0.79998249     0.91170565     0.49266122    -4.30062282 </span></span>
+<span><span class="co">#&gt;       beta1_ft       beta2_ft     L_omega2_z   L_epsilon2_z      logkappa2 </span></span>
+<span><span class="co">#&gt;    -0.59988031     0.09993533     0.55005057     0.26695392    -4.68896241 </span></span>
 <span><span class="co">#&gt; Epsilon_rho2_f      logSigmaM </span></span>
-<span><span class="co">#&gt;     0.85035928     0.10422306 </span></span>
+<span><span class="co">#&gt;     0.89582684     0.05547658 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 1738.337</span></span>
+<span><span class="co">#&gt; [1] 1256.257</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 6</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       12        7 </span></span>
+<span><span class="co">#&gt;        7        3 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $time_for_MLE</span></span>
-<span><span class="co">#&gt; Time difference of 1.733057 secs</span></span>
+<span><span class="co">#&gt; Time difference of 1.310401 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $max_gradient</span></span>
-<span><span class="co">#&gt; [1] 0.0005693192</span></span>
+<span><span class="co">#&gt; [1] 0.0007302568</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Convergence_check</span></span>
 <span><span class="co">#&gt; [1] "The model is likely not converged"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $number_of_coefficients</span></span>
 <span><span class="co">#&gt;  Total  Fixed Random </span></span>
-<span><span class="co">#&gt;   2060     20   2040 </span></span>
+<span><span class="co">#&gt;   2183      7   2176 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $AIC</span></span>
-<span><span class="co">#&gt; [1] 3516.675</span></span>
+<span><span class="co">#&gt; [1] 2526.515</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $diagnostics</span></span>
-<span><span class="co">#&gt;             Param starting_value     Lower         MLE     Upper final_gradient</span></span>
-<span><span class="co">#&gt; 1        beta1_ft    -0.58930212      -Inf -0.58930072       Inf  -2.544080e-04</span></span>
-<span><span class="co">#&gt; 2        beta2_ft     0.51556564      -Inf  0.51556558       Inf   5.379535e-06</span></span>
-<span><span class="co">#&gt; 3        beta2_ft     0.46458076      -Inf  0.46458132       Inf  -1.711880e-05</span></span>
-<span><span class="co">#&gt; 4        beta2_ft     0.49055249      -Inf  0.49054914       Inf   2.249599e-04</span></span>
-<span><span class="co">#&gt; 5        beta2_ft     0.46815184      -Inf  0.46815469       Inf  -2.146493e-04</span></span>
-<span><span class="co">#&gt; 6        beta2_ft     0.22994932      -Inf  0.22995166       Inf  -1.963291e-04</span></span>
-<span><span class="co">#&gt; 7        beta2_ft     0.39666756      -Inf  0.39666648       Inf   7.352745e-05</span></span>
-<span><span class="co">#&gt; 8        beta2_ft     0.19322632      -Inf  0.19322487       Inf   1.263052e-04</span></span>
-<span><span class="co">#&gt; 9        beta2_ft    -0.07072357      -Inf -0.07072451       Inf   8.061085e-05</span></span>
-<span><span class="co">#&gt; 10       beta2_ft     0.11680236      -Inf  0.11680346       Inf  -8.984282e-05</span></span>
-<span><span class="co">#&gt; 11       beta2_ft     0.47100950      -Inf  0.47101097       Inf  -1.175670e-04</span></span>
-<span><span class="co">#&gt; 12       beta2_ft     0.77135978      -Inf  0.77135916       Inf   3.317524e-05</span></span>
-<span><span class="co">#&gt; 13       beta2_ft     0.40831857      -Inf  0.40831806       Inf   3.594733e-05</span></span>
-<span><span class="co">#&gt; 14       beta2_ft     0.42839428      -Inf  0.42839443       Inf  -2.828227e-05</span></span>
-<span><span class="co">#&gt; 15       beta2_ft     0.79997983      -Inf  0.79998249       Inf  -1.675174e-04</span></span>
-<span><span class="co">#&gt; 16       beta2_ft     0.91170839      -Inf  0.91170565       Inf   1.978155e-04</span></span>
-<span><span class="co">#&gt; 17   L_epsilon2_z     0.49266060      -Inf  0.49266122       Inf  -3.409419e-04</span></span>
-<span><span class="co">#&gt; 18      logkappa2    -4.30062178 -6.214608 -4.30062282 -3.565449   1.061017e-04</span></span>
-<span><span class="co">#&gt; 19 Epsilon_rho2_f     0.85035619 -0.990000  0.85035928  0.990000  -5.693192e-04</span></span>
-<span><span class="co">#&gt; 20      logSigmaM     0.10422369      -Inf  0.10422306 10.000000   8.657499e-05</span></span>
+<span><span class="co">#&gt;                         Param starting_value     Lower         MLE     Upper</span></span>
+<span><span class="co">#&gt; beta1_ft             beta1_ft    -0.59987818      -Inf -0.59988031       Inf</span></span>
+<span><span class="co">#&gt; beta2_ft             beta2_ft     0.09993558      -Inf  0.09993533       Inf</span></span>
+<span><span class="co">#&gt; L_omega2_z         L_omega2_z     0.55005171      -Inf  0.55005057       Inf</span></span>
+<span><span class="co">#&gt; L_epsilon2_z     L_epsilon2_z     0.26695303      -Inf  0.26695392       Inf</span></span>
+<span><span class="co">#&gt; logkappa2           logkappa2    -4.68896169 -6.214608 -4.68896241 -3.565449</span></span>
+<span><span class="co">#&gt; Epsilon_rho2_f Epsilon_rho2_f     0.89582671 -0.990000  0.89582684  0.990000</span></span>
+<span><span class="co">#&gt; logSigmaM           logSigmaM     0.05547811      -Inf  0.05547658 10.000000</span></span>
+<span><span class="co">#&gt;                final_gradient</span></span>
+<span><span class="co">#&gt; beta1_ft         7.302568e-04</span></span>
+<span><span class="co">#&gt; beta2_ft         3.958251e-05</span></span>
+<span><span class="co">#&gt; L_omega2_z       1.120592e-04</span></span>
+<span><span class="co">#&gt; L_epsilon2_z    -1.263658e-04</span></span>
+<span><span class="co">#&gt; logkappa2        9.682371e-05</span></span>
+<span><span class="co">#&gt; Epsilon_rho2_f  -1.138784e-04</span></span>
+<span><span class="co">#&gt; logSigmaM       -2.509090e-04</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $SD</span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;                   Estimate Std. Error</span></span>
-<span><span class="co">#&gt; beta1_ft       -0.58930072 0.05080467</span></span>
-<span><span class="co">#&gt; beta2_ft        0.51556558 0.14414517</span></span>
-<span><span class="co">#&gt; beta2_ft        0.46458132 0.17371754</span></span>
-<span><span class="co">#&gt; beta2_ft        0.49054914 0.19200615</span></span>
-<span><span class="co">#&gt; beta2_ft        0.46815469 0.20433942</span></span>
-<span><span class="co">#&gt; beta2_ft        0.22995166 0.21476799</span></span>
-<span><span class="co">#&gt; beta2_ft        0.39666648 0.21934845</span></span>
-<span><span class="co">#&gt; beta2_ft        0.19322487 0.22481460</span></span>
-<span><span class="co">#&gt; beta2_ft       -0.07072451 0.22973075</span></span>
-<span><span class="co">#&gt; beta2_ft        0.11680346 0.23059099</span></span>
-<span><span class="co">#&gt; beta2_ft        0.47101097 0.22964743</span></span>
-<span><span class="co">#&gt; beta2_ft        0.77135916 0.22895295</span></span>
-<span><span class="co">#&gt; beta2_ft        0.40831806 0.23199191</span></span>
-<span><span class="co">#&gt; beta2_ft        0.42839443 0.23305157</span></span>
-<span><span class="co">#&gt; beta2_ft        0.79998249 0.23091834</span></span>
-<span><span class="co">#&gt; beta2_ft        0.91170565 0.23072495</span></span>
-<span><span class="co">#&gt; L_epsilon2_z    0.49266122 0.04727208</span></span>
-<span><span class="co">#&gt; logkappa2      -4.30062282 0.13652887</span></span>
-<span><span class="co">#&gt; Epsilon_rho2_f  0.85035928 0.03527714</span></span>
-<span><span class="co">#&gt; logSigmaM       0.10422306 0.07108160</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.0005693192 </span></span>
+<span><span class="co">#&gt; beta1_ft       -0.59988031 0.04573745</span></span>
+<span><span class="co">#&gt; beta2_ft        0.09993533 0.21591340</span></span>
+<span><span class="co">#&gt; L_omega2_z      0.55005057 0.08905102</span></span>
+<span><span class="co">#&gt; L_epsilon2_z    0.26695392 0.04043402</span></span>
+<span><span class="co">#&gt; logkappa2      -4.68896241 0.18202530</span></span>
+<span><span class="co">#&gt; Epsilon_rho2_f  0.89582684 0.06297620</span></span>
+<span><span class="co">#&gt; logSigmaM       0.05547658 0.06294172</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.0007302568 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $time_for_sdreport</span></span>
-<span><span class="co">#&gt; Time difference of 6.984021 secs</span></span>
+<span><span class="co">#&gt; Time difference of 4.173163 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $time_for_run</span></span>
-<span><span class="co">#&gt; Time difference of 33.26514 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 22.04336 secs</span></span></code></pre></div>
 <p>Or with sdmTMB</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pbs-assess.github.io/sdmTMB/" class="external-link">sdmTMB</a></span><span class="op">)</span></span>
@@ -402,10 +374,10 @@ it with its true value:</p>
 <span></span>
 <span><span class="va">start_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mysdmTMB</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/sdmTMB.html" class="external-link">sdmTMB</a></span><span class="op">(</span></span>
-<span>  formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>,</span>
+<span>  formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>  mesh <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>  spatial <span class="op">=</span> <span class="st">"off"</span>,</span>
+<span>  spatial <span class="op">=</span> <span class="st">"on"</span>,</span>
 <span>  spatiotemporal <span class="op">=</span> <span class="st">"ar1"</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -425,15 +397,15 @@ it with its true value:</p>
 <tbody>
 <tr class="odd">
 <td align="left">tinyVAST</td>
-<td align="right">32.4</td>
+<td align="right">20.2</td>
 </tr>
 <tr class="even">
 <td align="left">VAST</td>
-<td align="right">167.4</td>
+<td align="right">26.7</td>
 </tr>
 <tr class="odd">
 <td align="left">sdmTMB</td>
-<td align="right">29.9</td>
+<td align="right">25.1</td>
 </tr>
 </tbody>
 </table>
@@ -447,14 +419,70 @@ it with its true value:</p>
 <span><span class="va">mydelta2</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>               formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>               delta_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>                 delta_formula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>,</span>
-<span>                 delta_dsem <span class="op">=</span> <span class="st">"logn -&gt; logn, 1, rho"</span><span class="op">)</span>,</span>
+<span>                 formula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>,</span>
+<span>                 spacetime_term <span class="op">=</span> <span class="st">"logn -&gt; logn, 1, rho"</span><span class="op">)</span>,</span>
 <span>               family <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">delta_lognormal</a></span><span class="op">(</span>type<span class="op">=</span><span class="st">"poisson-link"</span><span class="op">)</span>,</span>
-<span>               spatial_graph <span class="op">=</span> <span class="va">mesh</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in deviance_explained(out): Problem detected: deviance explained should be between 0 and 1</span></span>
+<span>               spatial_domain <span class="op">=</span> <span class="va">mesh</span> <span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in deviance_explained(out): Problem detected: deviance explained should</span></span>
+<span><span class="co">#&gt; be between 0 and 1</span></span>
 <span></span>
-<span><span class="va">mydelta</span></span>
-<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'mydelta' not found</span></span></code></pre></div>
+<span><span class="va">mydelta2</span></span>
+<span><span class="co">#&gt; Call: </span></span>
+<span><span class="co">#&gt; tinyVAST(formula = n ~ 1, data = Data, family = delta_lognormal(type = "poisson-link"), </span></span>
+<span><span class="co">#&gt;     spatial_domain = mesh, delta_options = list(formula = ~0 + </span></span>
+<span><span class="co">#&gt;         factor(time), spacetime_term = "logn -&gt; logn, 1, rho"))</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Run time: </span></span>
+<span><span class="co">#&gt; Time difference of 0.307236 secs</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Family: </span></span>
+<span><span class="co">#&gt; $obs</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Family: binomial lognormal </span></span>
+<span><span class="co">#&gt; Link function: log log </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; sdreport(.) result</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt;                Estimate Std. Error</span></span>
+<span><span class="co">#&gt; alpha_j    9.673977e-01 0.03523113</span></span>
+<span><span class="co">#&gt; alpha2_j  -9.722219e-01 0.13721439</span></span>
+<span><span class="co">#&gt; alpha2_j  -9.890696e-01 0.13927952</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.000142e+00 0.13927953</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.021256e+00 0.13721437</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.250672e+00 0.13721438</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.163360e+00 0.13654870</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.396657e+00 0.13857946</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.232469e+00 0.14220438</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.120828e+00 0.13589390</span></span>
+<span><span class="co">#&gt; alpha2_j  -8.562645e-01 0.13721437</span></span>
+<span><span class="co">#&gt; alpha2_j  -8.935466e-01 0.13721436</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.194395e+00 0.13589392</span></span>
+<span><span class="co">#&gt; alpha2_j  -9.129676e-01 0.13721437</span></span>
+<span><span class="co">#&gt; alpha2_j  -8.283647e-01 0.13461573</span></span>
+<span><span class="co">#&gt; alpha2_j  -7.688254e-01 0.13524967</span></span>
+<span><span class="co">#&gt; beta2_z    1.355635e+00        NaN</span></span>
+<span><span class="co">#&gt; beta2_z   -8.062577e-09        NaN</span></span>
+<span><span class="co">#&gt; log_sigma  2.328371e-01 0.01895245</span></span>
+<span><span class="co">#&gt; Warning:</span></span>
+<span><span class="co">#&gt; Hessian of fixed effects was not positive definite.</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.01194501 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
+<span><span class="co">#&gt; [1] -0.02549219</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; Fixed terms: </span></span>
+<span><span class="co">#&gt;              Estimate  Std_Error z_value       p_value</span></span>
+<span><span class="co">#&gt; (Intercept) 0.9673977 0.03523113 27.4586 5.484024e-166</span></span></code></pre></div>
 <p>And we can again use the <code>DHARMa</code> package to visualize
 simulation residuals:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -467,9 +495,7 @@ simulation residuals:</p>
 <span>                            observedResponse <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">n</span>, </span>
 <span>                            fittedPredictedResponse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">mydelta2</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2Fdelta-DHARMa-1.png" alt="plot of chunk delta-DHARMa"><div class="figcaption">plot of chunk delta-DHARMa</div>
-</div>
+<p><img src="VAST_files/figure-html/delta-DHARMa-1.png" width="576"></p>
 <p>We can then use AIC to compare the fit of the delta-model and Tweedie
 distribution:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -482,11 +508,11 @@ distribution:</p>
 <tbody>
 <tr class="odd">
 <td align="left">Tweedie</td>
-<td align="right">3475.378</td>
+<td align="right">2501.480</td>
 </tr>
 <tr class="even">
 <td align="left">delta-lognormal</td>
-<td align="right">4177.185</td>
+<td align="right">3206.731</td>
 </tr>
 </tbody>
 </table>
@@ -495,7 +521,8 @@ distribution:</p>
 <h2 id="bivariate-spatio-temporal-autoregressive-model">Bivariate spatio-temporal autoregressive model<a class="anchor" aria-label="anchor" href="#bivariate-spatio-temporal-autoregressive-model"></a>
 </h2>
 <p>We next highlight how to specify a bivariate spatio-temporal model
-with a cross-laggged (vector autoregressive) interaction.</p>
+with a cross-laggged (vector autoregressive) interaction. We first
+simulate artificial data for the sake of demonstration:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate settings</span></span>
 <span><span class="va">theta_xy</span> <span class="op">=</span> <span class="fl">0.2</span></span>
@@ -516,10 +543,12 @@ with a cross-laggged (vector autoregressive) interaction.</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># Shape into longform data-frame and add error</span></span>
-<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>time<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_t</span>, x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span>, <span class="st">"var"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"d1"</span>,<span class="st">"d2"</span><span class="op">)</span><span class="op">)</span>, z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/dtweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">z</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># make mesh</span></span>
+<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>time<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_t</span>, x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span>, <span class="st">"var"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"d1"</span>,<span class="st">"d2"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                   mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/dtweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span></code></pre></div>
+<p>We next set up inputs and run the model:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># make mesh</span></span>
 <span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Define DSEM</span></span>
@@ -533,18 +562,18 @@ with a cross-laggged (vector autoregressive) interaction.</p>
 <span><span class="st">"</span></span>
 <span></span>
 <span><span class="co"># fit model</span></span>
-<span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> dsem <span class="op">=</span> <span class="va">dsem</span>,</span>
+<span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
 <span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">var</span>,</span>
-<span>           spatial_graph <span class="op">=</span> <span class="va">mesh</span>,</span>
+<span>           spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
 <span>           family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; Call: </span></span>
-<span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + var, data = Data, dsem = dsem, family = tweedie(), </span></span>
-<span><span class="co">#&gt;     spatial_graph = mesh)</span></span>
+<span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + var, data = Data, spacetime_term = dsem, </span></span>
+<span><span class="co">#&gt;     family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 3.236934 mins</span></span>
+<span><span class="co">#&gt; Time difference of 1.393948 mins</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -557,45 +586,52 @@ with a cross-laggged (vector autoregressive) interaction.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;               Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j   -0.135067087 0.11243172</span></span>
-<span><span class="co">#&gt; alpha_j   -0.050931911 0.09302442</span></span>
-<span><span class="co">#&gt; beta_z     0.537678543 0.06461591</span></span>
-<span><span class="co">#&gt; beta_z     0.471060516 0.07549660</span></span>
-<span><span class="co">#&gt; beta_z    -0.268664647 0.07225850</span></span>
-<span><span class="co">#&gt; beta_z    -0.080655517 0.06157438</span></span>
-<span><span class="co">#&gt; beta_z     0.355720082 0.01973953</span></span>
-<span><span class="co">#&gt; log_sigma -0.675048462 0.02959907</span></span>
-<span><span class="co">#&gt; log_sigma  0.004059747 0.04917005</span></span>
-<span><span class="co">#&gt; log_kappa -0.566274473 0.09138031</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.002923743 </span></span>
+<span><span class="co">#&gt; alpha_j   -0.155959190 0.10708939</span></span>
+<span><span class="co">#&gt; alpha_j    0.091417001 0.10885456</span></span>
+<span><span class="co">#&gt; beta_z     0.531118986 0.06997634</span></span>
+<span><span class="co">#&gt; beta_z     0.554429566 0.06998695</span></span>
+<span><span class="co">#&gt; beta_z    -0.142194712 0.06564120</span></span>
+<span><span class="co">#&gt; beta_z    -0.098061704 0.06738895</span></span>
+<span><span class="co">#&gt; beta_z     0.331305819 0.01918731</span></span>
+<span><span class="co">#&gt; log_sigma -0.687222682 0.02831433</span></span>
+<span><span class="co">#&gt; log_sigma -0.002508699 0.05116634</span></span>
+<span><span class="co">#&gt; log_kappa -0.664200731 0.09783507</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.008334427 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Proportion deviance explained: </span></span>
-<span><span class="co">#&gt; [1] 0.4630639</span></span>
+<span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
+<span><span class="co">#&gt; [1] 0.4494309</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; DSEM terms: </span></span>
-<span><span class="co">#&gt;   heads to from parameter start lag    Estimate  Std_Error   z_value      p_value</span></span>
-<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.53767854 0.06461591  8.321148 8.711554e-17</span></span>
-<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.47106052 0.07549660  6.239493 4.389917e-10</span></span>
-<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.26866465 0.07225850 -3.718104 2.007234e-04</span></span>
-<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.08065552 0.06157438 -1.309888 1.902338e-01</span></span>
-<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.35572008 0.01973953 18.020697 1.340448e-72</span></span>
-<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.35572008 0.01973953 18.020697 1.340448e-72</span></span>
+<span><span class="co">#&gt; spacetime_term: </span></span>
+<span><span class="co">#&gt;   heads to from parameter start lag   Estimate  Std_Error   z_value</span></span>
+<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.5311190 0.06997634  7.589980</span></span>
+<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.5544296 0.06998695  7.921900</span></span>
+<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.1421947 0.06564120 -2.166242</span></span>
+<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.0980617 0.06738895 -1.455160</span></span>
+<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.3313058 0.01918731 17.266927</span></span>
+<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.3313058 0.01918731 17.266927</span></span>
+<span><span class="co">#&gt;        p_value</span></span>
+<span><span class="co">#&gt; 1 3.199557e-14</span></span>
+<span><span class="co">#&gt; 2 2.339088e-15</span></span>
+<span><span class="co">#&gt; 3 3.029273e-02</span></span>
+<span><span class="co">#&gt; 4 1.456250e-01</span></span>
+<span><span class="co">#&gt; 5 8.347066e-67</span></span>
+<span><span class="co">#&gt; 6 8.347066e-67</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
-<span><span class="co">#&gt;          Estimate  Std_Error    z_value   p_value</span></span>
-<span><span class="co">#&gt; vard1 -0.13506709 0.11243172 -1.2013254 0.2296250</span></span>
-<span><span class="co">#&gt; vard2 -0.05093191 0.09302442 -0.5475112 0.5840276</span></span></code></pre></div>
+<span><span class="co">#&gt;         Estimate Std_Error    z_value   p_value</span></span>
+<span><span class="co">#&gt; vard1 -0.1559592 0.1070894 -1.4563459 0.1452970</span></span>
+<span><span class="co">#&gt; vard2  0.0914170 0.1088546  0.8398086 0.4010157</span></span></code></pre></div>
 <p>The values for <code>beta_z</code> again correspond to the specified
 value for interaction-matrix <code>B</code></p>
 <p>We can again calculate the area-weighted total abundance and compare
 it with its true value:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predicted sample-weighted total</span></span>
 <span><span class="va">Est1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_t</span><span class="op">)</span>, FUN<span class="op">=</span>\<span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="../../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">out</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">Data</span>,<span class="va">time</span><span class="op">==</span><span class="va">t</span> <span class="op">&amp;</span> <span class="va">var</span><span class="op">==</span><span class="st">"d1"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">Est2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_t</span><span class="op">)</span>, FUN<span class="op">=</span>\<span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="../../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">out</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">Data</span>,<span class="va">time</span><span class="op">==</span><span class="va">t</span> <span class="op">&amp;</span> <span class="va">var</span><span class="op">==</span><span class="st">"d2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># True (latent) sample-weighted total</span></span>
-<span><span class="va">True</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">$</span><span class="va">z</span>, INDEX<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"time"</span><span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">time</span>,<span class="st">"var"</span><span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">var</span><span class="op">)</span>, FUN<span class="op">=</span><span class="va">sum</span> <span class="op">)</span></span>
+<span><span class="va">True</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, INDEX<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"time"</span><span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">time</span>,<span class="st">"var"</span><span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">var</span><span class="op">)</span>, FUN<span class="op">=</span><span class="va">sum</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co">#</span></span>
 <span><span class="va">Index</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">True</span><span class="op">)</span><span class="op">)</span>, <span class="st">"True"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">True</span><span class="op">)</span> <span class="op">)</span></span>
@@ -613,9 +649,7 @@ it with its true value:</p>
 <span>                  xend <span class="op">=</span> <span class="va">time</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">Estimate</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">True</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span> <span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figure%2FVAST-VAR-index-1.png" alt="plot of chunk VAST-VAR-index"><div class="figcaption">plot of chunk VAST-VAR-index</div>
-</div>
+<p><img src="VAST_files/figure-html/VAST-VAR-index-1.png" width="576"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

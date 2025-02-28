@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,17 +18,18 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/aaa.html">Overview of vignettes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/web_only/overview.html">Overview of vignettes</a></li>
+    <li><a class="dropdown-item" href="../articles/model-description.html">tinyVAST model description</a></li>
+    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
+    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
+    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
+    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
-    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
-    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
-    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -44,7 +45,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>summarize tinyVAST</h1>
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
       <div class="d-none name"><code>summary.tinyVAST.Rd</code></div>
     </div>
 
@@ -55,7 +56,11 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'tinyVAST'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span>, what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sem"</span>, <span class="st">"dsem"</span>, <span class="st">"fixed"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"space_term"</span>, <span class="st">"time_term"</span>, <span class="st">"spacetime_term"</span>, <span class="st">"fixed"</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,7 +72,7 @@
 
 
 <dt id="arg-what">what<a class="anchor" aria-label="anchor" href="#arg-what"></a></dt>
-<dd><p>What component to summarize, whether <code>sem</code>, <code>dsem</code>, or
+<dd><p>What component to summarize, whether <code>space_term</code>, <code>spacetime_term</code>, or
 <code>fixed</code> for the fixed effects included in the GAM formula</p></dd>
 
 
@@ -77,9 +82,20 @@
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>tinyVAST</code> includes three components: a structural equation model (SEM),
-a dynamic structural equation model (DSEM), and a generalized additive model (GAM).
-Each of these are summarized and interpreted differently, and <code>summary.tinyVAST</code>
+    <p><code>tinyVAST</code> includes three components:</p><dl><dt>Space-variable interaction</dt>
+<dd><p>a separable Gaussian Markov random field (GMRF)
+constructed from a structural equation model (SEM) and a spatial variable</p></dd>
+
+<dt>Space-variable-time interaction</dt>
+<dd><p>a separable GMRF constructed from a
+a dynamic SEM (a nonseparable time-variable interaction) and a spatial variable</p></dd>
+
+<dt>Additive variation</dt>
+<dd><p>a generalized additive model (GAM), representing exogenous
+covariates</p></dd>
+
+
+</dl><p>Each of these are summarized and interpreted differently, and <code>summary.tinyVAST</code>
 facilitates this.</p>
 <p>Regarding the DSEM componennt, tinyVAST includes an "arrow and lag"
 notation, which specifies the set of
