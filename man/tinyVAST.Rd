@@ -125,7 +125,7 @@ An object (list) of class \code{tinyVAST}. Elements include:
 \item{spatial_domain}{the spatial domain supplied during fitting}
 \item{obj}{The TMB object from \code{\link[TMB]{MakeADFun}}}
 \item{opt}{The output from \code{\link[stats]{nlminb}}}
-\item{opt}{The report from \code{obj$report()}
+\item{opt}{The report from \code{obj$report()}}
 \item{sdrep}{The output from \code{\link[TMB]{sdreport}}}
 \item{tmb_inputs}{The list of inputs passed to \code{\link[TMB]{MakeADFun}}}
 \item{call}{A record of the function call}
