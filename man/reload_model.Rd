@@ -18,15 +18,3 @@ Output from \code{\link{tinyVAST}} with DLLs relinked
 \code{reload_model} allows a user to save a fitted model, reload it in a new
 R terminal, and then relink the DLLs so that it functions as expected.
 }
-\examples{
-\dontrun{
-# Run model
-fit = tinyVAST( ... )
-saveRDS( object=fit, file="path_and_name.rds" )
-
-# Reload and relink
-fit_new = readRDS( file="path_and_name.rds" )
-fit_new = reload_model( x = fit_new )
-}
-
-}

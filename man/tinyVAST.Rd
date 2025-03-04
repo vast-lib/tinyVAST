@@ -123,6 +123,7 @@ An object (list) of class \code{tinyVAST}. Elements include:
 \describe{
 \item{data}{Data-frame supplied during model fitting}
 \item{spatial_domain}{the spatial domain supplied during fitting}
+\item{formula}{the formula specified during model fitting}
 \item{obj}{The TMB object from \code{\link[TMB]{MakeADFun}}}
 \item{opt}{The output from \code{\link[stats]{nlminb}}}
 \item{opt}{The report from \code{obj$report()}}

@@ -123,6 +123,7 @@
 #' \describe{
 #' \item{data}{Data-frame supplied during model fitting}
 #' \item{spatial_domain}{the spatial domain supplied during fitting}
+#' \item{formula}{the formula specified during model fitting}
 #' \item{obj}{The TMB object from \code{\link[TMB]{MakeADFun}}}
 #' \item{opt}{The output from \code{\link[stats]{nlminb}}}
 #' \item{opt}{The report from \code{obj$report()}}
@@ -818,6 +819,7 @@ function( formula,
   out = list(
     data = data,
     spatial_domain = spatial_domain,
+    formula = formula,
     obj = obj,
     opt = opt,
     rep = obj$report(obj$env$last.par.best),

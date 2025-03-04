@@ -33,9 +33,3 @@ estimates measurement error variance approaching zero (i.e., collapses to
 a process-error-only model) will have a conditional deviance explained
 that approaches 1.0
 }
-\references{
-Zheng, N., Cadigan, N., & Thorson, J. T. (2024).
-A note on numerical evaluation of conditional Akaike information for
-nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
-\doi{10.48550/arXiv.2411.14185}
-}

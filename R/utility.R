@@ -159,17 +159,6 @@ function( model ){
 #'
 #' @return Output from \code{\link{tinyVAST}} with DLLs relinked
 #'
-#' @examples
-#' \dontrun{
-#' # Run model
-#' fit = tinyVAST( ... )
-#' saveRDS( object=fit, file="path_and_name.rds" )
-#'
-#' # Reload and relink
-#' fit_new = readRDS( file="path_and_name.rds" )
-#' fit_new = reload_model( x = fit_new )
-#' }
-#'
 #' @export
 reload_model <-
 function( x,
@@ -345,12 +334,6 @@ function( x,
 #'        might make sense to use \code{null_delta_formula = response ~ category}
 #'
 #' @return the proportion of conditional deviance explained.
-#'
-#' @references
-#' Zheng, N., Cadigan, N., & Thorson, J. T. (2024).
-#' A note on numerical evaluation of conditional Akaike information for
-#' nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
-#' \doi{10.48550/arXiv.2411.14185}
 #'
 #' @export
 deviance_explained <-
