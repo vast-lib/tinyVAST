@@ -6,6 +6,11 @@
 \usage{
 \method{logLik}{tinyVAST}(object, ...)
 }
+\arguments{
+\item{object}{output from \code{tinyVAST}}
+
+\item{...}{not used}
+}
 \value{
 object of class \code{logLik} with attributes
 \item{val}{log-likelihood}

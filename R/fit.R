@@ -1214,6 +1214,9 @@ function( object,
 
 #' Extract the (marginal) log-likelihood of a tinyVAST model
 #'
+#' @param object output from \code{tinyVAST}
+#' @param ... not used
+#'
 #' @return object of class \code{logLik} with attributes
 #'   \item{val}{log-likelihood}
 #'   \item{df}{number of parameters}
