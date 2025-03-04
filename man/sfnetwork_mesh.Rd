@@ -9,6 +9,17 @@ sfnetwork_mesh(stream)
 \arguments{
 \item{stream}{\pkg{sfnetworks} object representing stream network}
 }
+\value{
+An object (list) of class \code{sfnetwork_mesh}. Elements include:
+\describe{
+\item{N}{The number of random effects used to represent the network}
+\item{table}{a table containing a description of parent nodes (from),
+childen nodes (to), and the distance separating them}
+\item{stream}{copy of the stream network object passed as argument}
+}
+}
 \description{
-Make mesh for stream network
+make an object representing spatial information required
+to specify a stream-network spatial domain, similar in usage to
+\code{link[fmesher]{fm_mesh_2d}} for a 2-dimensional continuous domain
 }

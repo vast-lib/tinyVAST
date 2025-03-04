@@ -69,6 +69,10 @@ explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 \item{run_model}{whether to run the model of export TMB objects prior to compilation
 (useful for debugging)}
 }
+\value{
+An object (list) of class \code{tinyVASTcontrol}, containing either default or
+updated values supplied by the user for model settings
+}
 \description{
 Control parameters for tinyVAST
 }

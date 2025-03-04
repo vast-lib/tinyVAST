@@ -45,6 +45,10 @@ bias-correction.}
 
 \item{...}{Not used.}
 }
+\value{
+Either a vector with the prediction for each row of \code{newdata}, or a named list
+with the prediction and standard error (when \code{se.fit = TRUE}).
+}
 \description{
 Predicts values given new covariates using a \pkg{tinyVAST} model
 }

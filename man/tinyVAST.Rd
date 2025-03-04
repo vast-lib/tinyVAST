@@ -118,6 +118,23 @@ settings.}
 
 \item{...}{Not used.}
 }
+\value{
+An object (list) of class \code{tinyVAST}. Elements include:
+\describe{
+\item{data}{Data-frame supplied during model fitting}
+\item{spatial_domain}{the spatial domain supplied during fitting}
+\item{obj}{The TMB object from \code{\link[TMB]{MakeADFun}}}
+\item{opt}{The output from \code{\link[stats]{nlminb}}}
+\item{opt}{The report from \code{obj$report()}
+\item{sdrep}{The output from \code{\link[TMB]{sdreport}}}
+\item{tmb_inputs}{The list of inputs passed to \code{\link[TMB]{MakeADFun}}}
+\item{call}{A record of the function call}
+\item{run_time}{Total time to run model}
+\item{interal}{Objects useful for package function, i.e., all arguments
+passed during the call}
+\item{deviance_explained}{output from \code{\link{deviance_explained}}}
+}
+}
 \description{
 Fits a vector autoregressive spatio-temporal (VAST) model using
 a minimal feature-set and a widely used interface.

@@ -18,6 +18,14 @@
 
 \item{...}{Not used}
 }
+\value{
+A data-frame containing the estimate (and standard errors, two-sided Wald-test
+z-value, and associated p-value if the standard errors are available) for
+model parameters, including the fixed-effects specified via \code{formula},
+or the path coefficients for the spatial SEM specified via \code{space_term},
+the dynamic SEM specified via \code{time_term}, or the spatial dynamic SEM
+specified via \code{spacetime_term}
+}
 \description{
 summarize parameters from a fitted tinyVAST
 }

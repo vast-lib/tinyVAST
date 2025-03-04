@@ -76,6 +76,12 @@ See details for more information.}
 
 \item{intern}{Do Laplace approximation on C++ side? Passed to \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.}
 }
+\value{
+A vector containing the plug-in estimate, standard error, the epsilon bias-corrected
+estimate if available, and the standard error for the bias-corrected estimator.
+Depending upon settings, one or more of these will be \code{NA} values, and the
+function can be repeatedly called to get multiple estimators and/or statistics.
+}
 \description{
 Calculates an estimator for a derived quantity by summing across multiple predictions.
 This can be used to approximate an integral when estimating area-expanded abundance,

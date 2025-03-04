@@ -118,6 +118,23 @@
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
 #' @seealso [summary.tinyVAST()] to visualize parameter estimates related to SEM and DSEM model components
 #'
+#' @return
+#' An object (list) of class `tinyVAST`. Elements include:
+#' \describe{
+#' \item{data}{Data-frame supplied during model fitting}
+#' \item{spatial_domain}{the spatial domain supplied during fitting}
+#' \item{obj}{The TMB object from \code{\link[TMB]{MakeADFun}}}
+#' \item{opt}{The output from \code{\link[stats]{nlminb}}}
+#' \item{opt}{The report from \code{obj$report()}
+#' \item{sdrep}{The output from \code{\link[TMB]{sdreport}}}
+#' \item{tmb_inputs}{The list of inputs passed to \code{\link[TMB]{MakeADFun}}}
+#' \item{call}{A record of the function call}
+#' \item{run_time}{Total time to run model}
+#' \item{interal}{Objects useful for package function, i.e., all arguments
+#'                passed during the call}
+#' \item{deviance_explained}{output from \code{\link{deviance_explained}}}
+#' }
+#'
 #' @examples
 #' # Simulate a seperable two-dimensional AR1 spatial process
 #' n_x = n_y = 25
@@ -799,15 +816,14 @@ function( formula,
     family = family                                       # for `add_predictions`
   )
   out = list(
-    formula = formula,
     data = data,
+    spatial_domain = spatial_domain,
     obj = obj,
     opt = opt,
     rep = obj$report(obj$env$last.par.best),
     sdrep = sdrep,
     tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map, tmb_random=tmb_random),
     call = match.call(),
-    spatial_domain = spatial_domain,
     run_time = Sys.time() - start_time,
     internal = internal
   )
@@ -858,6 +874,10 @@ function( formula,
 #'        explained.  See [deviance_explained()]
 #' @param run_model whether to run the model of export TMB objects prior to compilation
 #'        (useful for debugging)
+#'
+#' @return
+#' An object (list) of class `tinyVASTcontrol`, containing either default or
+#' updated values supplied by the user for model settings
 #'
 #' @export
 tinyVASTcontrol <-
@@ -1004,6 +1024,14 @@ function( x,
 #'        \code{fixed} for the fixed effects included in the GAM formula
 #' @param ... Not used
 #'
+#' @return
+#' A data-frame containing the estimate (and standard errors, two-sided Wald-test
+#' z-value, and associated p-value if the standard errors are available) for
+#' model parameters, including the fixed-effects specified via \code{formula},
+#' or the path coefficients for the spatial SEM specified via \code{space_term},
+#' the dynamic SEM specified via \code{time_term}, or the spatial dynamic SEM
+#' specified via \code{spacetime_term}
+#'
 #' @method summary tinyVAST
 #' @export
 summary.tinyVAST <-
@@ -1113,6 +1141,8 @@ function( object,
 #' @param ... Note used
 #'
 #' @method residuals tinyVAST
+#' @return a vector residuals, associated with each row of \code{data} supplied during fitting
+#'
 #' @export
 residuals.tinyVAST <-
 function( object,
@@ -1180,11 +1210,11 @@ function( object,
   return(resid)
 }
 
-# Extract the (marginal) log-likelihood of a tinyVAST model
-#
-# @return object of class \code{logLik} with attributes
-#   \item{val}{log-likelihood}
-#   \item{df}{number of parameters}
+#' Extract the (marginal) log-likelihood of a tinyVAST model
+#'
+#' @return object of class \code{logLik} with attributes
+#'   \item{val}{log-likelihood}
+#'   \item{df}{number of parameters}
 #' @importFrom stats logLik
 #' @export
 logLik.tinyVAST <- function(object, ...) {
@@ -1205,6 +1235,7 @@ logLik.tinyVAST <- function(object, ...) {
 #' @param ... Not used
 #' @importFrom stats fitted
 #' @export
+#' @return a vector of fitted values for each row of \code{data}
 #' @noRd
 fitted.tinyVAST <- function(object, ...) {
   predict( object, what="mu_g" )
@@ -1219,6 +1250,11 @@ fitted.tinyVAST <- function(object, ...) {
 #' @param ... ignored, for method compatibility
 #' @importFrom stats vcov
 #' @method vcov tinyVAST
+#' @return
+#' A square matrix containing the estimated covariances among the parameter estimates in the model.
+#' The dimensions dependend upon the argument \code{which}, to determine whether fixed, random effects,
+#' or both are outputted.
+#'
 #' @export
 vcov.tinyVAST <-
 function( object,
@@ -1248,4 +1284,5 @@ function( object,
 
   return( V )
 }
+
 

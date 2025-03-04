@@ -14,6 +14,9 @@
 #' @importFrom sfnetworks activate
 #' @importFrom Matrix Diagonal
 #'
+#' @return the sparse interpolation matrix, with rows for each row of \code{data}
+#' supplied during fitting and columns for each spatial random effect.
+#'
 #' @export
 sfnetwork_evaluator <-
 function( stream,
@@ -61,7 +64,20 @@ function( stream,
 
 #' @title Make mesh for stream network
 #'
+#' @description make an object representing spatial information required
+#' to specify a stream-network spatial domain, similar in usage to
+#' \code{link[fmesher]{fm_mesh_2d}} for a 2-dimensional continuous domain
+#'
 #' @inheritParams sfnetwork_evaluator
+#'
+#' @return
+#' An object (list) of class `sfnetwork_mesh`. Elements include:
+#' \describe{
+#' \item{N}{The number of random effects used to represent the network}
+#' \item{table}{a table containing a description of parent nodes (from),
+#'              childen nodes (to), and the distance separating them}
+#' \item{stream}{copy of the stream network object passed as argument}
+#' }
 #'
 #' @export
 sfnetwork_mesh <-
@@ -99,10 +115,25 @@ function( stream ){
 
 #' @title Simulate GMRF for stream network
 #'
+#' @description Simulate values from a GMRF using a tail-up exponential
+#' model on a stream network
+#'
 #' @param sfnetwork_mesh Output from \code{\link{sfnetwork_mesh}}
 #' @param theta Decorrelation rate
 #' @param n number of simulated GMRFs
 #' @param what Whether to return the simulated GMRF or its precision matrix
+#'
+#' @return a matrix of simulated values for a Gaussian Markov random field
+#' arising from a stream-network spatial domain, with row for each spatial random
+#' effect and \code{n} columns, using the sparse precision matrix
+#' defined in Charsley et al. (2023)
+#'
+#' @references
+#' Charsley, A. R., Gruss, A., Thorson, J. T., Rudd, M. B., Crow, S. K.,
+#' David, B., Williams, E. K., & Hoyle, S. D. (2023). Catchment-scale
+#' stream network spatio-temporal models, applied to the freshwater stages
+#' of a diadromous fish species, longfin eel (Anguilla dieffenbachii).
+#' Fisheries Research, 259, 106583. \doi{10.1016/j.fishres.2022.106583}
 #'
 #' @export
 simulate_sfnetwork <-

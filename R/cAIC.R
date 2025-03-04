@@ -55,7 +55,8 @@
 #'                 control = tinyVASTcontrol( getsd = FALSE,
 #'                                            profile = "alpha_j" ) )
 #'
-#' cAIC(fit)
+#' cAIC(fit) # conditional AIC
+#' AIC(fit) # marginal AIC
 #'
 #' @export
 cAIC <-

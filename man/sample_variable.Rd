@@ -23,6 +23,11 @@ sample_variable(
 
 \item{seed}{integer used to set random-number seed when sampling variables, as passed to \code{set.seed(.)}}
 }
+\value{
+A matrix with a row for each \code{data} supplied during fitting, and
+\code{n_samples} columns, where each column in a vector of samples
+for a requested quantity given sampled uncertainty in fixed and/or random effects
+}
 \description{
 \code{sample_variable} samples from the joint distribution of random and fixed effects to approximate the predictive distribution for a variable
 
@@ -34,14 +39,16 @@ representation of the tail probabilities, and results in some samples with impla
 such that the associated random effects then have implausibly high magnitude.
 }
 \examples{
-\dontrun{
-# Run model using selected inputs, but also with getJointPrecision=TRUE
-fit = tinyVAST( ...,
-    control = tinyVASTcontrol(getJointPrecision=TRUE) )
+ set.seed(101)
+ x = runif(n = 100, min = 0, max = 2*pi)
+ y = 1 + sin(x) + 0.1 * rnorm(100)
 
-# Run sample_variable
-sample = sample_variable( x = fit,
-                          variable_name = "mu_i" )
-}
+ # Do fit with getJointPrecision=TRUE
+ fit = tinyVAST( formula = y ~ s(x),
+                 data = data.frame(x=x,y=y),
+                 control = tinyVASTcontrol(getJointPrecision = TRUE) )
+
+ # samples from distribution for the mean
+ sample_variable(fit)
 
 }

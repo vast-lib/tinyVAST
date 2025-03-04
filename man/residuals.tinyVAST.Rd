@@ -13,6 +13,9 @@
 
 \item{...}{Note used}
 }
+\value{
+a vector residuals, associated with each row of \code{data} supplied during fitting
+}
 \description{
 Calculate residuals
 }

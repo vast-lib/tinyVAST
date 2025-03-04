@@ -27,6 +27,10 @@
 #' @param ... Not used.
 #' @importFrom Matrix Matrix sparseMatrix
 #'
+#' @return
+#' Either a vector with the prediction for each row of \code{newdata}, or a named list
+#' with the prediction and standard error (when \code{se.fit = TRUE}).
+#'
 #' @method predict tinyVAST
 #' @export
 predict.tinyVAST <-
@@ -206,6 +210,11 @@ function( object,
 #' will still calculate the standard-error, whereas using
 #' \code{apply.epsilon=TRUE} and \code{intern=TRUE} will not.  
 #'
+#' @return
+#' A vector containing the plug-in estimate, standard error, the epsilon bias-corrected
+#' estimate if available, and the standard error for the bias-corrected estimator.
+#' Depending upon settings, one or more of these will be \code{NA} values, and the
+#' function can be repeatedly called to get multiple estimators and/or statistics.
 #' 
 #' @export
 integrate_output <-
@@ -350,6 +359,11 @@ function( object,
 #'        \code{remove_origdata=TRUE} eliminates information about the distribution
 #'        for random effects, and cannot be combined with epsilon bias-correction.
 #'        WARNING:  feature is experimental and subject to change.
+#'
+#' @return
+#' the object \code{fit$tmb_inputs$tmb_data} representing data used during fitting,
+#' but with updated values for slots associated with predictions, where this
+#' updated object can be recompiled by TMB to provide predictions
 #'
 #' @export
 add_predictions <-

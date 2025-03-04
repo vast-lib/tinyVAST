@@ -231,16 +231,23 @@ function( x,
 #' @param seed integer used to set random-number seed when sampling variables, as passed to \code{set.seed(.)}
 #' @param sample_fixed whether to sample fixed and random effects, \code{sample_fixed=TRUE} as by default, or just sample random effects, \code{sample_fixed=FALSE}
 #'
-#' @examples
-#' \dontrun{
-#' # Run model using selected inputs, but also with getJointPrecision=TRUE
-#' fit = tinyVAST( ...,
-#'     control = tinyVASTcontrol(getJointPrecision=TRUE) )
+#' @return
+#' A matrix with a row for each \code{data} supplied during fitting, and
+#' \code{n_samples} columns, where each column in a vector of samples
+#' for a requested quantity given sampled uncertainty in fixed and/or random effects
 #'
-#' # Run sample_variable
-#' sample = sample_variable( x = fit,
-#'                           variable_name = "mu_i" )
-#' }
+#' @examples
+#'  set.seed(101)
+#'  x = runif(n = 100, min = 0, max = 2*pi)
+#'  y = 1 + sin(x) + 0.1 * rnorm(100)
+#'
+#'  # Do fit with getJointPrecision=TRUE
+#'  fit = tinyVAST( formula = y ~ s(x),
+#'                  data = data.frame(x=x,y=y),
+#'                  control = tinyVASTcontrol(getJointPrecision = TRUE) )
+#'
+#'  # samples from distribution for the mean
+#'  sample_variable(fit)
 #'
 #' @export
 sample_variable <-
@@ -336,6 +343,14 @@ function( x,
 #'        If missing, it uses
 #'        \code{null_formula = response ~ 1}. For multivariate models, it 
 #'        might make sense to use \code{null_delta_formula = response ~ category}
+#'
+#' @return the proportion of conditional deviance explained.
+#'
+#' @references
+#' Zheng, N., Cadigan, N., & Thorson, J. T. (2024).
+#' A note on numerical evaluation of conditional Akaike information for
+#' nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
+#' \doi{10.48550/arXiv.2411.14185}
 #'
 #' @export
 deviance_explained <-

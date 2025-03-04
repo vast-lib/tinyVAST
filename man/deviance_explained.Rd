@@ -18,6 +18,9 @@ If missing, it uses
 \code{null_formula = response ~ 1}. For multivariate models, it
 might make sense to use \code{null_delta_formula = response ~ category}}
 }
+\value{
+the proportion of conditional deviance explained.
+}
 \description{
 \code{deviance_explained} fits a null model, calculates the deviance relative to
 a saturated model for both the original and the null model, and uses these
@@ -29,4 +32,10 @@ be described as "conditional deviance explained". A state-space model that
 estimates measurement error variance approaching zero (i.e., collapses to
 a process-error-only model) will have a conditional deviance explained
 that approaches 1.0
+}
+\references{
+Zheng, N., Cadigan, N., & Thorson, J. T. (2024).
+A note on numerical evaluation of conditional Akaike information for
+nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
+\doi{10.48550/arXiv.2411.14185}
 }

@@ -1,7 +1,6 @@
 Type: Package
 Package: tinyVAST
-Title: Multivariate Spatio-Temporal Models using Dynamic Structural Equations
-	as Expressive Interface
+Title: Multivariate Spatio-Temporal Models using Structural Equations
 Version: 1.0.0
 Date: 2025-02-26
 Authors@R: c(
