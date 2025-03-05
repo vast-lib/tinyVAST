@@ -88,7 +88,7 @@ $$
 
 where $\mu_{\PL 1,i}$ and $\mu_{\PL 2,i}$ are the two linear predictors, such that $\mathbb{E}[y_i] = \mu_{\PL 1,i} \mu_{\PL 2,i}$;
 
-For the conventional logit-log bivariate link function we obtain:
+For the conventional logit-log bivariate link function we use a logit-link for encounter probabilities and a log-link for positive catch rates:
 
 $$
 \begin{aligned}
@@ -97,16 +97,17 @@ $$
 \end{aligned}
 $$
 
-while for the Poisson-linked link function we obtain:
+while for the Poisson-linked link function we specify a complemetary log-log link for encounter probabilities and define the second link function such that $\mu_{\PL 1,i} \mu_{\PL 2,i} = e^{p_{\PL 1,i}} e^{p_{\PL 2,i}}$:
 
 $$
 \begin{aligned}
-\mu_{\PL 1,i} &= 1 - e^{-p_{\PL 1,i}} \\
+\mu_{\PL 1,i} &= 1 - e^{-e^{p_{\PL 1,i}}} \\
 \mu_{\PL 2,i} &= \frac{e^{p_{\PL 1,i}}}{\mu_{\PL 1,i}} e^{p_{\PL 2,i}}
 \end{aligned}
 $$
+where $e^{p_{\PL 1,i}}$ is the density for an underlying point process, and $e^{p_{\PL 2,i}}$ is biomass per point (i.e., animal or group).  
 
-In either case, $\mu_{\PL 1,i}$ is the $\mathrm{Pr}(Y>0)$ (and is fitted with a Bernoulli distribution), while $\mu_{\PL 2,i}$ is the central tendancy for positive values, i.e., $\mathbb{E}(Y | Y>0) = \mu_{\PL 2,i}$.
+In either the conventional or Poisson-linked delta model, $\mu_{\PL 1,i} = \mathrm{Pr}(Y>0)$ is the encounter probability (and is fitted with a Bernoulli distribution), while $\mu_{\PL 2,i}$ is the central tendancy for positive values, i.e., $\mu_{\PL 2,i} = \mathbb{E}(Y | Y>0)$.
 
 # Spatial domains
 

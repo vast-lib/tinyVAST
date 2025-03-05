@@ -408,10 +408,10 @@ function( object,
 #'   y_iz = simulate(fit, nsim=500, type="mle-mvn")
 #'
 #'   # Visualize using DHARMa
-#'   res = createDHARMa( simulatedResponse = y_iz,
+#'   res = DHARMa::createDHARMa( simulatedResponse = y_iz,
 #'                       observedResponse = y,
 #'                       fittedPredictedResponse = fitted(fit) )
-#'   plot(res)
+#'   DHARMa::plot(res)
 #' }
 #' @export
 simulate.tinyVAST <-
