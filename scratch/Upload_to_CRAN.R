@@ -60,6 +60,10 @@ if( FALSE ){
 # Check online but document first!
 document()
 check_win_devel()
+check_win_release()
+check_win_oldrelease()
+check_mac_release()
+#check_rhub()
 
 # Submit to CRAN via devtools .. not preferred!
 if( FALSE ){

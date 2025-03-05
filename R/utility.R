@@ -172,7 +172,7 @@ function( x,
   obj = MakeADFun( data = x$tmb_inputs$tmb_data,
                       parameters = x$internal$parlist,
                       map = x$tmb_inputs$tmb_map,
-                      random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
+                      random = x$tmb_inputs$tmb_random,
                       DLL = "tinyVAST",
                       profile = x$internal$control$profile )
   obj$env$beSilent()

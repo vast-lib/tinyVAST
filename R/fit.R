@@ -1290,4 +1290,59 @@ function( object,
   return( V )
 }
 
+#' Simulate new data from a fitted model
+#'
+#' \code{simulate.tinyVAST} is an S3 method for producing a matrix of simulations from
+#' a fitted model. It can be used with the \pkg{DHARMa} package
+#' among other uses.  Code is modified from the version in sdmTMB
+#'
+#' @param object output from [tinyVAST()]
+#' @param nsim how many simulations to do
+#' @param seed random seed
+#' @param type How parameters should be treated. `"mle-eb"`: fixed effects
+#'   are at their maximum likelihood (MLE) estimates  and random effects are at
+#'   their empirical Bayes (EB) estimates. `"mle-mvn"`: fixed effects are at
+#'   their MLEs but random effects are taken from a single approximate sample.
+#'   This latter option is a suggested approach if these simulations will be
+#'   used for goodness of fit testing (e.g., with the DHARMa package).
+#' @param ... not used
+#'
+#' @return
+#' A matrix with row for each row of \code{data} in the fitted model and \code{nsim}
+#' columns, containing new samples from the fitted model.
+#'
+#' @method simulate tinyVAST
+#' @importFrom stats simulate
+#'
+#' @examples
+#' set.seed(101)
+#' x = seq(0, 2*pi, length=100)
+#' y = sin(x) + 0.1*rnorm(length(x))
+#' fit = tinyVAST( data=data.frame(x=x,y=y), formula = y ~ s(x) )
+#' simulate(fit, nsim=100, type="mle-mvn")
+#'
+#' @export
+simulate.tinyVAST <-
+function( object,
+          nsim = 1L,
+          seed = sample.int(1e+06, 1L),
+          type = c("mle-eb", "mle-mvn"),
+          ... ) {
+
+  type = match.arg(type)
+  set.seed(seed)
+  par_iz = outer( object$env$last.par.best, rep(1,nsim) )
+
+  if( (type == "mle-mvn") & (length(object$env$random)>0) ){
+    tmp = object$env$MC( n = nsim, keep = TRUE, antithetic = FALSE )
+    par_iz[object$env$lrandom(),] = attr(tmp, "samples")
+  }
+
+  y_iz = apply( par_iz,
+                MARGIN = 2,
+                FUN = function(par_i) object$simulate(par_i)$y_i )
+  return( y_iz )
+}
+
+
 
