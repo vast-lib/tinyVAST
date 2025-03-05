@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/VAST.Rmd"); rmarkdown::render( "vignettes/VAST.Rmd", rmarkdown::pdf_document())
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/web_only/VAST.Rmd"); rmarkdown::render( "vignettes/web_only/VAST.Rmd", rmarkdown::pdf_document())
 ```
 
 ```{r setup, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE}
@@ -125,9 +125,9 @@ plot( x=Data$mu, y=Data$mu_hat )
 
 We can also use the `DHARMa` package to visualize simulation residuals:
 ```{r VAST-DHARMa, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-# simulate new data conditional on fixed and random effects
-y_ir = replicate( n = 100, 
-           expr = mytinyVAST$obj$simulate()$y_i )
+# simulate new data conditional on fixed effects
+# and sampling random effects from their predictive distribution
+y_ir = simulate(mytinyVAST, nsim=100, type="mle-mvn")
 
 #
 res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
@@ -245,11 +245,11 @@ mydelta2
 
 And we can again use the `DHARMa` package to visualize simulation residuals:
 ```{r delta-DHARMa, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-# simulate new data conditional on fixed and random effects
-y_ir = replicate( n = 100, 
-           expr = mydelta2$obj$simulate()$y_i )
+# simulate new data conditional on fixed effects
+# and sampling random effects from their predictive distribution
+y_ir = simulate(mydelta2, nsim=100, type="mle-mvn")
 
-#
+# Visualize using DHARMa
 res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
                             observedResponse = Data$n, 
                             fittedPredictedResponse = fitted(mydelta2) )
