@@ -411,7 +411,7 @@ function( object,
 #'   res = DHARMa::createDHARMa( simulatedResponse = y_iz,
 #'                       observedResponse = y,
 #'                       fittedPredictedResponse = fitted(fit) )
-#'   DHARMa::plot(res)
+#'   plot(res)
 #' }
 #' @export
 simulate.tinyVAST <-
