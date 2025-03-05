@@ -1,5 +1,7 @@
 
 #' @title print summary of tinyVAST model
+#' @param x output from \code{tinyVAST}
+#' @param ... not used
 #' @method print tinyVAST
 #' @import methods
 #' @return invisibly returns a named list of key model outputs and summary

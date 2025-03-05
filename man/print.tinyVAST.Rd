@@ -6,6 +6,11 @@
 \usage{
 \method{print}{tinyVAST}(x, ...)
 }
+\arguments{
+\item{x}{output from \code{tinyVAST}}
+
+\item{...}{not used}
+}
 \value{
 invisibly returns a named list of key model outputs and summary
 statements
