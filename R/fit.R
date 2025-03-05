@@ -1331,16 +1331,16 @@ function( object,
 
   type = match.arg(type)
   set.seed(seed)
-  par_iz = outer( object$env$last.par.best, rep(1,nsim) )
+  par_iz = outer( object$obj$env$last.par.best, rep(1,nsim) )
 
-  if( (type == "mle-mvn") & (length(object$env$random)>0) ){
-    tmp = object$env$MC( n = nsim, keep = TRUE, antithetic = FALSE )
-    par_iz[object$env$lrandom(),] = attr(tmp, "samples")
+  if( (type == "mle-mvn") & (length(object$obj$env$random)>0) ){
+    tmp = object$obj$env$MC( n = nsim, keep = TRUE, antithetic = FALSE )
+    par_iz[object$obj$env$lrandom(),] = attr(tmp, "samples")
   }
 
   y_iz = apply( par_iz,
                 MARGIN = 2,
-                FUN = function(par_i) object$simulate(par_i)$y_i )
+                FUN = function(par_i) object$obj$simulate(par_i)$y_i )
   return( y_iz )
 }
 
