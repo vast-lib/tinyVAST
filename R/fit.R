@@ -687,16 +687,6 @@ function( formula,
   #}
 
   # User-supplied parameters
-  if( !is.null(control$tmb_par) ){
-    # Check shape but not numeric values, and give informative error
-    attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
-    if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
-      tmb_par = control$tmb_par
-    }else{
-      stop("Not using `control$tmb_par` because it has some difference from `tmb_par` built internally")
-    }
-  }
-
   # Check for obvious issues ... no NAs except in RAMstart
   name_set = c( "ram_space_term_start", "ram_time_term_start", "ram_spacetime_term_start",
                 "ram2_space_term_start", "ram2_time_term_start", "ram2_spacetime_term_start")
@@ -718,6 +708,26 @@ function( formula,
                  "gamma2_k","epsilon2_stc","omega2_sc","delta2_tc","xi2_sl")
   if( isTRUE(control$reml) ){
     tmb_random = union( tmb_random, c("alpha_j","alpha2_j") )
+  }
+
+  # User-specified tmb_par
+  if( !is.null(control$tmb_par) ){
+    # Check shape but not numeric values, and give informative error
+    attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
+    if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
+      tmb_par = control$tmb_par
+    }else{
+      stop("Not using `control$tmb_par` because it has some difference from `tmb_par` built internally")
+    }
+  }
+
+  # user-specified tmb_map
+  if( !is.null(control$tmb_map) ){
+    if( isTRUE(all(names(control$tmb_map) %in% names(tmb_par))) ){
+      tmb_map = control$tmb_map
+    }else{
+      stop("Not using `control$tmb_map` because it has some element not present in from `tmb_par`")
+    }
   }
 
   ##############
@@ -852,6 +862,9 @@ function( formula,
 #' @param getsd Boolean indicating whether to call [TMB::sdreport()]
 #' @param tmb_par list of parameters for starting values, with shape identical
 #'   to `tinyVAST(...)$internal$parlist`
+#' @param tmb_map input passed to [TMB::MakeADFun] as argument `map`, over-writing
+#'   the version `tinyVAST(...)$tmb_inputs$tmb_map` and allowing detailed control
+#'   over estimated parameters (advanced feature)
 #' @param eval.max Maximum number of evaluations of the objective function
 #'   allowed. Passed to `control` in [stats::nlminb()].
 #' @param iter.max Maximum number of iterations allowed. Passed to `control` in
@@ -893,6 +906,7 @@ function( nlminb_loops = 1,
           verbose = getOption("tinyVAST.verbose", FALSE),
           profile = c(),
           tmb_par = NULL,
+          tmb_map = NULL,
           gmrf_parameterization = c("separable","projection"),
           #estimate_delta0 = FALSE,
           reml = FALSE,
@@ -914,6 +928,7 @@ function( nlminb_loops = 1,
     verbose = verbose,
     profile = profile,
     tmb_par = tmb_par,
+    tmb_map = tmb_map,
     gmrf_parameterization = gmrf_parameterization,
     #estimate_delta0 = FALSE,
     reml = reml,

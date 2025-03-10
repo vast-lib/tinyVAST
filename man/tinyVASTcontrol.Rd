@@ -15,6 +15,7 @@ tinyVASTcontrol(
   verbose = getOption("tinyVAST.verbose", FALSE),
   profile = c(),
   tmb_par = NULL,
+  tmb_map = NULL,
   gmrf_parameterization = c("separable", "projection"),
   reml = FALSE,
   getJointPrecision = FALSE,
@@ -48,6 +49,10 @@ for the outer optimizer. Passed to
 
 \item{tmb_par}{list of parameters for starting values, with shape identical
 to \code{tinyVAST(...)$internal$parlist}}
+
+\item{tmb_map}{input passed to \link[TMB:MakeADFun]{TMB::MakeADFun} as argument \code{map}, over-writing
+the version \code{tinyVAST(...)$tmb_inputs$tmb_map} and allowing detailed control
+over estimated parameters (advanced feature)}
 
 \item{gmrf_parameterization}{Parameterization to use for the Gaussian Markov
 random field, where the default \code{separable} constructs a full-rank and
