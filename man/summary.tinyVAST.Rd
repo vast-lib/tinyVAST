@@ -7,6 +7,7 @@
 \method{summary}{tinyVAST}(
   object,
   what = c("space_term", "time_term", "spacetime_term", "fixed"),
+  predictor = c("one", "two"),
   ...
 )
 }
@@ -15,6 +16,9 @@
 
 \item{what}{What component to summarize, whether \code{space_term}, \code{spacetime_term}, or
 \code{fixed} for the fixed effects included in the GAM formula}
+
+\item{predictor}{whether to get the 1st or 2nd linear predictor (the latter is
+only applicable in delta models)}
 
 \item{...}{Not used}
 }

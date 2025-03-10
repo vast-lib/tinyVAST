@@ -105,6 +105,8 @@ function( x,
 #' @param object Output from [tinyVAST()]
 #' @param what What component to summarize, whether \code{space_term}, \code{spacetime_term}, or
 #'        \code{fixed} for the fixed effects included in the GAM formula
+#' @param predictor whether to get the 1st or 2nd linear predictor (the latter is
+#'        only applicable in delta models)
 #' @param ... Not used
 #'
 #' @return
@@ -120,10 +122,14 @@ function( x,
 summary.tinyVAST <-
 function( object,
           what = c("space_term","time_term","spacetime_term","fixed"),
+          predictor = c( "one", "two" ),
           ... ){
 
   #
   what = match.arg(what)
+  predictor = match.arg(predictor)
+  if(predictor == "two") stop("Not implemented yet")
+
   ParHat = object$obj$env$parList()
   if( !is.null(object$sdrep) ){
     SE = as.list( object$sdrep, report=FALSE, what="Std. Error")
