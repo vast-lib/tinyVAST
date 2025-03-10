@@ -159,17 +159,6 @@ function( model ){
 #'
 #' @return Output from \code{\link{tinyVAST}} with DLLs relinked
 #'
-#' @examples
-#' \dontrun{
-#' # Run model
-#' fit = tinyVAST( ... )
-#' saveRDS( object=fit, file="path_and_name.rds" )
-#'
-#' # Reload and relink
-#' fit_new = readRDS( file="path_and_name.rds" )
-#' fit_new = reload_model( x = fit_new )
-#' }
-#'
 #' @export
 reload_model <-
 function( x,
@@ -183,7 +172,7 @@ function( x,
   obj = MakeADFun( data = x$tmb_inputs$tmb_data,
                       parameters = x$internal$parlist,
                       map = x$tmb_inputs$tmb_map,
-                      random = c("gamma_k","epsilon_stc","omega_sc","gamma2_k","epsilon2_stc","omega2_sc"),
+                      random = x$tmb_inputs$tmb_random,
                       DLL = "tinyVAST",
                       profile = x$internal$control$profile )
   obj$env$beSilent()
@@ -231,16 +220,23 @@ function( x,
 #' @param seed integer used to set random-number seed when sampling variables, as passed to \code{set.seed(.)}
 #' @param sample_fixed whether to sample fixed and random effects, \code{sample_fixed=TRUE} as by default, or just sample random effects, \code{sample_fixed=FALSE}
 #'
-#' @examples
-#' \dontrun{
-#' # Run model using selected inputs, but also with getJointPrecision=TRUE
-#' fit = tinyVAST( ...,
-#'     control = tinyVASTcontrol(getJointPrecision=TRUE) )
+#' @return
+#' A matrix with a row for each \code{data} supplied during fitting, and
+#' \code{n_samples} columns, where each column in a vector of samples
+#' for a requested quantity given sampled uncertainty in fixed and/or random effects
 #'
-#' # Run sample_variable
-#' sample = sample_variable( x = fit,
-#'                           variable_name = "mu_i" )
-#' }
+#' @examples
+#'  set.seed(101)
+#'  x = runif(n = 100, min = 0, max = 2*pi)
+#'  y = 1 + sin(x) + 0.1 * rnorm(100)
+#'
+#'  # Do fit with getJointPrecision=TRUE
+#'  fit = tinyVAST( formula = y ~ s(x),
+#'                  data = data.frame(x=x,y=y),
+#'                  control = tinyVASTcontrol(getJointPrecision = TRUE) )
+#'
+#'  # samples from distribution for the mean
+#'  sample_variable(fit)
 #'
 #' @export
 sample_variable <-
@@ -337,6 +333,8 @@ function( x,
 #'        \code{null_formula = response ~ 1}. For multivariate models, it 
 #'        might make sense to use \code{null_delta_formula = response ~ category}
 #'
+#' @return the proportion of conditional deviance explained.
+#'
 #' @export
 deviance_explained <-
 function( x, 
@@ -373,7 +371,7 @@ function( x,
                        variable_column = x$internal$variable_column,
                        times = x$internal$times,
                        variables = x$internal$variables,
-                       delta_options = list( delta_formula = null_delta_formula ),
+                       delta_options = list( formula = null_delta_formula ),
                        distribution_column = x$internal$distribution_column) 
   null_obj = null_fit$obj
 
@@ -402,8 +400,11 @@ function( x,
 
   # Calculate deviance explained
   devexpl = 1 - x$rep$deviance / null_rep$deviance
-  if( (devexpl<0) | (devexpl>1) ){
+  if( isTRUE(devexpl<0) | isTRUE(devexpl>1) ){
     warning("Problem detected: deviance explained should be between 0 and 1")
+  }
+  if( is.na(devexpl) ){
+    warning("Deviance explained is NA, probably because it's not implemented for the family used")
   }
 
   # Return

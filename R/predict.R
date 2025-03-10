@@ -27,14 +27,18 @@
 #' @param ... Not used.
 #' @importFrom Matrix Matrix sparseMatrix
 #'
+#' @return
+#' Either a vector with the prediction for each row of \code{newdata}, or a named list
+#' with the prediction and standard error (when \code{se.fit = TRUE}).
+#'
 #' @method predict tinyVAST
 #' @export
 predict.tinyVAST <-
 function( object,
           newdata,
           remove_origdata = FALSE,
-          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g",
-                   "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pxi2_g"),
+          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pdelta_g", "pxi_g",
+                   "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pdelta2_g", "pxi2_g"),
           se.fit = FALSE,
           ... ){
 
@@ -79,7 +83,7 @@ function( object,
   return( out )
 }
 
-#' @title Monte Carlo integration for abundance
+#' @title Integration for target variable
 #'
 #' @description 
 #' Calculates an estimator for a derived quantity by summing across multiple predictions.
@@ -92,7 +96,7 @@ function( object,
 #' @param newdata New data-frame of independent variables used to predict the response,
 #'        where a total value is calculated by combining across these individual predictions.
 #'        If these locations are randomly drawn from a specified spatial domain, then 
-#'        `integrate_output` applies Monte Carlo integration to approximate the
+#'        `integrate_output` applies midpoint integration to approximate the
 #'        total over that area.  If locations are drawn sysmatically from a domain,
 #'        then `integrate_output` is applying a midpoint approximation to the integral.
 #' @param area vector of values used for area-weighted expansion of 
@@ -138,7 +142,7 @@ function( object,
 #'        See details for more information.  
 #'
 #' @details
-#' Analysts will often want to calculate some value by combiningg the predicted response at multiple
+#' Analysts will often want to calculate some value by combining the predicted response at multiple
 #' locations, and potentially from multiple variables in a multivariate analysis. 
 #' This arises in a univariate model, e.g., when calculating the integral under a predicted
 #' density function, which is approximated using a midpoint or Monte Carlo approximation
@@ -151,7 +155,7 @@ function( object,
 #'
 #' In more complicated cases, an analyst can then use `covariate` 
 #' to calculate the weighted average
-#' of a covariate for each Monte Carlo point. For example, if the covariate is 
+#' of a covariate for each midpoint location. For example, if the covariate is 
 #' positional coordinates or depth/elevation, then \code{type=2}
 #' measures shifts in the average habitat utilization with respect to that covariate.  
 #' Alternatively, an analyst fitting a multivariate model might weight one variable
@@ -206,6 +210,11 @@ function( object,
 #' will still calculate the standard-error, whereas using
 #' \code{apply.epsilon=TRUE} and \code{intern=TRUE} will not.  
 #'
+#' @return
+#' A vector containing the plug-in estimate, standard error, the epsilon bias-corrected
+#' estimate if available, and the standard error for the bias-corrected estimator.
+#' Depending upon settings, one or more of these will be \code{NA} values, and the
+#' function can be repeatedly called to get multiple estimators and/or statistics.
 #' 
 #' @export
 integrate_output <-
@@ -351,6 +360,11 @@ function( object,
 #'        for random effects, and cannot be combined with epsilon bias-correction.
 #'        WARNING:  feature is experimental and subject to change.
 #'
+#' @return
+#' the object \code{fit$tmb_inputs$tmb_data} representing data used during fitting,
+#' but with updated values for slots associated with predictions, where this
+#' updated object can be recompiled by TMB to provide predictions
+#'
 #' @export
 add_predictions <-
 function( object,
@@ -426,15 +440,15 @@ function( object,
   W2_gl = make_spatial_varying( object$internal$delta_spatial_varying )
 
   # Assemble A_gs
-  if( is(object$spatial_graph, "fm_mesh_2d") ){
-    A_gs = fm_evaluator( object$spatial_graph, loc=as.matrix(newdata[,object$internal$space_columns]) )$proj$A
-  }else if( is(object$spatial_graph, "igraph") ) {
+  if( is(object$spatial_domain, "fm_mesh_2d") ){
+    A_gs = fm_evaluator( object$spatial_domain, loc=as.matrix(newdata[,object$internal$space_columns]) )$proj$A
+  }else if( is(object$spatial_domain, "igraph") ) {
     Match = match( newdata[,object$internal$space_columns], rownames(object$tmb_inputs$tmb_data$Adj) )
-    if(any(is.na(Match))) stop("Check `spatial_graph` for SAR")
+    if(any(is.na(Match))) stop("Check `spatial_domain` for SAR")
     A_gs = sparseMatrix( i=seq_len(nrow(newdata)), j=Match, x=rep(1,nrow(newdata)) )
-  }else if( is(object$spatial_graph,"sfnetwork_mesh") ){      # if( !is.null(sem) )
+  }else if( is(object$spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(sem) )
     # stream network
-    A_gs = sfnetwork_evaluator( stream = object$spatial_graph$stream,
+    A_gs = sfnetwork_evaluator( stream = object$spatial_domain$stream,
                                 loc = as.matrix(newdata[,object$internal$space_columns]) )
   }else{
     A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
@@ -454,7 +468,7 @@ function( object,
   AepsilonG_zz = cbind(predAtriplet$i, predAtriplet$j, t_g[predAtriplet$i], c_g[predAtriplet$i])
   which_Arows = which(apply( AepsilonG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( (nrow(object$internal$dsem_ram$output$ram)==0) & (nrow(object$internal$delta_dsem_ram$output$ram)==0) ){
+  if( (nrow(object$internal$spacetime_term_ram$output$ram)==0) & (nrow(object$internal$delta_spacetime_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   AepsilonG_zz = AepsilonG_zz[which_Arows,,drop=FALSE]
@@ -464,7 +478,7 @@ function( object,
   AomegaG_zz = cbind(predAtriplet$i, predAtriplet$j, c_g[predAtriplet$i])
   which_Arows = which(apply( AomegaG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
-  if( (nrow(object$internal$sem_ram$output$ram)==0) & (nrow(object$internal$delta_sem_ram$output$ram)==0) ){
+  if( (nrow(object$internal$space_term_ram$output$ram)==0) & (nrow(object$internal$delta_space_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
   }
   AomegaG_zz = AomegaG_zz[which_Arows,,drop=FALSE]
@@ -524,7 +538,7 @@ function( object,
   }
 
   # Check for obvious issues ... no NAs except in RAMstart
-  index_drop = match(c("ram_sem_start","ram_dsem_start","ram2_sem_start","ram2_dsem_start"),names(tmb_data2))
+  index_drop = match(c("ram_space_term_start","ram_time_term_start","ram_spacetime_term_start","ram2_space_term_start","ram2_time_term_start","ram2_spacetime_term_start"),names(tmb_data2))
   if( any(is.na(tmb_data2[-index_drop])) ){
     stop("Check output of `add_predictions` for NAs")
   }

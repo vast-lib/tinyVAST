@@ -18,6 +18,9 @@ If missing, it uses
 \code{null_formula = response ~ 1}. For multivariate models, it
 might make sense to use \code{null_delta_formula = response ~ category}}
 }
+\value{
+the proportion of conditional deviance explained.
+}
 \description{
 \code{deviance_explained} fits a null model, calculates the deviance relative to
 a saturated model for both the original and the null model, and uses these

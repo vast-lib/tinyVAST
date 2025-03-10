@@ -52,7 +52,7 @@ dsem = "
 "
 
 # fit model
-mytiny = tinyVAST( dsem = dsem,
+mytiny = tinyVAST( spacetime_term = dsem,
                  data = data,
                  times = isle_royale[,1],
                  variables = colnames(isle_royale[,2:3]),
@@ -65,7 +65,7 @@ deviance_explained( mytiny,
                     null_formula = logn ~ 0 + var )
 
 # See summary
-knitr::kable( summary(mytiny,"dsem"), digits=3 )
+knitr::kable( summary(mytiny,"spacetime_term"), digits=3 )
 ```
 
 And we can specifically inspect the estimated interaction matrix:

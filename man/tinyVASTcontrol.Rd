@@ -15,10 +15,12 @@ tinyVASTcontrol(
   verbose = getOption("tinyVAST.verbose", FALSE),
   profile = c(),
   tmb_par = NULL,
+  tmb_map = NULL,
   gmrf_parameterization = c("separable", "projection"),
   reml = FALSE,
   getJointPrecision = FALSE,
-  calculate_deviance_explained = TRUE
+  calculate_deviance_explained = TRUE,
+  run_model = TRUE
 )
 }
 \arguments{
@@ -48,6 +50,10 @@ for the outer optimizer. Passed to
 \item{tmb_par}{list of parameters for starting values, with shape identical
 to \code{tinyVAST(...)$internal$parlist}}
 
+\item{tmb_map}{input passed to \link[TMB:MakeADFun]{TMB::MakeADFun} as argument \code{map}, over-writing
+the version \code{tinyVAST(...)$tmb_inputs$tmb_map} and allowing detailed control
+over estimated parameters (advanced feature)}
+
 \item{gmrf_parameterization}{Parameterization to use for the Gaussian Markov
 random field, where the default \code{separable} constructs a full-rank and
 separable precision matrix, and the alternative \code{projection} constructs
@@ -64,6 +70,13 @@ to \code{\link[TMB]{sdreport}}.}
 
 \item{calculate_deviance_explained}{whether to calculate proportion of deviance
 explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
+
+\item{run_model}{whether to run the model of export TMB objects prior to compilation
+(useful for debugging)}
+}
+\value{
+An object (list) of class \code{tinyVASTcontrol}, containing either default or
+updated values supplied by the user for model settings
 }
 \description{
 Control parameters for tinyVAST

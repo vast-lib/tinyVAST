@@ -9,23 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-has_lattice = requireNamespace("lattice", quietly = TRUE)
-has_pdp = requireNamespace("pdp", quietly = TRUE)
-EVAL <- has_lattice && has_pdp
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = EVAL,
-  purl = EVAL
-)
-# Install locally
-#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE, dep=FALSE )
-# Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/condition.Rmd"); rmarkdown::render( "vignettes/condition.Rmd", rmarkdown::pdf_document())
-```
 
-```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+
+
+``` r
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -38,7 +25,8 @@ This replicates a similar vignette provided for the VAST package, but showcases 
 
 We first load and combine the two data sets:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 data( condition_and_density )
 
 # Combine both parts
@@ -61,13 +49,15 @@ formed_data = cbind( combo_data[,c("Year","Lat","Lon")],
 ```
 
 We then construct the SPDE mesh
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # make mesh
 mesh = fm_mesh_2d( formed_data[,c('Lon','Lat')], cutoff=1 )
 ```
 
 Next, we specify spatial and spatio-temporal variance in both condition and density. 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 #
 sem = "
   Biomass <-> Biomass, sdB
@@ -84,7 +74,8 @@ dsem = "
 ```
 
 Finally, we define the distribution for each data set using the `family` argument:
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 #
 family = list(
   Biomass = tweedie(),
@@ -93,14 +84,15 @@ family = list(
 ```
 
 Finally, we fit the model using tinyVAST
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # fit model
 fit = tinyVAST( data = formed_data,
            formula = Response ~ interaction(Year,Type) + log_length,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            control = tinyVASTcontrol( trace=0, verbose=TRUE, profile="alpha_j" ),
-           sem = sem,
-           dsem = dsem,
+           space_term = sem,
+           spacetime_term = dsem,
            family = family,
            variables = c("Biomass","Condition"),
            variable_column = "Type",
@@ -111,19 +103,29 @@ fit = tinyVAST( data = formed_data,
 ```
 
 We can look at structural parameters using summary functions:
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # spatial terms
-summary(fit, "sem")
+summary(fit, "space_term")
+#>   heads        to      from parameter start      Estimate   Std_Error     z_value      p_value
+#> 1     2   Biomass   Biomass         1  <NA>  1.423877e+00 0.133046888 10.70207257 9.952681e-27
+#> 2     2 Condition Condition         2  <NA> -3.316228e-02 0.004167473 -7.95740912 1.756791e-15
+#> 3     1 Condition   Biomass         3  <NA>  9.320889e-05 0.004855054  0.01919832 9.846829e-01
 
 # spatio-temporal terms
-summary(fit, "dsem")
+summary(fit, "spacetime_term")
+#>   heads        to      from parameter start lag     Estimate   Std_Error    z_value      p_value
+#> 1     2   Biomass   Biomass         1  <NA>   0  0.966428902 0.024274955  39.811769 0.000000e+00
+#> 2     2 Condition Condition         2  <NA>   0 -0.040541656 0.002723390 -14.886465 4.035502e-50
+#> 3     1 Condition   Biomass         3  <NA>   0  0.008201844 0.003339305   2.456153 1.404335e-02
 ```
 
 # Abundance-weighted expansion
 
 To explore output, we can plot output using the survey extent:
 
-```{r condition-maps, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # Extract shapefile
 region = condition_and_density$eastern_bering_sea
 
@@ -159,11 +161,14 @@ plot_grid = st_sf( sf_grid,
 plot( plot_grid, border=NA )
 ```
 
+![plot of chunk condition-maps](figure/condition-maps-1.png)
+
 # Density-weighted condition
 
 Finally, we can calculate density-weighted condition
 
-```{r condition-timeseries, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # 
 expand_data = rbind( newdata2, newdata )
 W_gz = cbind( c(as.numeric(areas_km2),rep(0,length(areas_km2))), 0 )
@@ -180,9 +185,13 @@ for( yearI in seq_len(nrow(cond_tz)) ){
                           bias.correct = TRUE ) 
   cond_tz[yearI,c("Est","SE")] = out[c("Estimate","Std. Error")]
 }
+#> Error in integrate_output(fit, newdata = expand_data, V_gz = V_gz, W_gz = W_gz, : unused arguments (V_gz = V_gz, W_gz = W_gz)
 
 # plot time-series
 ggplot( cond_tz ) +
   geom_line( aes(x=Year, y=Est) ) +
   geom_ribbon( aes(x=Year, ymin=Est-SE, ymax=Est+SE), alpha=0.2 )
+#> Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning -Inf
 ```
+
+![plot of chunk condition-timeseries](figure/condition-timeseries-1.png)

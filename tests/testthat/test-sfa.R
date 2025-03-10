@@ -54,10 +54,10 @@ test_that("Basic spatial factor analysis works", {
   "
 
   # fit model
-  out = tinyVAST( sem = sem,
+  out = tinyVAST( space_term = sem,
              data = Data,
              formula = n ~ 0 + factor(species),
-             spatial_graph = mesh,
+             spatial_domain = mesh,
              family = tweedie(),
              variables = c( "f1", "f2", 1:n_c ),
              space_columns = c("x","y"),
@@ -66,6 +66,6 @@ test_that("Basic spatial factor analysis works", {
              distribution_column = "dist",
              control = tinyVASTcontrol(gmrf="proj") )
   #
-  summary( out, what="sem" )
+  summary( out, what="space_term" )
   expect_s3_class(out, "tinyVAST")
 })

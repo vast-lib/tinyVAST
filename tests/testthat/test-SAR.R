@@ -32,7 +32,7 @@ test_that("SAR model with spatio-temporal dynamics works", {
     mytiny0 = tinyVAST(
       formula = Biomass_nozeros ~ 0 + Species + Region,
       data = Data,
-      dsem = dsem,
+      spacetime_term = dsem,
       variable_column = "Species",
       time_column = "Year",
       space_column = "Region",
@@ -40,12 +40,12 @@ test_that("SAR model with spatio-temporal dynamics works", {
       family = list( "chum" = lognormal(),
         "pink" = lognormal(),
         "sockeye" = lognormal() ),
-      spatial_graph = unconnected_graph,
+      spatial_domain = unconnected_graph,
       control = tinyVASTcontrol( profile="alpha_j" ) )
   })
 
   # Summarize output
-  Summary = summary(mytiny0, what="dsem")
+  Summary = summary(mytiny0, what="spacetime_term")
   expect_equal(sum(is.na(Summary$Std_Error)), 0L)
   expect_equal(Summary$Estimate[1:5],
     c(0.8075069, 0.1946127, 0.05004454, 0.8819951, 0.6749841), tolerance = 1e-3)

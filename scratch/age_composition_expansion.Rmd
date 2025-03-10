@@ -9,22 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-has_rnaturalearth = requireNamespace("rnaturalearth", quietly = TRUE)
-EVAL <- has_rnaturalearth
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = EVAL,
-  purl = EVAL
-)
-# Install locally
-#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
-# Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/web_only/age_composition_expansion.Rmd"); rmarkdown::render( "vignettes/web_only/age_composition_expansion.Rmd", rmarkdown::pdf_document())
-```
 
-```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+
+
+``` r
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -36,7 +24,8 @@ We here explore the capacity to use area-expansion to calculate proportion-at-ag
 # Expanding age-composition data
 To start, we load sampling data that has undergone first-stage expansion.  This arises when each primary sampling unit includes secondary subsampling of ages, and the subsampled proporrtion-at-age in each primary unit has been expanded to the total abundance in that primary sample:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 data( bering_sea_pollock_ages )
 
 # subset to Years 2010-2023 (to speed up the example)
@@ -58,7 +47,8 @@ Data = cbind( st_drop_geometry(Data), st_coordinates(Data) )
 
 Next, we construct the various inputs to _tinyVAST_
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # adds different variances for each age
 sem = ""
 
@@ -91,7 +81,8 @@ control = tinyVASTcontrol( getsd = FALSE,
 
 We could run the model with a log-linked Tweedie distribution and a single linear predictor:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 family = list(
   Age_1 = tweedie(),
   Age_2 = tweedie(),
@@ -114,21 +105,22 @@ family = list(
 myfit = tinyVAST(
   data = Data,
   formula = Abundance_per_hectare ~ 0 + Year_Age,
-  sem = sem,
-  dsem = dsem,
+  space_term = sem,
+  spacetime_term = dsem,
   family = family,
   space_column = c("X", "Y"), 
   variable_column = "Age",
   time_column = "Year",
   distribution_column = "Age",
-  spatial_graph = mesh,
+  spatial_domain = mesh,
   control = control
 )
 ```
 
 After the model is fitted, we then apply area-expansion and the epsilon bias-correction method to predict abundance-at-age, and convert that to a proportion:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # Get shapefile for survey extent
 data( bering_sea )
 
@@ -173,7 +165,8 @@ Finally, we can compare these estimates with those from package _VAST_.  Estimat
 because VAST used a delta-gamma distribution with spatio-temporal variation in two linear predictors, 
 and also used a different mesh.  
 
-```{r agecomp, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # Load VAST results for same data
 data(bering_sea_pollock_vast)
 myvast = bering_sea_pollock_vast
@@ -194,5 +187,7 @@ ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
   geom_point( ) +
   scale_y_log10()
 ```
+
+![plot of chunk agecomp](figure/agecomp-1.png)
 
 

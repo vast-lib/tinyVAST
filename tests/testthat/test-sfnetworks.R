@@ -43,12 +43,12 @@ test_that("Basic sfnetworks works", {
   # fit model
   out = tinyVAST( data = Data,
              formula = Count ~ 1,
-             spatial_graph = graph,
+             spatial_domain = graph,
              space_column = c("X","Y"),
              variable_column = "var",
              time_column = "time",
              distribution_column = "dist",
-             sem = "" )
+             space_term = "" )
   expect_equal( out$opt$obj, 119.3909, tolerance=0.01 )
 
   #

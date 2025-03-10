@@ -1,9 +1,8 @@
 Type: Package
 Package: tinyVAST
-Title: Vector Autoregressive Spatio-Temporal Model Using Minimal
-    Feature-Set
-Version: 0.7.1
-Date: 2025-01-08
+Title: Multivariate Spatio-Temporal Models using Structural Equations
+Version: 1.0.0
+Date: 2025-03-10
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
 	   role = c("aut", "cre"),
@@ -12,10 +11,15 @@ Authors@R: c(
            role = c("aut"),
            comment = c(ORCID = "0000-0001-9563-1937")) 
     )
-Description: Fits a Vector Autoregressive Spatio-Temporal (VAST) model
-    using a minimal feature-set, including using dynamic structural
-    equation model (DSEM) to specify the space-time-variable interactions
-    and the mgcv package to specify splines via the formula interface.
+Description: Fits a wide variety of multivariate spatio-temporal models
+    with simultaneous and lagged interactions among variables (including
+    vector autoregressive spatio-temporal ('VAST') dynamics)
+    for areal, continuous, or network spatial domains.  
+    It includes time-variable, space-variable, and space-time-variable 
+    interactions using dynamic structural equation models ('DSEM') 
+    as expressive interface, and the 'mgcv' package to specify splines 
+    via the formula interface.  See Thorson et al. (2024)
+    <doi:10.48550/arXiv.2401.10193> for more details.
 License: GPL-3
 Depends:
     R (>= 4.1.0)
@@ -29,7 +33,7 @@ Imports:
     sem,
     sf,
     sfnetworks,
-    TMB (>= 1.9.7),
+    TMB (>= 1.9.17),
     units,
     checkmate,
     abind,
@@ -49,7 +53,9 @@ Suggests:
     viridisLite,
     visreg,
     plyr,
-    DHARMa
+    DHARMa,
+    glmmTMB,
+    tibble
 LinkingTo:
     RcppEigen,
     TMB

@@ -9,10 +9,23 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+has_lattice = requireNamespace("lattice", quietly = TRUE)
+has_pdp = requireNamespace("pdp", quietly = TRUE)
+EVAL <- has_lattice && has_pdp
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = EVAL,
+  purl = EVAL
+)
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE, dep=FALSE )
+# Build
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/condition.Rmd"); rmarkdown::render( "vignettes/condition.Rmd", rmarkdown::pdf_document())
+```
 
-
-
-```r
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -25,8 +38,7 @@ This replicates a similar vignette provided for the VAST package, but showcases 
 
 We first load and combine the two data sets:
 
-
-```r
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 data( condition_and_density )
 
 # Combine both parts
@@ -49,15 +61,13 @@ formed_data = cbind( combo_data[,c("Year","Lat","Lon")],
 ```
 
 We then construct the SPDE mesh
-
-```r
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # make mesh
 mesh = fm_mesh_2d( formed_data[,c('Lon','Lat')], cutoff=1 )
 ```
 
 Next, we specify spatial and spatio-temporal variance in both condition and density. 
-
-```r
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 #
 sem = "
   Biomass <-> Biomass, sdB
@@ -74,8 +84,7 @@ dsem = "
 ```
 
 Finally, we define the distribution for each data set using the `family` argument:
-
-```r
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 #
 family = list(
   Biomass = tweedie(),
@@ -84,15 +93,14 @@ family = list(
 ```
 
 Finally, we fit the model using tinyVAST
-
-```r
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # fit model
 fit = tinyVAST( data = formed_data,
            formula = Response ~ interaction(Year,Type) + log_length,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            control = tinyVASTcontrol( trace=0, verbose=TRUE, profile="alpha_j" ),
-           sem = sem,
-           dsem = dsem,
+           space_term = sem,
+           spacetime_term = dsem,
            family = family,
            variables = c("Biomass","Condition"),
            variable_column = "Type",
@@ -103,29 +111,19 @@ fit = tinyVAST( data = formed_data,
 ```
 
 We can look at structural parameters using summary functions:
-
-```r
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # spatial terms
-summary(fit, "sem")
-#>   heads        to      from parameter start      Estimate   Std_Error     z_value      p_value
-#> 1     2   Biomass   Biomass         1  <NA>  1.423877e+00 0.133046685 10.70208186 9.951682e-27
-#> 2     2 Condition Condition         2  <NA> -3.316273e-02 0.004167567 -7.95733630 1.757825e-15
-#> 3     1 Condition   Biomass         3  <NA>  9.292899e-05 0.004855089  0.01914053 9.847290e-01
+summary(fit, "space_term")
 
 # spatio-temporal terms
-summary(fit, "dsem")
-#>   heads        to      from parameter start lag     Estimate   Std_Error    z_value      p_value
-#> 1     2   Biomass   Biomass         1  <NA>   0  0.966426764 0.024274856  39.811844 0.000000e+00
-#> 2     2 Condition Condition         2  <NA>   0 -0.040541910 0.002723401 -14.886499 4.033460e-50
-#> 3     1 Condition   Biomass         3  <NA>   0  0.008201997 0.003339314   2.456192 1.404181e-02
+summary(fit, "spacetime_term")
 ```
 
 # Abundance-weighted expansion
 
 To explore output, we can plot output using the survey extent:
 
-
-```r
+```{r condition-maps, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Extract shapefile
 region = condition_and_density$eastern_bering_sea
 
@@ -133,6 +131,7 @@ region = condition_and_density$eastern_bering_sea
 sf_grid = st_make_grid( region, cellsize=c(0.2,0.2) )
 sf_grid = st_intersection( sf_grid, region )
 sf_grid = st_make_valid( sf_grid )
+n_g = length(sf_grid)
 
 #
 grid_coords = st_coordinates( st_centroid(sf_grid) )
@@ -144,7 +143,7 @@ newdata = data.frame( "Lat" = grid_coords[,'Y'],
                       "Year" = 1982,
                       "Type" = "Condition",
                       #"Year_Type" = "1982_Condition",
-                      "log_length" = 0 )
+                      "log_length" = 0 )  # Average log-length across years
 cond_1982 = predict(fit, newdata=newdata, what="p_g")
 
 # Repeat for density
@@ -161,18 +160,13 @@ plot_grid = st_sf( sf_grid,
 plot( plot_grid, border=NA )
 ```
 
-![plot of chunk condition-maps](figure/condition-maps-1.png)
-
 # Density-weighted condition
 
-Finally, we can calculate density-weighted condition
+Finally, we can calculate density-weighted condition, using local numerical density as weighting term while averaging across the model domain.  Condition will be in units *mass per allometric-length* and the model is estimating the allometric weight-length relationship jointly with condition.  Therefore, condition will have units that are not directly comparable with either weight or density.  
 
-
-```r
+```{r condition-timeseries, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # 
 expand_data = rbind( newdata2, newdata )
-W_gz = cbind( c(as.numeric(areas_km2),rep(0,length(areas_km2))), 0 )
-V_gz = cbind( rep(c(0,3),each=length(areas_km2)), seq_along(areas_km2)-1 )
 
 #
 cond_tz = data.frame( "Year"=1998:2016, "Est"=NA, "SE"=NA )
@@ -180,8 +174,9 @@ for( yearI in seq_len(nrow(cond_tz)) ){
   expand_data[,'Year'] = cond_tz[yearI,"Year"]
   out = integrate_output( fit, 
                           newdata = expand_data,
-                          V_gz = V_gz,
-                          W_gz = W_gz, 
+                          area = c(as.numeric(areas_km2),rep(0,n_g)),
+                          type = rep(c(0,3),each=n_g),
+                          weighting_index = c( rep(0,n_g), seq_along(areas_km2)-1 ),
                           bias.correct = TRUE ) 
   cond_tz[yearI,c("Est","SE")] = out[c("Estimate","Std. Error")]
 }
@@ -192,4 +187,12 @@ ggplot( cond_tz ) +
   geom_ribbon( aes(x=Year, ymin=Est-SE, ymax=Est+SE), alpha=0.2 )
 ```
 
-![plot of chunk condition-timeseries](figure/condition-timeseries-1.png)
+```{r condition-sanitycheck, eval=FALSE, echo=FALSE, message=FALSE}
+sanity_tz = data.frame( "Year"=1998:2016, "dens", "cond", "combo" )
+for( yearI in seq_len(nrow(cond_tz)) ){
+  expand_data[,'Year'] = cond_tz[yearI,"Year"]
+  pred = predict( fit, 
+                  expand_data )
+
+
+```

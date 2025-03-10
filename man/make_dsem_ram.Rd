@@ -5,7 +5,7 @@
 \title{Make a RAM (Reticular Action Model)}
 \usage{
 make_dsem_ram(
-  sem,
+  dsem,
   times,
   variables,
   covs = NULL,
@@ -14,10 +14,10 @@ make_dsem_ram(
 )
 }
 \arguments{
-\item{sem}{Specification for structural equation model structure for
-constructing a space-variable interaction.
-\code{sem=NULL} disables the space-variable interaction;
-see \code{\link[=make_sem_ram]{make_sem_ram()}}.}
+\item{dsem}{dynamic structural equation model structure,
+passed to either \code{\link[sem]{specifyModel}}
+or \code{\link[sem]{specifyEquations}} and then parsed to control
+the set of path coefficients and variance-covariance parameters}
 
 \item{times}{A character vector listing the set of times in order}
 
@@ -84,22 +84,22 @@ Lines may end in a comment following #. The function extends code copied from pa
 
 This text then specifies linkages in a multivariate time-series model for variables \eqn{\mathbf X}
 with dimensions \eqn{T \times C} for \eqn{T} times and \eqn{C} variables.
-\code{make_dsem_ram} then parses this text to build a path matrix \eqn{\mathbf \Rho} with
+\code{make_dsem_ram} then parses this text to build a path matrix \eqn{\mathbf P} with
 dimensions \eqn{TC \times TC}, where \eqn{\rho_{k_2,k_1}}
 represents the impact of \eqn{x_{t_1,c_1}} on \eqn{x_{t_2,c_2}}, where \eqn{k_1=T c_1+t_1}
 and \eqn{k_2=T c_2+t_2}.  This path matrix defines a simultaneous equation
 
-\deqn{ \mathrm{vec}(\mathbf X) = \mathbf \Rho \mathrm{vec}(\mathbf X) + \mathrm{vec}(\mathbf \Delta)}
+\deqn{ \mathrm{vec}(\mathbf X) = \mathbf P \mathrm{vec}(\mathbf X) + \mathrm{vec}(\mathbf \Delta)}
 
 where \eqn{\mathbf \Delta} is a matrix of exogenous errors with covariance \eqn{\mathbf{V = \Gamma \Gamma}^t},
 where \eqn{\mathbf \Gamma} is the Cholesky of exogenous covariance.  This
 simultaneous autoregressive (SAR) process then results in \eqn{\mathbf X} having covariance:
 
-\deqn{ \mathrm{Cov}(\mathbf X) = \mathbf{(I - \Rho)}^{-1} \mathbf{\Gamma \Gamma}^t \mathbf{((I - \Rho)}^{-1})^t }
+\deqn{ \mathrm{Cov}(\mathbf X) = \mathbf{(I - P)}^{-1} \mathbf{\Gamma \Gamma}^t \mathbf{((I - P)}^{-1})^t }
 
 Usefully, it is also easy to compute the inverse-covariance (precision) matrix \eqn{\mathbf{Q = V}^{-1}}:
 
-\deqn{ \mathbf{Q} = (\mathbf{\Gamma}^{-1} \mathbf{(I - \Rho)})^t \mathbf{\Gamma}^{-1} \mathbf{(I - \Rho)} }
+\deqn{ \mathbf{Q} = (\mathbf{\Gamma}^{-1} \mathbf{(I - P)})^t \mathbf{\Gamma}^{-1} \mathbf{(I - P)} }
 
 \strong{Example: univariate and first-order autoregressive model}
 
@@ -107,23 +107,23 @@ This simultaneous autoregressive (SAR) process across variables and times
 allows the user to specify both simultaneous effects (effects among variables within
 year \eqn{T}) and lagged effects (effects among variables among years \eqn{T}).
 As one example, consider a univariate and first-order autoregressive process where \eqn{T=4}.
-with independent errors.  This is specified by passing \code{ sem = X -> X, 1, rho; X <-> X, 0, sigma } to \code{make_dsem_ram}.
+with independent errors.  This is specified by passing \code{ dsem = X -> X, 1, rho; X <-> X, 0, sigma } to \code{make_dsem_ram}.
 This is then parsed to a RAM:
 
 \tabular{rrrrr}{
 \strong{heads} \tab \strong{to} \tab \strong{from} \tab \strong{paarameter} \tab \strong{start} \cr
-1 \tab 2 \tab 1 \tab 1 \tab \if{html}{\out{<NA>}}\cr
-1 \tab 3 \tab 2 \tab 1 \tab \if{html}{\out{<NA>}}\cr
-1 \tab 4 \tab 3 \tab  1 \tab \if{html}{\out{<NA>}}\cr
-2 \tab 1 \tab 1 \tab 2 \tab \if{html}{\out{<NA>}}\cr
-2 \tab 2 \tab 2 \tab  2 \tab \if{html}{\out{<NA>}}\cr
-2 \tab 3 \tab 3 \tab 2 \tab \if{html}{\out{<NA>}}\cr
-2 \tab 4 \tab 4 \tab 2 \tab \if{html}{\out{<NA>}}
+1 \tab 2 \tab 1 \tab 1 \tab NA \cr
+1 \tab 3 \tab 2 \tab 1 \tab NA \cr
+1 \tab 4 \tab 3 \tab  1 \tab NA \cr
+2 \tab 1 \tab 1 \tab 2 \tab NA \cr
+2 \tab 2 \tab 2 \tab  2 \tab NA \cr
+2 \tab 3 \tab 3 \tab 2 \tab NA \cr
+2 \tab 4 \tab 4 \tab 2 \tab NA
 }
 
-Rows of this RAM where \code{heads=1} are then interpreted to construct the path matrix \eqn{\mathbf \Rho}:
+Rows of this RAM where \code{heads=1} are then interpreted to construct the path matrix \eqn{\mathbf P}:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{\deqn{ \mathbf \Rho = \begin{bmatrix}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{\deqn{ \mathbf P = \begin{bmatrix}
     0 & 0 & 0 & 0 \\
     \rho & 0 & 0 & 0 \\
     0 & \rho & 0 & 0 \\
@@ -157,22 +157,22 @@ models (VAR), dynamic factor analysis (DFA), or many other time-series models.
 }
 \examples{
 # Univariate AR1
-sem = "
+dsem = "
   X -> X, 1, rho
   X <-> X, 0, sigma
 "
-make_dsem_ram( sem=sem, variables="X", times=1:4 )
+make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
 
 # Univariate AR2
-sem = "
+dsem = "
   X -> X, 1, rho1
   X -> X, 2, rho2
   X <-> X, 0, sigma
 "
-make_dsem_ram( sem=sem, variables="X", times=1:4 )
+make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
 
 # Bivariate VAR
-sem = "
+dsem = "
   X -> X, 1, XtoX
   X -> Y, 1, XtoY
   Y -> X, 1, YtoX
@@ -180,34 +180,34 @@ sem = "
   X <-> X, 0, sdX
   Y <-> Y, 0, sdY
 "
-make_dsem_ram( sem=sem, variables=c("X","Y"), times=1:4 )
+make_dsem_ram( dsem=dsem, variables=c("X","Y"), times=1:4 )
 
 # Dynamic factor analysis with one factor and two manifest variables
 # (specifies a random-walk for the factor, and miniscule residual SD)
-sem = "
+dsem = "
   factor -> X, 0, loadings1
   factor -> Y, 0, loadings2
   factor -> factor, 1, NA, 1
   X <-> X, 0, NA, 0           # No additional variance
   Y <-> Y, 0, NA, 0           # No additional variance
 "
-make_dsem_ram( sem=sem, variables=c("X","Y","factor"), times=1:4 )
+make_dsem_ram( dsem=dsem, variables=c("X","Y","factor"), times=1:4 )
 
 # ARIMA(1,1,0)
-sem = "
+dsem = "
   factor -> factor, 1, rho1 # AR1 component
   X -> X, 1, NA, 1          # Integrated component
   factor -> X, 0, NA, 1
   X <-> X, 0, NA, 0         # No additional variance
 "
-make_dsem_ram( sem=sem, variables=c("X","factor"), times=1:4 )
+make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
 
 # ARIMA(0,0,1)
-sem = "
+dsem = "
   factor -> X, 0, NA, 1
   factor -> X, 1, rho1     # MA1 component
   X <-> X, 0, NA, 0        # No additional variance
 "
-make_dsem_ram( sem=sem, variables=c("X","factor"), times=1:4 )
+make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
 
 }

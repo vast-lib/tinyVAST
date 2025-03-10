@@ -16,6 +16,11 @@ add_predictions(object, newdata, remove_origdata = FALSE)
 for random effects, and cannot be combined with epsilon bias-correction.
 WARNING:  feature is experimental and subject to change.}
 }
+\value{
+the object \code{fit$tmb_inputs$tmb_data} representing data used during fitting,
+but with updated values for slots associated with predictions, where this
+updated object can be recompiled by TMB to provide predictions
+}
 \description{
 Given user-provided \code{newdata}, expand the object \code{tmb_data}
 to include predictions corresponding to those new observations

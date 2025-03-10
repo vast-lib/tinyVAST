@@ -8,8 +8,9 @@
   object,
   newdata,
   remove_origdata = FALSE,
-  what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pxi_g",
-    "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pxi2_g"),
+  what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pdelta_g",
+    "pxi_g", "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pdelta2_g",
+    "pxi2_g"),
   se.fit = FALSE,
   ...
 )
@@ -43,6 +44,10 @@ bias-correction.}
 \item{se.fit}{Calculate standard errors?}
 
 \item{...}{Not used.}
+}
+\value{
+Either a vector with the prediction for each row of \code{newdata}, or a named list
+with the prediction and standard error (when \code{se.fit = TRUE}).
 }
 \description{
 Predicts values given new covariates using a \pkg{tinyVAST} model

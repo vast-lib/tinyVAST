@@ -81,10 +81,10 @@ red_snapper$var = "logdens"
 # fit using tinyVAST
 fit = tinyVAST( data = red_snapper, 
                 formula = formula,
-                sem = "logdens <-> logdens, sd_space",
-                dsem = "logdens <-> logdens, 0, sd_spacetime",
+                space_term = "logdens <-> logdens, sd_space",
+                spacetime_term = "logdens <-> logdens, 0, sd_spacetime",
                 space_columns = c("Lon",'Lat'),
-                spatial_graph = mesh,
+                spatial_domain = mesh,
                 time_column = "Year",
                 distribution_column = "Data_type",
                 family = family,

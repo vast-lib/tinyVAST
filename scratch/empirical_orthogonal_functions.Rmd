@@ -9,22 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-has_rnaturalearth = requireNamespace("rnaturalearth", quietly = TRUE)
-EVAL <- has_rnaturalearth
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = EVAL,
-  purl = EVAL
-)
-# Install locally
-#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
-# Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/empirical_orthogonal_functions.Rmd"); rmarkdown::render( "vignettes/empirical_orthogonal_functions.Rmd", rmarkdown::pdf_document())
-```
 
-```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+
+
+``` r
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
@@ -37,7 +25,8 @@ generalize an empirical orthogonal function analysis.
 # Empirical Orthogonal Function (EOF) analysis
 To start, we reformat data on September Sea ice concentrations:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
+
+``` r
 data( sea_ice )
 library(sf)
 library(rnaturalearth)
@@ -62,7 +51,8 @@ Data = data.frame( st_drop_geometry(sf_ice),
 
 Next, we construct the various inputs to _tinyVAST_
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 n_eof = 2
 dsem = make_eof_ram( variables = "Ice",
                      times = sort(unique(Data[,'year'])),
@@ -71,11 +61,11 @@ dsem = make_eof_ram( variables = "Ice",
 mesh = fm_mesh_2d( Data[,c('X','Y')], cutoff=1.5 )
 
 # fit model
-out = tinyVAST( dsem = dsem,
-           sem = "",
+out = tinyVAST( spacetime_term = dsem,
+           space_term = "",
            data = as.data.frame(Data),
            formula = ice_concentration ~ 1,
-           spatial_graph = mesh,
+           spatial_domain = mesh,
            space_column = c("X","Y"),
            variable_column = "var",
            time_column = "year",
@@ -83,11 +73,14 @@ out = tinyVAST( dsem = dsem,
            times = c(paste0("EOF_",seq_len(n_eof)), sort(unique(Data[,'year']))),
            control = tinyVASTcontrol( profile="alpha_j",
                                       gmrf_parameterization="projection") )
+#> Warning in tinyVAST(spacetime_term = dsem, space_term = "", data = as.data.frame(Data), : `spatial_domain` has over 1000 components, so
+#> the model may be extremely slow
 ```
 
 Finally, we can extract, rotate, and plot the dominant modes of variability and associated spatial responses:
 
-```{r EOF, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # Country shapefiles for plotting
 sf_maps = ne_countries( return="sf", scale="medium", continent=c("north america","europe","asia") )
 sf_maps = st_transform( sf_maps, crs=st_crs(sf_ice) )
@@ -122,6 +115,7 @@ omega_g = predict( out, cbind(newdata, year="EOF_2"), what="pomega_g" )
 
 # Rotate responses and loadings
 rotated_results = rotate_pca( L_tf=L_tf, x_sf=cbind(EOF1_g,EOF2_g), order="decreasing" )
+#> Warning in sqrt(Eigen$values): NaNs produced
 EOF1_g = rotated_results$x_sf[,1]
 EOF2_g = rotated_results$x_sf[,2]
 L_tf = rotated_results$L_tf
@@ -140,3 +134,5 @@ matplot( y=L_tf, x=unique(Data$year), type="l",
   legend( "top", ncol=n_eof, legend=paste0("EOF",1:n_eof),
           fill=viridisLite::viridis(n_eof) )
 ```
+
+![plot of chunk EOF](figure/EOF-1.png)

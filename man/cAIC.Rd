@@ -57,7 +57,8 @@ fit = tinyVAST( data = red_snapper,
                 control = tinyVASTcontrol( getsd = FALSE,
                                            profile = "alpha_j" ) )
 
-cAIC(fit)
+cAIC(fit) # conditional AIC
+AIC(fit) # marginal AIC
 
 }
 \references{

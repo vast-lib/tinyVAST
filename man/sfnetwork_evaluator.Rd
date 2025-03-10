@@ -13,6 +13,10 @@ sfnetwork_evaluator(stream, loc, tolerance = 0.01)
 
 \item{tolerance}{error-check tolerance}
 }
+\value{
+the sparse interpolation matrix, with rows for each row of \code{data}
+supplied during fitting and columns for each spatial random effect.
+}
 \description{
 Make sparse matrix to project from stream-network nodes
 to user-supplied points

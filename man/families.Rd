@@ -39,4 +39,11 @@ Thorson, J.T. 2018. Three problems with the conventional delta-model for
 biomass sampling data, and a computationally efficient alternative. Canadian
 Journal of Fisheries and Aquatic Sciences, 75(9), 1369-1382.
 \doi{10.1139/cjfas-2017-0266}
+
+\emph{Poisson-link delta families}:
+
+Thorson, J.T. 2018. Three problems with the conventional delta-model for
+biomass sampling data, and a computationally efficient alternative. Canadian
+Journal of Fisheries and Aquatic Sciences, 75(9), 1369-1382.
+\doi{10.1139/cjfas-2017-0266}
 }

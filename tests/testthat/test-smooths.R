@@ -13,6 +13,7 @@ test_that("Basic splines work", {
   m_m <- mgcv::gam(y ~ s(x2) + s(fac, bs = "re"), data = dat, REML = FALSE)
   m_s <- sdmTMB::sdmTMB(y ~ s(x2) + (1 | fac), data = dat, reml = FALSE, spatial = "off")
   m_v <- tinyVAST(formula = y ~ s(x2) + s(fac, bs = "re"), data = dat)
+  m_wrong <- tinyVAST(formula = y ~ s(x2), data = dat)
 
   # logLik(m_g4$mer)
   # logLik(m_gt)
@@ -25,8 +26,10 @@ test_that("Basic splines work", {
   p_m <- predict(m_m)
   p_s <- predict(m_s)$est
   p_v <- predict(m_v)
+  p_wrong <- predict(m_wrong)
   expect_gt(cor(p_m, p_v), 0.999)
   expect_gt(cor(p_s, p_v), 0.999)
+  # cor( p_v, p_wrong )
 
   # m_g4 <- gamm4::gamm4(y ~ s(x2), data = dat, REML = FALSE)
   # m_gt <- glmmTMB::glmmTMB(y ~ s(x2), data = dat)
@@ -67,6 +70,7 @@ test_that("A model with s(x, bs = 'fs') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   d$yearf <- as.factor(d$year)
   m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, by = year, bs = "fs"), data = d, method = "REML")
   m_v <- tinyVAST(
@@ -92,6 +96,7 @@ test_that("A model with s(x, bs = 'gp') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
   m_v <- tinyVAST(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
   m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "gp"), data = d, spatial = "off")
@@ -108,6 +113,7 @@ test_that("A model with s(x, bs = 'ds') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_s <- sdmTMB::sdmTMB(
     log(density) ~ s(depth_scaled, bs = "ds"),
     data = d, spatial = "off"
@@ -127,6 +133,7 @@ test_that("A model with s(x, bs = 'cr') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "cr"), data = d, spatial = "off")
   m_m <- mgcv::gam(data = d, formula = log(density) ~ s(depth_scaled, bs = "cr"))
   m_v <- tinyVAST(data = d, formula = log(density) ~ s(depth_scaled, bs = "cr"))
@@ -143,6 +150,7 @@ test_that("A model with s(x, bs = 'cs') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "cs"), data = d, spatial = "off")
   m_m <- mgcv::gam(data = d, formula = log(density) ~ s(depth_scaled, bs = "cs"))
   m_v <- tinyVAST(data = d, formula = log(density) ~ s(depth_scaled, bs = "cs"))
@@ -159,6 +167,7 @@ test_that("A model with s(x, bs = 'cc') works", {
   skip_on_cran()
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
+  d = as.data.frame(d)
   m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "cc"), data = d, spatial = "off")
   m_m <- mgcv::gam(data = d, formula = log(density) ~ s(depth_scaled, bs = "cc"))
   m_v <- tinyVAST(data = d, formula = log(density) ~ s(depth_scaled, bs = "cc"))

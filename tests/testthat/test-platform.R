@@ -23,8 +23,8 @@ test_that("tinyVAST example is working ", {
   # fit model
   out = tinyVAST( data = Data,
              formula = n ~ s(w),
-             spatial_graph = mesh,
-             sem = "",
+             spatial_domain = mesh,
+             space_term = "",
              control = tinyVASTcontrol(getJointPrecision=TRUE) )
   expect_s3_class(out, "tinyVAST")
 

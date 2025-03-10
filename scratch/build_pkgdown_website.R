@@ -13,23 +13,25 @@ library(pkgdown)
 
 # Precompute vignettes
 # https://ropensci.org/blog/2019/12/08/precompute-vignettes/
+# NOT DOING THIS ANYMORE 
+#  Now running them via pkgdown::build_site at the same time and disabled _yaml
 if( FALSE ){
   setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\vignettes)')
 
-  knitr::knit( "web_only/age_composition_expansion.Rmd.orig",
-               output = "vignettes/web_only/age_composition_expansion.Rmd" )
-
-  knitr::knit( "web_only/empirical_orthogonal_functions.Rmd.orig",
-               output = "web_only/empirical_orthogonal_functions.Rmd" )
-
-  knitr::knit( "web_only/VAST.Rmd.orig",
-               output = "web_only/VAST.Rmd" )
-
-  knitr::knit( "web_only/stream_networks.Rmd.orig",
-               output = "web_only/stream_networks.Rmd" )
-
-  knitr::knit( "web_only/condition.Rmd.orig",
-               output = "web_only/condition.Rmd" )
+  #knitr::knit( "web_only/stream_networks.Rmd.orig",
+  #             output = "web_only/stream_networks.Rmd" )
+  #
+  #knitr::knit( "web_only/age_composition_expansion.Rmd.orig",
+  #             output = "web_only/age_composition_expansion.Rmd" )
+  #
+  #knitr::knit( "web_only/condition.Rmd.orig",
+  #             output = "web_only/condition.Rmd" )
+  #
+  #knitr::knit( "web_only/empirical_orthogonal_functions.Rmd.orig",
+  #             output = "web_only/empirical_orthogonal_functions.Rmd" )
+  #
+  #knitr::knit( "web_only/VAST.Rmd.orig",
+  #             output = "web_only/VAST.Rmd" )
 }
 
 setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')

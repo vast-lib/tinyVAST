@@ -10,22 +10,10 @@ vignette: >
   %\VignetteDepends{ggraph2}
 ---
 
-```{r, include = FALSE}
-has_viridisLite = requireNamespace("viridisLite", quietly = TRUE)
-EVAL <- has_viridisLite
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = EVAL,
-  purl = EVAL
-)
-# Install locally
-#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE, dep=FALSE )
-# Build
-#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/web_only/stream_networks.Rmd"); rmarkdown::render( "vignettes/web_only/stream_networks.Rmd", rmarkdown::pdf_document())
-```
 
-```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+
+
+``` r
 library(sf)
 library(sfnetworks)
 library(tinyVAST)
@@ -39,17 +27,21 @@ We here show how it can fit a stream network model, where spatial correlations a
 
 First, we load a shapefile representing a stream network, and convert it to _sfnetwork_ format.  This format includes
 edges representing stream segments, and nodes where edges connect.
-```{r stream-shape, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
+
+``` r
 stream <- st_read( file.path(system.file("stream_network",package="tinyVAST"),
                    "East_Fork_Lewis_basin.shp"), quiet=TRUE )
 stream = as_sfnetwork(stream)
 plot(stream, main="East Fork Lewis Basin")
 ```
 
+![plot of chunk stream-shape](figure/stream-shape-1.png)
+
 We then convert it to an S3 class "sfnetwork_mesh" defined by _tinyVAST_ for stream networks,
 and rescale distances to 1000 ft (to ensure that distances are 0.01 to 100, avoiding
 issues of numerical under or overflow).
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # Rescale
 graph = sfnetwork_mesh( stream )
 graph$table$dist = graph$table$dist / 1000  # Convert distance scale
@@ -59,7 +51,8 @@ Next, we'll simulate a Gaussian Markov random field at stream vertices using `si
 sample evenly spaced locations along the stream using `st_line_sample`,
 project the GMRF to those locations using `sfnetwork_evaluator`, and
 simulate data at those locations:
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # Parameters
 alpha = 2
 kappa = 0.05
@@ -90,7 +83,8 @@ Data = data.frame( Count = Count_i,
 ```
 
 We can visualize the GMRF at those locations using _sfnetwork_
-```{r stream-dens, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # Plot stream
 plot(stream)
 # Extract nodes and plot on network
@@ -98,19 +92,22 @@ plot( st_sf(st_geometry(activate(stream,"nodes")), "omega"=omega_s),
       add=TRUE, pch=19, cex=2)
 ```
 
+![plot of chunk stream-dens](figure/stream-dens-1.png)
+
 Finally, we can fit the model, interpolate the GMRF along at dense locations along
 the stream network, and plot those with the true (simulated) values at the
 location of simulated samples.
-```{r stream-pred, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+``` r
 # fit model
 out = tinyVAST( data = Data,
            formula = Count ~ 1,
-           spatial_graph = graph,
+           spatial_domain = graph,
            space_column = c("X","Y"),
            variable_column = "var",
            time_column = "time",
            distribution_column = "dist",
-           sem = "" )
+           space_term = "" )
 
 #
 sf_plot = st_union( st_line_sample( activate(stream,"edges"), density=1/1000))
@@ -127,3 +124,5 @@ plot( stream, main="omegahat_i")
 plot( st_sf(sf_plot,"omega"=omega_plot), add=TRUE, pch=19, cex=0.5, pal=viridis )
 plot( st_sf(extrap,"omega"=omega_i), add=TRUE, pch=19, cex=2, pal=viridis )
 ```
+
+![plot of chunk stream-pred](figure/stream-pred-1.png)
