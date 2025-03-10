@@ -2,7 +2,7 @@ Type: Package
 Package: tinyVAST
 Title: Multivariate Spatio-Temporal Models using Structural Equations
 Version: 1.0.0
-Date: 2025-02-26
+Date: 2025-03-10
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
 	   role = c("aut", "cre"),
@@ -33,7 +33,7 @@ Imports:
     sem,
     sf,
     sfnetworks,
-    TMB (>= 1.9.7),
+    TMB (>= 1.9.17),
     units,
     checkmate,
     abind,
