@@ -128,7 +128,6 @@ function( object,
   #
   what = match.arg(what)
   predictor = match.arg(predictor)
-  if(predictor == "two") stop("Not implemented yet")
 
   ParHat = object$obj$env$parList()
   if( !is.null(object$sdrep) ){
@@ -137,17 +136,25 @@ function( object,
 
   # SEM component
   if( what=="space_term" ){
-    model = object$internal$space_term_ram$output$ram
+    if(predictor=="one"){
+      term = "space_term_ram"
+      parname = "theta_z"
+    }else{
+      term = "delta_space_term_ram"
+      parname = "theta2_z"
+    }
+
+    model = object$internal[[term]]$output$ram
     if(nrow(model)>0){
       model$to = as.character(object$internal$variables)[model$to]
       model$from = as.character(object$internal$variables)[model$from]
     }
 
     #
-    coefs = data.frame( model, "Estimate"=c(NA,ParHat$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+    coefs = data.frame( model, "Estimate"=c(NA,ParHat[[parname]])[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
     coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,'start']), coefs$Estimate )
     if( !is.null(object$sdrep) ){
-      coefs = data.frame( coefs, "Std_Error"=c(NA,SE$theta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+      coefs = data.frame( coefs, "Std_Error"=c(NA,SE[[parname]])[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
     }
@@ -155,7 +162,15 @@ function( object,
 
   # DSEM component
   if( what=="time_term" ){
-    model = object$internal$time_term_ram$output$model
+    if(predictor=="one"){
+      term = "time_term_ram"
+      parname = "nu_z"
+    }else{
+      term = "delta_time_term_ram"
+      parname = "nu2_z"
+    }
+
+    model = object$internal[[term]]$output$model
     model = data.frame( heads = model[,'direction'],
                         to = model[,'second'],
                         from = model[,'first'],
@@ -164,10 +179,10 @@ function( object,
                         lag = model[,'lag'] )
 
     #
-    coefs = data.frame( model, "Estimate"=c(NA,ParHat$nu_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+    coefs = data.frame( model, "Estimate"=c(NA,ParHat[[parname]])[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
     coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,'start']), coefs$Estimate )
     if( !is.null(object$sdrep) ){
-      coefs = data.frame( coefs, "Std_Error"=c(NA,SE$nu_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+      coefs = data.frame( coefs, "Std_Error"=c(NA,SE[[parname]])[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
     }
@@ -175,17 +190,25 @@ function( object,
 
   # DSEM component
   if( what=="spacetime_term" ){
-    if( is(object$internal$spacetime_term_ram$output,"dsem_ram") ){
-      model = object$internal$spacetime_term_ram$output$model
+    if(predictor=="one"){
+      term = "spacetime_term_ram"
+      parname = "beta_z"
+    }else{
+      term = "delta_spacetime_term_ram"
+      parname = "beta2_z"
+    }
+
+    if( is(object$internal[[term]]$output,"dsem_ram") ){
+      model = object$internal[[term]]$output$model
       model = data.frame( heads = model[,'direction'],
                           to = model[,'second'],
                           from = model[,'first'],
                           parameter = model[,'parameter'],
                           start = model[,'start'],
                           lag = model[,'lag'] )
-    }else if( is(object$internal$spacetime_term_ram$output,"eof_ram") ){
-      model = object$internal$spacetime_term_ram$output$model
-      vars = object$internal$spacetime_term_ram$output$variances
+    }else if( is(object$internal[[term]]$output,"eof_ram") ){
+      model = object$internal[[term]]$output$model
+      vars = object$internal[[term]]$output$variances
       model = data.frame( heads = c( rep(1,nrow(model)), rep(2,nrow(vars)) ),
                           to = c( as.character(model$to), as.character(vars$to) ),
                           from = c( as.character(model$from), as.character(vars$from) ),
@@ -197,25 +220,33 @@ function( object,
     }
 
     #
-    coefs = data.frame( model, "Estimate"=c(NA,ParHat$beta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+    coefs = data.frame( model, "Estimate"=c(NA,ParHat[[parname]])[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
     coefs$Estimate = ifelse( is.na(coefs$Estimate), as.numeric(model[,'start']), coefs$Estimate )
     if( !is.null(object$sdrep) ){
-      coefs = data.frame( coefs, "Std_Error"=c(NA,SE$beta_z)[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
+      coefs = data.frame( coefs, "Std_Error"=c(NA,SE[[parname]])[ as.numeric(model[,'parameter'])+1 ] ) # parameter=0 outputs NA
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
     }
   }
 
   if( what=="fixed" ){
+    if(predictor=="one"){
+      term = "X_ij"
+      parname = "alpha_j"
+    }else{
+      term = "X2_ij"
+      parname = "alpha2_j"
+    }
+
     coefs = data.frame(
-      Estimate = ParHat$alpha_j
+      Estimate = ParHat[[parname]]
     )
     if( !is.null(object$sdrep) ){
-      coefs = data.frame( coefs, "Std_Error"=SE$alpha_j ) # parameter=0 outputs NA
+      coefs = data.frame( coefs, "Std_Error"=SE[[parname]] ) # parameter=0 outputs NA
       coefs = data.frame( coefs, "z_value"=coefs[,'Estimate']/coefs[,'Std_Error'] )
       coefs = data.frame( coefs, "p_value"=pnorm(-abs(coefs[,'z_value'])) * 2 )
     }
-    rownames(coefs) = colnames(object$tmb_input$tmb_data$X_ij)
+    rownames(coefs) = colnames(object$tmb_input$tmb_data[[term]])
   }
 
   return(coefs)
