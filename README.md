@@ -9,6 +9,7 @@
 [![R-CMD-check](https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/vast-lib/tinyVAST/branch/main/graph/badge.svg)](https://app.codecov.io/gh/vast-lib/tinyVAST?branch=main)
 [![Documentation](https://img.shields.io/badge/documentation-tinyVAST-orange.svg?colorB=E91E63)](https://vast-lib.github.io/tinyVAST/)
+[![DOI](https://zenodo.org/badge/704919773.svg)](https://doi.org/10.5281/zenodo.15001856)
 <!-- badges: end -->
 
 tinyVAST is an R package that fits multivariate spatio-temporal models while using Gaussian Markov random fields to represent nonseparable interactions among variables over time. See a preprint:
