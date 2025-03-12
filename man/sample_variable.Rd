@@ -5,7 +5,8 @@
 \title{Sample from predictive distribution of a variable}
 \usage{
 sample_variable(
-  x,
+  object,
+  newdata = NULL,
   variable_name = "mu_i",
   n_samples = 100,
   sample_fixed = TRUE,
@@ -13,7 +14,9 @@ sample_variable(
 )
 }
 \arguments{
-\item{x}{output from \verb{\code{tinyVAST()}}}
+\item{object}{output from \verb{\code{tinyVAST()}}}
+
+\item{newdata}{data frame of new data, used to sample model components for predictions e.g., \code{mu_g}}
 
 \item{variable_name}{name of variable available in report using \code{Obj$report()} or parameters using \code{Obj$env$parList()}}
 
