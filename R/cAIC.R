@@ -31,7 +31,7 @@
 #' \doi{10.48550/arXiv.2411.14185}
 #'
 #' @examples
-#' dontrun{
+#' \dontrun{
 #' data( red_snapper )
 #' red_snapper = droplevels(subset(red_snapper, Data_type=="Biomass_KG"))
 #'

@@ -38,7 +38,7 @@ a fitted model. It can be used with the \pkg{DHARMa} package
 among other uses.  Code is modified from the version in sdmTMB
 }
 \examples{
-dontrun{
+\dontrun{
 set.seed(101)
 x = seq(0, 2*pi, length=100)
 y = sin(x) + 0.1*rnorm(length(x))

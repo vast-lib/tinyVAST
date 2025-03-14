@@ -137,7 +137,7 @@
 #' }
 #'
 #' @examples
-#' dontrun{
+#' \dontrun{
 #' # Simulate a seperable two-dimensional AR1 spatial process
 #' n_x = n_y = 25
 #' n_w = 10

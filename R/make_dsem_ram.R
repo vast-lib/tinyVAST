@@ -126,7 +126,7 @@
 #' @return A reticular action module (RAM) describing dependencies
 #'
 #' @examples
-#' dontrun{
+#' \dontrun{
 #' # Univariate AR1
 #' dsem = "
 #'   X -> X, 1, rho

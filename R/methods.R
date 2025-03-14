@@ -433,7 +433,7 @@ function( object,
 #' @importFrom stats simulate
 #'
 #' @examples
-#' dontrun{
+#' \dontrun{
 #' set.seed(101)
 #' x = seq(0, 2*pi, length=100)
 #' y = sin(x) + 0.1*rnorm(length(x))

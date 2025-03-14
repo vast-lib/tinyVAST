@@ -156,7 +156,7 @@ a conventional structural equation model (SEM), cross-lagged (a.k.a. vector auto
 models (VAR), dynamic factor analysis (DFA), or many other time-series models.
 }
 \examples{
-dontrun{
+\dontrun{
 # Univariate AR1
 dsem = "
   X -> X, 1, rho

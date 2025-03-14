@@ -34,7 +34,7 @@ For models that include profiled fixed effects, these profiles are turned
 off.
 }
 \examples{
-dontrun{
+\dontrun{
 data( red_snapper )
 red_snapper = droplevels(subset(red_snapper, Data_type=="Biomass_KG"))
 

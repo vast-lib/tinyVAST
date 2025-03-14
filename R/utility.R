@@ -227,7 +227,7 @@ function( x,
 #' for a requested quantity given sampled uncertainty in fixed and/or random effects
 #'
 #' @examples
-#' dontrun{
+#' \dontrun{
 #'  set.seed(101)
 #'  x = runif(n = 100, min = 0, max = 2*pi)
 #'  y = 1 + sin(x) + 0.1 * rnorm(100)

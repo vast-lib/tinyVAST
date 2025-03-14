@@ -42,7 +42,7 @@ representation of the tail probabilities, and results in some samples with impla
 such that the associated random effects then have implausibly high magnitude.
 }
 \examples{
-dontrun{
+\dontrun{
  set.seed(101)
  x = runif(n = 100, min = 0, max = 2*pi)
  y = 1 + sin(x) + 0.1 * rnorm(100)

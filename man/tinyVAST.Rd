@@ -165,7 +165,7 @@ two are then parsed to include a single exogenous variance for the single variab
 }
 }
 \examples{
-dontrun{
+\dontrun{
 # Simulate a seperable two-dimensional AR1 spatial process
 n_x = n_y = 25
 n_w = 10
