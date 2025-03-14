@@ -514,10 +514,10 @@ function( object,
   tmb_data2$AepsilonG_z = AepsilonG_z
   tmb_data2$AomegaG_zz = AomegaG_zz - 1    # Triplet form, i, s, t
   tmb_data2$AomegaG_z = AomegaG_z
-  tmb_data2$t_g = t_g - 1 # Convert to CPP indexing
-  tmb_data2$c_g = c_g - 1 # Convert to CPP indexing
+  tmb_data2$t_g = as.integer(t_g - 1) # Convert to CPP indexing, and keep as integer-vector
+  tmb_data2$c_g = as.integer(c_g - 1) # Convert to CPP indexing, and keep as integer-vector
   tmb_data2$offset_g = covariates$offset_g
-  tmb_data2$e_g = e_g - 1 # -1 to convert to CPP index
+  tmb_data2$e_g = as.integer(e_g - 1) # -1 to convert to CPP index, and keep as integer-vector
   tmb_data2$A_gs = A_gs
   tmb_data2$W_gl = W_gl
   tmb_data2$W2_gl = W2_gl
