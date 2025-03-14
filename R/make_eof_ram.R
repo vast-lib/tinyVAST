@@ -14,9 +14,10 @@
 #' @return A reticular action module (RAM) describing dependencies
 #'
 #' @examples
+#' dontrun{
 #' # Two EOFs for two variables
 #' make_eof_ram( times = 2010:2020, variables = c("pollock","cod"), n_eof=2 )
-#'
+#' }
 #' @export
 make_eof_ram <-
 function( times,

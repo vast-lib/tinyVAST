@@ -126,6 +126,7 @@
 #' @return A reticular action module (RAM) describing dependencies
 #'
 #' @examples
+#' dontrun{
 #' # Univariate AR1
 #' dsem = "
 #'   X -> X, 1, rho
@@ -179,6 +180,7 @@
 #'   X <-> X, 0, NA, 0        # No additional variance
 #' "
 #' make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
+#' }
 #'
 #' @export
 make_dsem_ram <-

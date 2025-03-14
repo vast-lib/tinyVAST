@@ -137,6 +137,7 @@
 #' }
 #'
 #' @examples
+#' dontrun{
 #' # Simulate a seperable two-dimensional AR1 spatial process
 #' n_x = n_y = 25
 #' n_w = 10
@@ -160,6 +161,7 @@
 #'                 formula = n ~ s(w),
 #'                 spatial_domain = mesh,
 #'                 space_term = "n <-> n, sd_n" )
+#' }
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export

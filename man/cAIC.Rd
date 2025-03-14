@@ -34,6 +34,7 @@ For models that include profiled fixed effects, these profiles are turned
 off.
 }
 \examples{
+dontrun{
 data( red_snapper )
 red_snapper = droplevels(subset(red_snapper, Data_type=="Biomass_KG"))
 
@@ -59,7 +60,7 @@ fit = tinyVAST( data = red_snapper,
 
 cAIC(fit) # conditional AIC
 AIC(fit) # marginal AIC
-
+}
 }
 \references{
 Zheng, N., Cadigan, N., & Thorson, J. T. (2024).

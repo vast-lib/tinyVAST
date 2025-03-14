@@ -42,6 +42,7 @@ representation of the tail probabilities, and results in some samples with impla
 such that the associated random effects then have implausibly high magnitude.
 }
 \examples{
+dontrun{
  set.seed(101)
  x = runif(n = 100, min = 0, max = 2*pi)
  y = 1 + sin(x) + 0.1 * rnorm(100)
@@ -53,5 +54,5 @@ such that the associated random effects then have implausibly high magnitude.
  # samples from distribution for the mean
  # excluding fixed effects due to CRAN checks
  samples = sample_variable(fit, sample_fixed = FALSE)
-
+}
 }
