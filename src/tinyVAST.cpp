@@ -93,14 +93,15 @@ Type gamma_distribution( vector<Type> gamma_k,
   using namespace density;
   Type nll = 0.0;
   int k = 0;   // Counter
-  for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
-    int m_z = Sdims(z);
-    vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
-    SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
-    k += m_z;
+  if( log_lambda.size() > 0 ){     // valgrind seems to need this logical check
+    for(int z=0; z<Sdims.size(); z++){
+      int m_z = Sdims(z);
+      vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
+      SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
+      nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
+      k += m_z;
+    }
   }
-
   return( nll );
 }
 

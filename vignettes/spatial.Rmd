@@ -161,7 +161,7 @@ Alternatively, we can use the `predict` function to plot confidence intervals fo
 ```{r show_ggplot, eval=FALSE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # create new data frame
 newdata <- data.frame(w = seq(min(Data$w), max(Data$w), length.out = 100))
-newdata = cbind( newdata, 'x'=13, 'y'=13, 'var'='n' )
+newdata = cbind( newdata, 'x'=13, 'y'=13, 'var'='n', 'time'=2020 )
 
 # make predictions
 p <- predict( out, newdata=newdata, se.fit=TRUE, what="p_g" )
