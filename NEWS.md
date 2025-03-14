@@ -1,3 +1,10 @@
+# tinyVAST 1.0.1
+
+* Modify examples for `simulate.tinyVAST` and `sample_variable` to try to avoid
+  terminal output giving error in valgrind check
+* Modify `spatial` and `mgcv` vignettes to try to avoid code chunks giving errors
+  in clang-UBSAN check
+
 # tinyVAST 1.0.0
 
 * Adding nbinom1 and nbinom2 families

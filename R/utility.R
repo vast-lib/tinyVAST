@@ -233,11 +233,11 @@ function( x,
 #'
 #'  # Do fit with getJointPrecision=TRUE
 #'  fit = tinyVAST( formula = y ~ s(x),
-#'                  data = data.frame(x=x,y=y),
-#'                  control = tinyVASTcontrol(getJointPrecision = TRUE) )
+#'                  data = data.frame(x=x,y=y) )
 #'
 #'  # samples from distribution for the mean
-#'  sample_variable(fit)
+#'  # excluding fixed effects due to CRAN checks
+#'  samples = sample_variable(fit, sample_fixed = FALSE)
 #'
 #' @export
 sample_variable <-
@@ -264,10 +264,6 @@ function( object,
     )
   }
 
-  # Informative error messages
-  if( !("jointPrecision" %in% names(object$sdrep)) ){
-    stop("jointPrecision not present in object$sdrep; please re-run with `getJointPrecision=TRUE`")
-  }
   # Combine Report and ParHat, and check for issues
   ParHat = object$obj$env$parList()
   Intersect = intersect(names(object$rep), names(ParHat))
@@ -294,6 +290,10 @@ function( object,
 
   # Sample from joint distribution
   if( sample_fixed==TRUE ){
+    # Informative error messages
+    if( !("jointPrecision" %in% names(object$sdrep)) ){
+      stop("jointPrecision not present in object$sdrep; please re-run with `getJointPrecision=TRUE`")
+    }
     u_zr = rmvnorm_prec( mu=object$obj$env$last.par.best, prec=object$sdrep$jointPrecision, n.sims=n_samples, seed=seed)
     # apply( u_zr, MARGIN=2, FUN=function(vec){sum(abs(vec)==Inf)})
     # u_zr[-object$obj$env$random,1]

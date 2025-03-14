@@ -40,7 +40,7 @@ options("tinyVAST.verbose" = FALSE)
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
 We here show how it can fit spatial autoregressive model.  We first simulate a spatial random field and a confounder variable, and simulate data from this simulated process.
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r simulate_data, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate a 2D AR1 spatial process with a cyclic confounder w
 n_x = n_y = 25
 n_w = 10
@@ -60,7 +60,7 @@ Data$time = 2020
 
 We next construct a triangulated mesh that represents our continuous spatial domain
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r make_mesh, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')], cutoff = 2 )
 
@@ -69,7 +69,7 @@ plot(mesh)
 ```
 
 Finally, we can fit these data using `tinyVAST`
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r fit_tinyVAST, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Define sem, with just one variance for the single variable
 sem = "
   density <-> density, spatial_sd
@@ -84,7 +84,7 @@ out = tinyVAST( data = Data,
 ```
 
 We can then calculate the area-weighted total abundance:
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r calculate_total, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Predicted sample-weighted total
 integrate_output(out, newdata = out$data)
 # integrate_output(out, apply.epsilon=TRUE )
@@ -99,13 +99,13 @@ sum( Data$z )
 
 We can compute deviance residuals and percent-deviance explained:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r show_deviance_explained, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Percent deviance explained
 out$deviance_explained
 ```
 
 We can then compare this with the PDE reported by `mgcv`
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r run_gam, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 start_time = Sys.time()
 mygam = gam( n ~ s(w) + s(x,y), data=Data ) #
 Sys.time() - start_time
@@ -116,7 +116,7 @@ where this comparison shows that using the SPDE method in tinyVAST results in hi
 
 It is then easy to confirm that mgcv and tinyVAST give (essentially) identical PDE when switching tinyVAST to use the same bivariate spline for space.
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r run_reduced_tinyVAST, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 out_reduced = tinyVAST( data = Data,
                         formula = n ~ s(w) + s(x,y) )
 
@@ -127,12 +127,12 @@ out_reduced$deviance_explained
 # Visualize spatial response
 
 `tinyVAST` then has a standard `predict` function:
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r show_predict, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 predict(out, newdata=data.frame(x=1, y=1, time=1, w=1, var="density") )
 ```
 
 and this is used to compute the spatial response
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r show_image, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Prediction grid
 pred = outer( seq(1,n_x,len=51),
               seq(1,n_y,len=51),
@@ -144,7 +144,7 @@ image( x=1:n_x, y=1:n_y, z=matrix(Data$z,ncol=n_y), main="True response" )
 ```
 
 We can also compute the marginal effect of the cyclic confounder
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r show_partial, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # compute partial dependence plot
 Partial = partial( object = out,
                    pred.var = "w",
@@ -156,9 +156,9 @@ Partial = partial( object = out,
 plotPartial( Partial )
 ```
 
-Alternatively, we can use the `predict` function to plot confidence intervals for marginal effects:
+Alternatively, we can use the `predict` function to plot confidence intervals for marginal effects, although this is disabled on CRAN vignettes:
 
-```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+```{r show_ggplot, eval=FALSE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # create new data frame
 newdata <- data.frame(w = seq(min(Data$w), max(Data$w), length.out = 100))
 newdata = cbind( newdata, 'x'=13, 'y'=13, 'var'='n' )

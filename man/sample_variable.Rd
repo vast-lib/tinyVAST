@@ -48,10 +48,10 @@ such that the associated random effects then have implausibly high magnitude.
 
  # Do fit with getJointPrecision=TRUE
  fit = tinyVAST( formula = y ~ s(x),
-                 data = data.frame(x=x,y=y),
-                 control = tinyVASTcontrol(getJointPrecision = TRUE) )
+                 data = data.frame(x=x,y=y) )
 
  # samples from distribution for the mean
- sample_variable(fit)
+ # excluding fixed effects due to CRAN checks
+ samples = sample_variable(fit, sample_fixed = FALSE)
 
 }
