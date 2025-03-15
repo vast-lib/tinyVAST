@@ -19,3 +19,8 @@ platforms = c( "m1-san", "clang-ubsan", "valgrind" )
 # 9 -- clang-ubsan
 # 30 -- valgrind
 rhub::rhub_check( platforms = platforms )
+
+# Check valgrind on dev
+if( FALSE ){
+  rhub::rhub_check( platforms = "valgrind", branch = "dev" )
+}
