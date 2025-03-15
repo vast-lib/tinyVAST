@@ -432,26 +432,6 @@ function( object,
 #' @method simulate tinyVAST
 #' @importFrom stats simulate
 #'
-#' @examples
-#' \dontrun{
-#' set.seed(101)
-#' x = seq(0, 2*pi, length=100)
-#' y = sin(x) + 0.1*rnorm(length(x))
-#' fit = tinyVAST( data=data.frame(x=x,y=y), formula = y ~ s(x) )
-#' sims = simulate(fit, nsim=100, type="mle-mvn")
-#'
-#' if(requireNamespace("DHARMa")){
-#'   # simulate new data conditional on fixed effects
-#'   # and sampling random effects from their predictive distribution
-#'   y_iz = simulate(fit, nsim=500, type="mle-mvn")
-#'
-#'   # Visualize using DHARMa
-#'   res = DHARMa::createDHARMa( simulatedResponse = y_iz,
-#'                       observedResponse = y,
-#'                       fittedPredictedResponse = fitted(fit) )
-#'   plot(res)
-#' }
-#' }
 #' @export
 simulate.tinyVAST <-
 function( object,

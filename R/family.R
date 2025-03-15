@@ -59,8 +59,6 @@ sdmTMB::tweedie
 #' Journal of Fisheries and Aquatic Sciences, 75(9), 1369-1382.
 #' \doi{10.1139/cjfas-2017-0266}
 #'
-#' @examples
-#' delta_lognormal()
 delta_lognormal <- function(link1, link2 = "log", type = c("standard", "poisson-link")) {
   type <- match.arg(type)
   if( missing(link1) ){
@@ -91,8 +89,6 @@ delta_lognormal <- function(link1, link2 = "log", type = c("standard", "poisson-
 #'   model. `"poisson-link"` for a Poisson-link delta model (Thorson 2018).
 #' @export
 #' @importFrom stats Gamma binomial
-#' @examples
-#' delta_gamma()
 #' @rdname families
 #' @references
 #' *Poisson-link delta families*:

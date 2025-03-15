@@ -32,9 +32,3 @@ A reticular action module (RAM) describing dependencies
 \description{
 \code{make_eof_ram} converts SEM arrow notation to \code{ram} describing SEM parameters
 }
-\examples{
-\dontrun{
-# Two EOFs for two variables
-make_eof_ram( times = 2010:2020, variables = c("pollock","cod"), n_eof=2 )
-}
-}

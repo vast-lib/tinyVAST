@@ -30,35 +30,6 @@
 #' nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
 #' \doi{10.48550/arXiv.2411.14185}
 #'
-#' @examples
-#' \dontrun{
-#' data( red_snapper )
-#' red_snapper = droplevels(subset(red_snapper, Data_type=="Biomass_KG"))
-#'
-#' # Define mesh
-#' mesh = fmesher::fm_mesh_2d( red_snapper[,c('Lon','Lat')],
-#'                            cutoff = 1 )
-#'
-#' # define formula with a catchability covariate for gear
-#' formula = Response_variable ~ factor(Year) + offset(log(AreaSwept_km2))
-#'
-#' # make variable column
-#' red_snapper$var = "logdens"
-#
-#' # fit using tinyVAST
-#' fit = tinyVAST( data = red_snapper,
-#'                 formula = formula,
-#'                 sem = "logdens <-> logdens, sd_space",
-#'                 space_columns = c("Lon",'Lat'),
-#'                 spatial_graph = mesh,
-#'                 family = tweedie(link="log"),
-#'                 variable_column = "var",
-#'                 control = tinyVASTcontrol( getsd = FALSE,
-#'                                            profile = "alpha_j" ) )
-#'
-#' cAIC(fit) # conditional AIC
-#' AIC(fit) # marginal AIC
-#' }
 #' @export
 cAIC <-
 function( object ){
