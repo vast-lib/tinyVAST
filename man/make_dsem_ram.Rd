@@ -155,3 +155,59 @@ Similarly, the arrow-and-lag notation can be used to specify a SAR representing
 a conventional structural equation model (SEM), cross-lagged (a.k.a. vector autoregressive)
 models (VAR), dynamic factor analysis (DFA), or many other time-series models.
 }
+\examples{
+# Univariate AR1
+dsem = "
+  X -> X, 1, rho
+  X <-> X, 0, sigma
+"
+make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
+
+# Univariate AR2
+dsem = "
+  X -> X, 1, rho1
+  X -> X, 2, rho2
+  X <-> X, 0, sigma
+"
+make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
+
+# Bivariate VAR
+dsem = "
+  X -> X, 1, XtoX
+  X -> Y, 1, XtoY
+  Y -> X, 1, YtoX
+  Y -> Y, 1, YtoY
+  X <-> X, 0, sdX
+  Y <-> Y, 0, sdY
+"
+make_dsem_ram( dsem=dsem, variables=c("X","Y"), times=1:4 )
+
+# Dynamic factor analysis with one factor and two manifest variables
+# (specifies a random-walk for the factor, and miniscule residual SD)
+dsem = "
+  factor -> X, 0, loadings1
+  factor -> Y, 0, loadings2
+  factor -> factor, 1, NA, 1
+  X <-> X, 0, NA, 0           # No additional variance
+  Y <-> Y, 0, NA, 0           # No additional variance
+"
+make_dsem_ram( dsem=dsem, variables=c("X","Y","factor"), times=1:4 )
+
+# ARIMA(1,1,0)
+dsem = "
+  factor -> factor, 1, rho1 # AR1 component
+  X -> X, 1, NA, 1          # Integrated component
+  factor -> X, 0, NA, 1
+  X <-> X, 0, NA, 0         # No additional variance
+"
+make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
+
+# ARIMA(0,0,1)
+dsem = "
+  factor -> X, 0, NA, 1
+  factor -> X, 1, rho1     # MA1 component
+  X <-> X, 0, NA, 0        # No additional variance
+"
+make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
+
+}

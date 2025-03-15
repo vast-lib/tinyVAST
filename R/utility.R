@@ -226,6 +226,19 @@ function( x,
 #' \code{n_samples} columns, where each column in a vector of samples
 #' for a requested quantity given sampled uncertainty in fixed and/or random effects
 #'
+#' @examples
+#'  set.seed(101)
+#'  x = runif(n = 100, min = 0, max = 2*pi)
+#'  y = 1 + sin(x) + 0.1 * rnorm(100)
+#'
+#'  # Do fit with getJointPrecision=TRUE
+#'  fit = tinyVAST( formula = y ~ s(x),
+#'                  data = data.frame(x=x,y=y) )
+#'
+#'  # samples from distribution for the mean
+#'  # excluding fixed effects due to CRAN checks
+#'  samples = sample_variable(fit, sample_fixed = FALSE)
+#'
 #' @export
 sample_variable <-
 function( object,
