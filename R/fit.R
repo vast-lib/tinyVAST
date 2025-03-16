@@ -157,9 +157,7 @@
 #'
 #' # fit model with cyclic confounder as GAM term
 #' out = tinyVAST( data = Data,
-#'                 formula = n ~ 1,
-#'                 spatial_domain = mesh,
-#'                 space_term = "n <-> n, sd_n" )
+#'                 formula = n ~ 1 )
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
