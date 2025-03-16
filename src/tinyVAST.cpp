@@ -363,10 +363,10 @@ bool isNA(Type x){
 //}
 
 // get sign of double, only for REPORT use
-//template<class Type>
-//Type sign(Type x){
-//  return x / pow(pow(x,2),0.5);
-//}
+template<class Type>
+Type sign(Type x){
+  return x / pow(pow(x,2),0.5);
+}
 //
 //// dlnorm
 //template<class Type>
@@ -444,21 +444,21 @@ Type one_predictor_likelihood( Type &y,
       logmu = log( p );
       log_one_minus_mu = log( Type(1.0) - mu );
       break;
-    case log_link:
-      mu = exp(p);
-      logmu = p;
-      log_one_minus_mu = log( Type(1.0) - mu );
-      break;
-    case logit_link:
-      mu = invlogit(p);
-      logmu = log(mu);
-      log_one_minus_mu = log( invlogit(-1 * p) );
-      break;
-    case cloglog_link:
-      mu = Type(1.0) - exp( -1*exp(p) );
-      logmu = logspace_sub( Type(0.0), -1*exp(p) );
-      log_one_minus_mu = -1*exp(p);
-      break;
+//    case log_link:
+//      mu = exp(p);
+//      logmu = p;
+//      log_one_minus_mu = log( Type(1.0) - mu );
+//      break;
+//    case logit_link:
+//      mu = invlogit(p);
+//      logmu = log(mu);
+//      log_one_minus_mu = log( invlogit(-1 * p) );
+//      break;
+//    case cloglog_link:
+//      mu = Type(1.0) - exp( -1*exp(p) );
+//      logmu = logspace_sub( Type(0.0), -1*exp(p) );
+//      log_one_minus_mu = -1*exp(p);
+//      break;
     default:
       error("Link not implemented.");
   }
@@ -472,63 +472,63 @@ Type one_predictor_likelihood( Type &y,
           y = rnorm( mu, exp(log_sigma_segment(0)) );
         }
         break;
-      case tweedie_family:
-        nll -= weight * dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
-        devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
-        if(isDouble<Type>::value && of->do_simulate){
-          y = rtweedie( mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
-        }
-        break;
-      case lognormal_family:
-        nll -= weight * dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
-        devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
-        if(isDouble<Type>::value && of->do_simulate){
-          y = exp(rnorm( logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
-        }
-        break;
-      case poisson_family:
-        nll -= weight * dpois( y, mu, true );
-        devresid = sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
-        if(isDouble<Type>::value && of->do_simulate){
-          y = rpois( mu );
-        }
-        break;
-      case binomial_family:
-        if(y==0){
-          nll -= weight * log_one_minus_mu;
-        }else{
-          nll -= weight * logmu;
-        }
-        if(isDouble<Type>::value && of->do_simulate){
-          y = rbinom( Type(1), mu );
-        }
-        devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
-        break;
-      case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
-        nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
-        devresid = sign(y - mu) * pow(2 * ( (y-mu)/mu - log(y/mu) ), 0.5);
-        if(isDouble<Type>::value && of->do_simulate){
-          y = rgamma( exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)) );
-        }
-        break;
-      case nbinom1_family:   // dnbinom_robust( x, log(mu_i), log(var - mu) )
-        // var - mu = exp( log(mu) + log(theta) ) = theta * mu  -->  var = (theta+1) * mu
-        nll -= weight * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
-        devresid = devresid_nbinom2( y, logmu, logmu - log_sigma_segment(0) );    // theta = mu / phi
-        if(isDouble<Type>::value && of->do_simulate){
-          // rnbinom2( mu, var )
-          y = rnbinom2( mu, mu * (Type(1.0) + exp(log_sigma_segment(0))) );
-        }
-        break;
-      case nbinom2_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
-        // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
-        nll -= weight * dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
-        devresid = devresid_nbinom2( y, logmu, log_sigma_segment(0) );
-        if(isDouble<Type>::value && of->do_simulate){
-          // rnbinom2( mu, var )
-          y = rnbinom2( mu, mu * (Type(1.0) + mu / exp(log_sigma_segment(0))) );
-        }
-        break;
+//      case tweedie_family:
+//        nll -= weight * dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+//        devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
+//        if(isDouble<Type>::value && of->do_simulate){
+//          y = rtweedie( mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
+//        }
+//        break;
+//      case lognormal_family:
+//        nll -= weight * dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+//        devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
+//        if(isDouble<Type>::value && of->do_simulate){
+//          y = exp(rnorm( logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
+//        }
+//        break;
+//      case poisson_family:
+//        nll -= weight * dpois( y, mu, true );
+//        devresid = sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
+//        if(isDouble<Type>::value && of->do_simulate){
+//          y = rpois( mu );
+//        }
+//        break;
+//      case binomial_family:
+//        if(y==0){
+//          nll -= weight * log_one_minus_mu;
+//        }else{
+//          nll -= weight * logmu;
+//        }
+//        if(isDouble<Type>::value && of->do_simulate){
+//          y = rbinom( Type(1), mu );
+//        }
+//        devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
+//        break;
+//      case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
+//        nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
+//        devresid = sign(y - mu) * pow(2 * ( (y-mu)/mu - log(y/mu) ), 0.5);
+//        if(isDouble<Type>::value && of->do_simulate){
+//          y = rgamma( exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)) );
+//        }
+//        break;
+//      case nbinom1_family:   // dnbinom_robust( x, log(mu_i), log(var - mu) )
+//        // var - mu = exp( log(mu) + log(theta) ) = theta * mu  -->  var = (theta+1) * mu
+//        nll -= weight * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
+//        devresid = devresid_nbinom2( y, logmu, logmu - log_sigma_segment(0) );    // theta = mu / phi
+//        if(isDouble<Type>::value && of->do_simulate){
+//          // rnbinom2( mu, var )
+//          y = rnbinom2( mu, mu * (Type(1.0) + exp(log_sigma_segment(0))) );
+//        }
+//        break;
+//      case nbinom2_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
+//        // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
+//        nll -= weight * dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
+//        devresid = devresid_nbinom2( y, logmu, log_sigma_segment(0) );
+//        if(isDouble<Type>::value && of->do_simulate){
+//          // rnbinom2( mu, var )
+//          y = rnbinom2( mu, mu * (Type(1.0) + mu / exp(log_sigma_segment(0))) );
+//        }
+//        break;
       default:
         error("Distribution not implemented.");
     }
