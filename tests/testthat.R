@@ -1,7 +1,7 @@
 
 
-library(testthat)
-library(tinyVAST)
+#library(testthat)
+#library(tinyVAST)
 
 # Run tests
 #testthat::test_check("tinyVAST")
