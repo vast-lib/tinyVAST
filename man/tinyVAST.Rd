@@ -185,7 +185,8 @@ mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 
 # fit model with cyclic confounder as GAM term
 out = tinyVAST( data = Data,
-                formula = n ~ 1 )
+                formula = n ~ 1,
+                control = tinyVASTcontrol(calculate_deviance_explained = FALSE) )
 
 }
 \seealso{

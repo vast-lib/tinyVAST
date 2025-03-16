@@ -157,7 +157,8 @@
 #'
 #' # fit model with cyclic confounder as GAM term
 #' out = tinyVAST( data = Data,
-#'                 formula = n ~ 1 )
+#'                 formula = n ~ 1,
+#'                 control = tinyVASTcontrol(calculate_deviance_explained = FALSE) )
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
