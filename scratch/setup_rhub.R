@@ -23,6 +23,7 @@ rhub::rhub_check( platforms = platforms )
 # Check valgrind on dev
 if( FALSE ){
   rhub::rhub_check( platforms = "valgrind", branch = "dev" )
+  rhub::rhub_check( platforms = "valgrind", branch = "dev_branch" )
   # Or main
   rhub::rhub_check( platforms = "valgrind", branch = "main" )
 }
