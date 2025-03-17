@@ -12,3 +12,8 @@
 #  9.  "wsl git clone https://github.com/vast-lib/tinyVAST"
 # To open R in command-line:  "wsl R"
 # Then use R as normal
+
+# To RUN valgrind
+# Start -> Search "cmd"
+# cd [copy windows explorer, e.g., C:\Users\james\OneDrive\Desktop\Git\tinyVAST\scratch]
+# wsl R -d "valgrind --leak-check=full" -f [R testing script, e.g., linreg.R]
