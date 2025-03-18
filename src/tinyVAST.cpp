@@ -96,9 +96,9 @@ Type gamma_distribution( vector<Type> gamma_k,
   for(int z=0; z<Sdims.size(); z++){
     int m_z = Sdims(z);
     vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
-    SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    // Probably in the following line
-    //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);  // Maybe needs Type(m_z)
+    Eigen::SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
+    // GMRF(Q).Quadform(x) caused a problem calculating the log-determinant unnecessarily, resulting in valgrind error
+    //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
     nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*(gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
     k += m_z;
   }
@@ -849,8 +849,8 @@ Type objective_function<Type>::operator() (){
 
 
   // Distribution for spline components
-  if(log_lambda.size() > 0){ nll += gamma_distribution( gamma_k, Sdims, S_kk, log_lambda ); }
-  if(log_lambda2.size() > 0){ nll += gamma_distribution( gamma2_k, S2dims, S2_kk, log_lambda2 ); }
+  nll += gamma_distribution( gamma_k, Sdims, S_kk, log_lambda );
+  nll += gamma_distribution( gamma2_k, S2dims, S2_kk, log_lambda2 );
 
   // Distribution for SVC components
   nll += xi_distribution( xi_sl, log_sigmaxi_l, Q_ss );
