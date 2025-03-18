@@ -24,7 +24,7 @@ rhub::rhub_check( platforms = platforms )
 if( FALSE ){
   rhub::rhub_check( platforms = "valgrind", branch = "dev" )
   # Or main
-  rhub::rhub_check( platforms = "valgrind", branch = "main" )
+  rhub::rhub_check( platforms = "clang-ubsan", branch = "main" )
 }
 
 # HOW TO CHECK `valgrind` FOR ISSUES
