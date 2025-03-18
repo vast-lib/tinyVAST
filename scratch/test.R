@@ -1,7 +1,9 @@
-#
+ #
     library(tinyVAST)
 
     # Simulate a seperable two-dimensional AR1 spatial process
+     #set.seed(101) # No errors
+     set.seed(123)  # HAS ERRORS
      n_x = n_y = 25
      n_w = 10
      R_xx = exp(-0.4 * abs(outer(1:n_x, 1:n_x, FUN="-")) )
@@ -21,14 +23,14 @@
 
      # fit model with cyclic confounder as GAM term
      out = tinyVAST( data = Data,
-                     formula = n ~ 1,
-                      spatial_domain = mesh,
-                      space_term = "n <-> n, sd_n" )
+                     formula = n ~ s(w),
+                     control = tinyVASTcontrol(
+                       calculate_deviance_explained = FALSE,
+                       nlminb_loops = FALSE,
+                       getsd = 0
+                     ) )
+     #rep = out$obj$report()
 
-out
-
-#     n_x = n_y = 25
-#     Data = expand.grid(x=1:n_x, y=1:n_y)
-
-     # make SPDE mesh for spatial term
-#     mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
+     #out = tinyVAST( data = Data,
+     #                formula = n ~ s(w) )
+     #out
