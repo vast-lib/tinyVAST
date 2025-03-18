@@ -98,7 +98,8 @@ Type gamma_distribution( vector<Type> gamma_k,
     vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
     Eigen::SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
     // Probably in the following line
-    nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);  // Maybe needs Type(m_z)
+    //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);  // Maybe needs Type(m_z)
+    nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*(gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
     k += m_z;
   }
   return( nll );

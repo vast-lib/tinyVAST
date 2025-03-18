@@ -2,8 +2,8 @@
     library(tinyVAST)
 
     # Simulate a seperable two-dimensional AR1 spatial process
-     set.seed(101) # No errors
-     #set.seed(123)  # HAS ERRORS
+     #set.seed(101) # No errors
+     set.seed(123)  # HAS ERRORS
      n_x = n_y = 25
      n_w = 10
      R_xx = exp(-0.4 * abs(outer(1:n_x, 1:n_x, FUN="-")) )
@@ -29,8 +29,8 @@
                        nlminb_loops = FALSE,
                        getsd = 0
                      ) )
-     rep = out$obj$report()
+     #rep = out$obj$report()
 
-     out = tinyVAST( data = Data,
-                     formula = n ~ s(w) )
-     out
+     #out = tinyVAST( data = Data,
+     #                formula = n ~ s(w) )
+     #out
