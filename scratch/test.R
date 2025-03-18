@@ -60,4 +60,106 @@ fit = tinyVAST( data = red_snapper,
 cAIC(fit) # conditional AIC
 AIC(fit) # marginal AIC
 
-#
+###############
+# make_dsem_ram
+###############
+
+
+# Univariate AR1
+dsem = "
+  X -> X, 1, rho
+  X <-> X, 0, sigma
+"
+make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
+
+# Univariate AR2
+dsem = "
+  X -> X, 1, rho1
+  X -> X, 2, rho2
+  X <-> X, 0, sigma
+"
+make_dsem_ram( dsem=dsem, variables="X", times=1:4 )
+
+# Bivariate VAR
+dsem = "
+  X -> X, 1, XtoX
+  X -> Y, 1, XtoY
+  Y -> X, 1, YtoX
+  Y -> Y, 1, YtoY
+  X <-> X, 0, sdX
+  Y <-> Y, 0, sdY
+"
+make_dsem_ram( dsem=dsem, variables=c("X","Y"), times=1:4 )
+
+# Dynamic factor analysis with one factor and two manifest variables
+# (specifies a random-walk for the factor, and miniscule residual SD)
+dsem = "
+  factor -> X, 0, loadings1
+  factor -> Y, 0, loadings2
+  factor -> factor, 1, NA, 1
+  X <-> X, 0, NA, 0           # No additional variance
+  Y <-> Y, 0, NA, 0           # No additional variance
+"
+make_dsem_ram( dsem=dsem, variables=c("X","Y","factor"), times=1:4 )
+
+# ARIMA(1,1,0)
+dsem = "
+  factor -> factor, 1, rho1 # AR1 component
+  X -> X, 1, NA, 1          # Integrated component
+  factor -> X, 0, NA, 1
+  X <-> X, 0, NA, 0         # No additional variance
+"
+make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
+
+# ARIMA(0,0,1)
+dsem = "
+  factor -> X, 0, NA, 1
+  factor -> X, 1, rho1     # MA1 component
+  X <-> X, 0, NA, 0        # No additional variance
+"
+make_dsem_ram( dsem=dsem, variables=c("X","factor"), times=1:4 )
+
+###############
+# make_eof_ram
+###############
+
+make_eof_ram( times = 2010:2020, variables = c("pollock","cod"), n_eof=2 )
+
+###############
+# simulate.tinyVAST
+###############
+
+set.seed(101)
+x = seq(0, 2*pi, length=100)
+y = sin(x) + 0.1*rnorm(length(x))
+fit = tinyVAST( data=data.frame(x=x,y=y), formula = y ~ s(x) )
+simulate(fit, nsim=100, type="mle-mvn")
+
+if(requireNamespace("DHARMa")){
+  # simulate new data conditional on fixed effects
+  # and sampling random effects from their predictive distribution
+  y_iz = simulate(fit, nsim=500, type="mle-mvn")
+
+  # Visualize using DHARMa
+  res = DHARMa::createDHARMa( simulatedResponse = y_iz,
+                      observedResponse = y,
+                      fittedPredictedResponse = fitted(fit) )
+  plot(res)
+}
+
+
+###############
+# sample_variable
+###############
+
+set.seed(101)
+ x = runif(n = 100, min = 0, max = 2*pi)
+ y = 1 + sin(x) + 0.1 * rnorm(100)
+
+ # Do fit with getJointPrecision=TRUE
+ fit = tinyVAST( formula = y ~ s(x),
+                 data = data.frame(x=x,y=y),
+                 control = tinyVASTcontrol(getJointPrecision = TRUE) )
+
+ # samples from distribution for the mean
+ sample_variable(fit)
