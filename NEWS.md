@@ -2,8 +2,10 @@
 
 * Modify examples for `simulate.tinyVAST` and `sample_variable` to try to avoid
   terminal output giving error in valgrind check
-* Modify `spatial` and `mgcv` vignettes to try to avoid code chunks giving errors
-  in clang-UBSAN check
+* Add `ivector_minus_one` function to satisfy clang-UBSAN
+* Swap `GMRF(Q).Quadform(x)` to `x.matrix().transpose() * (Q * x.matrix())` to
+  avoid calculating log-determinant of `Q` in the smoothers penalty, to avoid
+  valgrind errors
 
 # tinyVAST 1.0.0
 
