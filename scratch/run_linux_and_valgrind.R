@@ -6,6 +6,8 @@
 #  3.  "wsl sudo apt install r-base"
 #  4.  "wsl sudo apt install cmake"        # CPP compiles
 #  5.  "wsl sudo apt install libssl-dev"      # Unknown
+#  5B.  "wsl sudo apt install libudunits2-dev"         # units dependency
+#  5C.  "wsl sudo apt install proj-bin libproj-dev"    # PROJ
 #  6.  "wsl sudo apt-get install gdal-bin"     # GDAL for spatial stuff
 #  7.  "wsl sudo apt-get install libgdal-dev"  # ditto
 #  8.  "wsl sudo apt install valgrind"   # valgrind
