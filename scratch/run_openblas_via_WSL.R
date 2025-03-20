@@ -26,4 +26,9 @@ sudo update-alternatives --config liblapack.so.3-x86_64-linux-gnu
 R
 sessionInfo()
 q()
+# Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+
+# Install MKL using
 
