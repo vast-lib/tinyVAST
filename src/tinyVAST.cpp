@@ -93,14 +93,15 @@ Type gamma_distribution( vector<Type> gamma_k,
   using namespace density;
   Type nll = 0.0;
   int k = 0;   // Counter
-  for(int z=0; z<Sdims.size(); z++){   // PARALLEL_REGION
+  for(int z=0; z<Sdims.size(); z++){
     int m_z = Sdims(z);
     vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
-    SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    nll -= Type(0.5)*m_z*log_lambda(z) - 0.5*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
+    Eigen::SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
+    // GMRF(Q).Quadform(x) caused a problem calculating the log-determinant unnecessarily, resulting in valgrind error
+    //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
+    nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*(gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
     k += m_z;
   }
-
   return( nll );
 }
 
@@ -857,14 +858,19 @@ Type objective_function<Type>::operator() (){
 
   // Linear predictor
   vector<Type> p_i( n_i );
-  p_i = X_ij*alpha_j + Z_ik*gamma_k + offset_i;
+  p_i.setZero();
+  p_i += offset_i;
+  if(alpha_j.size() > 0){ p_i += X_ij*alpha_j; }
+  if(gamma_k.size() > 0){ p_i += Z_ik*gamma_k; }
   p_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
   p_i += multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
   p_i += multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
   p_i += multiply_delta( delta_tc, t_i, c_i, n_i );
   // 2nd linear predictor
   vector<Type> p2_i( n_i );
-  p2_i = X2_ij*alpha2_j + Z2_ik*gamma2_k;
+  p2_i.setZero();
+  if(alpha2_j.size() > 0){ p2_i += X2_ij*alpha2_j; }
+  if(gamma2_k.size() > 0){ p2_i += Z2_ik*gamma2_k; }
   p2_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
   p2_i += multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
   p2_i += multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);

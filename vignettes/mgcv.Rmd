@@ -100,7 +100,7 @@ Partial = partial( object = myfit,
 plotPartial( Partial )
 ```
 
-Alternatively, we can use `visreg` to visualize output:
+Alternatively, we can use `visreg` to visualize output, although it is disabled for CRAN vignette checks:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 visreg(myfit, xvar="group", what="p_g")

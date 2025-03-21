@@ -214,7 +214,8 @@ function( x,
 #'       representation of the tail probabilities, and results in some samples with implausibly high (or negative) variances,
 #'       such that the associated random effects then have implausibly high magnitude.
 #'
-#' @param x output from `\code{tinyVAST()}`
+#' @param object output from `\code{tinyVAST()}`
+#' @param newdata data frame of new data, used to sample model components for predictions e.g., \code{mu_g}
 #' @param variable_name name of variable available in report using \code{Obj$report()} or parameters using \code{Obj$env$parList()}
 #' @param n_samples number of samples from the joint predictive distribution for fixed and random effects.  Default is 100, which is slow.
 #' @param seed integer used to set random-number seed when sampling variables, as passed to \code{set.seed(.)}
@@ -232,31 +233,44 @@ function( x,
 #'
 #'  # Do fit with getJointPrecision=TRUE
 #'  fit = tinyVAST( formula = y ~ s(x),
-#'                  data = data.frame(x=x,y=y),
-#'                  control = tinyVASTcontrol(getJointPrecision = TRUE) )
+#'                  data = data.frame(x=x,y=y) )
 #'
 #'  # samples from distribution for the mean
-#'  sample_variable(fit)
+#'  # excluding fixed effects due to CRAN checks
+#'  samples = sample_variable(fit, sample_fixed = FALSE)
 #'
 #' @export
 sample_variable <-
-function( x,
+function( object,
+          newdata = NULL,
           variable_name = "mu_i",
           n_samples = 100,
           sample_fixed = TRUE,
           seed = 123456 ){
 
-  # Informative error messages
-  if( !("jointPrecision" %in% names(x$sdrep)) ){
-    stop("jointPrecision not present in x$sdrep; please re-run with `getJointPrecision=TRUE`")
+  # Rebuild object with newdata
+  if( !is.null(newdata) ){
+    tmb_data2 = add_predictions( object = object, newdata = newdata )
+    newobj = MakeADFun( data = tmb_data2,
+                        parameters = object$internal$parlist,
+                        map = object$tmb_inputs$tmb_map,
+                        random = object$tmb_inputs$tmb_random,
+                        profile = object$internal$control$profile,
+                        DLL = "tinyVAST" )
+    object = list(
+      obj = newobj,
+      sdrep = object$sdrep,
+      rep = newobj$rep()
+    )
   }
+
   # Combine Report and ParHat, and check for issues
-  ParHat = x$obj$env$parList()
-  Intersect = intersect(names(x$rep), names(ParHat))
-  if( isFALSE(all.equal(x$rep[Intersect],ParHat[Intersect])) ){
+  ParHat = object$obj$env$parList()
+  Intersect = intersect(names(object$rep), names(ParHat))
+  if( isFALSE(all.equal(object$rep[Intersect],ParHat[Intersect])) ){
     stop("Duplicate entries in `Obj$report()` and `Obj$env$parList()` are not identical when calling `sample_variable`")
   }
-  Output = c( x$rep, ParHat )
+  Output = c( object$rep, ParHat )
   # Check that variable_name is available
   if( isFALSE(variable_name %in% names(Output)) ){
     stop( variable_name, " not found in `Obj$report()` or `Obj$env$parList()`; please choose check your requested variable name from available list: ", paste(names(Output),collapse=", ") )
@@ -276,13 +290,17 @@ function( x,
 
   # Sample from joint distribution
   if( sample_fixed==TRUE ){
-    u_zr = rmvnorm_prec( mu=x$obj$env$last.par.best, prec=x$sdrep$jointPrecision, n.sims=n_samples, seed=seed)
+    # Informative error messages
+    if( !("jointPrecision" %in% names(object$sdrep)) ){
+      stop("jointPrecision not present in object$sdrep; please re-run with `getJointPrecision=TRUE`")
+    }
+    u_zr = rmvnorm_prec( mu=object$obj$env$last.par.best, prec=object$sdrep$jointPrecision, n.sims=n_samples, seed=seed)
     # apply( u_zr, MARGIN=2, FUN=function(vec){sum(abs(vec)==Inf)})
-    # u_zr[-x$obj$env$random,1]
+    # u_zr[-object$obj$env$random,1]
   }else{
-    u_zr = x$obj$env$last.par.best %o% rep(1, n_samples)
-    MC = x$obj$env$MC( keep=TRUE, n=n_samples, antithetic=FALSE )
-    u_zr[x$obj$env$random,] = attr(MC, "samples")
+    u_zr = object$obj$env$last.par.best %o% rep(1, n_samples)
+    MC = object$obj$env$MC( keep=TRUE, n=n_samples, antithetic=FALSE )
+    u_zr[object$obj$env$random,] = attr(MC, "samples")
   }
 
   # Extract variable for each sample
@@ -291,10 +309,10 @@ function( x,
     if( rI%%max(1,floor(n_samples/10)) == 0 ){
       message( "  Finished sample ", rI, " of ",n_samples )
     }
-    Report = x$obj$report( par=u_zr[,rI] )
-    ParHat = x$obj$env$parList( x=u_zr[,rI][x$obj$env$lfixed()], par=u_zr[,rI] )
-    if( isFALSE(all.equal(x$rep[Intersect],ParHat[Intersect])) ){
-      stop("Duplicate entries in `x$obj$report()` and `x$obj$env$parList()` are not identical when calling `sample_variable`")
+    Report = object$obj$report( par=u_zr[,rI] )
+    ParHat = object$obj$env$parList( x=u_zr[,rI][object$obj$env$lfixed()], par=u_zr[,rI] )
+    if( isFALSE(all.equal(object$rep[Intersect],ParHat[Intersect])) ){
+      stop("Duplicate entries in `object$obj$report()` and `object$obj$env$parList()` are not identical when calling `sample_variable`")
     }
     Output = c( Report, ParHat )
     Var = Output[[variable_name]]

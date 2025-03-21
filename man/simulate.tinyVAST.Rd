@@ -42,7 +42,7 @@ set.seed(101)
 x = seq(0, 2*pi, length=100)
 y = sin(x) + 0.1*rnorm(length(x))
 fit = tinyVAST( data=data.frame(x=x,y=y), formula = y ~ s(x) )
-simulate(fit, nsim=100, type="mle-mvn")
+sims = simulate(fit, nsim=100, type="mle-mvn")
 
 if(requireNamespace("DHARMa")){
   # simulate new data conditional on fixed effects

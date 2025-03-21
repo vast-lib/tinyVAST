@@ -5,7 +5,8 @@
 \title{Sample from predictive distribution of a variable}
 \usage{
 sample_variable(
-  x,
+  object,
+  newdata = NULL,
   variable_name = "mu_i",
   n_samples = 100,
   sample_fixed = TRUE,
@@ -13,7 +14,9 @@ sample_variable(
 )
 }
 \arguments{
-\item{x}{output from \verb{\code{tinyVAST()}}}
+\item{object}{output from \verb{\code{tinyVAST()}}}
+
+\item{newdata}{data frame of new data, used to sample model components for predictions e.g., \code{mu_g}}
 
 \item{variable_name}{name of variable available in report using \code{Obj$report()} or parameters using \code{Obj$env$parList()}}
 
@@ -45,10 +48,10 @@ such that the associated random effects then have implausibly high magnitude.
 
  # Do fit with getJointPrecision=TRUE
  fit = tinyVAST( formula = y ~ s(x),
-                 data = data.frame(x=x,y=y),
-                 control = tinyVASTcontrol(getJointPrecision = TRUE) )
+                 data = data.frame(x=x,y=y) )
 
  # samples from distribution for the mean
- sample_variable(fit)
+ # excluding fixed effects due to CRAN checks
+ samples = sample_variable(fit, sample_fixed = FALSE)
 
 }

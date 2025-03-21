@@ -564,15 +564,15 @@ function( formula,
     X2_ij = delta_gam_basis$X_ij,
     Z2_ik = delta_gam_basis$Z_ik,
     W2_il = delta_SVC$W_il,
-    t_i = t_i - 1, # -1 to convert to CPP index
-    c_i = c_i - 1, # -1 to convert to CPP index
+    t_i = ivector_minus_one(t_i), # -1 to convert to CPP index, and keep as integer-vector
+    c_i = ivector_minus_one(c_i), # -1 to convert to CPP index, and keep as integer-vector
     offset_i = gam_basis$offset_i,
     weights_i = weights_i,
     family_ez = distributions$family_code,
     link_ez = distributions$link_code,
     components_e = distributions$components,
     poislink_e = distributions$poisson_link_delta,
-    e_i = distributions$e_i - 1, # -1 to convert to CPP index
+    e_i = ivector_minus_one(distributions$e_i), # -1 to convert to CPP index, and keep as integer-vector
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,
     Sdims = gam_basis$Sdims,
@@ -762,10 +762,15 @@ function( formula,
 
   # Optimize
   #start_time = Sys.time()
+  if( isTRUE(control$suppress_nlminb_warnings) ){
+    do_nlminb = function( ... ) suppressWarnings(nlminb( ... ))
+  }else{
+    do_nlminb = function( ... ) nlminb( ... )
+  }
   opt = list( "par"=obj$par )
   for( i in seq_len(max(0,control$nlminb_loops)) ){
     if( isTRUE(control$verbose) ) message("Running nlminb_loop #", i)
-    opt = nlminb( start = opt$par,
+    opt = do_nlminb( start = opt$par,
                   objective = obj$fn,
                   gradient = obj$gr,
                   control = list( eval.max = control$eval.max,
@@ -889,6 +894,9 @@ function( formula,
 #'        explained.  See [deviance_explained()]
 #' @param run_model whether to run the model of export TMB objects prior to compilation
 #'        (useful for debugging)
+#' @param suppress_nlminb_warnings whether to suppress uniformative warnings
+#'        from \code{nlminb} arising when a function evaluation is NA, which
+#'        are then replaced with Inf and avoided during estimation
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
@@ -912,7 +920,8 @@ function( nlminb_loops = 1,
           reml = FALSE,
           getJointPrecision = FALSE,
           calculate_deviance_explained = TRUE,
-          run_model = TRUE ){
+          run_model = TRUE,
+          suppress_nlminb_warnings = TRUE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -934,7 +943,8 @@ function( nlminb_loops = 1,
     reml = reml,
     getJointPrecision = getJointPrecision,
     calculate_deviance_explained = calculate_deviance_explained,
-    run_model = run_model
+    run_model = run_model,
+    suppress_nlminb_warnings = suppress_nlminb_warnings
   ), class = "tinyVASTcontrol" )
 }
 

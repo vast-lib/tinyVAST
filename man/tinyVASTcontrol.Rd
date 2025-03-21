@@ -20,7 +20,8 @@ tinyVASTcontrol(
   reml = FALSE,
   getJointPrecision = FALSE,
   calculate_deviance_explained = TRUE,
-  run_model = TRUE
+  run_model = TRUE,
+  suppress_nlminb_warnings = TRUE
 )
 }
 \arguments{
@@ -73,6 +74,10 @@ explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 
 \item{run_model}{whether to run the model of export TMB objects prior to compilation
 (useful for debugging)}
+
+\item{suppress_nlminb_warnings}{whether to suppress uniformative warnings
+from \code{nlminb} arising when a function evaluation is NA, which
+are then replaced with Inf and avoided during estimation}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or

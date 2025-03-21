@@ -148,7 +148,7 @@ test_that("Index standardization results are identical in VAST and tinyVAST", {
     "Est. (bias.correct)" = as.list(vast$par$SD, report=TRUE, what="Est. (bias.correct)")$Index_ctl[1,,1]
   )
   index_tv = as.matrix(index[1:3,])
-  expect_equal( index_vast, index_tv, tol = 1 )
-  expect_equal( tv$opt$obj, as.numeric(vast$parameter_estimates$obj), tol = 0.1 )
+  expect_equal( index_vast, index_tv, tolerance = 1 )
+  expect_equal( tv$opt$obj, as.numeric(vast$parameter_estimates$obj), tolerance = 0.1 )
 })
 

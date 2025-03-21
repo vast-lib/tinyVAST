@@ -28,10 +28,6 @@ elements \code{delta} (logical) and \code{type} (standard vs. Poisson-link).
 \description{
 Additional families compatible with \code{\link[=tinyVAST]{tinyVAST()}}.
 }
-\examples{
-delta_lognormal()
-delta_gamma()
-}
 \references{
 \emph{Poisson-link delta families}:
 

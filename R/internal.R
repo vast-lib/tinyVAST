@@ -1,6 +1,14 @@
 .onAttach <- function(libname, pkgname) {
 }
 
+ivector_minus_one <- function( ivector ){
+  if( any(is.na(ivector)) ) stop("Check ivector for NAs")
+  if( length(ivector) > 0 ){
+    ivector = as.integer( ivector - 1 )
+  }
+  return(ivector)
+}
+
 rm_wsp <- function (x) {
   # from brms:::rm_wsp()
   # VIA sdmTMB smoothers.R
