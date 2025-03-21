@@ -19,5 +19,3 @@
 # Start -> Search "cmd"
 # cd [copy windows explorer, e.g., C:\Users\james\OneDrive\Desktop\Git\tinyVAST]
 # wsl R -d "valgrind" -f scratch/test.R      #  remove  --leak-check=full to match CRAN
-
-#

@@ -163,3 +163,4 @@ set.seed(101)
 
  # samples from distribution for the mean
  sample_variable(fit)
+
