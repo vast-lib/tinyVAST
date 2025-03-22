@@ -58,7 +58,7 @@ d_cs = L_cf \%*\% delta_fs
 # Shape into longform data-frame and add error
 Data = data.frame( expand.grid(species=1:n_c, x=1:n_x, y=1:n_y),
                    "var"="logn", "z"=exp(as.vector(d_cs)) )
-Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$z, phi=0.5, power=1.5 )
+Data$n = rnorm( n=nrow(Data), mean=Data$z, sd=0.1 )
 
 # make mesh
 mesh = fmesher::fm_mesh_2d( Data[,c('x','y')] )
@@ -88,7 +88,6 @@ out = tinyVAST( space_term = sem,
            data = Data,
            formula = n ~ 0 + factor(species),
            spatial_domain = mesh,
-           family = tweedie(),
            variables = c( "f1", "f2", 1:n_c ),
            space_columns = c("x","y"),
            variable_column = "species",
