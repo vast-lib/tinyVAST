@@ -111,7 +111,7 @@
 #'   update.formula binomial poisson predict
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
-#' @importFrom Matrix Cholesky solve Matrix diag
+#' @importFrom Matrix Cholesky solve Matrix diag t
 #' @importFrom abind abind
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference

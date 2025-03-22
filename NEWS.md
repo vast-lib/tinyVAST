@@ -1,3 +1,8 @@
+# tinyVAST 1.1.0
+
+* Adding `term_covariance` to calculate the covariance among variables for SEM term,
+  or covariance among variables-and-lags for DSEM terms
+
 # tinyVAST 1.0.1
 
 * Modify examples for `simulate.tinyVAST` and `sample_variable` to try to avoid
