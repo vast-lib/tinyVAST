@@ -527,8 +527,8 @@ named_list <- function(...) {
 #'            time_column = "time",
 #'            distribution_column = "dist" )
 #'
-#' Extract covariance among species and factors, where
-#' estimated covariance is obtained by ignoring factors
+#' # Extract covariance among species and factors, where
+#' # estimated covariance is obtained by ignoring factors
 #' V = term_covariance( out, what = "space_term", pred = "one" )
 #'
 #' @export
