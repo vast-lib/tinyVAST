@@ -490,7 +490,7 @@ named_list <- function(...) {
 #' # Shape into longform data-frame and add error
 #' Data = data.frame( expand.grid(species=1:n_c, x=1:n_x, y=1:n_y),
 #'                    "var"="logn", "z"=exp(as.vector(d_cs)) )
-#' Data$n = rnorm( n=nrow(Data), mean=Data$z, sd=0.1 )
+#' Data$n = rnorm( n=nrow(Data), mean=Data$z, sd=1 )
 #'
 #' # make mesh
 #' mesh = fmesher::fm_mesh_2d( Data[,c('x','y')] )
