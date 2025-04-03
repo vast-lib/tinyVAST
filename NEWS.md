@@ -2,6 +2,8 @@
 
 * Adding `term_covariance` to calculate the covariance among variables for SEM term,
   or covariance among variables-and-lags for DSEM terms
+* Adding Restricted Spatial Regression estimator for covariates `alphaprime_j` and `alphaprime2_j`
+  to `fit$rep` output.
 
 # tinyVAST 1.0.1
 
