@@ -856,25 +856,34 @@ Type objective_function<Type>::operator() (){
   nll += xi_distribution( xi_sl, log_sigmaxi_l, Q_ss );
   nll += xi_distribution( xi2_sl, log_sigmaxi2_l, Q_ss );
 
-  // Linear predictor
+  // Linear predictor .. keep partial effects for RSR adjustment below
   vector<Type> p_i( n_i );
   p_i.setZero();
   p_i += offset_i;
   if(alpha_j.size() > 0){ p_i += X_ij*alpha_j; }
   if(gamma_k.size() > 0){ p_i += Z_ik*gamma_k; }
-  p_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
-  p_i += multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
-  p_i += multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
-  p_i += multiply_delta( delta_tc, t_i, c_i, n_i );
+  vector<Type> pepsilon1_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
+  vector<Type> pomega1_i = multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
+  vector<Type> pxi1_i = multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
+  vector<Type> pdelta1_i = multiply_delta( delta_tc, t_i, c_i, n_i );
+  p_i += pepsilon1_i;
+  p_i += pomega1_i;
+  p_i += pxi1_i;
+  p_i += pdelta1_i;
+
   // 2nd linear predictor
   vector<Type> p2_i( n_i );
   p2_i.setZero();
   if(alpha2_j.size() > 0){ p2_i += X2_ij*alpha2_j; }
   if(gamma2_k.size() > 0){ p2_i += Z2_ik*gamma2_k; }
-  p2_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
-  p2_i += multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
-  p2_i += multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
-  p2_i += multiply_delta( delta2_tc, t_i, c_i, n_i );
+  vector<Type> pepsilon2_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
+  vector<Type> pomega2_i = multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
+  vector<Type> pxi2_i = multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
+  vector<Type> pdelta2_i = multiply_delta( delta2_tc, t_i, c_i, n_i );
+  p2_i += pepsilon2_i;
+  p2_i += pomega2_i;
+  p2_i += pxi2_i;
+  p2_i += pdelta2_i;
 
   // Likelihood
   // relative_deviance != devresid^2 for hurdle model
@@ -897,6 +906,14 @@ Type objective_function<Type>::operator() (){
       devresid_i(i) = NAN;
     }
   }
+
+  // Restricted spatial regression correction
+  matrix<Type> covX_jj = X_ij.transpose() * X_ij;
+  matrix<Type> precisionX_jj = atomic::matinv(covX_jj);
+  vector<Type> alphaprime_j = alpha_j + (precisionX_jj * (X_ij.transpose() * (pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i).matrix())).array();
+  matrix<Type> covX2_jj = X2_ij.transpose() * X2_ij;
+  matrix<Type> precisionX2_jj = atomic::matinv(covX2_jj);
+  vector<Type> alphaprime2_j = alpha2_j + (precisionX2_jj * (X2_ij.transpose() * (pomega2_i + pepsilon2_i + pxi2_i + pdelta2_i).matrix())).array();
 
   // Predictions
   if( n_g > 0 ){
@@ -1017,6 +1034,8 @@ Type objective_function<Type>::operator() (){
   }
 
   // Reporting
+  REPORT( alphaprime_j );
+  REPORT( alphaprime2_j );
   REPORT( p_i );
   REPORT( p2_i );
   REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
