@@ -554,9 +554,16 @@ function( formula,
   # All interactions among features should come here
   ##############
 
+  # Make options
+  spatial_options = c(
+    spatial_method_code,
+    ifelse( control$gmrf_parameterization=="separable", 0, 1),
+    ifelse( isFALSE(control$get_rsr), 0, 1)
+  )
+
   # make dat
   tmb_data = list(
-    spatial_options = c(spatial_method_code, ifelse(control$gmrf_parameterization=="separable",0,1) ),
+    spatial_options = spatial_options,
     y_i = gam_basis$y_i,
     X_ij = gam_basis$X_ij,
     Z_ik = gam_basis$Z_ik,
