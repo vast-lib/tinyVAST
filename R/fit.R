@@ -897,6 +897,8 @@ function( formula,
 #' @param suppress_nlminb_warnings whether to suppress uniformative warnings
 #'        from \code{nlminb} arising when a function evaluation is NA, which
 #'        are then replaced with Inf and avoided during estimation
+#' @param get_rsr Experimental option, whether to report restricted spatial
+#'        regression (RSR) adjusted estimator for covariate responses
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
@@ -921,7 +923,8 @@ function( nlminb_loops = 1,
           getJointPrecision = FALSE,
           calculate_deviance_explained = TRUE,
           run_model = TRUE,
-          suppress_nlminb_warnings = TRUE ){
+          suppress_nlminb_warnings = TRUE,
+          get_rsr = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -944,7 +947,8 @@ function( nlminb_loops = 1,
     getJointPrecision = getJointPrecision,
     calculate_deviance_explained = calculate_deviance_explained,
     run_model = run_model,
-    suppress_nlminb_warnings = suppress_nlminb_warnings
+    suppress_nlminb_warnings = suppress_nlminb_warnings,
+    get_rsr = get_rsr
   ), class = "tinyVASTcontrol" )
 }
 

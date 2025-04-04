@@ -682,6 +682,8 @@ Type objective_function<Type>::operator() (){
   // Spatial objects
   DATA_IVECTOR( spatial_options );   //
   // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off;  spatial_options(0)==4: stream-network
+  // spatial_options(1)==0: use GMRF(Q) to evaluate density;  spatial_options(1)==1: use GMRF(I) and project by Q^{-0.5} to evaluate density
+  // spatial_options(2)==0: no RSS; spatial_options(2)==1: yes RSR
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -908,12 +910,18 @@ Type objective_function<Type>::operator() (){
   }
 
   // Restricted spatial regression correction
-  matrix<Type> covX_jj = X_ij.transpose() * X_ij;
-  matrix<Type> precisionX_jj = atomic::matinv(covX_jj);
-  vector<Type> alphaprime_j = alpha_j + (precisionX_jj * (X_ij.transpose() * (pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i).matrix())).array();
-  matrix<Type> covX2_jj = X2_ij.transpose() * X2_ij;
-  matrix<Type> precisionX2_jj = atomic::matinv(covX2_jj);
-  vector<Type> alphaprime2_j = alpha2_j + (precisionX2_jj * (X2_ij.transpose() * (pomega2_i + pepsilon2_i + pxi2_i + pdelta2_i).matrix())).array();
+  if( spatial_options(2) == 1 ){
+    matrix<Type> covX_jj = X_ij.transpose() * X_ij;
+    matrix<Type> precisionX_jj = atomic::matinv(covX_jj);
+    vector<Type> alphaprime_j = alpha_j + (precisionX_jj * (X_ij.transpose() * (pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i).matrix())).array();
+    matrix<Type> covX2_jj = X2_ij.transpose() * X2_ij;
+    matrix<Type> precisionX2_jj = atomic::matinv(covX2_jj);
+    vector<Type> alphaprime2_j = alpha2_j + (precisionX2_jj * (X2_ij.transpose() * (pomega2_i + pepsilon2_i + pxi2_i + pdelta2_i).matrix())).array();
+    REPORT( alphaprime_j );
+    REPORT( alphaprime2_j );
+    ADREPORT( alphaprime_j );
+    ADREPORT( alphaprime2_j );
+  }
 
   // Predictions
   if( n_g > 0 ){
@@ -1034,8 +1042,6 @@ Type objective_function<Type>::operator() (){
   }
 
   // Reporting
-  REPORT( alphaprime_j );
-  REPORT( alphaprime2_j );
   REPORT( p_i );
   REPORT( p2_i );
   REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
