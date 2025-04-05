@@ -5,12 +5,11 @@ bibentry(
                  "spatio-temporal models"),
   author = c(
     person(c("James", "T."), "Thorson"),
-    person(c("Sean", "C."), "Ward"),
+    person(c("Sean", "C."), "Anderson"),
     person(c("Pamela"), "Goddard"),
     person(c("Christopher", "N."), "Rooper")
   ),
-  year = "2024",
-  journal = "bioRxiv",
-  volume = "2401.10193",
-  doi = "10.48550/arXiv.2401.10193"
+  year = "2025",
+  journal = "Global Ecology and Biogeography",
+  doi = "10.1111/geb.70035"
 )
