@@ -42,10 +42,10 @@ To cite tinyVAST in publications use:
 citation("tinyVAST")
 ```
 
-Thorson, J. T., Anderson, S. C., Goddard, P., & Rooper, C. N. (2024).
+Thorson, J. T., Anderson, S. C., Goddard, P., & Rooper, C. N. (2025).
 tinyVAST: R package with an expressive interface to specify lagged and
-simultaneous effects in multivariate spatio-temporal models
-(arXiv:2401.10193). arXiv. <http://arxiv.org/abs/2401.10193>
+simultaneous effects in multivariate spatio-temporal models. 
+Global Ecology and Biogeography.  <https://doi.org/10.1111/geb.70035>
 
 ## Related software
 
