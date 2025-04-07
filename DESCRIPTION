@@ -39,6 +39,7 @@ Imports:
     abind,
     sdmTMB,
     dsem (>= 1.6.0),
+    insight
 Suggests:
     ggplot2,
     knitr,
@@ -55,7 +56,8 @@ Suggests:
     plyr,
     DHARMa,
     glmmTMB,
-    tibble
+    tibble,
+    cv
 LinkingTo:
     RcppEigen,
     TMB

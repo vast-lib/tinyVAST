@@ -34,6 +34,10 @@ test_that("Basic tinyVAST works", {
   expect_true(sum(is.na(s[,2])) == 0L)
 })
 
+test_that("cv(.) works for crossvalidation", {
+
+})
+
 # test_that("data_colnames are robust", {
 #
 #   expect_error({out <- tinyVAST(

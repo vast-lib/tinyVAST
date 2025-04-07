@@ -4,6 +4,7 @@
   or covariance among variables-and-lags for DSEM terms
 * Adding Restricted Spatial Regression estimator for covariates `alphaprime_j` and `alphaprime2_j`
   to `fit$rep` output.
+* Adding methods to allow use of `cv` to calculate crossvalidation skill
 
 # tinyVAST 1.0.1
 
