@@ -196,6 +196,12 @@ function( formula,
   assertDataFrame(data)
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
+  # Input conflicts
+  matched_call = match.call()
+  if( isTRUE(as.character(matched_call$family) == "family") ){
+    stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name")
+  }
+
   # Haven't tested for extra levels
   tmpdata = droplevels(data)
   if( !identical(tmpdata,data) ){
@@ -850,7 +856,7 @@ function( formula,
     rep = obj$report(obj$env$last.par.best),
     sdrep = sdrep,
     tmb_inputs = list(tmb_data=tmb_data, tmb_par=tmb_par, tmb_map=tmb_map, tmb_random=tmb_random),
-    call = match.call(),
+    call = matched_call,
     run_time = Sys.time() - start_time,
     internal = internal
   )

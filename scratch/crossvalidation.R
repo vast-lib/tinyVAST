@@ -10,6 +10,7 @@ z = mvtnorm::rmvnorm(1, sigma=kronecker(R_xx,R_yy) )
 w = sample(1:n_w, replace=TRUE, size=length(z))
 Data = data.frame( expand.grid(x=1:n_x, y=1:n_y), w=w, z=as.vector(z) + cos(w/n_w*2*pi))
 Data$n = Data$z + rnorm(nrow(Data), sd=1)
+Data$c = rpois( nrow(Data), lambda = exp(Data$n) )
 
 # Add columns for multivariate and/or temporal dimensions
 Data$var = "n"
@@ -18,10 +19,20 @@ Data$var = "n"
 mesh = fmesher::fm_mesh_2d( Data[,c('x','y')], n=100 )
 
 # fit model with cyclic confounder as GAM term
+Family = gaussian()
 out = tinyVAST( data = Data,
-                formula = n ~ s(w),
+                formula = c ~ s(w),
+                space_columns = c("x", "y"),
+                #data = dat,
+                #formula = d ~ 1,
+                #space_columns = c("X1", "X2"),
+                family = Family,
                 spatial_domain = mesh,
                 space_term = "n <-> n, sd_n" )
+cv(out)
+
+library(cv)
+CV = cv(out)
 
 #########
 # update works
