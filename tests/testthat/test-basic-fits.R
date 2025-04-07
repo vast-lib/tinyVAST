@@ -17,7 +17,8 @@ sim_dat1 <- function(seed = 192838) {
 dat <- sim_dat1()
 
 test_that("Basic tinyVAST works", {
-  mesh <- fmesher::fm_mesh_2d(dat[, c("x", "y")], n = 100)
+  require(fmesher)
+  mesh <- fm_mesh_2d(dat[, c("x", "y")], n = 100)
   out <- tinyVAST(
     data = dat,
     formula = n ~ s(w),
