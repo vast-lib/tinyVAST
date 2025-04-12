@@ -378,7 +378,7 @@ function( formula,
   # Spatial domain constructor
   ##############
 
-  if( is(spatial_domain,"fm_mesh_2d") ){
+  if( inherits(spatial_domain,"fm_mesh_2d") ){
     # SPDE
     n_s = spatial_domain$n
     spatial_method_code = 1
@@ -386,7 +386,7 @@ function( formula,
     spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     estimate_kappa = TRUE
-  }else if( is(spatial_domain,"igraph") ) {
+  }else if( inherits(spatial_domain,"igraph") ) {
     # SAR
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_domain, sparse=TRUE )
@@ -396,7 +396,7 @@ function( formula,
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
     estimate_kappa = ifelse( ecount(spatial_domain)>0, TRUE, FALSE )
-  }else if( is(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
+  }else if( inherits(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
     # stream network
     spatial_method_code = 4
     n_s = spatial_domain$n
