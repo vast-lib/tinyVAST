@@ -45,7 +45,7 @@ citation("tinyVAST")
 Thorson, J. T., Anderson, S. C., Goddard, P., & Rooper, C. N. (2025).
 tinyVAST: R package with an expressive interface to specify lagged and
 simultaneous effects in multivariate spatio-temporal models. 
-Global Ecology and Biogeography.  <https://doi.org/10.1111/geb.70035>
+Global Ecology and Biogeography.  34(4): e70035. <https://doi.org/10.1111/geb.70035>
 
 ## Related software
 
