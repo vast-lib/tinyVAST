@@ -29,16 +29,19 @@ out <- tinyVAST(
     silent = FALSE
   )
 )
-# Run cv::cv
-library(cv)
-CV = cv(out, seed = 123)
 
 test_that("Basic tinyVAST works", {
   expect_s3_class(out, "tinyVAST")
   s <- summary(out$sdrep)
   expect_true(sum(is.na(s[,2])) == 0L)
+})
 
-  #
+test_that("cv::cv works", {
+  skip_on_ci()
+  skip_on_cran()
+
+  # Run cv::cv
+  CV = cv::cv(out, seed = 123)
   expect_equal( as.numeric(CV[['CV crit']]), 1.607874, tolerance = 0.0001 )
 })
 
