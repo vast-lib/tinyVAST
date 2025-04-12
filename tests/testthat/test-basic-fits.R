@@ -39,6 +39,7 @@ test_that("Basic tinyVAST works", {
 test_that("cv::cv works", {
   skip_on_ci()
   skip_on_cran()
+  skip_on_covr()
 
   # Run cv::cv
   CV = cv::cv(out, seed = 123)

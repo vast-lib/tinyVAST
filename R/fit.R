@@ -165,6 +165,10 @@
 #'                 spatial_domain = mesh,
 #'                 space_term = "n <-> n, sd_n" )
 #'
+#' # Run crossvalidation
+#' CV = cv::cv( out )
+#' CV
+#'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
 tinyVAST <-

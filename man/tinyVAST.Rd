@@ -191,6 +191,10 @@ out = tinyVAST( data = Data,
                 spatial_domain = mesh,
                 space_term = "n <-> n, sd_n" )
 
+# Run crossvalidation
+CV = cv::cv( out )
+CV
+
 }
 \seealso{
 Details section of \code{\link[=make_dsem_ram]{make_dsem_ram()}} for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
