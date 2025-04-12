@@ -54,7 +54,9 @@
 #'        in argument `times`.
 #' @param times A integer vector listing the set of times in order.
 #'        If `times=NULL`, then it is filled in as the vector of integers
-#'        from the minimum to maximum value of `data$time`.
+#'        from the minimum to maximum value of `data$time`.  Alternatively,
+#'        it could be the minimum value of `data$time` through future years,
+#'        such that the model can forecast those future years.
 #' @param variable_column A character string indicating the column of `data`
 #'        listing the variable for each sample, from the set of times
 #'        in argument `variables`.
@@ -114,8 +116,7 @@
 #' @importFrom Matrix Cholesky solve Matrix diag t
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data
-#' @importFrom insight get_response get_data
-#' @importFrom cv GetResponse
+#' @importFrom cv GetResponse cv
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
