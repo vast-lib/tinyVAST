@@ -30,7 +30,8 @@ out <- tinyVAST(
   )
 )
 # Run cv::cv
-CV = cv::cv(out, seed = 123)
+library(cv)
+CV = cv(out, seed = 123)
 
 test_that("Basic tinyVAST works", {
   expect_s3_class(out, "tinyVAST")
