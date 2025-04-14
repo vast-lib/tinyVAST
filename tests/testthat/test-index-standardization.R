@@ -51,7 +51,7 @@ test_that("Basic index standardization works", {
   expect_equal( my1$opt, my2$opt, tolerance=0.001 )
 
   # Predicted sample-weighted total
-  integrate_output( my1,
+  index = integrate_output( my1,
                     newdata = subset(Data,time==t) )
 
   # fit with time & spacetime random-walk using GMRF-projection
@@ -73,8 +73,9 @@ test_that("Basic index standardization works", {
   expect_equal( my3$opt, my4$opt, tolerance=0.001 )
 })
 
-test_that("Index standardization results are identical in VAST and tinyVAST", {
+test_that("Index standardization results are identical in VAST, tinyVAST, and sdmTMB", {
   skip_if_not(require(VAST))
+  skip_if_not(require(sdmTMB))
   library(fmesher)
   set.seed(101)
   options("tinyVAST.verbose" = FALSE)
@@ -141,14 +142,56 @@ test_that("Index standardization results are identical in VAST and tinyVAST", {
   )
   # cbind( tv$rep$mu_i, vast$Report$D_i )
 
-  #
+  # tinyVAST index
   index_vast = rbind(
     "Estimate" = as.list(vast$par$SD, report=TRUE, what="Estimate")$Index_ctl[1,,1],
     "Std. Error" = as.list(vast$par$SD, report=TRUE, what="Std. Error")$Index_ctl[1,,1],
     "Est. (bias.correct)" = as.list(vast$par$SD, report=TRUE, what="Est. (bias.correct)")$Index_ctl[1,,1]
   )
   index_tv = as.matrix(index[1:3,])
-  expect_equal( index_vast, index_tv, tolerance = 1 )
+
+  mesh2 = make_mesh( data = droplevels(Data),
+                     xy_cols = c("Lon","Lat"),
+                     mesh = vast$spatial_list$Mesh$anisotropic_mesh )
+  sdm = sdmTMB(
+    formula = Response_variable ~ 0 + factor(Year),
+    data = droplevels(Data),
+    mesh = mesh2,
+    family = delta_gamma(type="poisson-link"),
+    spatiotemporal = list("iid","off"),
+    time = "Year",
+    spatial = list("on","off"),
+    share_range = TRUE,
+    do_index = TRUE
+  )
+  pred_sdm = predict( sdm,
+                      newdata = data.frame(extrap$Data_Extrap),
+                      xy_cols = c("Lon","Lat"),
+                      return_tmb_object = TRUE,
+                      year =  )
+  index_sdm = sapply(
+    sort(unique(Data$Year)),
+    FUN = \(t){
+      pred_sdm = predict( sdm,
+                          newdata = data.frame(extrap$Data_Extrap, Year = t),
+                          xy_cols = c("Lon","Lat"),
+                          return_tmb_object = TRUE )
+      index_sdm = get_index( pred_sdm,
+                             bias_correct = TRUE,
+                             area = as.numeric(extrap$Area_km2) )[1:6]
+      index_sdm$est
+    }
+  )
+
+  # index for tinyVAST vs. VAST
+  expect_equal( index_tv, index_vast, tolerance = 1 )
+  # index for tinyVAST vs. sdmTMB
+  expect_equal( index_tv['Est. (bias.correct)',], index_sdm, tolerance = 1 )
+  # ML for tinyVAST vs. VAST
   expect_equal( tv$opt$obj, as.numeric(vast$parameter_estimates$obj), tolerance = 0.1 )
+  # ML for tinyVAST vs. sdmTMB
+  expect_equal( tv$opt$obj, as.numeric(sdm$model$obj), tolerance = 0.1 )
 })
+
+
 
