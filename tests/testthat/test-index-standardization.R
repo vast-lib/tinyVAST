@@ -161,14 +161,8 @@ test_that("Index standardization results are identical in VAST, tinyVAST, and sd
     spatiotemporal = list("iid","off"),
     time = "Year",
     spatial = list("on","off"),
-    share_range = TRUE,
-    do_index = TRUE
+    share_range = TRUE
   )
-  pred_sdm = predict( sdm,
-                      newdata = data.frame(extrap$Data_Extrap),
-                      xy_cols = c("Lon","Lat"),
-                      return_tmb_object = TRUE,
-                      year =  )
   index_sdm = sapply(
     sort(unique(Data$Year)),
     FUN = \(t){
