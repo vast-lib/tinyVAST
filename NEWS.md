@@ -5,6 +5,9 @@
 * Adding Restricted Spatial Regression estimator for covariates `alphaprime_j` and `alphaprime2_j`
   to `fit$rep` output.
 * Adding methods to allow use of `cv` to calculate crossvalidation skill
+* Add `bias.correct` option to predict (but still no flag for SEs for anything except p_i)
+* Switch `sample_variable` from using `obj$env$MC` to `obj$env$spHess(random=TRUE)`
+  which seems more stable as dependency
 
 # tinyVAST 1.0.1
 

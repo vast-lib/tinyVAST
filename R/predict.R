@@ -24,6 +24,7 @@
 #'        \code{pepsilon2_g} is the second predictor from spatio-temporal variation, and
 #'        \code{pxi2_g} is the second predictor from spatially varying coefficients.
 #' @param se.fit Calculate standard errors?
+#' @param bias.correct whether to epsilon bias-correct the predicted value
 #' @param ... Not used.
 #' @importFrom Matrix Matrix sparseMatrix
 #'
@@ -40,12 +41,14 @@ function( object,
           what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pdelta_g", "pxi_g",
                    "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pdelta2_g", "pxi2_g"),
           se.fit = FALSE,
+          bias.correct = FALSE,
           ... ){
 
   # extract original X and Z
   if(missing(newdata)){
     newdata = object$data
   }
+  if( isTRUE(bias.correct) & isFALSE(se.fit) ) stop("`bias.correct` can only be done if `se.fit=TRUE`")
   assertDataFrame(newdata)
   if(inherits(newdata,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
   what = match.arg(what)
@@ -67,7 +70,7 @@ function( object,
 
   # Add standard errors
   if( isTRUE(se.fit) ){
-    if( what!="p_g" ) stop("se.fit=TRUE only works for what=`p_g`", call. = FALSE)
+    if( what %in% "p_g" ) stop("se.fit=TRUE only works for what=`p_g`", call. = FALSE)
     if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE", call. = FALSE)
     newsd = sdreport( obj = newobj,
                       par.fixed = object$opt$par,
@@ -77,7 +80,10 @@ function( object,
     SD = as.list( newsd, what="Std. Error", report=TRUE )
     out = list( fit = out,
                 se.fit = SD[[what]] )
-
+    if( isTRUE(bias.correct) ){
+      bias.corrected = as.list( newsd, what="Est. (bias.correct)", report=TRUE )
+      out$bias.corrected = bias.corrected[[what]]
+    }
   }
 
   return( out )

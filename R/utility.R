@@ -299,8 +299,11 @@ function( object,
     # u_zr[-object$obj$env$random,1]
   }else{
     u_zr = object$obj$env$last.par.best %o% rep(1, n_samples)
-    MC = object$obj$env$MC( keep=TRUE, n=n_samples, antithetic=FALSE )
-    u_zr[object$obj$env$random,] = attr(MC, "samples")
+    Q = object$obj$env$spHess( random = TRUE, par = object$obj$env$last.par.best )
+    MC = rmvnorm_prec( mu=object$obj$env$last.par.best[object$obj$env$lrandom()], prec=Q, n.sims=n_samples, seed=seed)
+    #MC = object$obj$env$MC( keep=TRUE, n=n_samples, antithetic=FALSE )
+    #u_zr[object$obj$env$random,] = attr(MC, "samples")
+    u_zr[object$obj$env$lrandom(),] = MC
   }
 
   # Extract variable for each sample
