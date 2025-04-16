@@ -75,14 +75,15 @@ test_that("dsem and tinyVAST give identical results with lags", {
   Y = 2 + 0.5 * X + rnorm(n_rows - 1)
 
   # Add NAs
-  X = c(X, NA)
-  Y = c(NA, Y)
+  X = c(X, NA )
+  Y = c(NA, Y )
 
-  # Must omit NAs to have same data set in each
-  tsdat = ts( na.omit(data.frame(X=X, Y=Y)) )
+  # Keep full in data in both
+  tsdat = ts( data.frame(X=X, Y=Y) )
   dat = expand.grid( times = time(tsdat), var = c("X","Y") )
   dat$site = "a"
   dat$z = as.vector(tsdat)
+  dat = na.omit(dat)
 
   #
   f1 = tinyVAST(
@@ -93,11 +94,6 @@ test_that("dsem and tinyVAST give identical results with lags", {
     time_column = "times",
     control = tinyVASTcontrol( extra_reporting = TRUE )
   )
-  rep1 = f1$obj$report()
-  v1 = f1$obj$env$last.par
-  p1 = f1$obj$env$parList()
-  #rep1$Rho_time_hh
-  #rep1$Gamma_time_hh
 
   # dsem
   f2 = dsem(
