@@ -735,7 +735,8 @@ function( formula,
   if( !is.null(control$tmb_par) ){
     # Check shape but not numeric values, and give informative error
     attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
-    if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
+    # Compare dimensions by multiplying both by zero
+    if( isTRUE(all.equal(control$tmb_par*0, tmb_par*0, tolerance=Inf)) ){
       tmb_par = control$tmb_par
     }else{
       stop("Not using `control$tmb_par` because it has some difference from `tmb_par` built internally")
