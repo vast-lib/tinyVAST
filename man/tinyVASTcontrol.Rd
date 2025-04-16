@@ -83,6 +83,9 @@ are then replaced with Inf and avoided during estimation}
 
 \item{get_rsr}{Experimental option, whether to report restricted spatial
 regression (RSR) adjusted estimator for covariate responses}
+
+\item{extra_reporting}{Whether to report a much larger set of quantities via
+\code{obj$env$report()}}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or

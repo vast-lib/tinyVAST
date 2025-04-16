@@ -923,6 +923,8 @@ function( formula,
 #'        are then replaced with Inf and avoided during estimation
 #' @param get_rsr Experimental option, whether to report restricted spatial
 #'        regression (RSR) adjusted estimator for covariate responses
+#' @param extra_reporting Whether to report a much larger set of quantities via
+#'        \code{obj$env$report()}
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
