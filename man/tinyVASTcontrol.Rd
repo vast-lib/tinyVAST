@@ -22,7 +22,8 @@ tinyVASTcontrol(
   calculate_deviance_explained = TRUE,
   run_model = TRUE,
   suppress_nlminb_warnings = TRUE,
-  get_rsr = FALSE
+  get_rsr = FALSE,
+  extra_reporting = FALSE
 )
 }
 \arguments{
