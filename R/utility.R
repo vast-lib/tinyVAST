@@ -373,7 +373,9 @@ function( x,
     control$trace = 0
     control$verbose = FALSE
     control$calculate_deviance_explained = FALSE
-  
+    control$tmb_par = NULL
+    control$tmb_map = NULL
+
   # 
   control_initial = control
     control_initial$nlminb_loops = 0
