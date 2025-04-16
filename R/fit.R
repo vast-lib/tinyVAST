@@ -572,7 +572,8 @@ function( formula,
   spatial_options = c(
     spatial_method_code,
     ifelse( control$gmrf_parameterization=="separable", 0, 1),
-    ifelse( isFALSE(control$get_rsr), 0, 1)
+    ifelse( isFALSE(control$get_rsr), 0, 1),
+    ifelse( isFALSE(control$extra_reporting), 0, 1)
   )
 
   # make dat
@@ -947,7 +948,8 @@ function( nlminb_loops = 1,
           calculate_deviance_explained = TRUE,
           run_model = TRUE,
           suppress_nlminb_warnings = TRUE,
-          get_rsr = FALSE ){
+          get_rsr = FALSE,
+          extra_reporting = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -971,7 +973,8 @@ function( nlminb_loops = 1,
     calculate_deviance_explained = calculate_deviance_explained,
     run_model = run_model,
     suppress_nlminb_warnings = suppress_nlminb_warnings,
-    get_rsr = get_rsr
+    get_rsr = get_rsr,
+    extra_reporting = extra_reporting
   ), class = "tinyVASTcontrol" )
 }
 

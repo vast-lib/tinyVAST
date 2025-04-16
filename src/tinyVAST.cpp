@@ -684,6 +684,7 @@ Type objective_function<Type>::operator() (){
   // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off;  spatial_options(0)==4: stream-network
   // spatial_options(1)==0: use GMRF(Q) to evaluate density;  spatial_options(1)==1: use GMRF(I) and project by Q^{-0.5} to evaluate density
   // spatial_options(2)==0: no RSS; spatial_options(2)==1: yes RSR
+  // spatial_options(3)==0: no extra reporting; spatial_options(3)==1: yes extra reporting
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -860,14 +861,19 @@ Type objective_function<Type>::operator() (){
 
   // Linear predictor .. keep partial effects for RSR adjustment below
   vector<Type> p_i( n_i );
-  p_i.setZero();
-  p_i += offset_i;
-  if(alpha_j.size() > 0){ p_i += X_ij*alpha_j; }
-  if(gamma_k.size() > 0){ p_i += Z_ik*gamma_k; }
+  vector<Type> palpha1_i( n_i );
+  vector<Type> pgamma1_i( n_i );
+  palpha1_i.setZero();
+  pgamma1_i.setZero();
+  p_i = offset_i;
+  if(alpha_j.size() > 0){ palpha1_i = X_ij*alpha_j; }
+  if(gamma_k.size() > 0){ pgamma1_i = Z_ik*gamma_k; }
   vector<Type> pepsilon1_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
   vector<Type> pomega1_i = multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
   vector<Type> pxi1_i = multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
   vector<Type> pdelta1_i = multiply_delta( delta_tc, t_i, c_i, n_i );
+  p_i += palpha1_i;
+  p_i += pgamma1_i;
   p_i += pepsilon1_i;
   p_i += pomega1_i;
   p_i += pxi1_i;
@@ -875,13 +881,19 @@ Type objective_function<Type>::operator() (){
 
   // 2nd linear predictor
   vector<Type> p2_i( n_i );
+  vector<Type> palpha2_i( n_i );
+  vector<Type> pgamma2_i( n_i );
+  palpha2_i.setZero();
+  pgamma2_i.setZero();
   p2_i.setZero();
-  if(alpha2_j.size() > 0){ p2_i += X2_ij*alpha2_j; }
-  if(gamma2_k.size() > 0){ p2_i += Z2_ik*gamma2_k; }
+  if(alpha2_j.size() > 0){ palpha2_i = X2_ij*alpha2_j; }
+  if(gamma2_k.size() > 0){ pgamma2_i = Z2_ik*gamma2_k; }
   vector<Type> pepsilon2_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
   vector<Type> pomega2_i = multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
   vector<Type> pxi2_i = multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
   vector<Type> pdelta2_i = multiply_delta( delta2_tc, t_i, c_i, n_i );
+  p2_i += palpha2_i;
+  p2_i += pgamma2_i;
   p2_i += pepsilon2_i;
   p2_i += pomega2_i;
   p2_i += pxi2_i;
@@ -1052,5 +1064,40 @@ Type objective_function<Type>::operator() (){
   SIMULATE{
     REPORT(y_i);
   }
+
+  //
+  if( spatial_options(3) == 1 ){
+    REPORT( Rho_hh );
+    REPORT( Gamma_hh );
+    REPORT( Gammainv_hh );
+    REPORT( Rho_cc );
+    REPORT( Gamma_cc );
+    REPORT( Gammainv_cc );
+    REPORT( Rho_time_hh );
+    REPORT( Gamma_time_hh );
+    REPORT( Gammainv_time_hh );
+    REPORT( Rho2_hh );
+    REPORT( Gamma2_hh );
+    REPORT( Gammainv2_hh );
+    REPORT( Rho2_cc );
+    REPORT( Gamma2_cc );
+    REPORT( Gammainv2_cc );
+    REPORT( Rho2_time_hh );
+    REPORT( Gamma2_time_hh );
+    REPORT( Gammainv2_time_hh );
+    REPORT( palpha1_i );
+    REPORT( pgamma1_i );
+    REPORT( pepsilon1_i );
+    REPORT( pomega1_i );
+    REPORT( pxi1_i );
+    REPORT( pdelta1_i );
+    REPORT( palpha2_i );
+    REPORT( pgamma2_i );
+    REPORT( pepsilon2_i );
+    REPORT( pomega2_i );
+    REPORT( pxi1_i );
+    REPORT( pdelta2_i );
+  }
+
   return nll;
 }
