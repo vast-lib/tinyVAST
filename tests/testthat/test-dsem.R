@@ -11,7 +11,7 @@ test_that("dsem and tinyVAST give identical results without lags", {
   X = 1 + rnorm(n_rows)
   Y = 2 + 0.5 * X + rnorm(n_rows)
 
-  # Must omit NAs to have same data set in each
+  # Format wide-form for DSEM and long-form fot tinyVAST
   tsdat = ts( data.frame(X=X, Y=Y) )
   dat = expand.grid( times = time(tsdat), var = c("X","Y") )
   dat$site = "a"
@@ -26,13 +26,15 @@ test_that("dsem and tinyVAST give identical results without lags", {
     time_column = "times"
   )
 
-  # dsem
+  # dsem build inputs
   f2 = dsem(
     tsdata = tsdat,
     family = c( "normal", "normal" ),
     sem = "X -> Y, 0, beta",
     control = dsem_control( run_model = FALSE, use_REML = FALSE )
   )
+
+  # Refit with same measurement error as tinyVAST
   map = f2$tmb_inputs$map
     map$lnsigma_j = factor( c(NA,NA) )
   pars = f2$tmb_inputs$parameters
@@ -74,11 +76,11 @@ test_that("dsem and tinyVAST give identical results with lags", {
   X = 1 + rnorm(n_rows - 1)
   Y = 2 + 0.5 * X + rnorm(n_rows - 1)
 
-  # Add NAs
+  # Add NAs for manually lagged effect
   X = c(X, NA )
   Y = c(NA, Y )
 
-  # Keep full in data in both
+  # Format wide-form for DSEM and long-form fot tinyVAST
   tsdat = ts( data.frame(X=X, Y=Y) )
   dat = expand.grid( times = time(tsdat), var = c("X","Y") )
   dat$site = "a"
@@ -95,7 +97,7 @@ test_that("dsem and tinyVAST give identical results with lags", {
     control = tinyVASTcontrol( extra_reporting = TRUE )
   )
 
-  # dsem
+  # dsem build inputs
   f2 = dsem(
     tsdata = tsdat,
     family = c( "normal", "normal" ),
@@ -104,7 +106,7 @@ test_that("dsem and tinyVAST give identical results with lags", {
                             getsd = FALSE, extra_convergence_checks = FALSE )
   )
 
-  #
+  # Refit with same measurement error as tinyVAST
   map = f2$tmb_inputs$map
     map$lnsigma_j = factor( c(NA,NA) )
   pars = f2$tmb_inputs$parameters
