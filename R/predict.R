@@ -407,6 +407,22 @@ function( object,
   make_covariates <-
   function( gam ){
 
+    remove_s_t2_ti_t2 <- function(formula) {
+      # FROM sdmTMB smoothers.R
+      terms <- stats::terms(formula)
+      terms_labels <- attr(terms, "term.labels")
+      drop_s <- grep("s\\(", terms_labels)
+      drop_t2 <- grep("t2\\(", terms_labels)
+      drop_te <- grep("te\\(", terms_labels)
+      drop_ti <- grep("ti\\(", terms_labels)
+      drop_all = unique( c(drop_s, drop_t2, drop_te, drop_ti) )
+      tdrop <- terms_labels[drop_all]
+      for (i in seq_along(tdrop)) {
+        formula <- stats::update(formula, paste("~ . -", tdrop[i]))
+      }
+      formula
+    }
+
     # Assemble predZ
     Z_gk = lapply( seq_along(gam$smooth),
                     FUN = \(x) mgcv::PredictMat(gam$smooth[[x]], data=newdata) )
@@ -415,7 +431,7 @@ function( object,
     if(is.null(Z_gk)) Z_gk = matrix( 0, nrow=nrow(newdata), ncol=0 )
 
     # Assemble predX
-    formula_no_sm = remove_s_and_t2(gam$formula)
+    formula_no_sm = remove_s_t2_ti_t2(gam$formula)
     mf1 = model.frame(formula_no_sm, origdata, drop.unused.levels=TRUE)
     #  drop.unused.levels necessary when using formula = ~ interaction(X,Y), which otherwise creates full-factorial combination of levels
     terms1 = attr(mf1, "terms")

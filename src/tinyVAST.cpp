@@ -84,23 +84,56 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
 }
 
 // distribution/projection for gamma
+// Based on:
+//   https://github.com/meganferg/FergusonEtal_20250125_EBS_Beluga_DSM/blob/main/src/te_tw_DSM.cpp#L85C9-L85C40 (Megan Ferguson)
 template<class Type>
 Type gamma_distribution( vector<Type> gamma_k,
                          vector<int> Sdims,
+                         vector<int> Sblock,
                          Eigen::SparseMatrix<Type> S_kk,
                          vector<Type> log_lambda ){
 
   using namespace density;
   Type nll = 0.0;
-  int k = 0;   // Counter
+  int start_gamma = 0;   // Counter for gamma
+  int start_k = 0;       // counter for columns of S_kk
+  int index_lambda = 0;
   for(int z=0; z<Sdims.size(); z++){
-    int m_z = Sdims(z);
-    vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
-    Eigen::SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    // GMRF(Q).Quadform(x) caused a problem calculating the log-determinant unnecessarily, resulting in valgrind error
-    //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
-    nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*(gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
-    k += m_z;
+    int ngamma_z = Sdims(z);
+    // Recover gamma_segment
+    vector<Type> gamma_segment = gamma_k.segment(start_gamma, ngamma_z);
+    start_gamma += ngamma_z;
+
+    // s() splines
+    if( Sblock(z) == 1 ){
+      // Recover S_block
+      Eigen::SparseMatrix<Type> S_block = S_kk.block(start_k, start_k, ngamma_z, ngamma_z);  // Recover S_i
+
+      /// Quadratic-form GRMF
+      // GMRF(Q).Quadform(x) caused a problem calculating the log-determinant unnecessarily, resulting in valgrind error
+      //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
+      nll -= Type(0.5)*Type(ngamma_z)*log_lambda(index_lambda) - Type(0.5) * exp(log_lambda(index_lambda)) *
+                                                    (gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
+
+      start_k += ngamma_z;
+      index_lambda += 1;
+    }
+
+    // te() / ti() / t2() splines
+    if( Sblock(z) >= 2 ){
+      // Recover S_block ... Eigen::SparseMatrix<Type> appears to initialize as empty so no .setZero() equivalent needed
+      Eigen::SparseMatrix<Type> S_block( ngamma_z, ngamma_z );
+      for( int block=0; block < Sblock(z); block ++ ){
+        Eigen::SparseMatrix<Type> S_tmp = S_kk.block(start_k, start_k, ngamma_z, ngamma_z);  // Recover S_i
+        S_block += exp(log_lambda(index_lambda)) * S_tmp;
+        start_k += ngamma_z;
+        index_lambda++;
+      }
+
+      /// Quadratic-form GRMF
+      nll -= 0.5*(atomic::logdet(matrix<Type>(S_block))) - 0.5 *
+                                                    (gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
+    }
   }
   return( nll );
 }
@@ -676,8 +709,10 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( weights_i );
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
+  DATA_IVECTOR( Sblock );
   DATA_SPARSE_MATRIX( S2_kk ); // Sparse penalization matrix
   DATA_IVECTOR( S2dims );   // Dimensions of blockwise components of S_kk
+  DATA_IVECTOR( S2block );
 
   // Spatial objects
   DATA_IVECTOR( spatial_options );   //
@@ -852,8 +887,8 @@ Type objective_function<Type>::operator() (){
 
 
   // Distribution for spline components
-  nll += gamma_distribution( gamma_k, Sdims, S_kk, log_lambda );
-  nll += gamma_distribution( gamma2_k, S2dims, S2_kk, log_lambda2 );
+  nll += gamma_distribution( gamma_k, Sdims, Sblock, S_kk, log_lambda );
+  nll += gamma_distribution( gamma2_k, S2dims, S2block, S2_kk, log_lambda2 );
 
   // Distribution for SVC components
   nll += xi_distribution( xi_sl, log_sigmaxi_l, Q_ss );

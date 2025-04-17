@@ -8,6 +8,7 @@
 * Add `bias.correct` option to predict (but still no flag for SEs for anything except p_i)
 * Switch `sample_variable` from using `obj$env$MC` to `obj$env$spHess(random=TRUE)`
   which seems more stable as dependency
+* Add functionality for `te` and `ti` splines, although they remain poorly tested
 
 # tinyVAST 1.0.1
 

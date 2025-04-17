@@ -52,7 +52,7 @@ test_that("Basic splines work", {
   expect_gt(cor(p_s, p_v), 0.999)
 })
 
-test_that("2D splines work (or throw an error for now)", {
+test_that("t2 splines throw an error for now", {
   set.seed(1)
   dat <- mgcv::gamSim(1, n = 400, scale = 2)
   dat$fac <- fac <- as.factor(sample(1:20, 400, replace = TRUE))
@@ -62,7 +62,29 @@ test_that("2D splines work (or throw an error for now)", {
   m_m <- mgcv::gam(y ~ t2(x1, x2), data = dat)
   m_s <- sdmTMB::sdmTMB(y ~ t2(x1, x2), data = dat, spatial = "off")
   expect_error(m_v <- tinyVAST(formula = y ~ t2(x1, x2), data = dat), regexp = "t2")
-  expect_error(m_v <- tinyVAST(formula = y ~ te(x1, x2), data = dat), regexp = "te")
+})
+
+test_that("ti and te splines work", {
+  set.seed(1)
+  dat <- mgcv::gamSim(1, n = 400, scale = 2)
+  dat$fac <- fac <- as.factor(sample(1:20, 400, replace = TRUE))
+  dat$y <- dat$y + model.matrix(~ fac - 1) %*% rnorm(20) * .5
+  dat$y <- as.numeric(dat$y)
+
+  form = y ~ s(x1) + s(x2) + ti(x1, x2)
+  m_m <- mgcv::gam( form, data = dat)
+  m_v <- tinyVAST( form, data = dat)
+  p_m <- predict(m_m)
+  p_v <- predict(m_v)
+  expect_gt(cor(p_v, p_m), 0.99)
+
+  #
+  form = y ~ te(x1, x2)
+  m_m <- mgcv::gam( form, data = dat)
+  m_v <- tinyVAST( form, data = dat)
+  p_m <- predict(m_m)
+  p_v <- predict(m_v)
+  expect_gt(cor(p_v, p_m), 0.99)
 })
 
 # modified from sdmTMB tests:

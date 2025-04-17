@@ -314,10 +314,10 @@ function( formula,
     df_ram = data.frame(output$ram)
     ram_gamma = df_ram[df_ram$heads==2,,drop=FALSE]
     total_variance_h = tapply( as.numeric(ifelse(is.na(ram_gamma$start), 1, ram_gamma$start)),
-            INDEX = ram_gamma$from, FUN=\(x)sum(abs(x)) )
+            INDEX = ram_gamma$from, FUN=function(x)sum(abs(x)) )
     ram_rho = df_ram[df_ram$heads==1,,drop=FALSE]
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram_rho$start), 1, ram_rho$start)),
-            INDEX = ram_rho$from, FUN=\(x)sum(abs(x)) )
+            INDEX = ram_rho$from, FUN=function(x)sum(abs(x)) )
     if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
       stop("Must use gmrf_parameterization=`projection` for the spacetime_term RAM supplied")
     }
@@ -363,10 +363,10 @@ function( formula,
     df_ram = data.frame(output$ram)
     ram2 = df_ram[df_ram$heads == 2,,drop=FALSE]
     total_variance_h = tapply( as.numeric(ifelse( is.na(ram2$start), 1, ram2$start)),
-            INDEX = ram2$from, FUN=\(x)sum(abs(x)) )
+            INDEX = ram2$from, FUN=function(x)sum(abs(x)) )
     ram1 = df_ram[df_ram$heads == 1,,drop=FALSE]
     total_effect_h = tapply( as.numeric(ifelse(is.na(ram1$start), 1, ram1$start)),
-            INDEX = ram1$from, FUN=\(x)sum(abs(x)) )
+            INDEX = ram1$from, FUN=function(x)sum(abs(x)) )
     if( any(total_variance_h==0) && control$gmrf_parameterization=="separable" ){
       stop("Must use options$gmrf_parameterization=`projection` for the space_term RAM supplied")
     }
@@ -424,7 +424,7 @@ function( formula,
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
-  which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
+  which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=function(x) all(!is.na(x)) & any(x>0) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
   if( (nrow(spacetime_term_ram$output$ram)==0) & (nrow(delta_spacetime_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
@@ -434,7 +434,7 @@ function( formula,
 
   #
   Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
-  which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
+  which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=function(x) all(!is.na(x)) ))
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
   if( (nrow(space_term_ram$output$ram)==0) & (nrow(delta_space_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
@@ -454,28 +454,49 @@ function( formula,
     offset_i = gam_setup$offset
 
     # Extract and combine penalization matrices
-    S_list = lapply( seq_along(gam_setup$smooth), \(x) gam_setup$smooth[[x]]$S[[1]] )
-    S_kk = Matrix::.bdiag(S_list)       # join S's in sparse matrix
-    Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
-    if(is.null(Sdims)) Sdims = vector(length=0)
+    #S_list = lapply( seq_along(gam_setup$smooth), function(x) gam_setup$smooth[[x]]$S[[1]] )
+    #S_kk = Matrix::.bdiag(S_list)       # join S's in sparse matrix
+    #Sdims = unlist(lapply(S_list,nrow)) # Find dimension of each S
+    #if(is.null(Sdims)) Sdims = vector(length=0)
 
-    # Get covariates
-    not_allowed <- vapply(c("t2(", "te("), \(.x)
+    # Warnings and errors
+    not_allowed <- vapply( c("t2("), function(.x)
       length(grep(.x, x=gam_setup$term.names, fixed=TRUE)) > 0, FUN.VALUE = logical(1L)
     )
-    if (any(not_allowed)) {
-      stop("Found t2() or te() smoothers. These are not yet implemented.", call. = FALSE)
+    if(any(not_allowed)) {
+      stop("Found t2() smoothers. These are not yet implemented.", call. = FALSE)
     }
-    which_se = grep( pattern="s(", x=gam_setup$term.names, fixed=TRUE )
+    which_experimental <- vapply( c("ti(", "te("), function(.x)
+      length(grep(.x, x=gam_setup$term.names, fixed=TRUE)) > 0, FUN.VALUE = logical(1L)
+    )
+    if(any(which_experimental)) {
+      message("Found ti() or te() smoothers. These are experimental.", call. = FALSE)
+    }
 
-    # Extract and add names
+    # Extract and combine penalization matrices by block
+    S_list = lapply( seq_along(gam_setup$smooth), function(x) gam_setup$smooth[[x]]$S )
+    S_kk = Matrix::.bdiag( lapply(S_list, Matrix::.bdiag) )
+    Sdims = unlist( lapply(S_list, FUN = function(List){nrow(List[[1]])}) )
+    Sblock = unlist( lapply(S_list, length) )
+    if( sum(Sdims * Sblock) != nrow(S_kk) ) stop("Check constructor for smooths, term `Sblock`")
+
+    # Identify fixed vs. random effects
+    search_names = c( "s(", "te(", "ti(", "t2(" )
+    which_se = sapply( X = search_names,
+                       FUN = function(x){ grep( pattern=x, x=gam_setup$term.names, fixed=TRUE ) } )
+    which_se = sort( unlist(which_se), decreasing = FALSE )
+    if( length(which_se) != sum(Sdims) ) stop("Check constructor for smooths, term `which_se`")
+
+    # Extract design matrices for fixed and random effects and add names
     colnames(gam_setup$X) = gam_setup$term.names
     X_ij = gam_setup$X[,setdiff(seq_len(ncol(gam_setup$X)),which_se),drop=FALSE]
     Z_ik = gam_setup$X[,which_se,drop=FALSE]
+    if(is.null(Sdims)) Sdims = numeric()
+    if(is.null(Sblock)) Sblock = numeric()
 
     #
-    out = list( "X_ij"=X_ij, "Z_ik"=Z_ik, "S_kk"=S_kk, "Sdims"=Sdims, "y_i"=y_i,
-                "offset_i"=offset_i, "gam_setup"=gam_setup )
+    out = list( "X_ij"=X_ij, "Z_ik"=Z_ik, "S_kk"=S_kk, "Sdims"=Sdims, "Sblock" = Sblock,
+                "y_i"=y_i, "offset_i"=offset_i, "gam_setup"=gam_setup )
     return(out)
   }
   gam_basis = build_gam_basis( formula )
@@ -498,8 +519,8 @@ function( formula,
 
     # Construct log_sigma based on family
     pad_length = function(x){if(length(x)==1) c(x,99L) else x}
-    remove_last = \(x) x[-length(x)]
-    Nsigma_e = sapply( family, FUN=\(x){
+    remove_last = function(x) x[-length(x)]
+    Nsigma_e = sapply( family, FUN=function(x){
                        switch( x$family[length(x$family)],
                          "gaussian" = 1,
                          "tweedie" = 2,
@@ -514,7 +535,7 @@ function( formula,
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
     #
-    family_code = t(rbind(sapply( family, FUN=\(x){
+    family_code = t(rbind(sapply( family, FUN=function(x){
                        pad_length(c("gaussian" = 0,
                          "tweedie" = 1,
                          "lognormal" = 2,
@@ -525,15 +546,15 @@ function( formula,
                          "nbinom1" = 6,
                          "nbinom2" = 7)[x$family])
                        } )))
-    link_code = t(rbind(sapply( family, FUN=\(x){
+    link_code = t(rbind(sapply( family, FUN=function(x){
                        pad_length(c("identity" = 0,
                          "log" = 1,
                          "logit" = 2,
                          "cloglog" = 3 )[x$link])
                        } )))
     components = apply( family_code, MARGIN=1,
-                         FUN=\(x)sum(x != 99L) )
-    poisson_link_delta = sapply( family, FUN=\(x){
+                         FUN=function(x)sum(x != 99L) )
+    poisson_link_delta = sapply( family, FUN=function(x){
                          as.integer(isTRUE(x$type == "poisson_link_delta"))} )
     out = list( "family_code" = cbind(family_code),
                 "link_code" = cbind(link_code),
@@ -598,8 +619,10 @@ function( formula,
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,
     Sdims = gam_basis$Sdims,
+    Sblock = gam_basis$Sblock,
     S2_kk = delta_gam_basis$S_kk,
     S2dims = delta_gam_basis$Sdims,
+    S2block = delta_gam_basis$Sblock,
     Aepsilon_zz = Aepsilon_zz - 1,     # Index form, i, s, t
     Aepsilon_z = Aepsilon_z,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
@@ -647,19 +670,19 @@ function( formula,
   # make params
   tmb_par = list(
     alpha_j = rep(0,ncol(tmb_data$X_ij)),  # Spline coefficients
-    gamma_k = rep(0,ncol(tmb_data$Z_ik)),  # Spline coefficients
+    gamma_k = rep(0,sum(tmb_data$Sdims)),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
     beta_z = as.numeric(ifelse(spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta_z = as.numeric(ifelse(space_term_ram$param_type==1, 0.01, 1)),
     nu_z = as.numeric(ifelse(time_term_ram$param_type==1, 0.01, 1)),
-    log_lambda = rep(0,length(tmb_data$Sdims)), #Log spline penalization coefficients
+    log_lambda = rep(0,sum(tmb_data$Sblock)), #Log spline penalization coefficients
     log_sigmaxi_l = rep(0,ncol(tmb_data$W_il)),
 
     alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
-    gamma2_k = rep(0,ncol(tmb_data$Z2_ik)),  # Spline coefficients
+    gamma2_k = rep(0,sum(tmb_data$S2dims)),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
     beta2_z = as.numeric(ifelse(delta_spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta2_z = as.numeric(ifelse(delta_space_term_ram$param_type==1, 0.01, 1)),
     nu2_z = as.numeric(ifelse(delta_time_term_ram$param_type==1, 0.01, 1)),
-    log_lambda2 = rep(0,length(tmb_data$S2dims)), #Log spline penalization coefficients
+    log_lambda2 = rep(0,sum(tmb_data$S2block)), #Log spline penalization coefficients
     log_sigmaxi2_l = rep(0,ncol(tmb_data$W2_il)),
 
     log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
@@ -765,6 +788,13 @@ function( formula,
       tmb_random = tmb_random
     )
     return(out)
+  }
+
+  # Debugging speedup ... if walking through manually, save and reload inputs in case of R crash
+  if( FALSE ){
+    setwd( R'(C:\Users\James.Thorson\Desktop\Temporary (can be deleted!))' )
+    save.image( "debugging.RData" )
+    #load.image( "debugging.RData" )
   }
 
   if( FALSE ){
