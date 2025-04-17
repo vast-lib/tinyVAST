@@ -72,19 +72,21 @@ test_that("ti and te splines work", {
   dat$y <- as.numeric(dat$y)
 
   form = y ~ s(x1) + s(x2) + ti(x1, x2)
-  m_m <- mgcv::gam( form, data = dat)
+  m_m <- mgcv::gam( form, data = dat, method="ML")
   m_v <- tinyVAST( form, data = dat)
   p_m <- predict(m_m)
   p_v <- predict(m_v)
   expect_gt(cor(p_v, p_m), 0.99)
+  cbind( "tinyVAST" = m_v$internal$parlist$log_lambda, "mgcv" = log(m_m$sp) )
 
   #
   form = y ~ te(x1, x2)
-  m_m <- mgcv::gam( form, data = dat)
+  m_m <- mgcv::gam( form, data = dat, method="ML")
   m_v <- tinyVAST( form, data = dat)
   p_m <- predict(m_m)
   p_v <- predict(m_v)
   expect_gt(cor(p_v, p_m), 0.99)
+  cbind( "tinyVAST" = m_v$internal$parlist$log_lambda, "mgcv" = log(m_m$sp) )
 })
 
 # modified from sdmTMB tests:
