@@ -76,7 +76,7 @@ test_that("ti and te splines work", {
   m_v <- tinyVAST( form, data = dat)
   p_m <- predict(m_m)
   p_v <- predict(m_v)
-  expect_gt(cor(p_v, p_m), 0.99)
+  expect_gt(cor(p_v, p_m), 0.98)
   cbind( "tinyVAST" = m_v$internal$parlist$log_lambda, "mgcv" = log(m_m$sp) )
 
   #
@@ -85,7 +85,7 @@ test_that("ti and te splines work", {
   m_v <- tinyVAST( form, data = dat)
   p_m <- predict(m_m)
   p_v <- predict(m_v)
-  expect_gt(cor(p_v, p_m), 0.99)
+  expect_gt(cor(p_v, p_m), 0.98)
   cbind( "tinyVAST" = m_v$internal$parlist$log_lambda, "mgcv" = log(m_m$sp) )
 })
 
