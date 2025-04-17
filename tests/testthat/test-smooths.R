@@ -204,21 +204,21 @@ test_that("A model with s(x, bs = 'cc') works", {
   expect_gt(stats::cor(p_v, p_m), 0.999)
 })
 
-# test_that("A model with s() by variables works", {
-#   set.seed(1)
-#   dat <- mgcv::gamSim(4)
-#   m_mgcv <- mgcv::gam(y ~ fac + s(x2, by = fac) + s(x0), data = dat)
-#   p_mgcv <- predict(m_mgcv)
-#
-#   m_s <- sdmTMB::sdmTMB(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat, spatial = "off")
-#
-#   m_v <- tinyVAST(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat)
-#   expect_s3_class(m_v, "tinyVAST")
-#
-#   p_m <- predict(m_mgcv)
-#   p_v <- predict(m_v)
-#   p_s <- predict(m_s)$est
-#
-#   plot(p_m, p_v);abline(a = 0, b = 1)
-#   expect_gt(cor(p_v, p_m), 0.9999)
-# })
+test_that("A model with s() by variables works", {
+  set.seed(1)
+  dat <- mgcv::gamSim(4)
+  m_mgcv <- mgcv::gam(y ~ fac + s(x2, by = fac) + s(x0), data = dat)
+  p_mgcv <- predict(m_mgcv)
+
+  m_s <- sdmTMB::sdmTMB(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat, spatial = "off")
+
+  m_v <- tinyVAST(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat)
+  expect_s3_class(m_v, "tinyVAST")
+
+  p_m <- predict(m_mgcv)
+  p_v <- predict(m_v)
+  p_s <- predict(m_s)$est
+
+  plot(p_m, p_v);abline(a = 0, b = 1)
+  expect_gt(cor(p_v, p_m), 0.99)
+})
