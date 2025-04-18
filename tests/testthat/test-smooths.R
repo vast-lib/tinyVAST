@@ -52,6 +52,31 @@ test_that("Basic splines work", {
   expect_gt(cor(p_s, p_v), 0.999)
 })
 
+test_that("Specify spline-order in s() works", {
+  #skip_on_cran()
+  #skip_on_ci()
+
+  set.seed(1)
+  dat <- mgcv::gamSim(1, n = 400, scale = 2)
+  newdata = data.frame( x2 = seq(-1, 1, by = 0.01) )
+
+  # Cubic spline ... penalize 2nd derivative, so extrapolate line beyond range
+  m_m <- mgcv::gam(y ~ s( x2, m = 2), data = dat, REML = FALSE)
+  p_m2 = predict( m_m, newdata )
+  m_v <- tinyVAST(formula = y ~ s(x2, m = 2), data = dat)
+  p_v2 <- predict( m_v, newdata )
+  expect_gt(cor(p_v2, p_m2), 0.999)
+  matplot( x = newdata$x2, y = cbind( p_m2, p_v2 ), type="l")
+
+  # Quadratic spline ... penalize 1st derivative, so extrapolate constant beyond range
+  m_m <- mgcv::gam(y ~ s( x2, m = 1), data = dat, REML = FALSE)
+  p_m1 = predict( m_m, newdata )
+  m_v <- tinyVAST(formula = y ~ s(x2, m = 1), data = dat)
+  p_v1 <- predict( m_v, newdata )
+  expect_gt(cor(p_v1, p_m1), 0.999)
+  matplot( x = newdata$x2, y = cbind( p_m1, p_v1 ), type="l")
+})
+
 test_that("t2 splines throw an error for now", {
   set.seed(1)
   dat <- mgcv::gamSim(1, n = 400, scale = 2)
