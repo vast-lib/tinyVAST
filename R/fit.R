@@ -470,7 +470,7 @@ function( formula,
       length(grep(.x, x=gam_setup$term.names, fixed=TRUE)) > 0, FUN.VALUE = logical(1L)
     )
     if(any(which_experimental)) {
-      message("Found ti() or te() smoothers. These are experimental.", call. = FALSE)
+      if(isTRUE(control$verbose)) message("Found ti() or te() smoothers. These are experimental.")
     }
 
     # Extract and combine penalization matrices by block
