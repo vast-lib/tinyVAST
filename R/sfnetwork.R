@@ -92,16 +92,16 @@ function( stream ){
   nodes = st_as_sf(activate(stream,"nodes"))
   N = nrow(nodes)
 
+  # Old table
+  table = data.frame( from = edges$from,
+                     to = edges$to,
+                     dist = drop_units(st_length(edges)) )
+
   # Error check
   number_of_parents = table( factor(table$to, levels=seq_len(N)) )
   if( max(number_of_parents) > 1 ){
     stop("Stream network has multiple parents for a node, i.e., isn't ordered upstream as assumed")
   }
-
-  # Old table
-  table = data.frame( from = edges$from,
-                     to = edges$to,
-                     dist = drop_units(st_length(edges)) )
 
   # Sparse matrix form ... doesn't work because sparseMatrix sums distances from multiple cells in M2 prior to nonlinear transformation
   # Have to calculate sparse matricse in CPP using the sparse distance matrix

@@ -833,6 +833,8 @@ Type objective_function<Type>::operator() (){
     DATA_IMATRIX( graph_sz );
     DATA_VECTOR( dist_s );
     Q_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
+    // DATA_SPARSE_MATRIX( Dist_ss );
+    //Q_ss = Q_network( log_kappa, n_s, Dist_ss );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
     log_tau = 0.0;
     REPORT( Q_ss );
   }
