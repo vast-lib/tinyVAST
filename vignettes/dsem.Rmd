@@ -83,14 +83,14 @@ library(dsem)
 
 # Keep in wide-form
 dsem_data = ts( log(isle_royale[,2:3]), start=1959)
-family = c("normal","normal")
+Family = c("normal", "normal")
 
 # fit without delta0
 # SEs aren't available because measurement errors goes to zero
 mydsem = dsem::dsem( sem = dsem,
              tsdata = dsem_data,
              control = dsem_control(getsd=FALSE),
-             family = family )
+             family = Family )
 mydsem
 
 # See summary

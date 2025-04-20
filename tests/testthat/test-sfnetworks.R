@@ -12,6 +12,7 @@ test_that("Basic sfnetworks works", {
   # Rescale
   graph = sfnetwork_mesh( stream )
   graph$table$dist = graph$table$dist / 1000  # Convert distance scale
+  graph$Dist_ss = graph$Dist_ss / 1000
 
   # Parameters
   alpha = 2

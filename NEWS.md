@@ -9,6 +9,9 @@
 * Switch `sample_variable` from using `obj$env$MC` to `obj$env$spHess(random=TRUE)`
   which seems more stable as dependency
 * Add functionality for `te` and `ti` splines, although they remain poorly tested
+* Add error check to `sfnetwork_mesh` to detect if the stream network is not ordered
+  as a tree
+* Improve stream network vignette to use matrix notation for joint precision, and
 
 # tinyVAST 1.0.1
 

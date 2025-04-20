@@ -54,8 +54,8 @@ legend( "bottomleft", bty="n",
 To fit these data, we first define the `family` for each datum.  Critically, we define the cloglog link for the Presence/Absence data, so that the linear predictor is proportional to numerical density for each data type.  See [Gruss and Thorson (2019)](https://doi.org/10.1093/icesjms/fsz075) or [Thorson and Kristensen (2024) Chap-7](https://doi.org/10.1201/9781003410294) for more details
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-#
-family = list(
+# Define link and distribution for each data type
+Family = list(
    "Encounter" = binomial(link="cloglog"),
    "Count" = poisson(link="log"),
    "Biomass_KG" = tweedie(link="log")
@@ -87,7 +87,7 @@ fit = tinyVAST( data = red_snapper,
                 spatial_domain = mesh,
                 time_column = "Year",
                 distribution_column = "Data_type",
-                family = family,
+                family = Family,
                 variable_column = "var" )
 ```
 

@@ -92,7 +92,8 @@ control = tinyVASTcontrol( getsd = FALSE,
 We could run the model with a log-linked Tweedie distribution and a single linear predictor:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-family = list(
+# Define separate tweedie family for each age
+Family = list(
   Age_1 = tweedie(),
   Age_2 = tweedie(),
   Age_3 = tweedie(),
@@ -110,13 +111,13 @@ family = list(
   Age_15 = tweedie()     
 )
 
-#Data$Year = factor(Data$Year)
+# Fit model
 myfit = tinyVAST(
   data = Data,
   formula = Abundance_per_hectare ~ 0 + Year_Age,
   space_term = sem,
   spacetime_term = dsem,
-  family = family,
+  family = Family,
   space_column = c("X", "Y"), 
   variable_column = "Age",
   time_column = "Year",

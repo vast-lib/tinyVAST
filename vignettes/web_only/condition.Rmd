@@ -86,7 +86,7 @@ dsem = "
 Finally, we define the distribution for each data set using the `family` argument:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 #
-family = list(
+Family = list(
   Biomass = tweedie(),
   Condition = gaussian()
 )
@@ -101,7 +101,7 @@ fit = tinyVAST( data = formed_data,
            control = tinyVASTcontrol( trace=0, verbose=TRUE, profile="alpha_j" ),
            space_term = sem,
            spacetime_term = dsem,
-           family = family,
+           family = Family,
            variables = c("Biomass","Condition"),
            variable_column = "Type",
            space_columns = c("Lon", "Lat"),

@@ -113,7 +113,7 @@
 #'   update.formula binomial poisson predict
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
-#' @importFrom Matrix Cholesky solve Matrix diag t
+#' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv

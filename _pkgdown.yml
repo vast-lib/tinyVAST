@@ -12,7 +12,7 @@ articles:
   - spatial
   - multiple_data
   - dsem
-  - simultaneous_autoregressive_process
+  - web_only/simultaneous_autoregressive_process
   - web_only/stream_networks
   - web_only/age_composition_expansion
   - web_only/condition
@@ -27,6 +27,8 @@ reference:
   - add_predictions
   - classify_variables
   - parse_path
+  - get_data.tinyVAST
+  - GetResponse.tinyVAST
 
 - title: 'Fitting and diagnostics'
   desc: |
@@ -35,9 +37,12 @@ reference:
   - tinyVAST
   - tinyVASTcontrol
   - residuals.tinyVAST
+  - logLik.tinyVAST
   - cAIC
   - deviance_explained
   - Families
+  - simulate.tinyVAST
+  - print.tinyVAST
 
 - title: 'SEM and DSEM constructors'
   desc: |
