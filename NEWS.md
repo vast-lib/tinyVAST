@@ -12,6 +12,12 @@
 * Add error check to `sfnetwork_mesh` to detect if the stream network is not ordered
   as a tree
 * Improve stream network vignette to use matrix notation for joint precision, and
+  modify `simulate_sfnetwork` to use that
+* Change `tinyVAST.cpp` to use matrix notation constructor and fix bug in previous
+  constructor where the covariance between first and second nodes was not right
+* Expand `test-sfnetworks.R` integrated test to confirm that matrix-notation
+  precision constructor is identical to the inverse of Ornstein-Uhlenbeck covariance
+  as intended.
 
 # tinyVAST 1.0.1
 

@@ -20,29 +20,87 @@ enum valid_link {
   cloglog_link = 3
 };
 
-// Needed for returning SparseMatrix for Ornstein-Uhlenbeck network correlations
+// Old algorithmic constructor for tail-down exponential stream network, copied from VAST
+//template<class Type>
+//Eigen::SparseMatrix<Type> Q_network( Type log_theta,
+//                                     int n_s,
+//                                     vector<int> parent_s,
+//                                     vector<int> child_s,
+//                                     vector<Type> dist_s ){
+//
+//  Eigen::SparseMatrix<Type> Q( n_s, n_s );
+//  Type theta = exp( log_theta );
+//  for(int s=0; s<n_s; s++){
+//    Q.coeffRef( s, s ) = Type(1.0);
+//  }
+//  for(int s=0; s<parent_s.size(); s++){
+//  //for(int s=1; s<parent_s.size(); s++){
+//    if( exp(-dist_s(s))!= Type(0.) ){
+//      Type tmp = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+//      Type tmp2 = exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+//      Q.coeffRef( parent_s(s), child_s(s) ) = tmp;
+//      Q.coeffRef( child_s(s), parent_s(s) ) = tmp;
+//      Q.coeffRef( parent_s(s), parent_s(s) ) += tmp2;
+//      Q.coeffRef( child_s(s), child_s(s) ) += tmp2;
+//    }
+//  }
+//  return Q;
+//}
+
 template<class Type>
-Eigen::SparseMatrix<Type> Q_network( Type log_theta,
+Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
+                                                 vector<int> j,
+                                                 vector<Type> x,
+                                                 int N ){
+
+  // https://eigen.tuxfamily.org/dox/classEigen_1_1SparseMatrix.html#title35
+  using namespace Eigen;
+  std::vector<Triplet<Type>> tripletList;
+  for( int index = 0; index < i.size(); index ++ ){
+    tripletList.push_back(Triplet<Type>( i[index], j[index], x[index]) );
+  }
+  SparseMatrix<Type> M( N, N );
+  M.setFromTriplets( tripletList.begin(), tripletList.end() );
+
+  //Eigen::SparseMatrix<Type> M( N, N );
+  //for(int index=0; index<N; index++){
+  //  M.coeffRef( i[index], j[index] ) += x[index];
+  //}
+
+  return M;
+}
+
+// New matrix-notation precision constructor for tail-down exponential stream network
+template<class Type>
+Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
                                      int n_s,
                                      vector<int> parent_s,
                                      vector<int> child_s,
                                      vector<Type> dist_s ){
 
-  Eigen::SparseMatrix<Type> Q( n_s, n_s );
-  Type theta = exp( log_theta );
-  for(int s=0; s<n_s; s++){
-    Q.coeffRef( s, s ) = Type(1.0);
+  // Compute vectors
+  Type theta = exp(log_theta);
+  vector<Type> v1_s = exp(-theta * dist_s) / (1.0 - exp(-2.0 * theta * dist_s));
+  vector<Type> v2_s = exp(-2.0 * theta * dist_s) / (1.0 - exp(-2.0 * theta * dist_s));
+
+  // Make components
+  Eigen::SparseMatrix<Type> P_ss = vectorsToSparseMatrix( child_s,
+                                                          parent_s,
+                                                          v1_s,
+                                                          n_s );
+  Eigen::SparseMatrix<Type> D_ss = vectorsToSparseMatrix( child_s,
+                                                          child_s,
+                                                          v2_s,
+                                                          n_s );
+  Eigen::SparseMatrix<Type> invD_ss( n_s, n_s );
+  for( int s=0; s<n_s; s++ ){
+    D_ss.coeffRef(s,s) += 1.0;
+    invD_ss.coeffRef(s,s) = 1.0 / D_ss.coeffRef(s,s);
   }
-  for(int s=1; s<parent_s.size(); s++){
-    if( exp(-dist_s(s))!= Type(0.) ){
-      Type tmp = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
-      Type tmp2 = exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
-      Q.coeffRef( parent_s(s), child_s(s) ) = tmp;
-      Q.coeffRef( child_s(s), parent_s(s) ) = tmp;
-      Q.coeffRef( parent_s(s), parent_s(s) ) += tmp2;
-      Q.coeffRef( child_s(s), child_s(s) ) += tmp2;
-    }
-  }
+
+  // Assemble
+  Eigen::SparseMatrix<Type> DminusP_ss = D_ss - P_ss;
+  Eigen::SparseMatrix<Type> Q = DminusP_ss.transpose() * invD_ss * DminusP_ss;
   return Q;
 }
 
@@ -821,8 +879,8 @@ Type objective_function<Type>::operator() (){
     Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
     I_ss.setIdentity();
     Lspatial_ss = ( I_ss - exp(log_kappa)*Adj );
-    Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
     log_tau = 0.0;
+    Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
   }else if( spatial_options(0)==3 ){
     // Off, but using INLA inputs
     DATA_STRUCT(spatial_list, R_inla::spde_t);
@@ -832,12 +890,16 @@ Type objective_function<Type>::operator() (){
     // stream-network
     DATA_IMATRIX( graph_sz );
     DATA_VECTOR( dist_s );
-    Q_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
+    Q_ss = Q_network2( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
     // DATA_SPARSE_MATRIX( Dist_ss );
-    //Q_ss = Q_network( log_kappa, n_s, Dist_ss );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
-    log_tau = 0.0;
+    //Q_ss = Q_network( log_kappa, n_s, Dist_ss );
+    log_tau = (log(2.0) + log_kappa) / 2;
+    // diag(solve(Q)) = sigma^2 / (2 * theta)  ->  sigma^2 = 2*theta -> tau = 1/sqrt(2*theta)
     REPORT( Q_ss );
+    //Eigen::SparseMatrix<Type> Q2_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
+    //REPORT( Q2_ss );
   }
+  REPORT( log_tau );
 
   // spacetime_term
   Eigen::SparseMatrix<Type> Rho_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, epsilon_stc.dim(1)*epsilon_stc.dim(2), int(0) );
