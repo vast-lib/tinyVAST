@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@
     <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
@@ -107,10 +107,10 @@ parameters that are similar to mgcv, with small differences resulting
 from different methods for parameter estimation;</p></li>
 </ol>
 <p>These four components are assembled into two linear predictors:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>𝐗</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛂</mi><mn mathvariant="normal">1</mn></msub><mo>+</mo><msub><mi>𝐙</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛄</mi><mn mathvariant="normal">1</mn></msub><mo>+</mo><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝛀</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo>+</mo><msub><mi>𝐃</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo>+</mo><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝐄</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>𝐗</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛂</mi><mn mathvariant="normal">2</mn></msub><mo>+</mo><msub><mi>𝐙</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛄</mi><mn mathvariant="normal">2</mn></msub><mo>+</mo><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝛀</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo>+</mo><msub><mi>𝐃</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo>+</mo><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝐄</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mrow><msub><mi>𝐗</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛂</mi><mn mathvariant="normal">1</mn></msub><mo>+</mo><msub><mi>𝐙</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛄</mi><mn mathvariant="normal">1</mn></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">GAM</mtext></munder><mo>+</mo><munder><munder><mrow><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝛀</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">space_term</mtext></munder><mo>+</mo><munder><munder><msub><mi>𝐃</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">time_term</mtext></munder><mo>+</mo><munder><munder><mrow><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝐄</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">spacetime_term</mtext></munder></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mrow><msub><mi>𝐗</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛂</mi><mn mathvariant="normal">2</mn></msub><mo>+</mo><msub><mi>𝐙</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>𝛄</mi><mn mathvariant="normal">2</mn></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">GAM</mtext></munder><mo>+</mo><munder><munder><mrow><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝛀</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">space_term</mtext></munder><mo>+</mo><munder><munder><msub><mi>𝐃</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">time_term</mtext></munder><mo>+</mo><munder><munder><mrow><msub><mi>𝐀</mi><mi>i</mi></msub><msub><mi>𝐄</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">spacetime_term</mtext></munder></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
-p_{\mathrm 1,i} &amp;= \mathbf X_{\mathrm 1,i} \mathbf\alpha_{\mathrm 1} + \mathbf Z_{\mathrm 1,i} \mathbf\gamma_{\mathrm 1} + \mathbf A_{i} \mathbf\Omega_{\mathrm 1,c[i]} + \mathbf D_{\mathrm 1,c[i],t[i]} + \mathbf A_i \mathbf E_{\mathrm 1,c[i],t[i]}  \\
-p_{\mathrm 2,i} &amp;= \mathbf X_{\mathrm 2,i} \mathbf\alpha_{\mathrm 2} + \mathbf Z_{\mathrm 2,i} \mathbf\gamma_{\mathrm 2} + \mathbf A_{i} \mathbf\Omega_{\mathrm 2,c[i]} + \mathbf D_{\mathrm 2,c[i],t[i]} + \mathbf A_i \mathbf E_{\mathrm 2,c[i],t[i]}
+p_{\mathrm 1,i} &amp;= \underbrace{\mathbf X_{\mathrm 1,i} \mathbf\alpha_{\mathrm 1} + \mathbf Z_{\mathrm 1,i} \mathbf\gamma_{\mathrm 1}}_\text{GAM} + \underbrace{\mathbf A_{i} \mathbf\Omega_{\mathrm 1,c[i]}}_\text{space_term} + \underbrace{\mathbf D_{\mathrm 1,c[i],t[i]}}_\text{time_term} + \underbrace{\mathbf A_i \mathbf E_{\mathrm 1,c[i],t[i]}}_\text{spacetime_term}  \\
+p_{\mathrm 2,i} &amp;= \underbrace{\mathbf X_{\mathrm 2,i} \mathbf\alpha_{\mathrm 2} + \mathbf Z_{\mathrm 2,i} \mathbf\gamma_{\mathrm 2}}_\text{GAM} + \underbrace{\mathbf A_{i} \mathbf\Omega_{\mathrm 2,c[i]}}_\text{space_term} + \underbrace{\mathbf D_{\mathrm 2,c[i],t[i]}}_\text{time_term} + \underbrace{\mathbf A_i \mathbf E_{\mathrm 2,c[i],t[i]}}_\text{spacetime_term}
 \end{aligned}
 </annotation></semantics></math></p>
 <p>where</p>
@@ -141,7 +141,19 @@ is the row of the design matrix;</li>
 is the projection of the space-veriable interaction
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛀</mi><annotation encoding="application/x-tex">\mathbf\Omega</annotation></semantics></math>
 to sample
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>;</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
+is the interpolation matrix with dimension
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mo>×</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">I \times S</annotation></semantics></math>
+such that row
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐀</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mathbf A_{i}</annotation></semantics></math>
+interpolates spatial vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛀</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><annotation encoding="application/x-tex">\mathbf\Omega_{\mathrm 1,c[i]}</annotation></semantics></math>
+for sample
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and variable
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">c[i]</annotation></semantics></math>;</li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐃</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>c</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>t</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><annotation encoding="application/x-tex">\mathbf D_{\mathrm 1,c[i],t[i]}</annotation></semantics></math>
 is the time-variable interaction
@@ -154,13 +166,12 @@ is the projection of the space-variable-time interaction
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐄</mi><annotation encoding="application/x-tex">\mathbf E</annotation></semantics></math>
 to sample
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>;</li>
-<li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">p_{\mathrm 2,i}</annotation></semantics></math>
-is the second linear predictor, and terms are defined similarly but
-using subscript-2;</li>
 </ul>
-<p>The linear predictors are then passed through a bivariate
-inverse-link function to specify the distribution for errors:</p>
+<p>and terms are defined similarly for the second linear predictor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">p_{\mathrm 2,i}</annotation></semantics></math>
+except using subscript-2. The linear predictors are then passed through
+a bivariate inverse-link function to specify the distribution for
+errors:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>∼</mo><msub><mi>f</mi><mrow><mi>e</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>g</mi><mrow><mi>e</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo>−</mo><mn>1</mn></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><mo>,</mo><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><msub><mi>θ</mi><mrow><mi>e</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 y_i \sim f_{e[i]}( g_{e[i]}^{-1} (p_{\mathrm 1,i}, p_{\mathrm 2,i}), \theta_{e[i]} )
 </annotation></semantics></math></p>
@@ -177,7 +188,9 @@ to the central tendancy parameters of the distribution;</li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>θ</mi><mrow><mi>e</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><annotation encoding="application/x-tex">\theta_{e[i]}</annotation></semantics></math>
 is the dispersion parameters for distribution
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">e[i]</annotation></semantics></math>;</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">e[i]</annotation></semantics></math>
+for sample
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>;</li>
 </ul>
 <p>In the simple case, the distribution only requires a single linear
 predictor such that
@@ -198,28 +211,36 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">\mu_{\mathrm 2,i}</annotation></semantics></math>
 are the two linear predictors, such that
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathbb{E}[y_i] = \mu_{\mathrm 1,i} \mu_{\mathrm 2,i}</annotation></semantics></math>;</p>
-<p>For the conventional logit-log bivariate link function we obtain:</p>
+<p>For the conventional logit-log bivariate link function we use a
+logit-link for encounter probabilities and a log-link for positive catch
+rates:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></msup><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></msup></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></msup></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
 \mu_{\mathrm 1,i} &amp;= \frac{e^{p_{\mathrm 1,i}}}{1+e^{p_{\mathrm 1,i}}}  \\
 \mu_{\mathrm 2,i} &amp;= e^{p_{\mathrm 2,i}}
 \end{aligned}
 </annotation></semantics></math></p>
-<p>while for the Poisson-linked link function we obtain:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>1</mn><mo>−</mo><msup><mi>e</mi><mrow><mo>−</mo><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mrow></msup></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></msup><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mfrac><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></msup></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<p>while for the Poisson-linked link function we specify a complemetary
+log-log link for encounter probabilities and define the second link
+function such that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></msup><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></msup></mrow><annotation encoding="application/x-tex">\mu_{\mathrm 1,i} \mu_{\mathrm 2,i} = e^{p_{\mathrm 1,i}} e^{p_{\mathrm 2,i}}</annotation></semantics></math>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>1</mn><mo>−</mo><msup><mi>e</mi><mrow><mo>−</mo><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></msup></mrow></msup></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></msup><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></mfrac><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></msup></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
-\mu_{\mathrm 1,i} &amp;= 1 - e^{-p_{\mathrm 1,i}} \\
+\mu_{\mathrm 1,i} &amp;= 1 - e^{-e^{p_{\mathrm 1,i}}} \\
 \mu_{\mathrm 2,i} &amp;= \frac{e^{p_{\mathrm 1,i}}}{\mu_{\mathrm 1,i}} e^{p_{\mathrm 2,i}}
 \end{aligned}
-</annotation></semantics></math></p>
-<p>In either case,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">\mu_{\mathrm 1,i}</annotation></semantics></math>
-is the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">r</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{Pr}(Y&gt;0)</annotation></semantics></math>
-(and is fitted with a Bernoulli distribution), while
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub></msup><annotation encoding="application/x-tex">e^{p_{\mathrm 1,i}}</annotation></semantics></math>
+is the density for an underlying point process, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>e</mi><msub><mi>p</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></msup><annotation encoding="application/x-tex">e^{p_{\mathrm 2,i}}</annotation></semantics></math>
+is biomass per point (i.e., animal or group).</p>
+<p>In either the conventional or Poisson-linked delta model,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mrow><mn mathvariant="normal">1</mn><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">r</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mu_{\mathrm 1,i} = \mathrm{Pr}(Y&gt;0)</annotation></semantics></math>
+is the encounter probability (and is fitted with a Bernoulli
+distribution), while
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">\mu_{\mathrm 2,i}</annotation></semantics></math>
 is the central tendancy for positive values, i.e.,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo stretchy="false" form="prefix">|</mo><mi>Y</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathbb{E}(Y | Y&gt;0) = \mu_{\mathrm 2,i}</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mrow><mn mathvariant="normal">2</mn><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo stretchy="false" form="prefix">|</mo><mi>Y</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mu_{\mathrm 2,i} = \mathbb{E}(Y | Y&gt;0)</annotation></semantics></math>.</p>
 </div>
 <div class="section level2">
 <h2 id="spatial-domains">Spatial domains<a class="anchor" aria-label="anchor" href="#spatial-domains"></a>
@@ -231,14 +252,15 @@ precision matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><msup><mi>𝚺</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathbf Q_{\mathrm{domain}} = \mathbf\Sigma^{-1}</annotation></semantics></math>
 as the inverse of the spatial covariance matrix. tinyVAST involves three
 options for specifying this spatial precision:</p>
-<ul>
-<li>Stochastic partial differentiaul equation (SPDE): The analyst can
-approximate spatial variation over a continuous two-dimensional surface
-by constructing finite element mesh (FEM), treating the value at
-vertices as a GMRF, and then using bilinear interpolation (i.e., a
-piecewise linear approximation) to interpolate from vertices to the
-spatial domain. In this case, the precision is constructred as:</li>
-</ul>
+<div class="section level4">
+<h4 id="stochastic-partial-differentiaul-equation-spde">Stochastic partial differentiaul equation (SPDE)<a class="anchor" aria-label="anchor" href="#stochastic-partial-differentiaul-equation-spde"></a>
+</h4>
+<p>The analyst can approximate spatial variation over a continuous
+two-dimensional surface by constructing finite element mesh (FEM),
+treating the value at vertices as a GMRF, and then using bilinear
+interpolation (i.e., a piecewise linear approximation) to interpolate
+from vertices to the spatial domain. In this case, the precision is
+constructred as:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><msup><mi>τ</mi><mn>2</mn></msup><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>κ</mi><mn>4</mn></msup><msub><mi>𝐌</mi><mn mathvariant="normal">0</mn></msub><mo>+</mo><mn>2</mn><msup><mi>κ</mi><mn>2</mn></msup><msub><mi>𝐌</mi><mn mathvariant="normal">1</mn></msub><mo>+</mo><msub><mi>𝐌</mi><mn mathvariant="normal">2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \mathbf Q_{\mathrm{domain}} = \tau^2 ( \kappa^4 \mathbf M_{\mathrm 0} + 2\kappa^2 \mathbf M_{\mathrm 1} + \mathbf M_{\mathrm 2} )
 </annotation></semantics></math> where every row
@@ -248,16 +270,19 @@ of the interpolation matrix
 is nonzero for only the three vertices of the triangle that contains
 sample
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math></p>
-<ul>
-<li>Simultaneous autoregressive (SAR): Alternatively, the analyst can
-specify an areal model representing the value within spatial
-strata:</li>
-</ul>
+</div>
+<div class="section level4">
+<h4 id="simultaneous-autoregressive-sar">Simultaneous autoregressive (SAR):<a class="anchor" aria-label="anchor" href="#simultaneous-autoregressive-sar"></a>
+</h4>
+<p>Alternatively, the analyst can specify an areal model representing
+the value within spatial strata:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><msup><mi>τ</mi><mn>2</mn></msup><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐈</mi><mo>−</mo><mi>κ</mi><msup><mi>𝐀</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
 \mathbf Q_{\mathrm{domain}} = \tau^2 (\mathbf I - \kappa \mathbf A^*)^2 
 </annotation></semantics></math> where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>𝐀</mi><mo>*</mo></msup><annotation encoding="application/x-tex">\mathbf A^*</annotation></semantics></math>
-is the adjacency matrix of the graph specified by the analyst, and each
+is the adjacency matrix of the graph specified by the analyst,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>κ</mi><annotation encoding="application/x-tex">\kappa</annotation></semantics></math>
+is the estimated partial correlation between adjacent areas, and each
 row
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐀</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mathbf A_i</annotation></semantics></math>
 of interpolation matrix
@@ -268,15 +293,62 @@ is nonzero only for the single spatial stratum containing sample
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>𝐀</mi><mo>*</mo></msup><annotation encoding="application/x-tex">\mathbf A^*</annotation></semantics></math>
 is different from interpolation matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>,
-but we use the same term for both due to a collision in standard
-notation).</p>
-<ul>
-<li>Stream networks: Finally, the analyst can specify that sites are
-partially correlated if they are adjacent along a stream network (while
-ignoring flow direction). This results in an Onstein-Uhlenbeck process
-along the stream network, or an exponential <code>tail-down</code>
-model.</li>
-</ul>
+but we use the same notation for both due to a collision in notational
+standards).</p>
+</div>
+<div class="section level4">
+<h4 id="stream-networks-using-a-tail-down-exponential-correlation-function">Stream networks using a tail-down exponential correlation
+function<a class="anchor" aria-label="anchor" href="#stream-networks-using-a-tail-down-exponential-correlation-function"></a>
+</h4>
+<p>Finally, the analyst can specify that sites are partially correlated
+if they are adjacent along a stream network (while ignoring flow
+direction). This results in an Onstein-Uhlenbeck process along the
+stream network, or an <em>exponential tail-down</em> model:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix" mathvariant="bold">(</mo><mi>𝐈</mi><mo mathvariant="bold">+</mo><mi>𝐃</mi><mo mathvariant="bold">−</mo><mi>𝐏</mi><mo stretchy="true" form="postfix" mathvariant="bold">)</mo></mrow><mi>T</mi></msup><msup><mrow><mi>𝐈</mi><mo mathvariant="bold">+</mo><mi>𝐃</mi></mrow><mrow><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix" mathvariant="bold">(</mo><mi>𝐈</mi><mo mathvariant="bold">+</mo><mi>𝐃</mi><mo mathvariant="bold">−</mo><mi>𝐏</mi><mo stretchy="true" form="postfix" mathvariant="bold">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\mathbf{Q}_{\mathrm{domain}} = \mathbf{(I+D-P)}^T \mathbf{I+D}^{-1} \mathbf{(I+D-P)}
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐃</mi><annotation encoding="application/x-tex">\mathbf D</annotation></semantics></math>
+is a sparse diagonal matrix with diagonal elements</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><mn>2</mn><mi>θ</mi><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>𝐬</mi><mi>i</mi></msub><mo>,</mo><msub><mi>𝐬</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mrow><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><mn>2</mn><mi>θ</mi><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>𝐬</mi><mi>i</mi></msub><mo>,</mo><msub><mi>𝐬</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+d_{i,j} =\mathrm{exp}(-2 \theta |\mathbf s_i, \mathbf s_j|) / (1 - \mathrm{exp}(-2 \theta |\mathbf s_i, \mathbf s_j|))
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>𝐬</mi><mi>i</mi></msub><mo>,</mo><msub><mi>𝐬</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><annotation encoding="application/x-tex">|\mathbf s_i, \mathbf s_j|</annotation></semantics></math>
+is the distance from downstream (parent) node
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+to upstream (child) node
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+is the O-U parameter governing the decorrelation rate. Similarly,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐏</mi><annotation encoding="application/x-tex">\mathbf P</annotation></semantics></math>
+is a sparse matrix containing values
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{i,j}</annotation></semantics></math>,
+where:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><mi>θ</mi><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>𝐬</mi><mi>i</mi></msub><mo>,</mo><msub><mi>𝐬</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mrow><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">p</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><mn>2</mn><mi>θ</mi><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>𝐬</mi><mi>i</mi></msub><mo>,</mo><msub><mi>𝐬</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\rho_{i,j} = \mathrm{exp}(-\theta |\mathbf s_i, \mathbf s_j|) / (1 - \mathrm{exp}(-2 \theta |\mathbf s_i, \mathbf s_j|))
+</annotation></semantics></math> such that
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{i,j}</annotation></semantics></math>
+the regression slope predicting upstream node
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+from downstream node
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>.
+The spatial interpolation matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
+again has row
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐀</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mathbf A_i</annotation></semantics></math>
+for each sampling or predictive location, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐀</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mathbf A_i</annotation></semantics></math>
+is nonzero for the two nodes immediately up and downstream from a given
+location, with values such that a given location is predicted as a
+weighted average based upon the distance from those two nodes.</p>
+<p>For the SPDE and SAR spatial domains, the term
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
+is defined such that precision
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf Q_{\mathrm{domain}}</annotation></semantics></math>
+has unit variance. This is done because the spatial domain always arises
+in combination with other parameters, which are used to define the
+variance of the associated spatial variable.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="structural-equation-models">Structural equation models<a class="anchor" aria-label="anchor" href="#structural-equation-models"></a>
@@ -284,13 +356,18 @@ model.</li>
 <p>tinyVAST also involves specifying a structural equation model (SEM).
 This SEM be viewed either:</p>
 <ol style="list-style-type: decimal">
-<li>Weak interpretation: as a flexible way to parameterize the
-correlation among variables; or</li>
-<li>Strong interpretation: as a structural causal model, allowing
-inference about counterfactual changes to the system.</li>
+<li>
+<em>Weak interpretation</em>: as an expressive interface to
+parameterize the correlation among variables, using as many or few
+parameters as might be appropriate; or</li>
+<li>
+<em>Strong interpretation</em>: as a structural causal model,
+allowing predictions about the consequence of counterfactual changes to
+the system.</li>
 </ol>
-<p>To specify a SEM, the user uses <em>arrow notation</em>. For example,
-to specify a linear model this involves:</p>
+<p>To specify a SEM, the user uses <em>arrow notation</em> derived from
+package <code>sem</code>. For example, to specify a linear model this
+involves:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>w1 <span class="ot">-&gt;</span> w2, b_12</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>w1 <span class="ot">&lt;-</span><span class="er">&gt;</span> w1, sd_1</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>w2 <span class="ot">&lt;-</span><span class="er">&gt;</span> w2, sd_2</span></code></pre></div>
@@ -306,12 +383,26 @@ might cause
 which in turn causes
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mn>3</mn></msub><annotation encoding="application/x-tex">W_3</annotation></semantics></math>.
 This is then represented as:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>w1 <span class="ot">-&gt;</span> w2, b_12</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>w2 <span class="ot">-&gt;</span> w3, b_23</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>w1 <span class="ot">&lt;-</span><span class="er">&gt;</span> w1, s_1</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>w2 <span class="ot">&lt;-</span><span class="er">&gt;</span> w2, s_2</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>w3 <span class="ot">&lt;-</span><span class="er">&gt;</span> w3, s_3</span></code></pre></div>
-<p>Path coefficients for one-headed arrows then define path matrix
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Path, parameter_name, start value</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>w1 <span class="ot">-&gt;</span> w2, b_12, <span class="dv">0</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>w2 <span class="ot">-&gt;</span> w3, b_23, <span class="dv">0</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>w1 <span class="ot">&lt;-</span><span class="er">&gt;</span> w1, s_1, <span class="dv">1</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>w2 <span class="ot">&lt;-</span><span class="er">&gt;</span> w2, s_2, <span class="dv">1</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>w3 <span class="ot">&lt;-</span><span class="er">&gt;</span> w3, s_3, <span class="dv">1</span></span></code></pre></div>
+<p>SEM interactions can be as complicated or simple as desired, and can
+include:</p>
+<ol style="list-style-type: decimal">
+<li>Latent variables and loops (i.e., they are not restricted to
+directed acyclic graphs);</li>
+<li>Values that are fixed a priori, where the
+<code>parameter_name</code> is provided as <code>NA</code> and the
+starting value that follows is the fixed value;</li>
+<li>Values that are mirrored among path coefficients, where the same
+<code>parameter_name</code> is provided for multiple rows of the text
+file.</li>
+</ol>
+<p>In this preceding example, path coefficients for one-headed arrows
+then define path matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐏</mi><annotation encoding="application/x-tex">\mathbf P</annotation></semantics></math>:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐏</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>b</mi><mn>12</mn></msub></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><msub><mi>b</mi><mn>23</mn></msub></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \mathbf P = 
@@ -343,6 +434,9 @@ This then results in a sparse precision matrix:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐐</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msup><mrow><mi>𝐈</mi><mo mathvariant="bold">−</mo><mi>𝐏</mi></mrow><mi>T</mi></msup><mo stretchy="true" form="postfix">)</mo></mrow><msup><mi>𝐆</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>𝐆</mi><mrow><mo>−</mo><mi>T</mi></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>𝐈</mi><mo mathvariant="bold">−</mo><mi>𝐏</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \mathbf Q = (\mathbf{I - P}^T) \mathbf G^{-1} \mathbf G^{-T} (\mathbf{I - P})
 </annotation></semantics></math></p>
+<p>where this precision matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐐</mi><annotation encoding="application/x-tex">\mathbf Q</annotation></semantics></math>
+is then used as a modular component in the larger tinyVAST model.</p>
 </div>
 <div class="section level2">
 <h2 id="dynamic-structural-equation-models">Dynamic structural equation models<a class="anchor" aria-label="anchor" href="#dynamic-structural-equation-models"></a>
@@ -351,7 +445,7 @@ This then results in a sparse precision matrix:</p>
 models (DSEM). To specify a DSEM, the user uses <em>arrow-and-lag
 notation</em>. For example, to specify a univariate first-order
 autoregressive process:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>w1 <span class="ot">-&gt;</span> w1, <span class="dv">1</span>, rho</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>w1 <span class="ot">-&gt;</span> w1, <span class="dv">1</span>, rho, <span class="fl">0.8</span></span></code></pre></div>
 <p>If there were four time-intervals
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">T=4</annotation></semantics></math>)
 this would then result in the path matrix:</p>
@@ -375,9 +469,11 @@ The user can specify a separate <em>arrow-and-lag</em> notation to
 define the precision matrix for the time-variable interaction
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf Q_{\mathrm{time\_term}}</annotation></semantics></math>
 and for the space-time-variable interaction
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf Q_{\mathrm{spacetime\_term}}</annotation></semantics></math>.
-The time term
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf Q_{\mathrm{spacetime\_term}}</annotation></semantics></math>.</p>
+<p>The precision matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf Q_{\mathrm{time\_term}}</annotation></semantics></math>
+for the time term
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐃</mi><annotation encoding="application/x-tex">\mathbf D</annotation></semantics></math>
 is used to define the time-varying intercept for each variable:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">v</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">c</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐃</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∼</mo><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">V</mi><mi mathvariant="normal">N</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><msub><mi>𝐐</mi><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \mathrm{vec}(\mathbf D) \sim \mathrm{MVN}(\mathbf 0, \mathbf Q_{\mathrm{time\_term}})

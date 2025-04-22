@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@
     <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
@@ -117,7 +117,7 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;         2:3]))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 0.390975 secs</span></span>
+<span><span class="co">#&gt; Time difference of 0.337986 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -314,14 +314,14 @@ autoregressive model for wolf and moose abundance on Isle Royale.</p>
 <span></span>
 <span><span class="co"># Keep in wide-form</span></span>
 <span><span class="va">dsem_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/ts.html" class="external-link">ts</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">isle_royale</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>, start<span class="op">=</span><span class="fl">1959</span><span class="op">)</span></span>
-<span><span class="va">family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>,<span class="st">"normal"</span><span class="op">)</span></span>
+<span><span class="va">Family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"normal"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># fit without delta0</span></span>
 <span><span class="co"># SEs aren't available because measurement errors goes to zero</span></span>
-<span><span class="va">mydsem</span> <span class="op">=</span> <span class="fu">dsem</span><span class="fu">::</span><span class="fu"><a href="https://james-thorson-noaa.github.io/dsem/reference/dsem.html" class="external-link">dsem</a></span><span class="op">(</span> sem <span class="op">=</span> <span class="va">dsem</span>,</span>
+<span><span class="va">mydsem</span> <span class="op">=</span> <span class="fu">dsem</span><span class="fu">::</span><span class="fu"><a href="https://james-thorson-NOAA.github.io/dsem/reference/dsem.html" class="external-link">dsem</a></span><span class="op">(</span> sem <span class="op">=</span> <span class="va">dsem</span>,</span>
 <span>             tsdata <span class="op">=</span> <span class="va">dsem_data</span>,</span>
-<span>             control <span class="op">=</span> <span class="fu"><a href="https://james-thorson-noaa.github.io/dsem/reference/dsem_control.html" class="external-link">dsem_control</a></span><span class="op">(</span>getsd<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>,</span>
-<span>             family <span class="op">=</span> <span class="va">family</span> <span class="op">)</span></span>
+<span>             control <span class="op">=</span> <span class="fu"><a href="https://james-thorson-NOAA.github.io/dsem/reference/dsem_control.html" class="external-link">dsem_control</a></span><span class="op">(</span>getsd<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>             family <span class="op">=</span> <span class="va">Family</span> <span class="op">)</span></span>
 <span><span class="co">#&gt;   Coefficient_name Number_of_coefficients   Type</span></span>
 <span><span class="co">#&gt; 1           beta_z                      7  Fixed</span></span>
 <span><span class="co">#&gt; 2        lnsigma_j                      2  Fixed</span></span>

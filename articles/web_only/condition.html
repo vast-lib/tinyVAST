@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@
     <li><a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a></li>
@@ -136,7 +136,7 @@ condition and density.</p>
 <code>family</code> argument:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#</span></span>
-<span><span class="va">family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span><span class="va">Family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  Biomass <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -149,7 +149,7 @@ condition and density.</p>
 <span>           control <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> trace<span class="op">=</span><span class="fl">0</span>, verbose<span class="op">=</span><span class="cn">TRUE</span>, profile<span class="op">=</span><span class="st">"alpha_j"</span> <span class="op">)</span>,</span>
 <span>           space_term <span class="op">=</span> <span class="va">sem</span>,</span>
 <span>           spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
-<span>           family <span class="op">=</span> <span class="va">family</span>,</span>
+<span>           family <span class="op">=</span> <span class="va">Family</span>,</span>
 <span>           variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Biomass"</span>,<span class="st">"Condition"</span><span class="op">)</span>,</span>
 <span>           variable_column <span class="op">=</span> <span class="st">"Type"</span>,</span>
 <span>           space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lon"</span>, <span class="st">"Lat"</span><span class="op">)</span>,</span>

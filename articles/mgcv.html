@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@
     <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
@@ -129,7 +129,9 @@ simulation residuals:</p>
 <span><span class="va">res</span> <span class="op">=</span> <span class="fu">DHARMa</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DHARMa/man/createDHARMa.html" class="external-link">createDHARMa</a></span><span class="op">(</span> simulatedResponse <span class="op">=</span> <span class="va">y_ir</span>, </span>
 <span>                            observedResponse <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">y</span>, </span>
 <span>                            fittedPredictedResponse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in newton(lsp = lsp, X = G$X, y = G$y, Eb = G$Eb, UrS = G$UrS, L = G$L,</span></span>
+<span><span class="co">#&gt; : Fitting terminated with step failure - check results carefully</span></span></code></pre></div>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-4-1.png" width="576"></p>
 <p><code>tinyVAST</code> then has a standard <code>predict</code>
 function:</p>
@@ -149,8 +151,8 @@ function:</p>
 <span><span class="co"># Lattice plots as default option</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">Partial</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
-<p>Alternatively, we can use <code>visreg</code> to visualize
-output:</p>
+<p>Alternatively, we can use <code>visreg</code> to visualize output,
+although it is disabled for CRAN vignette checks:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>

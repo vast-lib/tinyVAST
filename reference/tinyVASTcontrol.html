@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,7 @@
     <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
@@ -66,11 +66,15 @@
 <span>  verbose <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"tinyVAST.verbose"</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  profile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  tmb_par <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tmb_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gmrf_parameterization <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"separable"</span>, <span class="st">"projection"</span><span class="op">)</span>,</span>
 <span>  reml <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  getJointPrecision <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  calculate_deviance_explained <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  run_model <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  run_model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  suppress_nlminb_warnings <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  get_rsr <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  extra_reporting <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -124,6 +128,12 @@ for the outer optimizer. Passed to
 to <code>tinyVAST(...)$internal$parlist</code></p></dd>
 
 
+<dt id="arg-tmb-map">tmb_map<a class="anchor" aria-label="anchor" href="#arg-tmb-map"></a></dt>
+<dd><p>input passed to <a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun</a> as argument <code>map</code>, over-writing
+the version <code>tinyVAST(...)$tmb_inputs$tmb_map</code> and allowing detailed control
+over estimated parameters (advanced feature)</p></dd>
+
+
 <dt id="arg-gmrf-parameterization">gmrf_parameterization<a class="anchor" aria-label="anchor" href="#arg-gmrf-parameterization"></a></dt>
 <dd><p>Parameterization to use for the Gaussian Markov
 random field, where the default <code>separable</code> constructs a full-rank and
@@ -153,7 +163,28 @@ explained.  See <code><a href="deviance_explained.html">deviance_explained()</a>
 <dd><p>whether to run the model of export TMB objects prior to compilation
 (useful for debugging)</p></dd>
 
+
+<dt id="arg-suppress-nlminb-warnings">suppress_nlminb_warnings<a class="anchor" aria-label="anchor" href="#arg-suppress-nlminb-warnings"></a></dt>
+<dd><p>whether to suppress uniformative warnings
+from <code>nlminb</code> arising when a function evaluation is NA, which
+are then replaced with Inf and avoided during estimation</p></dd>
+
+
+<dt id="arg-get-rsr">get_rsr<a class="anchor" aria-label="anchor" href="#arg-get-rsr"></a></dt>
+<dd><p>Experimental option, whether to report restricted spatial
+regression (RSR) adjusted estimator for covariate responses</p></dd>
+
+
+<dt id="arg-extra-reporting">extra_reporting<a class="anchor" aria-label="anchor" href="#arg-extra-reporting"></a></dt>
+<dd><p>Whether to report a much larger set of quantities via
+<code>obj$env$report()</code></p></dd>
+
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>An object (list) of class <code>tinyVASTcontrol</code>, containing either default or
+updated values supplied by the user for model settings</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

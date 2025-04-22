@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@
     <li><a class="dropdown-item" href="../../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a></li>
@@ -146,7 +146,8 @@ primary sample:</p>
 <p>We could run the model with a log-linked Tweedie distribution and a
 single linear predictor:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># Define separate tweedie family for each age</span></span>
+<span><span class="va">Family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  Age_1 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Age_2 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Age_3 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -164,13 +165,13 @@ single linear predictor:</p>
 <span>  Age_15 <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>     </span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">#Data$Year = factor(Data$Year)</span></span>
+<span><span class="co"># Fit model</span></span>
 <span><span class="va">myfit</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>  formula <span class="op">=</span> <span class="va">Abundance_per_hectare</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Year_Age</span>,</span>
 <span>  space_term <span class="op">=</span> <span class="va">sem</span>,</span>
 <span>  spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
-<span>  family <span class="op">=</span> <span class="va">family</span>,</span>
+<span>  family <span class="op">=</span> <span class="va">Family</span>,</span>
 <span>  space_column <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>, <span class="st">"Y"</span><span class="op">)</span>, </span>
 <span>  variable_column <span class="op">=</span> <span class="st">"Age"</span>,</span>
 <span>  time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>

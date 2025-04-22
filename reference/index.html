@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,7 @@
     <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
@@ -48,9 +48,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="fitting-and-predicting">Fitting and predicting<a class="anchor" aria-label="anchor" href="#fitting-and-predicting"></a></h2>
+      <h2 id="fitting-and-diagnostics">Fitting and diagnostics<a class="anchor" aria-label="anchor" href="#fitting-and-diagnostics"></a></h2>
 
-      <div class="section-desc"><p>Core tools for model fitting, prediction, and inspection.</p></div>
+      <div class="section-desc"><p>Core tools for model fitting and diagnostics.</p></div>
 
 
     </div><div class="section level2">
@@ -72,28 +72,16 @@
         <dd>Control parameters for tinyVAST</dd>
       </dl><dl><dt>
 
-          <code><a href="predict.tinyVAST.html">predict(<i>&lt;tinyVAST&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Predict using vector autoregressive spatio-temporal model</dd>
-      </dl><dl><dt>
-
-          <code><a href="summary.tinyVAST.html">summary(<i>&lt;tinyVAST&gt;</i>)</a></code>
-
-        </dt>
-        <dd>summarize tinyVAST</dd>
-      </dl><dl><dt>
-
           <code><a href="residuals.tinyVAST.html">residuals(<i>&lt;tinyVAST&gt;</i>)</a></code>
 
         </dt>
         <dd>Calculate deviance or response residuals for tinyVAST</dd>
       </dl><dl><dt>
 
-          <code><a href="integrate_output.html">integrate_output()</a></code>
+          <code><a href="logLik.tinyVAST.html">logLik(<i>&lt;tinyVAST&gt;</i>)</a></code>
 
         </dt>
-        <dd>Integration for target variable</dd>
+        <dd>Extract the (marginal) log-likelihood of a tinyVAST model</dd>
       </dl><dl><dt>
 
           <code><a href="cAIC.html">cAIC()</a></code>
@@ -114,32 +102,20 @@
         <dd>Additional families</dd>
       </dl><dl><dt>
 
-          <code><a href="reload_model.html">reload_model()</a></code>
+          <code><a href="simulate.tinyVAST.html">simulate(<i>&lt;tinyVAST&gt;</i>)</a></code>
 
         </dt>
-        <dd>Reload a previously fitted model</dd>
+        <dd>Simulate new data from a fitted model</dd>
       </dl><dl><dt>
 
-          <code><a href="rotate_pca.html">rotate_pca()</a></code>
+          <code><a href="print.tinyVAST.html">print(<i>&lt;tinyVAST&gt;</i>)</a></code>
 
         </dt>
-        <dd>Rotate factors to match Principal-Components Analysis</dd>
-      </dl><dl><dt>
-
-          <code><a href="sample_variable.html">sample_variable()</a></code>
-
-        </dt>
-        <dd>Sample from predictive distribution of a variable</dd>
-      </dl><dl><dt>
-
-          <code><a href="vcov.tinyVAST.html">vcov(<i>&lt;tinyVAST&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Extract Variance-Covariance Matrix</dd>
+        <dd>print summary of tinyVAST model</dd>
       </dl></div><div class="section level2">
-      <h2 id="graph-constructors">Graph constructors<a class="anchor" aria-label="anchor" href="#graph-constructors"></a></h2>
+      <h2 id="sem-and-dsem-constructors">SEM and DSEM constructors<a class="anchor" aria-label="anchor" href="#sem-and-dsem-constructors"></a></h2>
 
-      <div class="section-desc"><p>Tools to specify interactions.</p></div>
+      <div class="section-desc"><p>Tools to specify interactions among variables and over time.</p></div>
 
 
     </div><div class="section level2">
@@ -165,6 +141,76 @@
 
         </dt>
         <dd>Make a RAM (Reticular Action Model)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="predicting">Predicting<a class="anchor" aria-label="anchor" href="#predicting"></a></h2>
+
+      <div class="section-desc"><p>Core tools for model predictions.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="predict.tinyVAST.html">predict(<i>&lt;tinyVAST&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predict using vector autoregressive spatio-temporal model</dd>
+      </dl><dl><dt>
+
+          <code><a href="integrate_output.html">integrate_output()</a></code>
+
+        </dt>
+        <dd>Integration for target variable</dd>
+      </dl><dl><dt>
+
+          <code><a href="sample_variable.html">sample_variable()</a></code>
+
+        </dt>
+        <dd>Sample from predictive distribution of a variable</dd>
+      </dl></div><div class="section level2">
+      <h2 id="interpret-output">Interpret output<a class="anchor" aria-label="anchor" href="#interpret-output"></a></h2>
+
+      <div class="section-desc"><p>Tools for interpreting output.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="summary.tinyVAST.html">summary(<i>&lt;tinyVAST&gt;</i>)</a></code>
+
+        </dt>
+        <dd>summarize tinyVAST</dd>
+      </dl><dl><dt>
+
+          <code><a href="reload_model.html">reload_model()</a></code>
+
+        </dt>
+        <dd>Reload a previously fitted model</dd>
+      </dl><dl><dt>
+
+          <code><a href="term_covariance.html">term_covariance()</a></code>
+
+        </dt>
+        <dd>Extract covariance</dd>
+      </dl><dl><dt>
+
+          <code><a href="vcov.tinyVAST.html">vcov(<i>&lt;tinyVAST&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extract Variance-Covariance Matrix</dd>
+      </dl><dl><dt>
+
+          <code><a href="rotate_pca.html">rotate_pca()</a></code>
+
+        </dt>
+        <dd>Rotate factors to match Principal-Components Analysis</dd>
       </dl></div><div class="section level2">
       <h2 id="stream-network-utilities">Stream network utilities<a class="anchor" aria-label="anchor" href="#stream-network-utilities"></a></h2>
 

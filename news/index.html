@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,7 @@
     <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="../articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
@@ -49,12 +49,33 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.0" id="tinyvast-100">tinyVAST 1.0.0<a class="anchor" aria-label="anchor" href="#tinyvast-100"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.0" id="tinyvast-110">tinyVAST 1.1.0<a class="anchor" aria-label="anchor" href="#tinyvast-110"></a></h2>
+<ul><li>Adding <code>term_covariance</code> to calculate the covariance among variables for SEM term, or covariance among variables-and-lags for DSEM terms</li>
+<li>Adding Restricted Spatial Regression estimator for covariates <code>alphaprime_j</code> and <code>alphaprime2_j</code> to <code>fit$rep</code> output.</li>
+<li>Adding methods to allow use of <code>cv</code> to calculate crossvalidation skill</li>
+<li>Add <code>bias.correct</code> option to predict (but still no flag for SEs for anything except p_i)</li>
+<li>Switch <code>sample_variable</code> from using <code>obj$env$MC</code> to <code>obj$env$spHess(random=TRUE)</code> which seems more stable as dependency</li>
+<li>Add functionality for <code>te</code> and <code>ti</code> splines, although they remain poorly tested</li>
+<li>Add error check to <code>sfnetwork_mesh</code> to detect if the stream network is not ordered as a tree</li>
+<li>Improve stream network vignette to use matrix notation for joint precision, and modify <code>simulate_sfnetwork</code> to use that</li>
+<li>Change <code>tinyVAST.cpp</code> to use matrix notation constructor and fix bug in previous constructor where the covariance between first and second nodes was not right</li>
+<li>Expand <code>test-sfnetworks.R</code> integrated test to confirm that matrix-notation precision constructor is identical to the inverse of Ornstein-Uhlenbeck covariance as intended.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.1" id="tinyvast-101">tinyVAST 1.0.1<a class="anchor" aria-label="anchor" href="#tinyvast-101"></a></h2><p class="text-muted">CRAN release: 2025-03-21</p>
+<ul><li>Modify examples for <code>simulate.tinyVAST</code> and <code>sample_variable</code> to try to avoid terminal output giving error in valgrind check</li>
+<li>Add <code>ivector_minus_one</code> function to satisfy clang-UBSAN</li>
+<li>Swap <code>GMRF(Q).Quadform(x)</code> to <code>x.matrix().transpose() * (Q * x.matrix())</code> to avoid calculating log-determinant of <code>Q</code> in the smoothers penalty, to avoid valgrind errors</li>
+<li>Add tinyVASTcontrol option that suppresses nlminb warning messages by default, which are typically not informative to casual users</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="tinyvast-100">tinyVAST 1.0.0<a class="anchor" aria-label="anchor" href="#tinyvast-100"></a></h2><p class="text-muted">CRAN release: 2025-03-13</p>
 <ul><li>Adding nbinom1 and nbinom2 families</li>
 <li>Simplify argument names, by changing <code>sem</code> to <code>space_term</code>, <code>dsem</code> to <code>spacetime_term</code> and <code>spatial_graph</code> to <code>spatial_domain</code>, and eliminating <code>delta_</code> in the names for arguments to <code>delta_options</code>
 </li>
 <li>Add <code>time_term</code> to allow time-variable interaction (e.g., AR1 intercepts)</li>
 <li>Adding overview and model-description vignettes</li>
+<li>Add <code>simulate</code> S3 generic</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.1" id="tinyvast-071">tinyVAST 0.7.1<a class="anchor" aria-label="anchor" href="#tinyvast-071"></a></h2>

@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Multivariate Spatio-Temporal Models using Dynamic Structural Equations as Expressive Interface • tinyVAST</title>
+<title>Multivariate Spatio-Temporal Models using Structural Equations • tinyVAST</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Multivariate Spatio-Temporal Models using Dynamic Structural Equations as Expressive Interface">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Multivariate Spatio-Temporal Models using Structural Equations">
 <meta name="description" content="Fits a wide variety of multivariate spatio-temporal models with simultaneous and lagged interactions among variables (including vector autoregressive spatio-temporal (VAST) dynamics) for areal, continuous, or network spatial domains. It includes time-variable, space-variable, and space-time-variable interactions using dynamic structural equation models (DSEM) as expressive interface, and the mgcv package to specify splines via the formula interface. See Thorson et al. (2024) &lt;doi:10.48550/arXiv.2401.10193&gt; for more details.">
 <meta property="og:description" content="Fits a wide variety of multivariate spatio-temporal models with simultaneous and lagged interactions among variables (including vector autoregressive spatio-temporal (VAST) dynamics) for areal, continuous, or network spatial domains. It includes time-variable, space-variable, and space-time-variable interactions using dynamic structural equation models (DSEM) as expressive interface, and the mgcv package to specify splines via the formula interface. See Thorson et al. (2024) &lt;doi:10.48550/arXiv.2401.10193&gt; for more details.">
 </head>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,7 @@
     <li><a class="dropdown-item" href="articles/spatial.html">Spatial modeling</a></li>
     <li><a class="dropdown-item" href="articles/multiple_data.html">Multiple data types</a></li>
     <li><a class="dropdown-item" href="articles/dsem.html">Dynamic structural equation models</a></li>
-    <li><a class="dropdown-item" href="articles/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
+    <li><a class="dropdown-item" href="articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="articles/web_only/condition.html">Condition and density</a></li>
@@ -115,6 +115,7 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=tinyVAST" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/vast-lib/tinyVAST/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/vast-lib/tinyVAST/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -149,6 +150,10 @@
 <li><a href="https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://app.codecov.io/gh/vast-lib/tinyVAST?branch=main" class="external-link"><img src="https://codecov.io/gh/vast-lib/tinyVAST/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://vast-lib.github.io/tinyVAST/"><img src="https://img.shields.io/badge/documentation-tinyVAST-orange.svg?colorB=E91E63" alt="Documentation"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.15001856" class="external-link"><img src="https://zenodo.org/badge/704919773.svg" alt="DOI"></a></li>
+<li><a href="https://cran.r-project.org/package=tinyVAST" class="external-link"><img src="https://www.r-pkg.org/badges/version/tinyVAST"></a></li>
+<li><a href="https://cran.r-project.org/package=tinyVAST" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/tinyVAST"></a></li>
+<li><a href="https://cran.r-project.org/package=tinyVAST" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/tinyVAST"></a></li>
 </ul>
 </div>
 
