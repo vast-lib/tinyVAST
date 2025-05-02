@@ -608,7 +608,7 @@ function( object,
       object$internal$parlist = object$obj$env$parList()
     }
     # Extract path matrix
-    matrices = dsem:::make_matrices(
+    matrices = dsem::make_matrices(
       beta_p = object$internal$parlist[[parname]],
       model = model,
       times = times,
