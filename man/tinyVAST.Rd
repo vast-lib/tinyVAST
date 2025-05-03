@@ -192,7 +192,7 @@ out = tinyVAST( data = Data,
                 space_term = "n <-> n, sd_n" )
 
 # Run crossvalidation
-CV = cv::cv( out )
+CV = cv::cv( out, k = 4 )
 CV
 
 }

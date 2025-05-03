@@ -38,7 +38,8 @@ tinyVAST constructs the covariance from specified path structure and estimated p
 set.seed(101)
 theta_xy = 0.4
 n_x = n_y = 10
-n_c = 5
+n_c = 3           # Number of species
+n_f = 1           # Number of factors
 rho = 0.8
 resid_sd = 0.5
 
@@ -49,7 +50,7 @@ delta_fs = mvtnorm::rmvnorm(n_c, sigma=R_ss )
 
 # Simulate loadings for two factors
 L_cf = matrix( rnorm(n_c^2), nrow=n_c )
-L_cf[,3:5] = 0
+L_cf[,seq(from=n_f+1, to=n_c)] = 0
 L_cf = L_cf + resid_sd * diag(n_c)
 
 # Simulate correlated densities
@@ -65,22 +66,18 @@ mesh = fmesher::fm_mesh_2d( Data[,c('x','y')] )
 
 # Specify factor model with two factors and additional independent variance with shared SD
 sem = "
+  # Loadings matrix
   f1 -> 1, l1
   f1 -> 2, l2
   f1 -> 3, l3
-  f1 -> 4, l4
-  f1 -> 5, l5
-  f2 -> 2, l6
-  f2 -> 3, l7
-  f2 -> 4, l8
-  f2 -> 5, l9
+
+  # Factor variance = 1
   f1 <-> f1, NA, 1
-  f2 <-> f2, NA, 1
+
+  # Shared residual variance
   1 <-> 1, sd, 1
   2 <-> 2, sd, 1
   3 <-> 3, sd, 1
-  4 <-> 4, sd, 1
-  5 <-> 5, sd, 1
 "
 
 # fit model
