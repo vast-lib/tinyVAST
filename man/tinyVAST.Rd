@@ -86,7 +86,9 @@ in argument \code{times}.}
 
 \item{times}{A integer vector listing the set of times in order.
 If \code{times=NULL}, then it is filled in as the vector of integers
-from the minimum to maximum value of \code{data$time}.}
+from the minimum to maximum value of \code{data$time}.  Alternatively,
+it could be the minimum value of \code{data$time} through future years,
+such that the model can forecast those future years.}
 
 \item{variable_column}{A character string indicating the column of \code{data}
 listing the variable for each sample, from the set of times
@@ -188,6 +190,10 @@ out = tinyVAST( data = Data,
                 formula = n ~ s(w),
                 spatial_domain = mesh,
                 space_term = "n <-> n, sd_n" )
+
+# Run crossvalidation
+CV = cv::cv( out, k = 4 )
+CV
 
 }
 \seealso{

@@ -473,3 +473,31 @@ function( object,
   return( y_iz )
 }
 
+
+#' Get response
+#'
+#' S3 generic from package cv, used for crossvalidation
+#'
+#' @param model output from [tinyVAST()]
+#' @param ... not used
+#' @export
+GetResponse.tinyVAST <-
+function( model,
+          ...) {
+
+  insight::get_response(model)
+}
+
+#' Get data
+#'
+#' S3 generic from package insight, used for crossvalidation
+#'
+#' @param x output from [tinyVAST()]
+#' @param ... not used
+#' @export
+get_data.tinyVAST <-
+function( x,
+          ...){
+  x$data
+}
+

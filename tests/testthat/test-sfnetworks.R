@@ -12,6 +12,7 @@ test_that("Basic sfnetworks works", {
   # Rescale
   graph = sfnetwork_mesh( stream )
   graph$table$dist = graph$table$dist / 1000  # Convert distance scale
+  graph$Dist_ss = graph$Dist_ss / 1000
 
   # Parameters
   alpha = 2
@@ -49,7 +50,8 @@ test_that("Basic sfnetworks works", {
              time_column = "time",
              distribution_column = "dist",
              space_term = "" )
-  expect_equal( out$opt$obj, 119.3909, tolerance=0.01 )
+  #expect_equal( out$opt$obj, 119.3909, tolerance=0.01 )
+  expect_equal( out$opt$obj, 119.4153, tolerance=0.01 )   # AFTER FIXING BUG in v1.1.0
 
   #
   integrate_output( out,
@@ -60,4 +62,15 @@ test_that("Basic sfnetworks works", {
                     bias.correct = FALSE,
                     apply.epsilon = TRUE,
                     intern = TRUE )
+
+  # Check OU precision
+  theta = exp(out$internal$parlist$log_kappa)
+  edges = activate(stream,"edges")
+  Dist_ss = igraph::distances( edges, weights = sf::st_length(edges)  / 1000 )
+  V_ss = 1 / (2*theta) * exp( -theta * Dist_ss )
+  Q_ss = Matrix::Matrix(zapsmall(solve(V_ss)))
+  # Compare
+  Q2_ss = out$rep$Q_ss * exp(out$rep$log_tau)^2
+  diff_z = (Q_ss - Q2_ss)@x
+  expect_equal( diff_z, rep(0,length(diff_z)), tolerance = 0.001 )
 })

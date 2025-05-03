@@ -12,7 +12,7 @@ articles:
   - spatial
   - multiple_data
   - dsem
-  - simultaneous_autoregressive_process
+  - web_only/simultaneous_autoregressive_process
   - web_only/stream_networks
   - web_only/age_composition_expansion
   - web_only/condition
@@ -27,32 +27,48 @@ reference:
   - add_predictions
   - classify_variables
   - parse_path
+  - get_data.tinyVAST
+  - GetResponse.tinyVAST
 
-- title: 'Fitting and predicting'
+- title: 'Fitting and diagnostics'
   desc: |
-    Core tools for model fitting, prediction, and inspection.
+    Core tools for model fitting and diagnostics.
   contents:
   - tinyVAST
   - tinyVASTcontrol
-  - predict.tinyVAST
-  - summary.tinyVAST
   - residuals.tinyVAST
-  - integrate_output
+  - logLik.tinyVAST
   - cAIC
   - deviance_explained
   - Families
-  - reload_model
-  - rotate_pca
-  - sample_variable
-  - vcov.tinyVAST
+  - simulate.tinyVAST
+  - print.tinyVAST
 
-- title: 'Graph constructors'
+- title: 'SEM and DSEM constructors'
   desc: |
-    Tools to specify interactions.
+    Tools to specify interactions among variables and over time.
   contents:
   - make_sem_ram
   - make_dsem_ram
   - make_eof_ram
+
+- title: 'Predicting'
+  desc: |
+    Core tools for model predictions.
+  contents:
+  - predict.tinyVAST
+  - integrate_output
+  - sample_variable
+
+- title: 'Interpret output'
+  desc: |
+    Tools for interpreting output.
+  contents:
+  - summary.tinyVAST
+  - reload_model
+  - term_covariance
+  - vcov.tinyVAST
+  - rotate_pca
 
 - title: 'Stream network utilities'
   desc: |

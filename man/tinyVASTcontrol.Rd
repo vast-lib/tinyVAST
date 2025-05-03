@@ -21,7 +21,9 @@ tinyVASTcontrol(
   getJointPrecision = FALSE,
   calculate_deviance_explained = TRUE,
   run_model = TRUE,
-  suppress_nlminb_warnings = TRUE
+  suppress_nlminb_warnings = TRUE,
+  get_rsr = FALSE,
+  extra_reporting = FALSE
 )
 }
 \arguments{
@@ -78,6 +80,12 @@ explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 \item{suppress_nlminb_warnings}{whether to suppress uniformative warnings
 from \code{nlminb} arising when a function evaluation is NA, which
 are then replaced with Inf and avoided during estimation}
+
+\item{get_rsr}{Experimental option, whether to report restricted spatial
+regression (RSR) adjusted estimator for covariate responses}
+
+\item{extra_reporting}{Whether to report a much larger set of quantities via
+\code{obj$env$report()}}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or

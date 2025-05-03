@@ -16,22 +16,34 @@ sim_dat1 <- function(seed = 192838) {
 }
 dat <- sim_dat1()
 
-test_that("Basic tinyVAST works", {
-  mesh <- fmesher::fm_mesh_2d(dat[, c("x", "y")], n = 100)
-  out <- tinyVAST(
-    data = dat,
-    formula = n ~ s(w),
-    spatial_domain = mesh,
-    space_term = "",
-    control = tinyVASTcontrol(
-      verbose = TRUE,
-      newton_loops = 1,
-      silent = FALSE
-    )
+require(fmesher)
+mesh <- fm_mesh_2d(dat[, c("x", "y")], n = 100)
+out <- tinyVAST(
+  data = dat,
+  formula = n ~ s(w),
+  spatial_domain = mesh,
+  space_term = "",
+  control = tinyVASTcontrol(
+    verbose = TRUE,
+    newton_loops = 1,
+    silent = FALSE
   )
+)
+
+test_that("Basic tinyVAST works", {
   expect_s3_class(out, "tinyVAST")
   s <- summary(out$sdrep)
   expect_true(sum(is.na(s[,2])) == 0L)
+})
+
+test_that("cv::cv works", {
+  skip_on_ci()
+  skip_on_cran()
+  skip_on_covr()
+
+  # Run cv::cv
+  CV = cv::cv(out, seed = 123)
+  expect_equal( as.numeric(CV[['CV crit']]), 1.607874, tolerance = 0.0001 )
 })
 
 # test_that("data_colnames are robust", {

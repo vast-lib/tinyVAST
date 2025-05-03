@@ -20,29 +20,87 @@ enum valid_link {
   cloglog_link = 3
 };
 
-// Needed for returning SparseMatrix for Ornstein-Uhlenbeck network correlations
+// Old algorithmic constructor for tail-down exponential stream network, copied from VAST
+//template<class Type>
+//Eigen::SparseMatrix<Type> Q_network( Type log_theta,
+//                                     int n_s,
+//                                     vector<int> parent_s,
+//                                     vector<int> child_s,
+//                                     vector<Type> dist_s ){
+//
+//  Eigen::SparseMatrix<Type> Q( n_s, n_s );
+//  Type theta = exp( log_theta );
+//  for(int s=0; s<n_s; s++){
+//    Q.coeffRef( s, s ) = Type(1.0);
+//  }
+//  for(int s=0; s<parent_s.size(); s++){
+//  //for(int s=1; s<parent_s.size(); s++){
+//    if( exp(-dist_s(s))!= Type(0.) ){
+//      Type tmp = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+//      Type tmp2 = exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
+//      Q.coeffRef( parent_s(s), child_s(s) ) = tmp;
+//      Q.coeffRef( child_s(s), parent_s(s) ) = tmp;
+//      Q.coeffRef( parent_s(s), parent_s(s) ) += tmp2;
+//      Q.coeffRef( child_s(s), child_s(s) ) += tmp2;
+//    }
+//  }
+//  return Q;
+//}
+
 template<class Type>
-Eigen::SparseMatrix<Type> Q_network( Type log_theta,
+Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
+                                                 vector<int> j,
+                                                 vector<Type> x,
+                                                 int N ){
+
+  // https://eigen.tuxfamily.org/dox/classEigen_1_1SparseMatrix.html#title35
+  using namespace Eigen;
+  std::vector<Triplet<Type>> tripletList;
+  for( int index = 0; index < i.size(); index ++ ){
+    tripletList.push_back(Triplet<Type>( i[index], j[index], x[index]) );
+  }
+  SparseMatrix<Type> M( N, N );
+  M.setFromTriplets( tripletList.begin(), tripletList.end() );
+
+  //Eigen::SparseMatrix<Type> M( N, N );
+  //for(int index=0; index<N; index++){
+  //  M.coeffRef( i[index], j[index] ) += x[index];
+  //}
+
+  return M;
+}
+
+// New matrix-notation precision constructor for tail-down exponential stream network
+template<class Type>
+Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
                                      int n_s,
                                      vector<int> parent_s,
                                      vector<int> child_s,
                                      vector<Type> dist_s ){
 
-  Eigen::SparseMatrix<Type> Q( n_s, n_s );
-  Type theta = exp( log_theta );
-  for(int s=0; s<n_s; s++){
-    Q.coeffRef( s, s ) = Type(1.0);
+  // Compute vectors
+  Type theta = exp(log_theta);
+  vector<Type> v1_s = exp(-theta * dist_s) / (1.0 - exp(-2.0 * theta * dist_s));
+  vector<Type> v2_s = exp(-2.0 * theta * dist_s) / (1.0 - exp(-2.0 * theta * dist_s));
+
+  // Make components
+  Eigen::SparseMatrix<Type> P_ss = vectorsToSparseMatrix( child_s,
+                                                          parent_s,
+                                                          v1_s,
+                                                          n_s );
+  Eigen::SparseMatrix<Type> D_ss = vectorsToSparseMatrix( child_s,
+                                                          child_s,
+                                                          v2_s,
+                                                          n_s );
+  Eigen::SparseMatrix<Type> invD_ss( n_s, n_s );
+  for( int s=0; s<n_s; s++ ){
+    D_ss.coeffRef(s,s) += 1.0;
+    invD_ss.coeffRef(s,s) = 1.0 / D_ss.coeffRef(s,s);
   }
-  for(int s=1; s<parent_s.size(); s++){
-    if( exp(-dist_s(s))!= Type(0.) ){
-      Type tmp = -exp(-theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
-      Type tmp2 = exp(-2*theta*dist_s(s)) / (1-exp(-2*theta*dist_s(s)));
-      Q.coeffRef( parent_s(s), child_s(s) ) = tmp;
-      Q.coeffRef( child_s(s), parent_s(s) ) = tmp;
-      Q.coeffRef( parent_s(s), parent_s(s) ) += tmp2;
-      Q.coeffRef( child_s(s), child_s(s) ) += tmp2;
-    }
-  }
+
+  // Assemble
+  Eigen::SparseMatrix<Type> DminusP_ss = D_ss - P_ss;
+  Eigen::SparseMatrix<Type> Q = DminusP_ss.transpose() * invD_ss * DminusP_ss;
   return Q;
 }
 
@@ -84,23 +142,56 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
 }
 
 // distribution/projection for gamma
+// Based on:
+//   https://github.com/meganferg/FergusonEtal_20250125_EBS_Beluga_DSM/blob/main/src/te_tw_DSM.cpp#L85C9-L85C40 (Megan Ferguson)
 template<class Type>
 Type gamma_distribution( vector<Type> gamma_k,
                          vector<int> Sdims,
+                         vector<int> Sblock,
                          Eigen::SparseMatrix<Type> S_kk,
                          vector<Type> log_lambda ){
 
   using namespace density;
   Type nll = 0.0;
-  int k = 0;   // Counter
+  int start_gamma = 0;   // Counter for gamma
+  int start_k = 0;       // counter for columns of S_kk
+  int index_lambda = 0;
   for(int z=0; z<Sdims.size(); z++){
-    int m_z = Sdims(z);
-    vector<Type> gamma_segment = gamma_k.segment(k,m_z);       // Recover gamma_segment
-    Eigen::SparseMatrix<Type> S_block = S_kk.block(k,k,m_z,m_z);  // Recover S_i
-    // GMRF(Q).Quadform(x) caused a problem calculating the log-determinant unnecessarily, resulting in valgrind error
-    //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
-    nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*(gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
-    k += m_z;
+    int ngamma_z = Sdims(z);
+    // Recover gamma_segment
+    vector<Type> gamma_segment = gamma_k.segment(start_gamma, ngamma_z);
+    start_gamma += ngamma_z;
+
+    // s() splines
+    if( Sblock(z) == 1 ){
+      // Recover S_block
+      Eigen::SparseMatrix<Type> S_block = S_kk.block(start_k, start_k, ngamma_z, ngamma_z);  // Recover S_i
+
+      /// Quadratic-form GRMF
+      // GMRF(Q).Quadform(x) caused a problem calculating the log-determinant unnecessarily, resulting in valgrind error
+      //nll -= Type(0.5)*Type(m_z)*log_lambda(z) - Type(0.5)*exp(log_lambda(z))*GMRF(S_block).Quadform(gamma_segment);
+      nll -= Type(0.5)*Type(ngamma_z)*log_lambda(index_lambda) - Type(0.5) * exp(log_lambda(index_lambda)) *
+                                                    (gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
+
+      start_k += ngamma_z;
+      index_lambda += 1;
+    }
+
+    // te() / ti() / t2() splines
+    if( Sblock(z) >= 2 ){
+      // Recover S_block ... Eigen::SparseMatrix<Type> appears to initialize as empty so no .setZero() equivalent needed
+      Eigen::SparseMatrix<Type> S_block( ngamma_z, ngamma_z );
+      for( int block=0; block < Sblock(z); block ++ ){
+        Eigen::SparseMatrix<Type> S_tmp = S_kk.block(start_k, start_k, ngamma_z, ngamma_z);  // Recover S_i
+        S_block += exp(log_lambda(index_lambda)) * S_tmp;
+        start_k += ngamma_z;
+        index_lambda++;
+      }
+
+      /// Quadratic-form GRMF
+      nll -= 0.5*(atomic::logdet(matrix<Type>(S_block))) - 0.5 *
+                                                    (gamma_segment.matrix().transpose()*(S_block * gamma_segment.matrix())).sum();
+    }
   }
   return( nll );
 }
@@ -676,12 +767,17 @@ Type objective_function<Type>::operator() (){
   DATA_VECTOR( weights_i );
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
+  DATA_IVECTOR( Sblock );
   DATA_SPARSE_MATRIX( S2_kk ); // Sparse penalization matrix
   DATA_IVECTOR( S2dims );   // Dimensions of blockwise components of S_kk
+  DATA_IVECTOR( S2block );
 
   // Spatial objects
   DATA_IVECTOR( spatial_options );   //
   // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off;  spatial_options(0)==4: stream-network
+  // spatial_options(1)==0: use GMRF(Q) to evaluate density;  spatial_options(1)==1: use GMRF(I) and project by Q^{-0.5} to evaluate density
+  // spatial_options(2)==0: no RSS; spatial_options(2)==1: yes RSR
+  // spatial_options(3)==0: no extra reporting; spatial_options(3)==1: yes extra reporting
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -783,8 +879,8 @@ Type objective_function<Type>::operator() (){
     Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
     I_ss.setIdentity();
     Lspatial_ss = ( I_ss - exp(log_kappa)*Adj );
-    Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
     log_tau = 0.0;
+    Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
   }else if( spatial_options(0)==3 ){
     // Off, but using INLA inputs
     DATA_STRUCT(spatial_list, R_inla::spde_t);
@@ -794,10 +890,16 @@ Type objective_function<Type>::operator() (){
     // stream-network
     DATA_IMATRIX( graph_sz );
     DATA_VECTOR( dist_s );
-    Q_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
-    log_tau = 0.0;
+    Q_ss = Q_network2( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
+    // DATA_SPARSE_MATRIX( Dist_ss );
+    //Q_ss = Q_network( log_kappa, n_s, Dist_ss );
+    log_tau = (log(2.0) + log_kappa) / 2;
+    // diag(solve(Q)) = sigma^2 / (2 * theta)  ->  sigma^2 = 2*theta -> tau = 1/sqrt(2*theta)
     REPORT( Q_ss );
+    //Eigen::SparseMatrix<Type> Q2_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
+    //REPORT( Q2_ss );
   }
+  REPORT( log_tau );
 
   // spacetime_term
   Eigen::SparseMatrix<Type> Rho_hh = make_ram( ram_spacetime_term, ram_spacetime_term_start, beta_z, epsilon_stc.dim(1)*epsilon_stc.dim(2), int(0) );
@@ -849,32 +951,52 @@ Type objective_function<Type>::operator() (){
 
 
   // Distribution for spline components
-  nll += gamma_distribution( gamma_k, Sdims, S_kk, log_lambda );
-  nll += gamma_distribution( gamma2_k, S2dims, S2_kk, log_lambda2 );
+  nll += gamma_distribution( gamma_k, Sdims, Sblock, S_kk, log_lambda );
+  nll += gamma_distribution( gamma2_k, S2dims, S2block, S2_kk, log_lambda2 );
 
   // Distribution for SVC components
   nll += xi_distribution( xi_sl, log_sigmaxi_l, Q_ss );
   nll += xi_distribution( xi2_sl, log_sigmaxi2_l, Q_ss );
 
-  // Linear predictor
+  // Linear predictor .. keep partial effects for RSR adjustment below
   vector<Type> p_i( n_i );
-  p_i.setZero();
-  p_i += offset_i;
-  if(alpha_j.size() > 0){ p_i += X_ij*alpha_j; }
-  if(gamma_k.size() > 0){ p_i += Z_ik*gamma_k; }
-  p_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
-  p_i += multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
-  p_i += multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
-  p_i += multiply_delta( delta_tc, t_i, c_i, n_i );
+  vector<Type> palpha1_i( n_i );
+  vector<Type> pgamma1_i( n_i );
+  palpha1_i.setZero();
+  pgamma1_i.setZero();
+  p_i = offset_i;
+  if(alpha_j.size() > 0){ palpha1_i = X_ij*alpha_j; }
+  if(gamma_k.size() > 0){ pgamma1_i = Z_ik*gamma_k; }
+  vector<Type> pepsilon1_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
+  vector<Type> pomega1_i = multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
+  vector<Type> pxi1_i = multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
+  vector<Type> pdelta1_i = multiply_delta( delta_tc, t_i, c_i, n_i );
+  p_i += palpha1_i;
+  p_i += pgamma1_i;
+  p_i += pepsilon1_i;
+  p_i += pomega1_i;
+  p_i += pxi1_i;
+  p_i += pdelta1_i;
+
   // 2nd linear predictor
   vector<Type> p2_i( n_i );
+  vector<Type> palpha2_i( n_i );
+  vector<Type> pgamma2_i( n_i );
+  palpha2_i.setZero();
+  pgamma2_i.setZero();
   p2_i.setZero();
-  if(alpha2_j.size() > 0){ p2_i += X2_ij*alpha2_j; }
-  if(gamma2_k.size() > 0){ p2_i += Z2_ik*gamma2_k; }
-  p2_i += multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
-  p2_i += multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
-  p2_i += multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
-  p2_i += multiply_delta( delta2_tc, t_i, c_i, n_i );
+  if(alpha2_j.size() > 0){ palpha2_i = X2_ij*alpha2_j; }
+  if(gamma2_k.size() > 0){ pgamma2_i = Z2_ik*gamma2_k; }
+  vector<Type> pepsilon2_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
+  vector<Type> pomega2_i = multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
+  vector<Type> pxi2_i = multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
+  vector<Type> pdelta2_i = multiply_delta( delta2_tc, t_i, c_i, n_i );
+  p2_i += palpha2_i;
+  p2_i += pgamma2_i;
+  p2_i += pepsilon2_i;
+  p2_i += pomega2_i;
+  p2_i += pxi2_i;
+  p2_i += pdelta2_i;
 
   // Likelihood
   // relative_deviance != devresid^2 for hurdle model
@@ -896,6 +1018,20 @@ Type objective_function<Type>::operator() (){
       deviance += dev;
       devresid_i(i) = NAN;
     }
+  }
+
+  // Restricted spatial regression correction
+  if( spatial_options(2) == 1 ){
+    matrix<Type> covX_jj = X_ij.transpose() * X_ij;
+    matrix<Type> precisionX_jj = atomic::matinv(covX_jj);
+    vector<Type> alphaprime_j = alpha_j + (precisionX_jj * (X_ij.transpose() * (pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i).matrix())).array();
+    matrix<Type> covX2_jj = X2_ij.transpose() * X2_ij;
+    matrix<Type> precisionX2_jj = atomic::matinv(covX2_jj);
+    vector<Type> alphaprime2_j = alpha2_j + (precisionX2_jj * (X2_ij.transpose() * (pomega2_i + pepsilon2_i + pxi2_i + pdelta2_i).matrix())).array();
+    REPORT( alphaprime_j );
+    REPORT( alphaprime2_j );
+    ADREPORT( alphaprime_j );
+    ADREPORT( alphaprime2_j );
   }
 
   // Predictions
@@ -1027,5 +1163,40 @@ Type objective_function<Type>::operator() (){
   SIMULATE{
     REPORT(y_i);
   }
+
+  //
+  if( spatial_options(3) == 1 ){
+    REPORT( Rho_hh );
+    REPORT( Gamma_hh );
+    REPORT( Gammainv_hh );
+    REPORT( Rho_cc );
+    REPORT( Gamma_cc );
+    REPORT( Gammainv_cc );
+    REPORT( Rho_time_hh );
+    REPORT( Gamma_time_hh );
+    REPORT( Gammainv_time_hh );
+    REPORT( Rho2_hh );
+    REPORT( Gamma2_hh );
+    REPORT( Gammainv2_hh );
+    REPORT( Rho2_cc );
+    REPORT( Gamma2_cc );
+    REPORT( Gammainv2_cc );
+    REPORT( Rho2_time_hh );
+    REPORT( Gamma2_time_hh );
+    REPORT( Gammainv2_time_hh );
+    REPORT( palpha1_i );
+    REPORT( pgamma1_i );
+    REPORT( pepsilon1_i );
+    REPORT( pomega1_i );
+    REPORT( pxi1_i );
+    REPORT( pdelta1_i );
+    REPORT( palpha2_i );
+    REPORT( pgamma2_i );
+    REPORT( pepsilon2_i );
+    REPORT( pomega2_i );
+    REPORT( pxi1_i );
+    REPORT( pdelta2_i );
+  }
+
   return nll;
 }

@@ -89,13 +89,22 @@ function( stream ){
 
   # from, to, dist
   edges = st_as_sf(activate(stream,"edges"))
-  nodes = st_as_sf(activate(stream,"edges"))
+  nodes = st_as_sf(activate(stream,"nodes"))
+  N = nrow(nodes)
+
+  # Old table
   table = data.frame( from = edges$from,
                      to = edges$to,
                      dist = drop_units(st_length(edges)) )
-  N = max( c(table$from, table$to) )
 
-  # Sparse matrix form ... doesn't work because sparseMatrix sums multiple cells in M2 and M3 prior to nonlinear transformation
+  # Error check
+  number_of_parents = table( factor(table$to, levels=seq_len(N)) )
+  if( max(number_of_parents) > 1 ){
+    stop("Stream network has multiple parents for a node, i.e., isn't ordered upstream as assumed")
+  }
+
+  # Sparse matrix form ... doesn't work because sparseMatrix sums distances from multiple cells in M2 prior to nonlinear transformation
+  # Have to calculate sparse matricse in CPP using the sparse distance matrix
     # Q = I + Q1 + t(Q1) + Q2 + Q3
     # Q1 = exp(-theta*M1) / (1 - exp(-2*theta*M1)) *
     # Q2 = exp(-2*theta*M2) / (1 - exp(-2*theta*M2))
@@ -104,11 +113,18 @@ function( stream ){
   #M2 = sparseMatrix( i=table$from, j=table$from, x=table$dist, dims=c(N,N) )
   #M3 = sparseMatrix( i=table$to, j=table$to, x=table$dist, dims=c(N,N) )
 
+  # Sparse distance matrix
+  Dist_ss = sparseMatrix( i = table$to,
+                          j = table$from,
+                          x = table$dist,
+                          dims = c(N,N) )
+
   #
   out = structure( list(
     n = N,
     table = table,
-    stream = stream
+    stream = stream,
+    Dist_ss = Dist_ss
   ), class="sfnetwork_mesh" )
   return(out)
 }
@@ -143,17 +159,37 @@ function( sfnetwork_mesh,
           what = c("samples","Q") ){
 
   what = match.arg(what)
-  table = sfnetwork_mesh$table
   N = sfnetwork_mesh$n
 
+  # OLD WAY
+  #table = sfnetwork_mesh$table
     # Q1 = exp(-theta*M1) / (1 - exp(-2*theta*M1))
     # Q2 = exp(-2*theta*M2) / (1 - exp(-2*theta*M2))
     # Q3 = exp(-2*theta*M3) / (1 - exp(-2*theta*M3))
-  Q1 = sparseMatrix( i=table$from, j=table$to, x=-exp(-theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
-  Q2 = sparseMatrix( i=table$from, j=table$from, x=exp(-2*theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
-  Q3 = sparseMatrix( i=table$to, j=table$to, x=exp(-2*theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
-  I = Diagonal( n=nrow(Q1) )
-  Q = I + Q1 + Matrix::t(Q1) + Q2 + Q3
+  #Q1 = sparseMatrix( i=table$from, j=table$to, x=-exp(-theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
+  #Q2 = sparseMatrix( i=table$from, j=table$from, x=exp(-2*theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
+  #Q3 = sparseMatrix( i=table$to, j=table$to, x=exp(-2*theta*table$dist)/(1-exp(-2*theta*table$dist)), dims=c(N,N) )
+  #I = Diagonal( n=nrow(Q1) )
+  #Q = I + Q1 + Matrix::t(Q1) + Q2 + Q3
+
+  # NEW WAY
+  triplet = mat2triplet( sfnetwork_mesh$Dist_ss )
+  v1_s = exp(-theta * triplet$x) / (1 - exp(-2 * theta * triplet$x))
+  v2_s = exp(-2 * theta * triplet$x) / (1 - exp(-2 * theta * triplet$x))
+  # Make components
+  P_ss = sparseMatrix( i = triplet$i,
+                       j = triplet$j,
+                       x = v1_s,
+                       dims = c(N,N) )
+  D_ss = Diagonal( N ) +
+         sparseMatrix( i = triplet$i,
+                       j = triplet$i,
+                       x = v2_s,
+                       dims = c(N,N) )
+  # Assemble
+  DminusP_ss = D_ss - P_ss
+  Q = (t(DminusP_ss) %*% solve(D_ss) %*% DminusP_ss)
+
 
   #
   if(what=="samples") out = rmvnorm_prec( n=n, mean=rep(0,nrow(Q)), Q=Q )

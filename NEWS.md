@@ -1,3 +1,24 @@
+# tinyVAST 1.1.0
+
+* Adding `term_covariance` to calculate the covariance among variables for SEM term,
+  or covariance among variables-and-lags for DSEM terms
+* Adding Restricted Spatial Regression estimator for covariates `alphaprime_j` and `alphaprime2_j`
+  to `fit$rep` output.
+* Adding methods to allow use of `cv` to calculate crossvalidation skill
+* Add `bias.correct` option to predict (but still no flag for SEs for anything except p_i)
+* Switch `sample_variable` from using `obj$env$MC` to `obj$env$spHess(random=TRUE)`
+  which seems more stable as dependency
+* Add functionality for `te` and `ti` splines, although they remain poorly tested
+* Add error check to `sfnetwork_mesh` to detect if the stream network is not ordered
+  as a tree
+* Improve stream network vignette to use matrix notation for joint precision, and
+  modify `simulate_sfnetwork` to use that
+* Change `tinyVAST.cpp` to use matrix notation constructor and fix bug in previous
+  constructor where the covariance between first and second nodes was not right
+* Expand `test-sfnetworks.R` integrated test to confirm that matrix-notation
+  precision constructor is identical to the inverse of Ornstein-Uhlenbeck covariance
+  as intended.
+
 # tinyVAST 1.0.1
 
 * Modify examples for `simulate.tinyVAST` and `sample_variable` to try to avoid

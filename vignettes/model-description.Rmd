@@ -113,23 +113,43 @@ In either the conventional or Poisson-linked delta model, $\mu_{\PL 1,i} = \math
 
 Linear predictors include spatially autocorrelated latent variables.  These variables are treated as Gaussian Markov random fields (GMRFs), and evaluating the probability density of GMRFs involves calculating the precision matrix $\B Q_{\PL{domain}} = \B \Sigma^{-1}$ as the inverse of the spatial covariance matrix.  tinyVAST involves three options for specifying this spatial precision:
 
-* Stochastic partial differentiaul equation (SPDE):  The analyst can approximate spatial variation over a continuous two-dimensional surface by constructing finite element mesh (FEM), treating the value at vertices as a GMRF, and then using bilinear interpolation (i.e., a piecewise linear approximation) to interpolate from vertices to the spatial domain.  In this case, the precision is constructred as:
+### Stochastic partial differentiaul equation (SPDE)
+
+The analyst can approximate spatial variation over a continuous two-dimensional surface by constructing finite element mesh (FEM), treating the value at vertices as a GMRF, and then using bilinear interpolation (i.e., a piecewise linear approximation) to interpolate from vertices to the spatial domain.  In this case, the precision is constructred as:
 
 $$
 \B Q_{\PL{domain}} = \tau^2 ( \kappa^4 \B M_{\PL 0} + 2\kappa^2 \B M_{\PL 1} + \B M_{\PL 2} )
 $$
 where every row $\B A_i$ of the interpolation matrix $\B A$ is nonzero for only the three vertices of the triangle that contains sample $i$
 
-* Simultaneous autoregressive (SAR):  Alternatively, the analyst can specify an areal model representing the value within spatial strata:
+### Simultaneous autoregressive (SAR):
+
+Alternatively, the analyst can specify an areal model representing the value within spatial strata:
 
 $$
 \B Q_{\PL{domain}} = \tau^2 (\B I - \kappa \B A^*)^2 
 $$
-where $\B A^*$ is the adjacency matrix of the graph specified by the analyst, and each row $\B A_i$ of interpolation matrix $\B A$ is nonzero only for the single spatial stratum containing sample $i$ (and noting that adjacency matrix $\B A^*$ is different from interpolation matrix $\B A$, but we use the same notation for both due to a collision in notational standards).
+where $\B A^*$ is the adjacency matrix of the graph specified by the analyst, $\kappa$ is the estimated partial correlation between adjacent areas, and each row $\B A_i$ of interpolation matrix $\B A$ is nonzero only for the single spatial stratum containing sample $i$ (and noting that adjacency matrix $\B A^*$ is different from interpolation matrix $\B A$, but we use the same notation for both due to a collision in notational standards).
 
-* Stream networks:  Finally, the analyst can specify that sites are partially correlated if they are adjacent along a stream network (while ignoring flow direction).  This results in an Onstein-Uhlenbeck process along the stream network, or an *exponential tail-down* model.
+### Stream networks using a tail-down exponential correlation function
 
-For each spatial domain, the term $\tau$ is defined such that precision $\B Q_{\PL{domain}}$ has unit variance.  This is done because the spatial domain always arises in combination with other parameters, which are used to define the variance of the associated spatial variable.
+Finally, the analyst can specify that sites are partially correlated if they are adjacent along a stream network (while ignoring flow direction).  This results in an Onstein-Uhlenbeck process along the stream network, or an *exponential tail-down* model:
+
+$$
+\B{Q}_{\PL{domain}} = \B{(I+D-P)}^T \B{I+D}^{-1} \B{(I+D-P)}
+$$
+where $\B D$ is a sparse diagonal matrix with diagonal elements 
+
+$$
+d_{i,j} =\PL{exp}(-2 \theta |\B s_i, \B s_j|) / (1 - \PL{exp}(-2 \theta |\B s_i, \B s_j|))
+$$
+where $|\B s_i, \B s_j|$ is the distance from downstream (parent) node $j$ to upstream (child) node $i$, and $\theta$ is the O-U parameter governing the decorrelation rate.  Similarly, $\B P$ is a sparse matrix containing values $\rho_{i,j}$, where:
+$$
+\rho_{i,j} = \PL{exp}(-\theta |\B s_i, \B s_j|) / (1 - \PL{exp}(-2 \theta |\B s_i, \B s_j|))
+$$
+such that $\rho_{i,j}$ the regression slope predicting upstream node $i$ from downstream node $j$.  The spatial interpolation matrix $\B A$ again has row $\B A_i$ for each sampling or predictive location, and $\B A_i$ is nonzero for the two nodes immediately up and downstream from a given location, with values such that a given location is predicted as a weighted average based upon the distance from those two nodes.  
+
+For the SPDE and SAR spatial domains, the term $\tau$ is defined such that precision $\B Q_{\PL{domain}}$ has unit variance.  This is done because the spatial domain always arises in combination with other parameters, which are used to define the variance of the associated spatial variable.
 
 # Structural equation models
 
