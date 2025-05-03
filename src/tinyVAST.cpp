@@ -863,12 +863,22 @@ Type objective_function<Type>::operator() (){
 
   // Spatial distribution
   PARAMETER( log_kappa );
+  PARAMETER_VECTOR( ln_H_input );
   Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
   if( spatial_options(0)==1 ){
     // Using INLA
-    DATA_STRUCT(spatial_list, R_inla::spde_t);
-    Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
+    //DATA_STRUCT(spatial_list, R_inla::spde_t);
+    DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
+    // Anisotropy elements
+    matrix<Type> H( 2, 2 );
+    H(0,0) = exp(ln_H_input(0));
+    H(1,0) = ln_H_input(1);
+    H(0,1) = ln_H_input(1);
+    H(1,1) = (1+ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
+    // Build precision
+    //Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
+    Q_ss = R_inla::Q_spde( spatial_list, exp(log_kappa), H );
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
     Type range = pow(8.0, 0.5) / exp( log_kappa );
     REPORT( range );

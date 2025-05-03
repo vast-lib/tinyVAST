@@ -1,3 +1,7 @@
+# tinyVAST 1.2.0
+
+* Adding option for geometric anisotropy when using the SPDE method
+
 # tinyVAST 1.1.0
 
 * Adding `term_covariance` to calculate the covariance among variables for SEM term,
