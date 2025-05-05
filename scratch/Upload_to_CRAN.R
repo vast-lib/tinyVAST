@@ -65,6 +65,7 @@ check_win_oldrelease()
 check_mac_release()
 #check_rhub()
 
+
 # Submit to CRAN via devtools .. not preferred!
 if( FALSE ){
   file.remove( file.path("vignettes","vignette.pdf") )
@@ -76,4 +77,6 @@ root_dir = R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\scratch)'
 # https://cran.r-project.org/submit.html
 build( path=root_dir, manual=TRUE )
 
+#
+tools::check_packages_in_dir( root_dir )
 
