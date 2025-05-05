@@ -1,6 +1,9 @@
 # tinyVAST 1.2.0
 
 * Adding option for geometric anisotropy when using the SPDE method
+* For some reason, the CPP edits also address an error message
+  during `devtools::check_win_devel` "array subscript 'const __m128i[0]' is
+  partly outside array bounds of 'unsigned char [12]'"
 
 # tinyVAST 1.1.0
 
