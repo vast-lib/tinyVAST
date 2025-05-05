@@ -38,32 +38,36 @@ jobs:
         config: ${{ github.event.inputs.config }}
       id: rhub-setup
 
-  linux-containers:
-    needs: setup
-    if: ${{ needs.setup.outputs.containers != '[]' }}
-    runs-on: ubuntu-latest
-    name: ${{ matrix.config.label }}
-    strategy:
-      fail-fast: false
-      matrix:
-        config: ${{ fromJson(needs.setup.outputs.containers) }}
-    container:
-      image: ${{ matrix.config.container }}
+linux-containers:
+  needs: setup
+  if: ${{ needs.setup.outputs.containers != '[]' }}
+  runs-on: ubuntu-latest
+  name: ${{ matrix.config.label }}
+  strategy:
+    fail-fast: false
+    matrix:
+      config: ${{ fromJson(needs.setup.outputs.containers) }}
+  container:
+    image: ${{ matrix.config.container }}
 
-    steps:
-      - uses: r-hub/actions/checkout@v1
-      - uses: r-hub/actions/platform-info@v1
-        with:
-          token: ${{ secrets.RHUB_TOKEN }}
-          job-config: ${{ matrix.config.job-config }}
-      - uses: r-hub/actions/setup-deps@v1
-        with:
-          token: ${{ secrets.RHUB_TOKEN }}
-          job-config: ${{ matrix.config.job-config }}
-      - uses: r-hub/actions/run-check@v1
-        with:
-          token: ${{ secrets.RHUB_TOKEN }}
-          job-config: ${{ matrix.config.job-config }}
+  steps:
+    - uses: r-hub/actions/checkout@v1
+    - name: Install missing dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gawk
+    - uses: r-hub/actions/platform-info@v1
+      with:
+        token: ${{ secrets.RHUB_TOKEN }}
+        job-config: ${{ matrix.config.job-config }}
+    - uses: r-hub/actions/setup-deps@v1
+      with:
+        token: ${{ secrets.RHUB_TOKEN }}
+        job-config: ${{ matrix.config.job-config }}
+    - uses: r-hub/actions/run-check@v1
+      with:
+        token: ${{ secrets.RHUB_TOKEN }}
+        job-config: ${{ matrix.config.job-config }}
 
   other-platforms:
     needs: setup
