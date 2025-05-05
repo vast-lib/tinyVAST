@@ -1,4 +1,4 @@
-# tinyVAST 1.2.0
+# tinyVAST 1.1.1
 
 * Adding option for geometric anisotropy when using the SPDE method
 * For some reason, the CPP edits also address an error message
