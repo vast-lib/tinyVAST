@@ -471,6 +471,8 @@ named_list <- function(...) {
 #' The covariance matrix among variables
 #'
 #' @examples
+#' # Extract covariance for spatial factor analysis (too slow for CRAN)
+#' \donttest{
 #' # Simulate settings
 #' set.seed(101)
 #' theta_xy = 0.4
@@ -531,6 +533,7 @@ named_list <- function(...) {
 #' # Extract covariance among species and factors, where
 #' # estimated covariance is obtained by ignoring factors
 #' V = term_covariance( out, what = "space_term", pred = "one" )
+#' }
 #'
 #' @export
 term_covariance <-

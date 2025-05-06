@@ -34,6 +34,8 @@ and estimated parameters for a SEM or DSEM term in tinyVAST
 tinyVAST constructs the covariance from specified path structure and estimated parameters
 }
 \examples{
+# Extract covariance for spatial factor analysis (too slow for CRAN)
+\donttest{
 # Simulate settings
 set.seed(101)
 theta_xy = 0.4
@@ -94,5 +96,6 @@ out = tinyVAST( space_term = sem,
 # Extract covariance among species and factors, where
 # estimated covariance is obtained by ignoring factors
 V = term_covariance( out, what = "space_term", pred = "one" )
+}
 
 }

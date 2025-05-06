@@ -165,9 +165,11 @@
 #'                 spatial_domain = mesh,
 #'                 space_term = "n <-> n, sd_n" )
 #'
-#' # Run crossvalidation
+#' # Run crossvalidation (too slow for CRAN)
+#' \donttest{
 #' CV = cv::cv( out, k = 4 )
 #' CV
+#' }
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
