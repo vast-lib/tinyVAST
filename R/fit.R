@@ -165,9 +165,11 @@
 #'                 spatial_domain = mesh,
 #'                 space_term = "n <-> n, sd_n" )
 #'
-#' # Run crossvalidation
+#' # Run crossvalidation (too slow for CRAN)
+#' \donttest{
 #' CV = cv::cv( out, k = 4 )
 #' CV
+#' }
 #'
 #' @useDynLib tinyVAST, .registration = TRUE
 #' @export
@@ -386,10 +388,12 @@ function( formula,
     # SPDE
     n_s = spatial_domain$n
     spatial_method_code = 1
-    spatial_list = fm_fem( spatial_domain )
-    spatial_list = list("M0"=spatial_list$c0, "M1"=spatial_list$g1, "M2"=spatial_list$g2)
+    #spde = fm_fem( spatial_domain )
+    #spatial_list = list("M0"=spde$c0, "M1"=spde$g1, "M2"=spde$g2)
+    spatial_list = make_anisotropy_spde( spatial_domain )
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     estimate_kappa = TRUE
+    estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"igraph") ) {
     # SAR
     spatial_method_code = 2
@@ -400,6 +404,7 @@ function( formula,
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
     estimate_kappa = ifelse( ecount(spatial_domain)>0, TRUE, FALSE )
+    estimate_H = FALSE
   }else if( is(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
     # stream network
     spatial_method_code = 4
@@ -408,6 +413,7 @@ function( formula,
     A_is = sfnetwork_evaluator( stream = spatial_domain$stream,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
+    estimate_H = FALSE
   }else{
     # Single-site
     spatial_method_code = 3
@@ -418,6 +424,7 @@ function( formula,
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
     estimate_kappa = FALSE
+    estimate_H = FALSE
   }
   Atriplet = Matrix::mat2triplet(A_is)
   if(n_s>1000) warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
@@ -697,7 +704,8 @@ function( formula,
     xi2_sl = array(0, dim=c(n_s, ncol(tmb_data$W2_il))),
 
     eps = numeric(0),
-    log_kappa = log(1)
+    log_kappa = log(1),
+    ln_H_input = c(0, 0)
   )
 
   # Telescoping
@@ -744,8 +752,15 @@ function( formula,
   if( all(distributions$components==1) ){
     tmb_map$alpha2_j = factor( rep(NA,length(tmb_par$alpha2_j)) )
   }
+
+  # Map off log_kappa as needed
   if( isFALSE(estimate_kappa) ){
     tmb_map$log_kappa = factor(NA)
+  }
+
+  # Map off ln_H_input
+  if( isFALSE(estimate_H) ){
+    tmb_map$ln_H_input = factor( c(NA,NA) )
   }
 
   # 
@@ -803,6 +818,7 @@ function( formula,
     compile("tinyVAST.cpp" , framework = "TMBad" )
     dyn.load(dynlib("tinyVAST"))
   }
+  #browser()
   obj = MakeADFun( data = tmb_data,
                    parameters = tmb_par,
                    map = tmb_map,
@@ -955,6 +971,8 @@ function( formula,
 #'        regression (RSR) adjusted estimator for covariate responses
 #' @param extra_reporting Whether to report a much larger set of quantities via
 #'        \code{obj$env$report()}
+#' @param use_anisotropy Whether to estimate two parameters representing
+#'        geometric anisotropy
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
@@ -981,7 +999,8 @@ function( nlminb_loops = 1,
           run_model = TRUE,
           suppress_nlminb_warnings = TRUE,
           get_rsr = FALSE,
-          extra_reporting = FALSE ){
+          extra_reporting = FALSE,
+          use_anisotropy = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -1006,7 +1025,8 @@ function( nlminb_loops = 1,
     run_model = run_model,
     suppress_nlminb_warnings = suppress_nlminb_warnings,
     get_rsr = get_rsr,
-    extra_reporting = extra_reporting
+    extra_reporting = extra_reporting,
+    use_anisotropy = use_anisotropy
   ), class = "tinyVASTcontrol" )
 }
 

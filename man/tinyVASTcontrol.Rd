@@ -23,7 +23,8 @@ tinyVASTcontrol(
   run_model = TRUE,
   suppress_nlminb_warnings = TRUE,
   get_rsr = FALSE,
-  extra_reporting = FALSE
+  extra_reporting = FALSE,
+  use_anisotropy = FALSE
 )
 }
 \arguments{
@@ -86,6 +87,9 @@ regression (RSR) adjusted estimator for covariate responses}
 
 \item{extra_reporting}{Whether to report a much larger set of quantities via
 \code{obj$env$report()}}
+
+\item{use_anisotropy}{Whether to estimate two parameters representing
+geometric anisotropy}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or

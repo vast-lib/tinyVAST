@@ -14,9 +14,12 @@ rhub_setup(overwrite = FALSE)
 rhub::rhub_doctor()
 
 # Run
-platforms = c( "m1-san", "clang-ubsan", "valgrind" )
+#platforms = c( "m1-san", "clang-ubsan", "valgrind" )
+platforms = c( "gcc15", "windows" )
 # 2 -- UBSAN
+# 5 -- Windows latest
 # 9 -- clang-ubsan
+# 19 -- Fedora gcc15  ... hopefully "r-devel-linux-x86_64-fedora-gcc"
 # 30 -- valgrind
 rhub::rhub_check( platforms = platforms )
 
