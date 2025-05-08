@@ -1,3 +1,8 @@
+# tinyVAST 1.2.0
+
+* Adding a new spatial domain using `sf::st_make_grid`
+* Adding option for geometric anisotropy when using `sf::st_make_grid`
+
 # tinyVAST 1.1.1
 
 * Adding option for geometric anisotropy when using the SPDE method
