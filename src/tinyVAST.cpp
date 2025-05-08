@@ -70,44 +70,6 @@ Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
   return M;
 }
 
-// Q_SAR( log_kappa, H, n_s, i_z, j_z, delta_z2 )
-// New matrix-notation precision constructor for tail-down exponential stream network
-template<class Type>
-Eigen::SparseMatrix<Type> Q_SAR( Type rho,
-                                     matrix<Type> H,
-                                     int n_s,
-                                     vector<int> i_z,
-                                     vector<int> j_z,
-                                     matrix<Type> delta_z2 ){
-
-  //d_z = sqrt((delta_z2 %*% H)^2 %*% matrix(1,nrow=2,ncol=1))[,1]
-  matrix<Type> deltaprime_z2 = delta_z2 * H;
-  vector<Type> dist2_z( i_z.size() );
-  for( int z = 0; z < i_z.size(); z++ ){
-    dist2_z(z) = pow(deltaprime_z2(z,0),2.0) + pow(deltaprime_z2(z,1),2.0);
-  }
-  vector<Type> weight_z = exp( -1.0 * dist2_z );
-
-  // Make weight matrix
-  Eigen::SparseMatrix<Type> W_ss = vectorsToSparseMatrix( i_z,
-                                                          j_z,
-                                                          weight_z,
-                                                          n_s );
-
-  // Row-normalize W_ss
-  for( int row = 0; row < n_s; row ++ ){
-    Type rowsum = W_ss.row(row).sum();
-    W_ss.row(row) /= rowsum;
-  }
-
-  // Assemble
-  Eigen::SparseMatrix<Type> I_ss( n_s, n_s );
-  I_ss.setIdentity();
-  Eigen::SparseMatrix<Type> IminusP_ss = I_ss - rho * W_ss;
-  Eigen::SparseMatrix<Type> Q = IminusP_ss.transpose() * IminusP_ss;
-  return Q;
-}
-
 // New matrix-notation precision constructor for tail-down exponential stream network
 template<class Type>
 Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
@@ -902,20 +864,18 @@ Type objective_function<Type>::operator() (){
   // Spatial distribution
   PARAMETER( log_kappa );
   PARAMETER_VECTOR( ln_H_input );
-  // Anisotropy elements
-  matrix<Type> H( 2, 2 );
-  H(0,0) = exp(ln_H_input(0));
-  H(1,0) = ln_H_input(1);
-  H(0,1) = ln_H_input(1);
-  H(1,1) = (1+ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
-  REPORT( H );
-  // Spatial settings
   Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
   if( spatial_options(0)==1 ){
     // Using INLA
     //DATA_STRUCT(spatial_list, R_inla::spde_t);
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
+    // Anisotropy elements
+    matrix<Type> H( 2, 2 );
+    H(0,0) = exp(ln_H_input(0));
+    H(1,0) = ln_H_input(1);
+    H(0,1) = ln_H_input(1);
+    H(1,1) = (1+ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
     // Build precision
     //Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
     Q_ss = R_inla::Q_spde( spatial_list, exp(log_kappa), H );
@@ -948,15 +908,6 @@ Type objective_function<Type>::operator() (){
     REPORT( Q_ss );
     //Eigen::SparseMatrix<Type> Q2_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
     //REPORT( Q2_ss );
-  }else if( spatial_options(0)==5 ){
-    DATA_IVECTOR( i_z );
-    DATA_IVECTOR( j_z );
-    DATA_MATRIX( delta_z2 );
-    log_tau = Type(0.0);
-    // rho = inverse_cloglog( log_theta )
-    Type rho = exp(-1.0 * exp(log_kappa));
-    REPORT( rho );
-    Q_ss = Q_SAR( rho, H, n_s, i_z, j_z, delta_z2 );
   }
   REPORT( log_tau );
 

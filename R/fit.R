@@ -45,9 +45,7 @@
 #'        [fmesher::fm_mesh_2d()] to apply the SPDE method,
 #'        [igraph::make_empty_graph()] for independent time-series,
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
-#'        process to a user-supplied graph, [sfnetwork_mesh()] for stream networks,
-#'        [sf::st_make_grid] to apply a SAR to an areal model with adjacency
-#'        based on user-supplied polygons,
+#'        process, [sfnetwork_mesh()] for stream networks,
 #'        or `NULL` to specify a single site.  If using `igraph` then the
 #'        graph must have vertex names \code{V(graph)$name} that match
 #'        levels of \code{data[,'space_columns']}
@@ -119,7 +117,6 @@
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv
-#' @importFrom sf st_relate st_coordinates st_centroid st_within st_crs
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
@@ -417,34 +414,6 @@ function( formula,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
     estimate_H = FALSE
-  }else if( is(spatial_domain, "sfc_POLYGON") ){
-    # SAR with geometric anisotropy
-    spatial_method_code = 5
-    n_s = length(spatial_domain)
-    if( control$sar_adjacency == "rook" ){
-      st_adjacent <- function(m, ...) st_relate(m, m, pattern="F***1****", ...)
-    }else{
-      st_adjacent <- function(m, ...) st_relate(m, m, pattern = "F***T****", ...)
-    }
-    grid_A = st_adjacent(spatial_domain, sparse=TRUE)
-    A_ss = as(grid_A, "sparseMatrix")
-    grid_xy = st_coordinates(st_centroid(spatial_domain))
-    tripA = mat2triplet(A_ss)
-    spatial_list = list(
-      i_z = tripA$i,
-      j_z = tripA$j,
-      delta_z2 = grid_xy[tripA$i,] - grid_xy[tripA$j,]
-    )
-    sf_coords = st_as_sf( data,
-                          coords = space_columns,
-                          crs = st_crs(spatial_domain) )
-    s_i = as.integer(st_within( sf_coords, spatial_domain ))
-    A_is = sparseMatrix( i = seq_along(s_i),
-                         j = s_i,
-                         x = 1,
-                         dims = c(length(s_i),length(spatial_domain)) )
-    estimate_kappa = TRUE
-    estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else{
     # Single-site
     spatial_method_code = 3
@@ -703,12 +672,7 @@ function( formula,
   }else if( spatial_method_code %in% 4 ){
     tmb_data$graph_sz = as.matrix(spatial_list[,c('from','to')]) - 1
     tmb_data$dist_s = spatial_list[,c('dist')]
-  }else if( spatial_method_code %in% 5 ){
-    tmb_data$i_z = spatial_list$i_z - 1
-    tmb_data$j_z = spatial_list$j_z - 1
-    tmb_data$delta_z2 = spatial_list$delta_z2
   }
-
 
   # make params
   tmb_par = list(
@@ -1009,9 +973,6 @@ function( formula,
 #'        \code{obj$env$report()}
 #' @param use_anisotropy Whether to estimate two parameters representing
 #'        geometric anisotropy
-#' @param sar_adjacency Whether to use queen or rook adjacency when defining
-#'        a Simultaneous Autoregressive spatial precision from a sfc_POLYGON
-#'        (default is queen)
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
@@ -1039,8 +1000,7 @@ function( nlminb_loops = 1,
           suppress_nlminb_warnings = TRUE,
           get_rsr = FALSE,
           extra_reporting = FALSE,
-          use_anisotropy = FALSE,
-          sar_adjacency = "queen" ){
+          use_anisotropy = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -1066,8 +1026,7 @@ function( nlminb_loops = 1,
     suppress_nlminb_warnings = suppress_nlminb_warnings,
     get_rsr = get_rsr,
     extra_reporting = extra_reporting,
-    use_anisotropy = use_anisotropy,
-    sar_adjacency = sar_adjacency
+    use_anisotropy = use_anisotropy
   ), class = "tinyVASTcontrol" )
 }
 
