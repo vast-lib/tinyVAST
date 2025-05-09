@@ -24,7 +24,8 @@ tinyVASTcontrol(
   suppress_nlminb_warnings = TRUE,
   get_rsr = FALSE,
   extra_reporting = FALSE,
-  use_anisotropy = FALSE
+  use_anisotropy = FALSE,
+  sar_adjacency = "queen"
 )
 }
 \arguments{
@@ -90,6 +91,10 @@ regression (RSR) adjusted estimator for covariate responses}
 
 \item{use_anisotropy}{Whether to estimate two parameters representing
 geometric anisotropy}
+
+\item{sar_adjacency}{Whether to use queen or rook adjacency when defining
+a Simultaneous Autoregressive spatial precision from a sfc_POLYGON
+(default is queen)}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or

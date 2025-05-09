@@ -472,6 +472,15 @@ function( object,
     # stream network
     A_gs = sfnetwork_evaluator( stream = object$spatial_domain$stream,
                                 loc = as.matrix(newdata[,object$internal$space_columns]) )
+  }else if( is(object$spatial_domain, "sfc_POLYGON") ){
+    sf_coords = st_as_sf( newdata,
+                          coords = object$internal$space_columns,
+                          crs = st_crs(object$spatial_domain) )
+    s_i = as.integer(st_within( sf_coords, object$spatial_domain ))
+    A_gs = sparseMatrix( i = seq_along(s_i),
+                         j = s_i,
+                         x = 1,
+                         dims = c(length(s_i),length(object$spatial_domain)) )
   }else{
     A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
     A_gs = as(Matrix(A_gs),"CsparseMatrix")
