@@ -46,8 +46,9 @@
 #'        [igraph::make_empty_graph()] for independent time-series,
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
 #'        process to a user-supplied graph, [sfnetwork_mesh()] for stream networks,
-#'        [sf::st_make_grid] to apply a SAR to an areal model with adjacency
-#'        based on user-supplied polygons,
+#'        or class \code{sfc_GEOMETRY} e.g constructed using [sf::st_make_grid]
+#'        to apply a SAR to an areal model with adjacency
+#'        based on the geometry of the object,
 #'        or `NULL` to specify a single site.  If using `igraph` then the
 #'        graph must have vertex names \code{V(graph)$name} that match
 #'        levels of \code{data[,'space_columns']}
@@ -417,7 +418,7 @@ function( formula,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
     estimate_H = FALSE
-  }else if( is(spatial_domain, "sfc_POLYGON") ){
+  }else if( is(spatial_domain, "sfc_GEOMETRY") ){
     # SAR with geometric anisotropy
     spatial_method_code = 5
     n_s = length(spatial_domain)
@@ -1010,7 +1011,7 @@ function( formula,
 #' @param use_anisotropy Whether to estimate two parameters representing
 #'        geometric anisotropy
 #' @param sar_adjacency Whether to use queen or rook adjacency when defining
-#'        a Simultaneous Autoregressive spatial precision from a sfc_POLYGON
+#'        a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 #'        (default is queen)
 #'
 #' @return

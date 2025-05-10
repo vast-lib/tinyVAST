@@ -76,8 +76,9 @@ coordinates for each sample.}
 \code{\link[igraph:make_empty_graph]{igraph::make_empty_graph()}} for independent time-series,
 \code{\link[igraph:make_graph]{igraph::make_graph()}} to apply a simultaneous autoregressive (SAR)
 process to a user-supplied graph, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
-\link[sf:st_make_grid]{sf::st_make_grid} to apply a SAR to an areal model with adjacency
-based on user-supplied polygons,
+or class \code{sfc_GEOMETRY} e.g constructed using \link[sf:st_make_grid]{sf::st_make_grid}
+to apply a SAR to an areal model with adjacency
+based on the geometry of the object,
 or \code{NULL} to specify a single site.  If using \code{igraph} then the
 graph must have vertex names \code{V(graph)$name} that match
 levels of \code{data[,'space_columns']}}

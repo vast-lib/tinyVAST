@@ -93,7 +93,7 @@ regression (RSR) adjusted estimator for covariate responses}
 geometric anisotropy}
 
 \item{sar_adjacency}{Whether to use queen or rook adjacency when defining
-a Simultaneous Autoregressive spatial precision from a sfc_POLYGON
+a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 (default is queen)}
 }
 \value{

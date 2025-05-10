@@ -472,7 +472,7 @@ function( object,
     # stream network
     A_gs = sfnetwork_evaluator( stream = object$spatial_domain$stream,
                                 loc = as.matrix(newdata[,object$internal$space_columns]) )
-  }else if( is(object$spatial_domain, "sfc_POLYGON") ){
+  }else if( is(object$spatial_domain, "sfc_GEOMETRY") ){
     sf_coords = st_as_sf( newdata,
                           coords = object$internal$space_columns,
                           crs = st_crs(object$spatial_domain) )
