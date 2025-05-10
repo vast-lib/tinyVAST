@@ -446,7 +446,7 @@ function( formula,
                          dims = c(length(s_i),length(spatial_domain)) )
     estimate_kappa = TRUE
     estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
-  }else{
+  }else if( is.null(spatial_domain) ) {
     # Single-site
     spatial_method_code = 3
     n_s = 1
@@ -457,6 +457,8 @@ function( formula,
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
     estimate_kappa = FALSE
     estimate_H = FALSE
+  }else{
+    stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
   Atriplet = Matrix::mat2triplet(A_is)
   if(n_s>1000) warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
