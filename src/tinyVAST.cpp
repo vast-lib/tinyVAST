@@ -738,7 +738,7 @@ Type two_predictor_likelihood( Type y,
         //  break;
         case lognormal_family:
           nll -= weight * dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
-          dev += pow( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), 2.0 );
+          dev += pow( log(y) - (logmu2 - 0.5*exp(2.0*log_sigma_segment(0))), 2.0 );
           if(isDouble<Type>::value && of->do_simulate){
             y = exp(rnorm( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
           }
