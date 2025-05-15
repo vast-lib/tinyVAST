@@ -522,7 +522,7 @@ Type dbinom_custom( Type x,
   // size choose x
   Type logres = lgamma(size + 1.0) - lgamma(x + 1.0) - lgamma(size - x + 1.0);
   // p^x * (1-p)^(size-x)
-  Type logres += x * log_prob  +  (size-x) * log_one_minus_prob;
+  logres += x * log_prob  +  (size-x) * log_one_minus_prob;
   if(give_log) return logres; else return exp(logres);
 }
 
@@ -653,7 +653,7 @@ Type one_predictor_likelihood( Type &y,
         }
         // TODO:  Update deviance residual for Trials = weight
         //devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
-        devresid = NAN
+        devresid = NAN;
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
         nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
