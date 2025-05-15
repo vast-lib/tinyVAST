@@ -511,6 +511,21 @@ Type dlnorm( Type x,
   if(give_log) return logres; else return exp(logres);
 }
 
+// dlnorm
+template<class Type>
+Type dbinom_custom( Type x,
+             Type log_prob,
+             Type log_one_minus_prob,
+             Type size,
+             int give_log = 0 ){
+
+  // size choose x
+  Type logres = lgamma(size + 1.0) - lgamma(x + 1.0) - lgamma(size - x + 1.0);
+  // p^x * (1-p)^(size-x)
+  Type logres += x * log_prob  +  (size-x) * log_one_minus_prob;
+  if(give_log) return logres; else return exp(logres);
+}
+
 // Deviance for the Tweedie
 // https://en.wikipedia.org/wiki/Tweedie_distribution#Properties
 template<class Type>
@@ -582,13 +597,15 @@ Type one_predictor_likelihood( Type &y,
       break;
     case logit_link:
       mu = invlogit(p);
-      logmu = log(mu);
-      log_one_minus_mu = log( invlogit(-1 * p) );
+      //logmu = log(mu);
+      logmu = p - logspace_add( Type(0.0), p );
+      //log_one_minus_mu = log( invlogit(-1 * p) );
+      log_one_minus_mu = 0.0 - logspace_add( Type(0.0), p );
       break;
     case cloglog_link:
-      mu = Type(1.0) - exp( -1*exp(p) );
-      logmu = logspace_sub( Type(0.0), -1*exp(p) );
-      log_one_minus_mu = -1*exp(p);
+      mu = Type(1.0) - exp( -1 * exp(p) );
+      logmu = logspace_sub( Type(0.0), -1.0 * exp(p) );
+      log_one_minus_mu = -1.0 * exp(p);
       break;
     default:
       error("Link not implemented.");
@@ -625,15 +642,18 @@ Type one_predictor_likelihood( Type &y,
         }
         break;
       case binomial_family:
-        if(y==0){
-          nll -= weight * log_one_minus_mu;
-        }else{
-          nll -= weight * logmu;
-        }
+        //if(y==0){
+        //  nll -= weight * log_one_minus_mu;
+        //}else{
+        //  nll -= weight * logmu;
+        //}
+        nll -= dbinom_custom( y * weight, logmu, log_one_minus_mu, weight, true );
         if(isDouble<Type>::value && of->do_simulate){
-          y = rbinom( Type(1), mu );
+          y = rbinom( weight, mu );
         }
-        devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
+        // TODO:  Update deviance residual for Trials = weight
+        //devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
+        devresid = NAN
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
         nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );

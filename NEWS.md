@@ -4,6 +4,7 @@
 * Adding option for geometric anisotropy when using `sf::st_make_grid`
 * Fix bug in deviance for lognormal distribution in delta models (h/t Sean
   Anderson for finding it)
+* Change family = "binomial" to use `weights` as number of Binomial trials N
 
 # tinyVAST 1.1.1
 
