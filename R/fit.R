@@ -33,7 +33,8 @@
 #'        these functions, with names that match levels of
 #'        \code{data$distribution_column} to allow different
 #'        families by row of data. Delta model families are possible, and see
-#'        \code{\link[tinyVAST:families]{Families}} for delta-model options,
+#'        \code{\link[tinyVAST:families]{Families}} for delta-model options.
+#'        For binomial family options, see 'Binomial families' in the Details section below.
 #' @param space_columns A string or character vector that indicates
 #'        the column(s) of `data` indicating the location of each sample.
 #'        When `spatial_domain` is an `igraph` object, `space_columns` is a string with
@@ -105,6 +106,13 @@
 #' | Univariate spatio-temporal model, or multiple independence spatio-temporal variables | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
 #' | Multivariate spatial model including interactions | specify `spatial_domain` and use `space_term` to specify spatial interactions |
 #' | Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
+#'
+#' **Binomial families**
+#'
+#' A binomial family can be specified in only one way:
+#' the response is the observed proportion (proportion = successes / trials),
+#' and the 'weights' argument is used to specify the Binomial size (trials, N)
+#' parameter (`proportion ~ ..., weights = N`).
 #'
 #' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations

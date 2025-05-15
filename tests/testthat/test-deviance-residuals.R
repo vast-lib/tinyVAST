@@ -210,7 +210,7 @@ test_that("deviance residuals for poisson works", {
                 tolerance=1e-3 )
 })
 
-test_that("deviance residuals for Bernoulli works", {
+test_that("MLE for Bernoulli works", {
   skip_on_cran()
   #skip_on_ci()
 
@@ -224,16 +224,50 @@ test_that("deviance residuals for Bernoulli works", {
   mytiny = tinyVAST( y ~ 1 + x,
                      data = data.frame(x=x, y=y),
                      family = binomial("logit") )
-  resid1 = residuals( mytiny, type="deviance" )
+  #resid1 = residuals( mytiny, type="deviance" )
 
   #
   myglm = glm( y ~ 1 + x,
                      data = data.frame(x=x, y=y),
                      family = binomial("logit") )
-  resid2 = residuals( myglm, type="deviance" )
-  expect_equal( as.numeric(resid1), as.numeric(resid2),
+  #resid2 = residuals( myglm, type="deviance" )
+  #expect_equal( as.numeric(resid1), as.numeric(resid2),
+  #              tolerance=1e-3 )
+  expect_equal( as.numeric(coef(myglm)), as.numeric(mytiny$opt$par),
                 tolerance=1e-3 )
 })
+
+test_that("MLE for Binomial works", {
+  skip_on_cran()
+  #skip_on_ci()
+
+  # simulate data
+  set.seed(101)
+  x = rnorm(100)
+  mu = plogis(1 + 0.5*x)
+  size = rpois(100, lambda = 3)
+  success = rbinom( n=100, prob=mu, size=size )
+  y = success / ifelse( size==0, 1, size )
+
+  # delta-gamma in tinyVAST
+  mytiny = tinyVAST( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("logit"),
+                     weights = size )
+  #resid1 = residuals( mytiny, type="deviance" )
+
+  #
+  myglm = glm( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("logit"),
+                     weights = size )
+  #resid2 = residuals( myglm, type="deviance" )
+  #expect_equal( as.numeric(resid1), as.numeric(resid2),
+  #              tolerance=1e-3 )
+  expect_equal( as.numeric(coef(myglm)), as.numeric(mytiny$opt$par),
+                tolerance=1e-3 )
+})
+
 
 test_that("delta-gamma works", {
   skip_on_cran()

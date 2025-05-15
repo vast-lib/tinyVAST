@@ -61,7 +61,8 @@ Alternatively, can be a named list of
 these functions, with names that match levels of
 \code{data$distribution_column} to allow different
 families by row of data. Delta model families are possible, and see
-\code{\link[tinyVAST:families]{Families}} for delta-model options,}
+\code{\link[tinyVAST:families]{Families}} for delta-model options.
+For binomial family options, see 'Binomial families' in the Details section below.}
 
 \item{space_columns}{A string or character vector that indicates
 the column(s) of \code{data} indicating the location of each sample.
@@ -168,6 +169,14 @@ two are then parsed to include a single exogenous variance for the single variab
    Multivariate spatial model including interactions \tab specify \code{spatial_domain} and use \code{space_term} to specify spatial interactions \cr
    Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) \tab specify \code{spatial_domain} and use \code{spacetime_term=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{spacetime_term} and \code{spatial_domain} \cr
 }
+
+
+\strong{Binomial families}
+
+A binomial family can be specified in only one way:
+the response is the observed proportion (proportion = successes / trials),
+and the 'weights' argument is used to specify the Binomial size (trials, N)
+parameter (\verb{proportion ~ ..., weights = N}).
 }
 \examples{
 # Simulate a seperable two-dimensional AR1 spatial process
