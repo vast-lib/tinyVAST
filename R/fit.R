@@ -946,7 +946,8 @@ function( formula,
     parlist = obj$env$parList(par=obj$env$last.par.best),
     Hess_fixed = Hess_fixed,
     control = control,
-    family = family                                       # for `add_predictions`
+    family = family,                                       # for `add_predictions`
+    weights = weights
   )
   out = list(
     data = data,

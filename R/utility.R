@@ -393,6 +393,7 @@ function( x,
                        time_column = x$internal$time_column,
                        variable_column = x$internal$variable_column,
                        times = x$internal$times,
+                       weights = x$internal$weights,
                        variables = x$internal$variables,
                        delta_options = list( formula = null_delta_formula ),
                        distribution_column = x$internal$distribution_column) 

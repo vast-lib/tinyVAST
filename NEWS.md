@@ -5,6 +5,7 @@
 * Fix bug in deviance for lognormal distribution in delta models (h/t Sean
   Anderson for finding it)
 * Change family = "binomial" to use `weights` as number of Binomial trials N
+* Fix `deviance_explained` to work with non-default `weights` argument
 
 # tinyVAST 1.1.1
 
