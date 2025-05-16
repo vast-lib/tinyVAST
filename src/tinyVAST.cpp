@@ -526,6 +526,29 @@ Type dbinom_custom( Type x,
   if(give_log) return logres; else return exp(logres);
 }
 
+// dlnorm
+template<class Type>
+Type devresid_binom( Type y,
+                     Type weight,  // weight = size
+                     Type mu ){
+
+  Type y_weight = y * weight;
+  Type mu_weight = mu * weight;
+  Type p1, p2;
+  if(y_weight == 0){
+    p1 = 0.0;
+  }else{
+    p1 = y_weight * log(y_weight / mu_weight);
+  }
+  if( (weight - y_weight) == 0 ){
+    p2 = 0.0;
+  }else{
+    p2 = (weight - y_weight) * log( (weight - y_weight) / (weight - mu_weight) );
+  }
+  Type devresid = sign(y - mu) * pow(2 * (p1 + p2), 0.5);
+  return devresid;
+}
+
 // Deviance for the Tweedie
 // https://en.wikipedia.org/wiki/Tweedie_distribution#Properties
 template<class Type>
@@ -653,7 +676,7 @@ Type one_predictor_likelihood( Type &y,
         }
         // TODO:  Update deviance residual for Trials = weight
         //devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
-        devresid = NAN;
+        devresid = devresid_binom( y, weight, mu );
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
         nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
