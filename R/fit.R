@@ -122,6 +122,7 @@
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict
+#' @importFrom utils packageVersion
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
 #' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet
@@ -947,7 +948,8 @@ function( formula,
     Hess_fixed = Hess_fixed,
     control = control,
     family = family,                                       # for `add_predictions`
-    weights = weights
+    weights = weights,
+    packageVersion = packageVersion("tinyVAST")
   )
   out = list(
     data = data,

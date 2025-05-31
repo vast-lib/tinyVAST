@@ -45,6 +45,7 @@ function( object,
           ... ){
 
   # extract original X and Z
+  check_tinyVAST_version( object$internal$packageVersion )
   if(missing(newdata)){
     newdata = object$data
   }
@@ -237,6 +238,7 @@ function( object,
   ){
 
   # extract original X and Z
+  check_tinyVAST_version( object$internal$packageVersion )
   if(missing(newdata)) newdata = object$data
   # Build new .. object$data must be same as used for fitting to get SEs / skewness of random effects
   tmb_data2 = add_predictions( object = object,

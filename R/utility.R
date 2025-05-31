@@ -164,6 +164,7 @@ reload_model <-
 function( x,
           check_gradient = TRUE ){
 
+  check_tinyVAST_version( object$internal$packageVersion )
   # Retape
   #obj = x$obj
   #obj$retape()
@@ -247,6 +248,8 @@ function( object,
           n_samples = 100,
           sample_fixed = TRUE,
           seed = 123456 ){
+
+  check_tinyVAST_version( object$internal$packageVersion )
 
   # Rebuild object with newdata
   if( !is.null(newdata) ){

@@ -62,6 +62,7 @@
 cAIC <-
 function( object ){
 
+  check_tinyVAST_version( object$internal$packageVersion )
   #what = match.arg(what)
   #requireNamespace(Matrix)
   data = object$tmb_inputs$tmb_data

@@ -39,6 +39,13 @@ function( inla_mesh ){
   return(ret)
 }
 
+# Modified from sdmTMB
+check_tinyVAST_version <- function(version) {
+  if( utils::packageVersion("tinyVAST") != version ){
+    stop("Installed version of `tinyVAST` does not match the version used to
+          run model.  Please re-install the same version, or re-run the model.")
+  }
+}
 
 #rm_wsp <- function (x) {
 #  # from brms:::rm_wsp()

@@ -6,6 +6,9 @@
   Anderson for finding it)
 * Change family = "binomial" to use `weights` as number of Binomial trials N
 * Fix `deviance_explained` to work with non-default `weights` argument
+* Add `fit$internal$packageVersion` to allow `predict`, `cAIC` etc to check
+  and throw error if there's a package inconsistency between object and installed
+  package
 
 # tinyVAST 1.1.1
 
