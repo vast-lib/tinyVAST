@@ -932,6 +932,7 @@ function( formula,
     delta_spacetime_term_ram = delta_spacetime_term_ram,                                  # for `add_predictions`
     delta_space_term_ram = delta_space_term_ram,                                    # for `add_predictions`
     delta_time_term_ram = delta_time_term_ram,                                    # for `add_predictions`
+    delta_formula = delta_options$formula,
     delta_spacetime_term = delta_options$spacetime_term,
     delta_space_term = delta_options$space_term,
     delta_time_term = delta_options$time_term,
