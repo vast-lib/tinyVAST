@@ -25,7 +25,7 @@ function( Q,
   # Required libraries
   #library(Matrix)
 
-  #
+  # Error checks
   if( !all(observed_idx %in% seq_len(nrow(Q))) ){
     stop("Check `observed_idx` in `simulate_conditional_gmrf")
   }
@@ -76,4 +76,236 @@ function( Q,
   res <- predict_conditional_gmrf(Q, observed_idx, x_obs )
   y = rmvnorm_prec( n=n_sims, mu = res$mean, prec = res$Q_uu )
   return(y)
+}
+
+
+#' @title Project tinyVAST to future times (EXPERIMENTAL)
+#'
+#' @description
+#' Projects a fitted model forward in time.
+#'
+#' @inheritParams predict.tinyVAST
+#' @param object fitted model from \code{tinyVAST(.)}
+#' @param extra_times a vector of extra times, matching values in \code{newdata}
+#' @param newdata data frame including new values for \code{time_variable}
+#'
+#' @return
+#' A vector of values corresponding to rows in \code{newdata}
+#'
+#' @export
+project <-
+function( object,
+          extra_times,
+          newdata,
+          what = "mu_g" ){
+
+
+  ##############
+  # Step 1: Generate uncertainty in historical period
+  ##############
+
+  # SKIP STEP
+
+  ##############
+  # Step 2: Augment objects
+  ##############
+
+  all_times = c( object$internal$times, extra_times )
+
+  ##############
+  # Step 3: Build object with padded bounds
+  ##############
+
+  new_control = object$internal$control
+  new_control$run_model = FALSE
+
+  newobj = tinyVAST(
+    formula = object$formula,
+    data = object$data,
+    time_term = object$internal$time_term,
+    space_term = object$internal$space_term,
+    spacetime_term = object$internal$spacetime_term,
+    family = object$internal$family,
+    space_columns = object$internal$space_columns,
+    spatial_domain = object$spatial_domain,
+    time_column = object$internal$time_column,
+    times = all_times,
+    variable_column = object$internal$variable_column,
+    variables = object$internal$variables,
+    distribution_column = object$internal$distribution_column,
+    delta_options = list( formula = object$internal$delta_formula,
+                          space_term = object$internal$delta_space_term,
+                          time_term = object$internal$delta_time_term,
+                          spacetime_term = object$internal$delta_spacetime_term,
+                          spatial_varying = object$internal$delta_spatial_varying ),
+    spatial_varying = object$internal$spatially_varying,
+    weights = object$internal$weights,
+    control = new_control
+  )
+
+  ##############
+  # Step 4: Merge ParList and ParList1
+  ##############
+
+  augment_epsilon <-
+  function( neweps_stc,
+            eps_stc,
+            beta_z,
+            model ){
+
+    if( length(beta_z) > 0 ){
+      #
+      mats = dsem::make_matrices(
+        beta_p = beta_z,
+        model = model,
+        variables = object$internal$variables,
+        times = all_times
+      )
+      Q_kk = Matrix::t(mats$IminusP_kk) %*% (Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+      Q_hh = Matrix::kronecker( Q_kk, Q_ss )
+
+      #
+      grid = expand.grid( s = seq_len(dim(neweps_stc)[1]),
+                          t = seq_len(dim(neweps_stc)[2]),
+                          c = seq_len(dim(neweps_stc)[3]) )
+      grid$num = seq_len(prod(dim(neweps_stc)))
+      observed_idx = subset( grid, t %in% object$internal$times )$num
+
+      #
+      simeps_stc = simulate_conditional_gmrf(
+        Q = Q_hh,
+        observed_idx = observed_idx,
+        x_obs = as.vector( eps_stc ),
+        n_sims = 1
+      )
+
+      # Compile
+      missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:3])
+      neweps_stc[missing_indices] = simeps_stc[,1]
+      observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:3])
+      neweps_stc[observed_indices] = eps_stc[observed_indices]
+    }
+    return(neweps_stc)
+  }
+  augment_delta <-
+  function( newdelta_tc,
+            delta_tc,
+            nu_z,
+            model ){
+
+    if( length(nu_z) > 0 ){
+      #
+      mats = dsem::make_matrices(
+        beta_p = nu_z,
+        model = model,
+        variables = object$internal$variables,
+        times = all_times
+      )
+      Q_kk = Matrix::t(mats$IminusP_kk) %*% (Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+
+      #
+      grid = expand.grid( t = seq_len(dim(newdelta_tc)[1]),
+                          c = seq_len(dim(newdelta_tc)[2]) )
+      grid$num = seq_len(prod(dim(newdelta_tc)))
+      observed_idx = subset( grid, t %in% object$internal$times )$num
+
+      #
+      simdelta_tc = simulate_conditional_gmrf(
+        Q = Q_kk,
+        observed_idx = observed_idx,
+        x_obs = as.vector( delta_tc ),
+        n_sims = 1
+      )
+
+      # Compile
+      missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:2])
+      newdelta_tc[missing_indices] = simdelta_stc[,1]
+      observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:2])
+      newdelta_tc[observed_indices] = delta_tc[observed_indices]
+    }
+    return(newdelta_tc)
+  }
+
+  #
+  parlist = object$internal$parlist
+  new_parlist = newobj$tmb_par
+  Q_ss = object$rep$Q_ss
+
+  # Replace epsilon
+  new_parlist$epsilon_stc = augment_epsilon(
+    beta_z = parlist$beta_z,
+    eps_stc = parlist$epsilon_stc,
+    neweps_stc = new_parlist$epsilon_stc,
+    model = object$internal$spacetime_term_ram$output$model
+  )
+  new_parlist$epsilon2_stc = augment_epsilon(
+    beta_z = parlist$beta2_z,
+    eps_stc = parlist$epsilon2_stc,
+    neweps_stc = new_parlist$epsilon2_stc,
+    model = object$internal$delta_spacetime_term_ram$output$model
+  )
+
+  # Replace delta
+  new_parlist$delta_tc = augment_delta(
+    nu_z = parlist$nu_z,
+    delta_tc = parlist$delta_tc,
+    newdelta_tc = new_parlist$delta_tc,
+    model = object$internal$time_term_ram$output$model
+  )
+  new_parlist$delta2_tc = augment_delta(
+    nu_z = parlist$nu2_z,
+    delta_tc = parlist$delta2_tc,
+    newdelta_tc = new_parlist$delta2_tc,
+    model = object$internal$delta_time_term_ram$output$model
+  )
+
+  # Replace other variables that are not changed
+  same_vars = setdiff( names(new_parlist), c("epsilon_stc","epsilon2_stc","delta_tc","delta2_tc") )
+  new_parlist[same_vars] = parlist[same_vars]
+
+  ##############
+  # Step 5: Re-build model
+  ##############
+
+  new_control$run_model = TRUE
+  new_control$tmb_par = new_parlist
+  new_control$nlminb_loops = 0
+  new_control$newton_loops = 0
+  new_control$getsd = FALSE
+  new_control$calculate_deviance_explained = FALSE
+
+  newobj = tinyVAST(
+    formula = object$formula,
+    data = object$data,
+    time_term = object$internal$time_term,
+    space_term = object$internal$space_term,
+    spacetime_term = object$internal$spacetime_term,
+    family = object$internal$family,
+    space_columns = object$internal$space_columns,
+    spatial_domain = object$spatial_domain,
+    time_column = object$internal$time_column,
+    times = all_times,
+    variable_column = object$internal$variable_column,
+    variables = object$internal$variables,
+    distribution_column = object$internal$distribution_column,
+    delta_options = list( formula = object$internal$delta_formula,
+                          space_term = object$internal$delta_space_term,
+                          time_term = object$internal$delta_time_term,
+                          spacetime_term = object$internal$delta_spacetime_term,
+                          spatial_varying = object$internal$delta_spatial_varying ),
+    spatial_varying = object$internal$spatially_varying,
+    weights = object$internal$weights,
+    control = new_control
+  )
+
+  ##############
+  # Step 6: simulate samples
+  ##############
+
+  pred = predict(
+    object = newobj,
+    newdata = newdata,
+    what = what
+  )
+  return(pred)
 }
