@@ -9,6 +9,7 @@
 * Add `fit$internal$packageVersion` to allow `predict`, `cAIC` etc to check
   and throw error if there's a package inconsistency between object and installed
   package
+* Add `simulate_conditional_gmrf` as precursor to efficient projections
 
 # tinyVAST 1.1.1
 
