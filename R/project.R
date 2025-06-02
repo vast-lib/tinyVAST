@@ -118,6 +118,7 @@ function( object,
 
   new_control = object$internal$control
   new_control$run_model = FALSE
+  new_control$supress_user_warnings = TRUE
 
   newobj = tinyVAST(
     formula = object$formula,

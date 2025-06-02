@@ -22,6 +22,7 @@ tinyVASTcontrol(
   calculate_deviance_explained = TRUE,
   run_model = TRUE,
   suppress_nlminb_warnings = TRUE,
+  supress_user_warnings = FALSE,
   get_rsr = FALSE,
   extra_reporting = FALSE,
   use_anisotropy = FALSE,
@@ -82,6 +83,9 @@ explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 \item{suppress_nlminb_warnings}{whether to suppress uniformative warnings
 from \code{nlminb} arising when a function evaluation is NA, which
 are then replaced with Inf and avoided during estimation}
+
+\item{supress_user_warnings}{whether to suppress warnings from
+package author regarding dangerous or non-standard options}
 
 \item{get_rsr}{Experimental option, whether to report restricted spatial
 regression (RSR) adjusted estimator for covariate responses}
