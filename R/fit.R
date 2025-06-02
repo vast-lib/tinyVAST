@@ -470,7 +470,7 @@ function( formula,
     stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
   Atriplet = Matrix::mat2triplet(A_is)
-  if( (n_s>1000) & isFALSE(supress_user_warnings) ) warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
+  if( (n_s>1000) & isFALSE(suppress_user_warnings) ) warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
@@ -823,7 +823,7 @@ function( formula,
     # Check shape but not numeric values, and give informative error
     attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
     # Compare dimensions by multiplying both by zero
-    if( isFALSE(supress_user_warnings) ) warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
+    if( isFALSE(suppress_user_warnings) ) warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
     if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
       tmb_par = control$tmb_par
     }else{
@@ -1018,7 +1018,7 @@ function( formula,
 #' @param suppress_nlminb_warnings whether to suppress uniformative warnings
 #'        from \code{nlminb} arising when a function evaluation is NA, which
 #'        are then replaced with Inf and avoided during estimation
-#' @param supress_user_warnings whether to suppress warnings from
+#' @param suppress_user_warnings whether to suppress warnings from
 #'        package author regarding dangerous or non-standard options
 #' @param get_rsr Experimental option, whether to report restricted spatial
 #'        regression (RSR) adjusted estimator for covariate responses
@@ -1054,7 +1054,7 @@ function( nlminb_loops = 1,
           calculate_deviance_explained = TRUE,
           run_model = TRUE,
           suppress_nlminb_warnings = TRUE,
-          supress_user_warnings = FALSE,
+          suppress_user_warnings = FALSE,
           get_rsr = FALSE,
           extra_reporting = FALSE,
           use_anisotropy = FALSE,
@@ -1082,7 +1082,7 @@ function( nlminb_loops = 1,
     calculate_deviance_explained = calculate_deviance_explained,
     run_model = run_model,
     suppress_nlminb_warnings = suppress_nlminb_warnings,
-    supress_user_warnings = supress_user_warnings,
+    suppress_user_warnings = suppress_user_warnings,
     get_rsr = get_rsr,
     extra_reporting = extra_reporting,
     use_anisotropy = use_anisotropy,
