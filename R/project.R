@@ -162,13 +162,13 @@ function( object,
         variables = object$internal$variables,
         times = all_times
       )
-      Q_kk = Matrix::t(mats$IminusP_kk) %*% (Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+      Q_kk = Matrix::t(mats$IminusP_kk) %*% solve(Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
       Q_hh = Matrix::kronecker( Q_kk, Q_ss )
 
       #
       grid = expand.grid( s = seq_len(dim(neweps_stc)[1]),
-                          t = seq_len(dim(neweps_stc)[2]),
-                          c = seq_len(dim(neweps_stc)[3]) )
+                          t = all_times,
+                          c = object$internal$variables )
       grid$num = seq_len(prod(dim(neweps_stc)))
       observed_idx = subset( grid, t %in% object$internal$times )$num
 
@@ -181,10 +181,14 @@ function( object,
       )
 
       # Compile
-      missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:3])
-      neweps_stc[missing_indices] = simeps_stc[,1]
-      observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:3])
-      neweps_stc[observed_indices] = eps_stc[observed_indices]
+      #missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:3])
+      #neweps_stc[missing_indices] = simeps_stc[,1]
+      tset = match( extra_times, all_times )
+      neweps_stc[,tset,] = simeps_stc[,1]
+      #observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:3])
+      #neweps_stc[observed_indices] = eps_stc[observed_indices]
+      tset = match( object$internal$times, all_times )
+      neweps_stc[,tset,] = eps_stc
     }
     return(neweps_stc)
   }
@@ -202,11 +206,11 @@ function( object,
         variables = object$internal$variables,
         times = all_times
       )
-      Q_kk = Matrix::t(mats$IminusP_kk) %*% (Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+      Q_kk = Matrix::t(mats$IminusP_kk) %*% solve(Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
 
       #
-      grid = expand.grid( t = seq_len(dim(newdelta_tc)[1]),
-                          c = seq_len(dim(newdelta_tc)[2]) )
+      grid = expand.grid( t = all_times,
+                          c = object$internal$variables )
       grid$num = seq_len(prod(dim(newdelta_tc)))
       observed_idx = subset( grid, t %in% object$internal$times )$num
 
@@ -219,10 +223,14 @@ function( object,
       )
 
       # Compile
-      missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:2])
-      newdelta_tc[missing_indices] = simdelta_stc[,1]
-      observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:2])
-      newdelta_tc[observed_indices] = delta_tc[observed_indices]
+      #missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:2])
+      #newdelta_tc[missing_indices] = simdelta_tc[,1]
+      tset = match( extra_times, all_times )
+      newdelta_tc[tset,] = simdelta_tc[,1]
+      #observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:2])
+      #newdelta_tc[observed_indices] = delta_tc[observed_indices]
+      tset = match( object$internal$times, all_times )
+      newdelta_tc[tset,] = delta_tc
     }
     return(newdelta_tc)
   }
