@@ -1258,7 +1258,7 @@ Type objective_function<Type>::operator() (){
   REPORT( p_i );
   REPORT( p2_i );
   REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
-  //REPORT( Q_ss );
+  REPORT( Q_ss );                      // Needed for forming precision of epsilon_sct in `project(.)`
   REPORT( devresid_i );
   REPORT( deviance );
   REPORT( nll );
