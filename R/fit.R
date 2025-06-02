@@ -470,7 +470,9 @@ function( formula,
     stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
   Atriplet = Matrix::mat2triplet(A_is)
-  if( (n_s>1000) & isFALSE(suppress_user_warnings) ) warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
+  if( (n_s>1000) & isFALSE(control$suppress_user_warnings) ){
+    warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
+  }
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
@@ -823,7 +825,9 @@ function( formula,
     # Check shape but not numeric values, and give informative error
     attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
     # Compare dimensions by multiplying both by zero
-    if( isFALSE(suppress_user_warnings) ) warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
+    if( isFALSE(control$suppress_user_warnings) ){
+      warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
+    }
     if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
       tmb_par = control$tmb_par
     }else{
