@@ -50,10 +50,6 @@ out = tinyVAST( spacetime_term = dsem,
            family = tweedie() )
 out
 
-######################
-# project
-######################
-
 #object = out
 #extra_times = 21:25
 newdata = Data[1:10,]
@@ -65,219 +61,163 @@ project(
   newdata = newdata
 )
 
-#project <-
-#function( object,
-#          extra_times,
-#          newdata,
-#          what = "mu_g" ){
+######################
+# Univariate version
+######################
+
+library(tinyVAST)
+library(fmesher)
+
+# Simulate settings
+theta_xy = 0.4
+n_x = n_y = 10
+n_t = 20
+t_obs = 1:8
+rho = 0.8
+spacetime_sd = 0.5
+space_sd = 0.5
+gamma = 0
+
+# Simulate GMRFs
+R_s = exp(-theta_xy * abs(outer(1:n_x, 1:n_y, FUN="-")) )
+R_ss = kronecker(R_s, R_s)
+Vspacetime_ss = spacetime_sd^2 * R_ss
+Vspace_ss = space_sd^2 * R_ss
+
+# make spacetime AR1 over time
+eps_ts = mvtnorm::rmvnorm( n_t, sigma=Vspacetime_ss )
+for( t in seq_len(n_t) ){
+  if(t>1) eps_ts[t,] = rho*eps_ts[t-1,] + eps_ts[t,]/(1 + rho^2)
+}
+
+# make space term
+omega_s = mvtnorm::rmvnorm( 1, sigma=Vspace_ss )[1,]
+
+# linear predictor
+p_ts = gamma + outer( rep(1,n_t),omega_s ) + eps_ts
+
+# Shape into longform data-frame and add error
+DF = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y),
+                   var = "logn",
+                   mu = exp(as.vector(p_ts)) )
+DF$n = tweedie::rtweedie( n=nrow(DF), mu=DF$mu, phi=1, power=1.5 )
+
 #
+Data = DF[ DF$t %in% t_obs, ]
+mean( Data$n==0 )
+
+# make mesh
+mesh = fm_mesh_2d( Data[,c('x','y')] )
+
+# fit model
+mytinyVAST = tinyVAST(
+           space_term = "logn <-> logn, sd_space",
+           spacetime_term = "logn -> logn, 1, rho
+                             logn <-> logn, 0, sd_spacetime",
+           data = Data,
+           formula = n ~ 1,
+           spatial_domain = mesh,
+           family = tweedie() )
+mytinyVAST
+
 #
-#  ##############
-#  # Step 1: Generate uncertainty in historical period
-#  ##############
-#
-#  # SKIP STEP
-#
-#  ##############
-#  # Step 2: Augment objects
-#  ##############
-#
-#  all_times = c( object$internal$times, extra_times )
-#
-#  ##############
-#  # Step 3: Build object with padded bounds
-#  ##############
-#
-#  new_control = object$internal$control
-#  new_control$run_model = FALSE
-#
-#  newobj = tinyVAST(
-#    formula = object$formula,
-#    data = object$data,
-#    time_term = object$internal$time_term,
-#    space_term = object$internal$space_term,
-#    spacetime_term = object$internal$spacetime_term,
-#    family = object$internal$family,
-#    space_columns = object$internal$space_columns,
-#    spatial_domain = object$spatial_domain,
-#    time_column = object$internal$time_column,
-#    times = all_times,
-#    variable_column = object$internal$variable_column,
-#    variables = object$internal$variables,
-#    distribution_column = object$internal$distribution_column,
-#    delta_options = list( formula = object$internal$delta_formula,
-#                          space_term = object$internal$delta_space_term,
-#                          time_term = object$internal$delta_time_term,
-#                          spacetime_term = object$internal$delta_spacetime_term,
-#                          spatial_varying = object$internal$delta_spatial_varying ),
-#    spatial_varying = object$internal$spatially_varying,
-#    weights = object$internal$weights,
-#    control = new_control
-#  )
-#
-#  ##############
-#  # Step 4: Merge ParList and ParList1
-#  ##############
-#
-#  augment_epsilon <-
-#  function( neweps_stc,
-#            eps_stc,
-#            beta_z,
-#            model ){
-#
-#    if( length(beta_z) > 0 ){
-#      #
-#      mats = dsem::make_matrices(
-#        beta_p = beta_z,
-#        model = model,
-#        variables = object$internal$variables,
-#        times = all_times
-#      )
-#      Q_kk = Matrix::t(mats$IminusP_kk) %*% (Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
-#      Q_hh = Matrix::kronecker( Q_kk, Q_ss )
-#
-#      #
-#      grid = expand.grid( s = seq_len(dim(neweps_stc)[1]),
-#                          t = seq_len(dim(neweps_stc)[2]),
-#                          c = seq_len(dim(neweps_stc)[3]) )
-#      grid$num = seq_len(prod(dim(neweps_stc)))
-#      observed_idx = subset( grid, t %in% object$internal$times )$num
-#
-#      #
-#      simeps_stc = simulate_conditional_gmrf(
-#        Q = Q_hh,
-#        observed_idx = observed_idx,
-#        x_obs = as.vector( eps_stc ),
-#        n_sims = 1
-#      )
-#
-#      # Compile
-#      missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:3])
-#      neweps_stc[missing_indices] = simeps_stc[,1]
-#      observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:3])
-#      neweps_stc[observed_indices] = eps_stc[observed_indices]
-#    }
-#    return(neweps_stc)
-#  }
-#  augment_delta <-
-#  function( newdelta_tc,
-#            delta_tc,
-#            nu_z,
-#            model ){
-#
-#    if( length(nu_z) > 0 ){
-#      #
-#      mats = dsem::make_matrices(
-#        beta_p = nu_z,
-#        model = model,
-#        variables = object$internal$variables,
-#        times = all_times
-#      )
-#      Q_kk = Matrix::t(mats$IminusP_kk) %*% (Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
-#
-#      #
-#      grid = expand.grid( t = seq_len(dim(newdelta_tc)[1]),
-#                          c = seq_len(dim(newdelta_tc)[2]) )
-#      grid$num = seq_len(prod(dim(newdelta_tc)))
-#      observed_idx = subset( grid, t %in% object$internal$times )$num
-#
-#      #
-#      simdelta_tc = simulate_conditional_gmrf(
-#        Q = Q_kk,
-#        observed_idx = observed_idx,
-#        x_obs = as.vector( delta_tc ),
-#        n_sims = 1
-#      )
-#
-#      # Compile
-#      missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:2])
-#      newdelta_tc[missing_indices] = simdelta_stc[,1]
-#      observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:2])
-#      newdelta_tc[observed_indices] = delta_tc[observed_indices]
-#    }
-#    return(newdelta_tc)
-#  }
-#
-#  #
-#  parlist = object$internal$parlist
-#  new_parlist = newobj$tmb_par
-#  Q_ss = object$rep$Q_ss
-#
-#  # Replace epsilon
-#  new_parlist$epsilon_stc = augment_epsilon(
-#    beta_z = parlist$beta_z,
-#    eps_stc = parlist$epsilon_stc,
-#    neweps_stc = new_parlist$epsilon_stc,
-#    model = object$internal$spacetime_term_ram$output$model
-#  )
-#  new_parlist$epsilon2_stc = augment_epsilon(
-#    beta_z = parlist$beta2_z,
-#    eps_stc = parlist$epsilon2_stc,
-#    neweps_stc = new_parlist$epsilon2_stc,
-#    model = object$internal$delta_spacetime_term_ram$output$model
-#  )
-#
-#  # Replace delta
-#  new_parlist$delta_tc = augment_delta(
-#    nu_z = parlist$nu_z,
-#    delta_tc = parlist$delta_tc,
-#    newdelta_tc = new_parlist$delta_tc,
-#    model = object$internal$time_term_ram$output$model
-#  )
-#  new_parlist$delta2_tc = augment_delta(
-#    nu_z = parlist$nu2_z,
-#    delta_tc = parlist$delta2_tc,
-#    newdelta_tc = new_parlist$delta2_tc,
-#    model = object$internal$delta_time_term_ram$output$model
-#  )
-#
-#  # Replace other variables that are not changed
-#  same_vars = setdiff( names(new_parlist), c("epsilon_stc","epsilon2_stc","delta_tc","delta2_tc") )
-#  new_parlist[same_vars] = parlist[same_vars]
-#
-#  ##############
-#  # Step 5: Re-build model
-#  ##############
-#
-#  new_control$run_model = TRUE
-#  new_control$tmb_par = new_parlist
-#  new_control$nlminb_loops = 0
-#  new_control$newton_loops = 0
-#  new_control$getsd = FALSE
-#  new_control$calculate_deviance_explained = FALSE
-#
-#  newobj = tinyVAST(
-#    formula = object$formula,
-#    data = object$data,
-#    time_term = object$internal$time_term,
-#    space_term = object$internal$space_term,
-#    spacetime_term = object$internal$spacetime_term,
-#    family = object$internal$family,
-#    space_columns = object$internal$space_columns,
-#    spatial_domain = object$spatial_domain,
-#    time_column = object$internal$time_column,
-#    times = all_times,
-#    variable_column = object$internal$variable_column,
-#    variables = object$internal$variables,
-#    distribution_column = object$internal$distribution_column,
-#    delta_options = list( formula = object$internal$delta_formula,
-#                          space_term = object$internal$delta_space_term,
-#                          time_term = object$internal$delta_time_term,
-#                          spacetime_term = object$internal$delta_spacetime_term,
-#                          spatial_varying = object$internal$delta_spatial_varying ),
-#    spatial_varying = object$internal$spatially_varying,
-#    weights = object$internal$weights,
-#    control = new_control
-#  )
-#
-#  ##############
-#  # Step 6: simulate samples
-#  ##############
-#
-#  pred = predict(
-#    object = newobj,
-#    newdata = newdata,
-#    what = what
-#  )
-#  return(pred)
-#}
+DF$nhat = project(
+  mytinyVAST,
+  extra_times = (max(t_obs)+1):n_t,
+  newdata = DF,
+  what = "pepsilon_g"
+)
+
+library(sf)
+data_wide = reshape( DF[,c('x','y','time','mu')],
+                     direction = "wide", idvar = c('x','y'), timevar = "time")
+sf_data = st_as_sf( data_wide, coords=c("x","y"))
+sf_grid = sf::st_make_grid( sf_data )
+sf_plot = st_sf( sf_grid, log(st_drop_geometry(sf_data)) )
+plot( sf_plot, max.plot=n_t )
+
+dev.new()
+data_wide = reshape( DF[,c('x','y','time','nhat')],
+                     direction = "wide", idvar = c('x','y'), timevar = "time")
+sf_data = st_as_sf( data_wide, coords=c("x","y"))
+sf_grid = sf::st_make_grid( sf_data )
+sf_plot = st_sf(sf_grid, (st_drop_geometry(sf_data)) )
+plot(sf_plot, max.plot=n_t )
+
+
+##########################
+# Bivariate time-series
+##########################
+
+library(tinyVAST)
+
+data(isle_royale, package="dsem")
+
+# Convert to long-form
+data = expand.grid( "time"=isle_royale[,1], "var"=colnames(isle_royale[,2:3]) )
+data$logn = unlist(log(isle_royale[2:3]))
+
+# Define cross-lagged DSEM
+dsem = "
+  # Link, lag, param_name
+  wolves -> wolves, 1, arW
+  moose -> wolves, 1, MtoW
+  wolves -> moose, 1, WtoM
+  moose -> moose, 1, arM
+  #wolves -> moose, 0, corr
+  wolves <-> moose, 0, corr
+"
+
+# fit model
+mytiny = tinyVAST( time_term = dsem,
+                 data = data,
+                 times = isle_royale[,1],
+                 variables = colnames(isle_royale[,2:3]),
+                 formula = logn ~ 0 + var )
+mytiny
+
+newdata = expand.grid( "time" = max(isle_royale[,1])+1:20, "var" = colnames(isle_royale)[2:3] )
+newdata$pred = project(
+  mytiny,
+  newdata = newdata,
+  extra_times = max(isle_royale[,1])+1:20
+)
+
+##########################
+# Time-series
+##########################
+
+library(tinyVAST)
+
+# Convert to long-form
+x = cumsum( rnorm(50, mean=0, sd = 0.2) )
+data = data.frame( "val" = x, "var" = "x", "time" = seq_along(x) )
+
+# Define cross-lagged DSEM
+dsem = "
+  x -> x, 1, rho
+  x <-> x, 0, sd
+"
+
+# fit model
+mytiny = tinyVAST(
+  time_term = dsem,
+  data = data,
+  times = unique(data$t),
+  variables = "x",
+  formula = val ~ 1
+)
+mytiny
+
+newdata = data.frame( "time" = 1:60, "var" = "x" )
+Y = NULL
+for(i in 1:100 ){
+  tmp = project(
+    mytiny,
+    newdata = newdata,
+    extra_times = 51:60
+  )
+  Y = cbind(Y, tmp)
+}
+plot( x = row(Y),
+      y = Y )
