@@ -191,7 +191,7 @@ function( object,
         n_sims = 1,
         what = ifelse(future_var, "simulate", "predict")
       )
-      if( future_var == "simulate" ){
+      if( isTRUE(future_var) ){
         simeps_h = tmp[,1]
       }else{
         simeps_h = tmp$mean
@@ -239,7 +239,7 @@ function( object,
         n_sims = 1,
         what = ifelse(future_var, "simulate", "predict")
       )
-      if( future_var == "simulate" ){
+      if( isTRUE(future_var) ){
         simdelta_k = tmp[,1]
       }else{
         simeps_h = tmp$mean
