@@ -10,24 +10,28 @@
 #'        fixed measurements
 #' @param x_obs numeric vector with fixed values for indices \code{observed_idx}
 #' @param n_sims integer listing number of simulated values
+#' @param what Whether to simulate from the conditional GMRF, or predict the mean
+#'        and precision
 #'
 #' @return
 #' A matrix with \code{n_sims} columns and a row for every row of \code{Q} not in
 #' \code{observed_idx}, with simulations for those rows
 #'
 #' @export
-simulate_conditional_gmrf <-
+conditional_gmrf <-
 function( Q,
           observed_idx,
           x_obs,
-          n_sims = 1 ){
+          n_sims = 1,
+          what = c("simulate","predict") ){
 
   # Required libraries
   #library(Matrix)
+  what = match.arg(what)
 
   # Error checks
   if( !all(observed_idx %in% seq_len(nrow(Q))) ){
-    stop("Check `observed_idx` in `simulate_conditional_gmrf")
+    stop("Check `observed_idx` in `conditional_gmrf")
   }
   if( length(observed_idx) != length(x_obs) ){
     stop("Check length of `observed_idx` and `x_obs`")
@@ -74,8 +78,12 @@ function( Q,
   }
 
   res <- predict_conditional_gmrf(Q, observed_idx, x_obs )
-  y = rmvnorm_prec( n=n_sims, mu = res$mean, prec = res$Q_uu )
-  return(y)
+  if( what == "predict" ){
+    return(res)
+  }else{
+    y = rmvnorm_prec( n=n_sims, mu = res$mean, prec = res$Q_uu )
+    return(y)
+  }
 }
 
 
@@ -88,6 +96,8 @@ function( Q,
 #' @param object fitted model from \code{tinyVAST(.)}
 #' @param extra_times a vector of extra times, matching values in \code{newdata}
 #' @param newdata data frame including new values for \code{time_variable}
+#' @param future_var logical indicating whether to simulate future process errors
+#'        from GMRFs, or just compute the predictive mean
 #'
 #' @return
 #' A vector of values corresponding to rows in \code{newdata}
@@ -97,7 +107,8 @@ project <-
 function( object,
           extra_times,
           newdata,
-          what = "mu_g" ){
+          what = "mu_g",
+          future_var = TRUE ){
 
 
   ##############
@@ -173,18 +184,24 @@ function( object,
       observed_idx = subset( grid, t %in% object$internal$times )$num
 
       #
-      simeps_stc = simulate_conditional_gmrf(
+      tmp = conditional_gmrf(
         Q = Q_hh,
         observed_idx = observed_idx,
         x_obs = as.vector( eps_stc ),
-        n_sims = 1
+        n_sims = 1,
+        what = ifelse(future_var, "simulate", "predict")
       )
+      if( future_var == "simulate" ){
+        simeps_h = tmp[,1]
+      }else{
+        simeps_h = tmp$mean
+      }
 
       # Compile
       #missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:3])
       #neweps_stc[missing_indices] = simeps_stc[,1]
       tset = match( extra_times, all_times )
-      neweps_stc[,tset,] = simeps_stc[,1]
+      neweps_stc[,tset,] = simeps_h
       #observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:3])
       #neweps_stc[observed_indices] = eps_stc[observed_indices]
       tset = match( object$internal$times, all_times )
@@ -215,18 +232,24 @@ function( object,
       observed_idx = subset( grid, t %in% object$internal$times )$num
 
       #
-      simdelta_tc = simulate_conditional_gmrf(
+      tmp = conditional_gmrf(
         Q = Q_kk,
         observed_idx = observed_idx,
         x_obs = as.vector( delta_tc ),
-        n_sims = 1
+        n_sims = 1,
+        what = ifelse(future_var, "simulate", "predict")
       )
+      if( future_var == "simulate" ){
+        simdelta_k = tmp[,1]
+      }else{
+        simeps_h = tmp$mean
+      }
 
       # Compile
       #missing_indices = as.matrix(subset( grid, t %in% extra_times )[,1:2])
       #newdelta_tc[missing_indices] = simdelta_tc[,1]
       tset = match( extra_times, all_times )
-      newdelta_tc[tset,] = simdelta_tc[,1]
+      newdelta_tc[tset,] = simdelta_k
       #observed_indices = as.matrix(subset( grid, t %in% object$internal$times )[,1:2])
       #newdelta_tc[observed_indices] = delta_tc[observed_indices]
       tset = match( object$internal$times, all_times )

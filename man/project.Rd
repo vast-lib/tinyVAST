@@ -4,7 +4,7 @@
 \alias{project}
 \title{Project tinyVAST to future times (EXPERIMENTAL)}
 \usage{
-project(object, extra_times, newdata, what = "mu_g")
+project(object, extra_times, newdata, what = "mu_g", future_var = TRUE)
 }
 \arguments{
 \item{object}{fitted model from \code{tinyVAST(.)}}
@@ -27,6 +27,9 @@ project(object, extra_times, newdata, what = "mu_g")
 \code{pomega2_g} is the second predictor from spatial variation,
 \code{pepsilon2_g} is the second predictor from spatio-temporal variation, and
 \code{pxi2_g} is the second predictor from spatially varying coefficients.}
+
+\item{future_var}{logical indicating whether to simulate future process errors
+from GMRFs, or just compute the predictive mean}
 }
 \value{
 A vector of values corresponding to rows in \code{newdata}
