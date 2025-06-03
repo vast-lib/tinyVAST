@@ -131,7 +131,8 @@ function( stream ){
 
 #' @title Simulate GMRF for stream network
 #'
-#' @description Simulate values from a GMRF using a tail-up exponential
+#' @description
+#' Simulate values from a GMRF using a tail-down (flow-unconnected) exponential
 #' model on a stream network
 #'
 #' @param sfnetwork_mesh Output from \code{\link{sfnetwork_mesh}}
