@@ -188,15 +188,22 @@ newdata$pred = project(
 ##########################
 
 library(tinyVAST)
+set.seed(123)
 
 # Convert to long-form
-x = cumsum( rnorm(50, mean=0, sd = 0.2) )
-data = data.frame( "val" = x, "var" = "x", "time" = seq_along(x) )
+n_obs = 100
+rho = 0.9
+sigma_x = 0.2
+sigma_y = 0.1
+x = rnorm(n_obs, mean=0, sd = sigma_x)
+for(i in 2:length(x)) x[i] = rho * x[i-1] + x[i]
+y = x + rnorm( length(x), mean = 0, sd = sigma_y )
+data = data.frame( "val" = y, "var" = "y", "time" = seq_along(y) )
 
 # Define cross-lagged DSEM
 dsem = "
-  x -> x, 1, rho
-  x <-> x, 0, sd
+  y -> y, 1, rho
+  y <-> y, 0, sd
 "
 
 # fit model
@@ -204,18 +211,21 @@ mytiny = tinyVAST(
   time_term = dsem,
   data = data,
   times = unique(data$t),
-  variables = "x",
+  variables = "y",
   formula = val ~ 1
 )
 mytiny
 
-newdata = data.frame( "time" = 1:60, "var" = "x" )
+extra_times = length(x) + 1:20
+n_sims = 100
+newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
 Y = NULL
-for(i in 1:100 ){
+for(i in seq_len(n_sims) ){
   tmp = project(
     mytiny,
     newdata = newdata,
-    extra_times = 51:60
+    extra_times = extra_times,
+    future_var = FALSE
   )
   Y = cbind(Y, tmp)
 }

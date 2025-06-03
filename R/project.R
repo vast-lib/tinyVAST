@@ -242,7 +242,7 @@ function( object,
       if( isTRUE(future_var) ){
         simdelta_k = tmp[,1]
       }else{
-        simeps_h = tmp$mean
+        simdelta_k = tmp$mean
       }
 
       # Compile
