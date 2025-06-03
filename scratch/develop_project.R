@@ -111,7 +111,7 @@ mesh = fm_mesh_2d( Data[,c('x','y')] )
 
 # fit model
 mytinyVAST = tinyVAST(
-           space_term = "logn <-> logn, sd_space",
+           #space_term = "logn <-> logn, sd_space",
            spacetime_term = "logn -> logn, 1, rho
                              logn <-> logn, 0, sd_spacetime",
            data = Data,
@@ -125,7 +125,8 @@ DF$nhat = project(
   mytinyVAST,
   extra_times = (max(t_obs)+1):n_t,
   newdata = DF,
-  what = "pepsilon_g"
+  what = "mu_g",
+  future_var = FALSE
 )
 
 library(sf)
@@ -133,16 +134,16 @@ data_wide = reshape( DF[,c('x','y','time','mu')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
 sf_data = st_as_sf( data_wide, coords=c("x","y"))
 sf_grid = sf::st_make_grid( sf_data )
-sf_plot = st_sf( sf_grid, log(st_drop_geometry(sf_data)) )
-plot( sf_plot, max.plot=n_t )
+sf_plot = st_sf( sf_grid, (st_drop_geometry(sf_data)) )
+plot( sf_plot, max.plot=n_t, logz = TRUE )
 
 dev.new()
 data_wide = reshape( DF[,c('x','y','time','nhat')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
 sf_data = st_as_sf( data_wide, coords=c("x","y"))
 sf_grid = sf::st_make_grid( sf_data )
-sf_plot = st_sf(sf_grid, (st_drop_geometry(sf_data)) )
-plot(sf_plot, max.plot=n_t )
+sf_plot = st_sf(sf_grid, log(st_drop_geometry(sf_data)) )
+plot(sf_plot, max.plot=n_t, logz=FALSE, breaks = seq(log(min(DF$nhat)),log(max(DF$nhat)),length=11) )
 
 
 ##########################
@@ -177,11 +178,19 @@ mytiny = tinyVAST( time_term = dsem,
 mytiny
 
 newdata = expand.grid( "time" = max(isle_royale[,1])+1:20, "var" = colnames(isle_royale)[2:3] )
-newdata$pred = project(
+newdata$logn = project(
   mytiny,
   newdata = newdata,
-  extra_times = max(isle_royale[,1])+1:20
+  extra_times = max(isle_royale[,1])+1:20,
+  future_var = FALSE
 )
+
+library(ggplot2)
+ggplot( rbind(data,newdata) ) +
+  geom_point( aes(x=time, y=logn, col = var) ) #+
+  #facet_wrap( vars(var) )
+
+
 
 ##########################
 # Time-series
@@ -217,7 +226,7 @@ mytiny = tinyVAST(
 mytiny
 
 extra_times = length(x) + 1:20
-n_sims = 100
+n_sims = 3
 newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
 Y = NULL
 for(i in seq_len(n_sims) ){
