@@ -82,7 +82,6 @@
 #'        Thee weights argument needs to be a vector and not a name of the variable in the data frame.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings.
-#' @param ... Not used.
 #'
 #' @details
 #' `tinyVAST` includes four basic inputs that specify the model structure:
@@ -203,8 +202,7 @@ function( formula,
           delta_options = list(formula = ~ 1),
           spatial_varying = NULL,
           weights = NULL,
-          control = tinyVASTcontrol(),
-          ... ){
+          control = tinyVASTcontrol() ){
 
   # https://roxygen2.r-lib.org/articles/rd-formatting.html#tables for roxygen formatting
   start_time = Sys.time()

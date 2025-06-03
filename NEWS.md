@@ -11,6 +11,8 @@
   package
 * Add `conditional_gmrf` to do conditional simulations from a GMRF
 * Add `project` to project tinyVAST forward in time
+* Eliminate `...` argument to `tinyVAST` so that it's obvious if an argument
+  is mis-named.
 
 # tinyVAST 1.1.1
 

@@ -21,8 +21,7 @@ tinyVAST(
   delta_options = list(formula = ~1),
   spatial_varying = NULL,
   weights = NULL,
-  control = tinyVASTcontrol(),
-  ...
+  control = tinyVASTcontrol()
 )
 }
 \arguments{
@@ -121,8 +120,6 @@ Thee weights argument needs to be a vector and not a name of the variable in the
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings.}
-
-\item{...}{Not used.}
 }
 \value{
 An object (list) of class \code{tinyVAST}. Elements include:
