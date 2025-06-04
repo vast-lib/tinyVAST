@@ -4,30 +4,30 @@
 #'              the multivariate normal distribution with mean equal
 #'              to `mean` and sparse precision matrix `Q`.
 #'
-#' @param Q sparse precision (inverse-covariance) matrix.
+#' @param prec sparse precision (inverse-covariance) matrix.
 #' @param n number of observations.
-#' @param mean mean vector.
+#' @param mu mean vector.
 #'
-#' @return a matrix with dimension \code{length(mean)} by
+#' @return a matrix with dimension \code{length(mu)} by
 #'         \code{n}, containing realized draws from the specified
 #'         mean and precision
 #'
 #' @export
 rmvnorm_prec <-
-function( Q,
+function( prec,
           n = 1,
-          mean = rep(0,nrow(Q)) ) {
+          mu = rep(0,nrow(Q)) ) {
 
   # Simulate values
-  z0 = matrix( rnorm(length(mean) * n), ncol=n)
+  z0 = matrix( rnorm(length(mu) * n), ncol=n)
 
   # Q = t(P) * L * t(L) * P
-  L = Matrix::Cholesky(Q, super=TRUE)
+  L = Matrix::Cholesky(prec, super=TRUE)
 
   # Calculate t(P) * solve(t(L)) * z0 in two steps
   z = Matrix::solve(L, z0, system = "Lt") # z = Lt^-1 * z
   z = Matrix::solve(L, z, system = "Pt") # z = Pt    * z
-  return(mean + as.matrix(z))
+  return(mu + as.matrix(z))
 }
 
 #' @title Rotate factors to match Principal-Components Analysis
@@ -279,31 +279,21 @@ function( object,
     stop( variable_name, " not found in `Obj$report()` or `Obj$env$parList()`; please choose check your requested variable name from available list: ", paste(names(Output),collapse=", ") )
   }
 
-  #### Local function
-  # Sample from GMRF using sparse precision
-  rmvnorm_prec <- function(mu, prec, n.sims, seed) {
-    set.seed(seed)
-    z <- matrix(rnorm(length(mu) * n.sims), ncol=n.sims)
-    L <- Cholesky(prec, super=TRUE)
-    z <- solve(L, z, system = "Lt") ## z = Lt^-1 %*% z
-    z <- solve(L, z, system = "Pt") ## z = Pt    %*% z
-    z <- as.matrix(z)
-    return(mu + z)
-  }
-
   # Sample from joint distribution
   if( sample_fixed==TRUE ){
     # Informative error messages
     if( !("jointPrecision" %in% names(object$sdrep)) ){
       stop("jointPrecision not present in object$sdrep; please re-run with `getJointPrecision=TRUE`")
     }
-    u_zr = rmvnorm_prec( mu=object$obj$env$last.par.best, prec=object$sdrep$jointPrecision, n.sims=n_samples, seed=seed)
+    set.seed(seed)
+    u_zr = rmvnorm_prec( mu = object$obj$env$last.par.best, prec = object$sdrep$jointPrecision, n = n_samples)
     # apply( u_zr, MARGIN=2, FUN=function(vec){sum(abs(vec)==Inf)})
     # u_zr[-object$obj$env$random,1]
   }else{
     u_zr = object$obj$env$last.par.best %o% rep(1, n_samples)
     Q = object$obj$env$spHess( random = TRUE, par = object$obj$env$last.par.best )
-    MC = rmvnorm_prec( mu=object$obj$env$last.par.best[object$obj$env$lrandom()], prec=Q, n.sims=n_samples, seed=seed)
+    set.seed(seed)
+    MC = rmvnorm_prec( mu = object$obj$env$last.par.best[object$obj$env$lrandom()], prec = Q, n = n_samples)
     #MC = object$obj$env$MC( keep=TRUE, n=n_samples, antithetic=FALSE )
     #u_zr[object$obj$env$random,] = attr(MC, "samples")
     u_zr[object$obj$env$lrandom(),] = MC

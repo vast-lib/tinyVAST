@@ -4,7 +4,15 @@
 \alias{project}
 \title{Project tinyVAST to future times (EXPERIMENTAL)}
 \usage{
-project(object, extra_times, newdata, what = "mu_g", future_var = TRUE)
+project(
+  object,
+  extra_times,
+  newdata,
+  what = "mu_g",
+  future_var = TRUE,
+  parm_var = FALSE,
+  past_var = FALSE
+)
 }
 \arguments{
 \item{object}{fitted model from \code{tinyVAST(.)}}
@@ -36,4 +44,70 @@ A vector of values corresponding to rows in \code{newdata}
 }
 \description{
 Projects a fitted model forward in time.
+}
+\examples{
+# Convert to long-form
+set.seed(123)
+n_obs = 100
+rho = 0.9
+sigma_x = 0.2
+sigma_y = 0.1
+x = rnorm(n_obs, mean=0, sd = sigma_x)
+for(i in 2:length(x)) x[i] = rho * x[i-1] + x[i]
+y = x + rnorm( length(x), mean = 0, sd = sigma_y )
+data = data.frame( "val" = y, "var" = "y", "time" = seq_along(y) )
+
+# Define AR2 time_term
+time_term = "
+  y -> y, 1, rho1
+  y -> y, 2, rho2
+  y <-> y, 0, sd
+"
+
+# fit model
+mytiny = tinyVAST(
+  time_term = time_term,
+  data = data,
+  times = unique(data$t),
+  variables = "y",
+  formula = val ~ 1,
+  control = tinyVASTcontrol( getJointPrecision = TRUE )
+)
+
+# Deterministic projection
+extra_times = length(x) + 1:100
+n_sims = 10
+newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
+Y = project(
+  mytiny,
+  newdata = newdata,
+  extra_times = extra_times,
+  future_var = FALSE
+)
+plot( x = seq_along(Y),
+      y = Y,
+      type = "l", lty = "solid", col = "black" )
+
+# Stochastic projection with future process errors
+\dontrun{
+extra_times = length(x) + 1:100
+n_sims = 10
+newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
+Y = NULL
+for(i in seq_len(n_sims) ){
+  tmp = project(
+    mytiny,
+    newdata = newdata,
+    extra_times = extra_times,
+    future_var = TRUE,
+    past_var = TRUE,
+    parm_var = TRUE
+  )
+  Y = cbind(Y, tmp)
+}
+matplot( x = row(Y),
+         y = Y,
+         type = "l", lty = "solid", col = "black" )
+}
+
 }

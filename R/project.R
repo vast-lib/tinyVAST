@@ -61,27 +61,11 @@ function( Q,
     return(out)
   }
 
-  # Unconditional simulation from precision matrix
-  rmvnorm_prec <-
-  function( mu, # estimated fixed and random effects
-            prec, # estimated joint precision
-            n.sims) {
-
-    # Simulate values
-    z0 = matrix(rnorm(length(mu) * n.sims), ncol=n.sims)
-    # Q = t(P) * L * t(L) * P
-    L = Matrix::Cholesky(prec, super=TRUE)
-    # Calcualte t(P) * solve(t(L)) * z0 in two steps
-    z = Matrix::solve(L, z0, system = "Lt") # z = Lt^-1 * z
-    z = Matrix::solve(L, z, system = "Pt") # z = Pt    * z
-    return(mu + as.matrix(z))
-  }
-
   res <- predict_conditional_gmrf(Q, observed_idx, x_obs )
   if( what == "predict" ){
     return(res)
   }else{
-    y = rmvnorm_prec( n=n_sims, mu = res$mean, prec = res$Q_uu )
+    y = rmvnorm_prec( n = n_sims, mu = res$mean, prec = res$Q_uu )
     return(y)
   }
 }
@@ -98,9 +82,79 @@ function( Q,
 #' @param newdata data frame including new values for \code{time_variable}
 #' @param future_var logical indicating whether to simulate future process errors
 #'        from GMRFs, or just compute the predictive mean
+#' @param past_var logical indicating whether to re-simulate past process errors
+#'        from predictive distribution of random effects, thus changing the boundary
+#'        condition of the forecast
+#' @param parm_var logical indicating whether to re-sample fixed effects from their
+#'        predictive distribution, thus changing the GMRF for future process errors
 #'
 #' @return
 #' A vector of values corresponding to rows in \code{newdata}
+#'
+#' @examples
+#' # Convert to long-form
+#' set.seed(123)
+#' n_obs = 100
+#' rho = 0.9
+#' sigma_x = 0.2
+#' sigma_y = 0.1
+#' x = rnorm(n_obs, mean=0, sd = sigma_x)
+#' for(i in 2:length(x)) x[i] = rho * x[i-1] + x[i]
+#' y = x + rnorm( length(x), mean = 0, sd = sigma_y )
+#' data = data.frame( "val" = y, "var" = "y", "time" = seq_along(y) )
+#'
+#' # Define AR2 time_term
+#' time_term = "
+#'   y -> y, 1, rho1
+#'   y -> y, 2, rho2
+#'   y <-> y, 0, sd
+#' "
+#'
+#' # fit model
+#' mytiny = tinyVAST(
+#'   time_term = time_term,
+#'   data = data,
+#'   times = unique(data$t),
+#'   variables = "y",
+#'   formula = val ~ 1,
+#'   control = tinyVASTcontrol( getJointPrecision = TRUE )
+#' )
+#'
+#' # Deterministic projection
+#' extra_times = length(x) + 1:100
+#' n_sims = 10
+#' newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
+#' Y = project(
+#'   mytiny,
+#'   newdata = newdata,
+#'   extra_times = extra_times,
+#'   future_var = FALSE
+#' )
+#' plot( x = seq_along(Y),
+#'       y = Y,
+#'       type = "l", lty = "solid", col = "black" )
+#'
+#' # Stochastic projection with future process errors
+#' \dontrun{
+#' extra_times = length(x) + 1:100
+#' n_sims = 10
+#' newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
+#' Y = NULL
+#' for(i in seq_len(n_sims) ){
+#'   tmp = project(
+#'     mytiny,
+#'     newdata = newdata,
+#'     extra_times = extra_times,
+#'     future_var = TRUE,
+#'     past_var = TRUE,
+#'     parm_var = TRUE
+#'   )
+#'   Y = cbind(Y, tmp)
+#' }
+#' matplot( x = row(Y),
+#'          y = Y,
+#'          type = "l", lty = "solid", col = "black" )
+#' }
 #'
 #' @export
 project <-
@@ -108,14 +162,33 @@ function( object,
           extra_times,
           newdata,
           what = "mu_g",
-          future_var = TRUE ){
+          future_var = TRUE,
+          past_var = FALSE,
+          parm_var = FALSE ){
 
 
   ##############
-  # Step 1: Generate uncertainty in historical period
+  # Step 1: Generate uncertainty from parm_var and past_var
   ##############
 
-  # SKIP STEP
+  if( isFALSE(parm_var) & isFALSE(past_var) ){
+    parlist = object$internal$parlist
+  }
+  if( isTRUE(parm_var) & isFALSE(past_var) ){
+    stop("option not available")
+  }
+  if( isFALSE(parm_var) & isTRUE(past_var) ){
+    parvec = object$obj$env$last.par.best
+    MC = object$obj$env$MC( keep=TRUE, n=1, antithetic=FALSE )
+    parvec[object$obj$env$lrandom()] = attr(MC, "samples")
+    parlist = object$obj$env$parList( par = parvec )
+  }
+  if( isTRUE(parm_var) & isTRUE(past_var) ){
+    if(is.null(object$sdrep$jointPrecision)) stop("Rerun with `getJointPrecision=TRUE`")
+    parvec = rmvnorm_prec( mu = object$obj$env$last.par.best,
+                           prec = object$sdrep$jointPrecision )
+    parlist = object$obj$env$parList( par = parvec )
+  }
 
   ##############
   # Step 2: Augment objects
@@ -259,7 +332,6 @@ function( object,
   }
 
   #
-  parlist = object$internal$parlist
   new_parlist = newobj$tmb_par
   Q_ss = object$rep$Q_ss
 

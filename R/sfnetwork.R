@@ -193,7 +193,7 @@ function( sfnetwork_mesh,
 
 
   #
-  if(what=="samples") out = rmvnorm_prec( n=n, mean=rep(0,nrow(Q)), Q=Q )
+  if(what=="samples") out = rmvnorm_prec( n = n, mu = rep(0,nrow(Q)), prec = Q )
   if(what=="Q") out = Q
   return(out)
 }
