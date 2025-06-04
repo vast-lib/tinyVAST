@@ -10,8 +10,8 @@ project(
   newdata,
   what = "mu_g",
   future_var = TRUE,
-  parm_var = FALSE,
-  past_var = FALSE
+  past_var = FALSE,
+  parm_var = FALSE
 )
 }
 \arguments{
@@ -38,6 +38,13 @@ project(
 
 \item{future_var}{logical indicating whether to simulate future process errors
 from GMRFs, or just compute the predictive mean}
+
+\item{past_var}{logical indicating whether to re-simulate past process errors
+from predictive distribution of random effects, thus changing the boundary
+condition of the forecast}
+
+\item{parm_var}{logical indicating whether to re-sample fixed effects from their
+predictive distribution, thus changing the GMRF for future process errors}
 }
 \value{
 A vector of values corresponding to rows in \code{newdata}

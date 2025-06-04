@@ -2,7 +2,7 @@
 #'
 #' @description This function provides a random number generator for
 #'              the multivariate normal distribution with mean equal
-#'              to `mean` and sparse precision matrix `Q`.
+#'              to `mu` and sparse precision matrix `prec`.
 #'
 #' @param prec sparse precision (inverse-covariance) matrix.
 #' @param n number of observations.
@@ -164,7 +164,7 @@ reload_model <-
 function( x,
           check_gradient = TRUE ){
 
-  check_tinyVAST_version( object$internal$packageVersion )
+  check_tinyVAST_version( x$internal$packageVersion )
   # Retape
   #obj = x$obj
   #obj$retape()

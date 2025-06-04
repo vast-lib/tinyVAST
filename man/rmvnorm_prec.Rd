@@ -21,5 +21,5 @@ mean and precision
 \description{
 This function provides a random number generator for
 the multivariate normal distribution with mean equal
-to \code{mean} and sparse precision matrix \code{Q}.
+to \code{mu} and sparse precision matrix \code{prec}.
 }
