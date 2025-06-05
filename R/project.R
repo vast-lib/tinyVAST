@@ -194,15 +194,20 @@ function( object,
   # Step 2: Augment objects
   ##############
 
-  all_times = c( object$internal$times, extra_times )
+  all_times = union( object$internal$times, extra_times )
 
   ##############
   # Step 3: Build object with padded bounds
   ##############
 
   new_control = object$internal$control
-  new_control$run_model = FALSE
+  new_control$run_model = TRUE
+  new_control$nlminb_loops = 0
+  new_control$newton_loops = 0
+  new_control$getsd = FALSE
+  new_control$calculate_deviance_explained = FALSE
   new_control$suppress_user_warnings = TRUE
+  new_control$extra_reporting = TRUE
 
   newobj = tinyVAST(
     formula = object$formula,
@@ -228,6 +233,13 @@ function( object,
     control = new_control
   )
 
+  #
+  newpar = newobj$obj$env$last.par
+  oldpar = object$obj$env$last.par.best
+  tmb_fixed = setdiff(unique(names(newpar)), newobj$tmb_inputs$tmb_random)
+  newpar[ (names(newpar) %in% tmb_fixed) ] = oldpar[ (names(oldpar) %in% tmb_fixed) ]
+  newrep = newobj$obj$report( newpar )
+
   ##############
   # Step 4: Merge ParList and ParList1
   ##############
@@ -235,18 +247,27 @@ function( object,
   augment_epsilon <-
   function( neweps_stc,
             eps_stc,
-            beta_z,
-            model ){
+            #beta_z,
+            #model,
+            linpred ){
 
-    if( length(beta_z) > 0 ){
+    if( prod(dim(eps_stc)) > 0 ){
+    #if( length(beta_z) > 0 ){
       #
-      mats = dsem::make_matrices(
-        beta_p = beta_z,
-        model = model,
-        variables = object$internal$variables,
-        times = all_times
-      )
-      Q_kk = Matrix::t(mats$IminusP_kk) %*% solve(Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+      #mats = dsem::make_matrices(
+      #  beta_p = beta_z,
+      #  model = model,
+      #  variables = object$internal$variables,
+      #  times = all_times
+      #)
+      #Q_kk = Matrix::t(mats$IminusP_kk) %*% solve(Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+      if(linpred==1){
+        IminusRho_hh = Matrix::Diagonal(n=nrow(newrep$Rho_hh)) - newrep$Rho_hh
+        Q_kk = Matrix::t(IminusRho_hh) %*% Matrix::solve(Matrix::t(newrep$Gamma_hh) %*% newrep$Gamma_hh) %*% IminusRho_hh
+      }else{
+        IminusRho_hh = Matrix::Diagonal(n=nrow(newrep$Rho_hh)) - newrep$Rho2_hh
+        Q_kk = Matrix::t(IminusRho_hh) %*% Matrix::solve(Matrix::t(newrep$Gamma2_hh) %*% newrep$Gamma2_hh) %*% IminusRho_hh
+      }
       Q_hh = Matrix::kronecker( Q_kk, Q_ss )
 
       #
@@ -285,18 +306,27 @@ function( object,
   augment_delta <-
   function( newdelta_tc,
             delta_tc,
-            nu_z,
-            model ){
+            #nu_z,
+            #model,
+            linpred ){
 
-    if( length(nu_z) > 0 ){
+    if( prod(dim(delta_tc)) > 0 ){
+    #if( length(nu_z) > 0 ){
       #
-      mats = dsem::make_matrices(
-        beta_p = nu_z,
-        model = model,
-        variables = object$internal$variables,
-        times = all_times
-      )
-      Q_kk = Matrix::t(mats$IminusP_kk) %*% solve(Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+      #mats = dsem::make_matrices(
+      #  beta_p = nu_z,
+      #  model = model,
+      #  variables = object$internal$variables,
+      #  times = all_times
+      #)
+      #Q_kk = Matrix::t(mats$IminusP_kk) %*% solve(Matrix::t(mats$G_kk) %*% mats$G_kk) %*% mats$IminusP_kk
+      if(linpred==1){
+        IminusRho_hh = Matrix::Diagonal(n=nrow(newrep$Rho_time_hh)) - newrep$Rho_time_hh
+        Q_kk = Matrix::t(IminusRho_hh) %*% Matrix::solve(Matrix::t(newrep$Gamma_time_hh) %*% newrep$Gamma_time_hh) %*% IminusRho_hh
+      }else{
+        IminusRho_hh = Matrix::Diagonal(n=nrow(newrep$Rho2_time_hh)) - newrep$Rho2_time_hh
+        Q_kk = Matrix::t(IminusRho_hh) %*% Matrix::solve(Matrix::t(newrep$Gamma2_time_hh) %*% newrep$Gamma2_time_hh) %*% IminusRho_hh
+      }
 
       #
       grid = expand.grid( t = all_times,
@@ -332,35 +362,40 @@ function( object,
   }
 
   #
-  new_parlist = newobj$tmb_par
+  new_parlist = newobj$tmb_inputs$tmb_par
+  #new_parlist = newobj$tmb_par
   Q_ss = object$rep$Q_ss
 
   # Replace epsilon
   new_parlist$epsilon_stc = augment_epsilon(
-    beta_z = parlist$beta_z,
+    #beta_z = parlist$beta_z,
     eps_stc = parlist$epsilon_stc,
     neweps_stc = new_parlist$epsilon_stc,
-    model = object$internal$spacetime_term_ram$output$model
+    #model = object$internal$spacetime_term_ram$output$model,
+    linpred = 1
   )
   new_parlist$epsilon2_stc = augment_epsilon(
-    beta_z = parlist$beta2_z,
+    #beta_z = parlist$beta2_z,
     eps_stc = parlist$epsilon2_stc,
     neweps_stc = new_parlist$epsilon2_stc,
-    model = object$internal$delta_spacetime_term_ram$output$model
+    #model = object$internal$delta_spacetime_term_ram$output$model,
+    linpred = 2
   )
 
   # Replace delta
   new_parlist$delta_tc = augment_delta(
-    nu_z = parlist$nu_z,
+    #nu_z = parlist$nu_z,
     delta_tc = parlist$delta_tc,
     newdelta_tc = new_parlist$delta_tc,
-    model = object$internal$time_term_ram$output$model
+    #model = object$internal$time_term_ram$output$model,
+    linpred = 1
   )
   new_parlist$delta2_tc = augment_delta(
-    nu_z = parlist$nu2_z,
+    #nu_z = parlist$nu2_z,
     delta_tc = parlist$delta2_tc,
     newdelta_tc = new_parlist$delta2_tc,
-    model = object$internal$delta_time_term_ram$output$model
+    #model = object$internal$delta_time_term_ram$output$model,
+    linpred = 2
   )
 
   # Replace other variables that are not changed
@@ -371,12 +406,13 @@ function( object,
   # Step 5: Re-build model
   ##############
 
-  new_control$run_model = TRUE
+  #new_control$run_model = TRUE
   new_control$tmb_par = new_parlist
-  new_control$nlminb_loops = 0
-  new_control$newton_loops = 0
-  new_control$getsd = FALSE
-  new_control$calculate_deviance_explained = FALSE
+  new_control$extra_reporting = FALSE
+  #new_control$nlminb_loops = 0
+  #new_control$newton_loops = 0
+  #new_control$getsd = FALSE
+  #new_control$calculate_deviance_explained = FALSE
 
   newobj = tinyVAST(
     formula = object$formula,
