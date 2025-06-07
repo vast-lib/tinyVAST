@@ -479,6 +479,11 @@ function( object,
                           coords = object$internal$space_columns,
                           crs = st_crs(object$spatial_domain) )
     s_i = as.integer(st_within( sf_coords, object$spatial_domain ))
+    if(any(is.na(s_i))){
+      stop("Some rows of `newdata` in `predict` are not within the SAR domain.
+            Please exclude rows listed below or refit model with extended domain.\n",
+            paste0(which(is.na(s_i)), collapse = ", ") )
+    }
     A_gs = sparseMatrix( i = seq_along(s_i),
                          j = s_i,
                          x = 1,
