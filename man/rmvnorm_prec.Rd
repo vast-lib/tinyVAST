@@ -4,7 +4,7 @@
 \alias{rmvnorm_prec}
 \title{Multivariate Normal Random Deviates using Sparse Precision}
 \usage{
-rmvnorm_prec(prec, n = 1, mu = rep(0, nrow(Q)))
+rmvnorm_prec(prec, n = 1, mu = rep(0, nrow(prec)))
 }
 \arguments{
 \item{prec}{sparse precision (inverse-covariance) matrix.}

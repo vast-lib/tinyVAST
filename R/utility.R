@@ -16,7 +16,7 @@
 rmvnorm_prec <-
 function( prec,
           n = 1,
-          mu = rep(0,nrow(Q)) ) {
+          mu = rep(0,nrow(prec)) ) {
 
   # Simulate values
   z0 = matrix( rnorm(length(mu) * n), ncol=n)
