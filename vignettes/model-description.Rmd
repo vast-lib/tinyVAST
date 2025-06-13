@@ -8,7 +8,7 @@ vignette: >
   %\VignetteIndexEntry{tinyVAST model description}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-bibliography: 'tinyVAST vignettes.bib'
+bibliography: 'tinyVAST_vignettes.bib'
 editor_options: 
   markdown: 
     wrap: sentence
