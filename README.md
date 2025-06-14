@@ -1,7 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# tinyVAST
+# tinyVAST <a href='https://github.com/vast-lib/tinyVAST'><img src='man/figures/logo.png' align="right" style="height:139px;"/></a>
+
 
 > Multivariate spatio-temporal models using dynamic structural equations
 

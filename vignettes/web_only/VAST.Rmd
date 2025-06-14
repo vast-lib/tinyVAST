@@ -200,13 +200,13 @@ Or with sdmTMB
 
 ```{r, eval=has_sdmTMB, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 library(sdmTMB)
-mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
+sdmTMB_mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
 start_time = Sys.time()
 mysdmTMB = sdmTMB(
   formula = n ~ 1,
   data = Data,
-  mesh = mesh,
+  mesh = sdmTMB_mesh,
   spatial = "on",
   spatiotemporal = "ar1",
   time = "time",
