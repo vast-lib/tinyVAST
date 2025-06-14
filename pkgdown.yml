@@ -1,5 +1,5 @@
 pandoc: 3.1.1
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   web_only/age_composition_expansion: web_only/age_composition_expansion.html
@@ -15,7 +15,7 @@ articles:
   spatial_factor_analysis: spatial_factor_analysis.html
   web_only/stream_networks: web_only/stream_networks.html
   web_only/VAST: web_only/VAST.html
-last_built: 2025-04-22T04:25Z
+last_built: 2025-06-14T16:18Z
 urls:
   reference: https://vast-lib.github.io/tinyVAST/reference
   article: https://vast-lib.github.io/tinyVAST/articles

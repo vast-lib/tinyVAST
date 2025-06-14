@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Vector autoregressive spatio-temporal models • tinyVAST</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../../favicon.ico">
+<link rel="manifest" href="../../site.webmanifest">
 <script src="../../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -20,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,8 +72,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Vector autoregressive spatio-temporal models</h1>
+      <img src="../../logo.png" class="logo" alt=""><h1>Vector autoregressive spatio-temporal models</h1>
                         <h4 data-toc-skip class="author">James T.
 Thorson</h4>
             
@@ -148,7 +152,7 @@ spatio-temporal process:</p>
 <span><span class="co">#&gt;     family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 20.86577 secs</span></span>
+<span><span class="co">#&gt; Time difference of 13.84453 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -168,7 +172,7 @@ spatio-temporal process:</p>
 <span><span class="co">#&gt; log_sigma -0.64811502 0.05006806</span></span>
 <span><span class="co">#&gt; log_sigma  0.01446398 0.06494080</span></span>
 <span><span class="co">#&gt; log_kappa -0.15608154 0.16446880</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.005583973 </span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.005583877 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
 <span><span class="co">#&gt; [1] 0.543224</span></span>
@@ -182,7 +186,7 @@ spatio-temporal process:</p>
 <span><span class="co">#&gt; 1     1 logn logn         1  &lt;NA&gt;   1  0.8497537 0.07526572 11.290049</span></span>
 <span><span class="co">#&gt; 2     2 logn logn         2  &lt;NA&gt;   0 -0.2584177 0.03730119 -6.927869</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 1.469548e-29</span></span>
+<span><span class="co">#&gt; 1 1.469547e-29</span></span>
 <span><span class="co">#&gt; 2 4.272276e-12</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
@@ -315,10 +319,10 @@ it with its true value:</p>
 <span><span class="co">#&gt;        7        3 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $time_for_MLE</span></span>
-<span><span class="co">#&gt; Time difference of 1.187639 secs</span></span>
+<span><span class="co">#&gt; Time difference of 1.116973 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $max_gradient</span></span>
-<span><span class="co">#&gt; [1] 0.0007302568</span></span>
+<span><span class="co">#&gt; [1] 0.0007302205</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Convergence_check</span></span>
 <span><span class="co">#&gt; [1] "The model is likely not converged"</span></span>
@@ -340,13 +344,13 @@ it with its true value:</p>
 <span><span class="co">#&gt; Epsilon_rho2_f Epsilon_rho2_f     0.89582671 -0.990000  0.89582684  0.990000</span></span>
 <span><span class="co">#&gt; logSigmaM           logSigmaM     0.05547811      -Inf  0.05547658 10.000000</span></span>
 <span><span class="co">#&gt;                final_gradient</span></span>
-<span><span class="co">#&gt; beta1_ft         7.302568e-04</span></span>
-<span><span class="co">#&gt; beta2_ft         3.958251e-05</span></span>
-<span><span class="co">#&gt; L_omega2_z       1.120592e-04</span></span>
-<span><span class="co">#&gt; L_epsilon2_z    -1.263658e-04</span></span>
-<span><span class="co">#&gt; logkappa2        9.682371e-05</span></span>
-<span><span class="co">#&gt; Epsilon_rho2_f  -1.138784e-04</span></span>
-<span><span class="co">#&gt; logSigmaM       -2.509090e-04</span></span>
+<span><span class="co">#&gt; beta1_ft         7.302205e-04</span></span>
+<span><span class="co">#&gt; beta2_ft         3.958142e-05</span></span>
+<span><span class="co">#&gt; L_omega2_z       1.120543e-04</span></span>
+<span><span class="co">#&gt; L_epsilon2_z    -1.264243e-04</span></span>
+<span><span class="co">#&gt; logkappa2        9.682367e-05</span></span>
+<span><span class="co">#&gt; Epsilon_rho2_f  -1.139030e-04</span></span>
+<span><span class="co">#&gt; logSigmaM       -2.508976e-04</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $SD</span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
@@ -358,23 +362,23 @@ it with its true value:</p>
 <span><span class="co">#&gt; logkappa2      -4.68896241 0.18202530</span></span>
 <span><span class="co">#&gt; Epsilon_rho2_f  0.89582684 0.06297620</span></span>
 <span><span class="co">#&gt; logSigmaM       0.05547658 0.06294172</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.0007302568 </span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.0007302205 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $time_for_sdreport</span></span>
-<span><span class="co">#&gt; Time difference of 3.913741 secs</span></span>
+<span><span class="co">#&gt; Time difference of 3.637799 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $time_for_run</span></span>
-<span><span class="co">#&gt; Time difference of 20.53116 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 18.8233 secs</span></span></code></pre></div>
 <p>Or with sdmTMB</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pbs-assess.github.io/sdmTMB/" class="external-link">sdmTMB</a></span><span class="op">)</span></span>
-<span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/make_mesh.html" class="external-link">make_mesh</a></span><span class="op">(</span><span class="va">Data</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>, n_knots<span class="op">=</span><span class="va">n_x</span><span class="op">*</span><span class="va">n_y</span> <span class="op">)</span></span>
+<span><span class="va">sdmTMB_mesh</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/make_mesh.html" class="external-link">make_mesh</a></span><span class="op">(</span><span class="va">Data</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>, n_knots<span class="op">=</span><span class="va">n_x</span><span class="op">*</span><span class="va">n_y</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">start_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mysdmTMB</span> <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/sdmTMB.html" class="external-link">sdmTMB</a></span><span class="op">(</span></span>
 <span>  formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>  mesh <span class="op">=</span> <span class="va">mesh</span>,</span>
+<span>  mesh <span class="op">=</span> <span class="va">sdmTMB_mesh</span>,</span>
 <span>  spatial <span class="op">=</span> <span class="st">"on"</span>,</span>
 <span>  spatiotemporal <span class="op">=</span> <span class="st">"ar1"</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -395,15 +399,15 @@ it with its true value:</p>
 <tbody>
 <tr class="odd">
 <td align="left">tinyVAST</td>
-<td align="right">20.9</td>
+<td align="right">13.8</td>
 </tr>
 <tr class="even">
 <td align="left">VAST</td>
-<td align="right">24.7</td>
+<td align="right">22.7</td>
 </tr>
 <tr class="odd">
 <td align="left">sdmTMB</td>
-<td align="right">23.3</td>
+<td align="right">20.9</td>
 </tr>
 </tbody>
 </table>
@@ -421,8 +425,6 @@ it with its true value:</p>
 <span>                 spacetime_term <span class="op">=</span> <span class="st">"logn -&gt; logn, 1, rho"</span><span class="op">)</span>,</span>
 <span>               family <span class="op">=</span> <span class="fu"><a href="../../reference/families.html">delta_lognormal</a></span><span class="op">(</span>type<span class="op">=</span><span class="st">"poisson-link"</span><span class="op">)</span>,</span>
 <span>               spatial_domain <span class="op">=</span> <span class="va">mesh</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in deviance_explained(out): Problem detected: deviance explained should</span></span>
-<span><span class="co">#&gt; be between 0 and 1</span></span>
 <span></span>
 <span><span class="va">mydelta2</span></span>
 <span><span class="co">#&gt; Call: </span></span>
@@ -431,7 +433,7 @@ it with its true value:</p>
 <span><span class="co">#&gt;         factor(time), spacetime_term = "logn -&gt; logn, 1, rho"))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 0.127285 secs</span></span>
+<span><span class="co">#&gt; Time difference of 12.08404 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -443,44 +445,35 @@ it with its true value:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt;                Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j    9.673977e-01 0.03523113</span></span>
-<span><span class="co">#&gt; alpha2_j  -9.722219e-01 0.13721439</span></span>
-<span><span class="co">#&gt; alpha2_j  -9.890696e-01 0.13927952</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.000142e+00 0.13927953</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.021256e+00 0.13721437</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.250672e+00 0.13721438</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.163360e+00 0.13654870</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.396657e+00 0.13857946</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.232469e+00 0.14220438</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.120828e+00 0.13589390</span></span>
-<span><span class="co">#&gt; alpha2_j  -8.562645e-01 0.13721437</span></span>
-<span><span class="co">#&gt; alpha2_j  -8.935466e-01 0.13721436</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.194395e+00 0.13589392</span></span>
-<span><span class="co">#&gt; alpha2_j  -9.129676e-01 0.13721437</span></span>
-<span><span class="co">#&gt; alpha2_j  -8.283647e-01 0.13461573</span></span>
-<span><span class="co">#&gt; alpha2_j  -7.688254e-01 0.13524967</span></span>
-<span><span class="co">#&gt; beta2_z    1.355635e+00        NaN</span></span>
-<span><span class="co">#&gt; beta2_z   -8.062577e-09        NaN</span></span>
-<span><span class="co">#&gt; log_sigma  2.328371e-01 0.01895245</span></span>
-<span><span class="co">#&gt; Warning:</span></span>
-<span><span class="co">#&gt; Hessian of fixed effects was not positive definite.</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.01194501 </span></span>
+<span><span class="co">#&gt;              Estimate Std. Error</span></span>
+<span><span class="co">#&gt; alpha_j    0.96740001 0.03523113</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.24655462 0.14981014</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.29278786 0.17500129</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.30567555 0.19172148</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.32180765 0.20304203</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.57098803 0.21258828</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.44507832 0.21944962</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.71680189 0.22626332</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.54485926 0.23247417</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.39904953 0.23307993</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.12515792 0.23638029</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.22354399 0.23877400</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.51311713 0.24006131</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.24691172 0.24216424</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.12785616 0.24209136</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.07071400 0.24334578</span></span>
+<span><span class="co">#&gt; beta2_z    0.89674417 0.03512480</span></span>
+<span><span class="co">#&gt; beta2_z    0.31332882 0.03906491</span></span>
+<span><span class="co">#&gt; log_sigma  0.02962681 0.02475180</span></span>
+<span><span class="co">#&gt; log_kappa  0.10856732 0.14818594</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.002537521 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
-<span><span class="co">#&gt; [1] -0.02549219</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
+<span><span class="co">#&gt; [1] 0.3295016</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
-<span><span class="co">#&gt;              Estimate  Std_Error z_value       p_value</span></span>
-<span><span class="co">#&gt; (Intercept) 0.9673977 0.03523113 27.4586 5.484024e-166</span></span></code></pre></div>
+<span><span class="co">#&gt;             Estimate  Std_Error  z_value       p_value</span></span>
+<span><span class="co">#&gt; (Intercept)   0.9674 0.03523113 27.45867 5.474659e-166</span></span></code></pre></div>
 <p>And we can again use the <code>DHARMa</code> package to visualize
 simulation residuals:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -510,7 +503,7 @@ distribution:</p>
 </tr>
 <tr class="even">
 <td align="left">delta-lognormal</td>
-<td align="right">3206.731</td>
+<td align="right">2947.194</td>
 </tr>
 </tbody>
 </table>
@@ -571,7 +564,7 @@ simulate artificial data for the sake of demonstration:</p>
 <span><span class="co">#&gt;     family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 1.832037 mins</span></span>
+<span><span class="co">#&gt; Time difference of 1.049713 mins</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -583,42 +576,42 @@ simulate artificial data for the sake of demonstration:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
-<span><span class="co">#&gt;              Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j    0.07793943 0.09683986</span></span>
-<span><span class="co">#&gt; alpha_j    0.04764127 0.09394062</span></span>
-<span><span class="co">#&gt; beta_z     0.38302727 0.07451519</span></span>
-<span><span class="co">#&gt; beta_z     0.52195419 0.07473703</span></span>
-<span><span class="co">#&gt; beta_z    -0.43197006 0.08558201</span></span>
-<span><span class="co">#&gt; beta_z    -0.07103971 0.06250765</span></span>
-<span><span class="co">#&gt; beta_z     0.33194708 0.01954278</span></span>
-<span><span class="co">#&gt; log_sigma -0.69117448 0.02896349</span></span>
-<span><span class="co">#&gt; log_sigma -0.01359757 0.05570597</span></span>
-<span><span class="co">#&gt; log_kappa -0.57783059 0.09783048</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.01036706 </span></span>
+<span><span class="co">#&gt;               Estimate Std. Error</span></span>
+<span><span class="co">#&gt; alpha_j    0.264368407 0.09266171</span></span>
+<span><span class="co">#&gt; alpha_j    0.035863845 0.07360860</span></span>
+<span><span class="co">#&gt; beta_z     0.455447933 0.06734774</span></span>
+<span><span class="co">#&gt; beta_z     0.389078124 0.08038421</span></span>
+<span><span class="co">#&gt; beta_z    -0.405603385 0.08530597</span></span>
+<span><span class="co">#&gt; beta_z    -0.084083279 0.06545855</span></span>
+<span><span class="co">#&gt; beta_z     0.329048841 0.01844056</span></span>
+<span><span class="co">#&gt; log_sigma -0.691801477 0.02886804</span></span>
+<span><span class="co">#&gt; log_sigma  0.007588809 0.05777685</span></span>
+<span><span class="co">#&gt; log_kappa -0.487467935 0.09474226</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.003822157 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
-<span><span class="co">#&gt; [1] 0.4318183</span></span>
+<span><span class="co">#&gt; [1] 0.4593592</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; spacetime_term: </span></span>
 <span><span class="co">#&gt;   heads to from parameter start lag    Estimate  Std_Error   z_value</span></span>
-<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.38302727 0.07451519  5.140258</span></span>
-<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.52195419 0.07473703  6.983876</span></span>
-<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.43197006 0.08558201 -5.047440</span></span>
-<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.07103971 0.06250765 -1.136496</span></span>
-<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.33194708 0.01954278 16.985667</span></span>
-<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.33194708 0.01954278 16.985667</span></span>
+<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.45544793 0.06734774  6.762632</span></span>
+<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.38907812 0.08038421  4.840231</span></span>
+<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.40560339 0.08530597 -4.754689</span></span>
+<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.08408328 0.06545855 -1.284527</span></span>
+<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.32904884 0.01844056 17.843757</span></span>
+<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.32904884 0.01844056 17.843757</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 2.743621e-07</span></span>
-<span><span class="co">#&gt; 2 2.871448e-12</span></span>
-<span><span class="co">#&gt; 3 4.477687e-07</span></span>
-<span><span class="co">#&gt; 4 2.557489e-01</span></span>
-<span><span class="co">#&gt; 5 1.048543e-64</span></span>
-<span><span class="co">#&gt; 6 1.048543e-64</span></span>
+<span><span class="co">#&gt; 1 1.355075e-11</span></span>
+<span><span class="co">#&gt; 2 1.296884e-06</span></span>
+<span><span class="co">#&gt; 3 1.987519e-06</span></span>
+<span><span class="co">#&gt; 4 1.989576e-01</span></span>
+<span><span class="co">#&gt; 5 3.232149e-71</span></span>
+<span><span class="co">#&gt; 6 3.232149e-71</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
-<span><span class="co">#&gt;         Estimate  Std_Error   z_value  p_value</span></span>
-<span><span class="co">#&gt; vard1 0.07793943 0.09683986 0.8048279 0.420919</span></span>
-<span><span class="co">#&gt; vard2 0.04764127 0.09394062 0.5071423 0.612055</span></span></code></pre></div>
+<span><span class="co">#&gt;         Estimate  Std_Error   z_value     p_value</span></span>
+<span><span class="co">#&gt; vard1 0.26436841 0.09266171 2.8530492 0.004330192</span></span>
+<span><span class="co">#&gt; vard2 0.03586384 0.07360860 0.4872236 0.626099900</span></span></code></pre></div>
 <p>The values for <code>beta_z</code> again correspond to the specified
 value for interaction-matrix <code>B</code></p>
 <p>We can again calculate the area-weighted total abundance and compare
@@ -660,7 +653,7 @@ it with its true value:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
