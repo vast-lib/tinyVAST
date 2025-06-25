@@ -13,6 +13,10 @@
 * Add `project` to project tinyVAST forward in time
 * Eliminate `...` argument to `tinyVAST` so that it's obvious if an argument
   is mis-named.
+* Fix bug which previously resulted in non-converged models, where including DSEM arrow
+  "x<->x, 0, sd_xy" would improperly add another term "x <-> x, 0, V[x]" because
+  it didn't previously parse the whitespaces when detecting missing covariances
+  (h/t Jon Reum for flagging the issue)
 
 # tinyVAST 1.1.1
 
