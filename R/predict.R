@@ -497,10 +497,18 @@ function( object,
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(object$internal$times) > 0 ){
     t_g = match( newdata[,object$internal$time_column], object$internal$times )
-  }else{ t_g = integer(0) }
+  }else{
+    t_g = integer(0)
+  }
   if( length(object$internal$variables) > 0 ){
+    # Telescoping for a univariate model using var = "response" by default
+    if( !(object$internal$variable_column %in% colnames(newdata)) ){
+      newdata = data.frame( newdata, matrix(object$internal$variables[1], nrow=nrow(newdata), ncol=1, dimnames=list(NULL,object$internal$variable_column)) )
+    }
     c_g = match( newdata[,object$internal$variable_column], object$internal$variables )
-  }else{ c_g = integer(0) }
+  }else{
+    c_g = integer(0)
+  }
 
   #
   AepsilonG_zz = cbind(predAtriplet$i, predAtriplet$j, t_g[predAtriplet$i], c_g[predAtriplet$i])
@@ -536,6 +544,10 @@ function( object,
     newdata = cbind( newdata, matrix(1, nrow=nrow(newdata), ncol=1, dimnames=list(NULL,object$internal$distribution_column)) )
   }
 
+  #
+  if( !(object$internal$distribution_column %in% colnames(newdata)) ){
+    newdata = cbind( newdata, matrix(1, nrow=nrow(newdata), ncol=1, dimnames=list(NULL,object$internal$distribution_column)) )
+  }
   # Error checks
   tmb_data2 = object$tmb_inputs$tmb_data
   if( ncol(tmb_data2$X_ij) != ncol(covariates$X_gj) ) stop("Check X_gj")
