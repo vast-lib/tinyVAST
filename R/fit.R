@@ -84,15 +84,22 @@
 #'        settings.
 #'
 #' @details
-#' `tinyVAST` includes four basic inputs that specify the model structure:
+#' `tinyVAST` includes several basic inputs that specify the model structure:
 #' * `formula` specifies covariates and splines in a Generalized Additive Model;
-#' * `space_term` specifies interactions among variables and over time, constructing
+#' * `time_term` specifies interactions among variables and over time that
+#'   are constant across space, constructing the time-variable interaction.
+#' * `space_term` specifies interactions among variables and over time that occur
+#'   based on the variable values at each location, constructing
 #'   the space-variable interaction.
 #' * `spacetime_term` specifies interactions among variables and over time, constructing
 #'   the space-time-variable interaction.
-#' * `spatial_domain` specifies spatial correlations
 #'
-#' the default `spacetime_term=NULL` and `space_term=NULL` turns off all multivariate
+#' These inputs require defining the _domain_ of the model.  This includes:
+#' * `spatial_domain` specifies spatial domain, with determines spatial correlations
+#' * `times` specifies the temporal domain, i.e., sequence of time-steps
+#' * `variables` specifies the set of variables, i.e., the variables that will be modeled
+#'
+#' The default `spacetime_term=NULL` and `space_term=NULL` turns off all multivariate
 #' and temporal indexing, such that `spatial_domain` is then ignored, and the model collapses
 #' to a generalized additive model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 #' the user must specify `spatial_domain` and either `space_term=""` or `spacetime_term=""`, where the latter
@@ -106,12 +113,17 @@
 #' | Multivariate spatial model including interactions | specify `spatial_domain` and use `space_term` to specify spatial interactions |
 #' | Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
 #'
-#' **Binomial families**
+#' **Model building notes**
 #'
-#' A binomial family can be specified in only one way:
-#' the response is the observed proportion (proportion = successes / trials),
-#' and the 'weights' argument is used to specify the Binomial size (trials, N)
-#' parameter (`proportion ~ ..., weights = N`).
+#' * `binomial familes`:  A binomial family can be specified in only one way:
+#'   the response is the observed proportion (proportion = successes / trials),
+#'   and the 'weights' argument is used to specify the Binomial size (trials, N)
+#'   parameter (`proportion ~ ..., weights = N`).
+#'
+#' * `factor models`:  If a factor model is desired, the factor(s) must be named
+#'   and included in the `variables`.  The factor is then modeled for `space_term`,
+#'   `time_term`, and `spacetime_term` and it's variance must be fixed a priori
+#'   for any term where it is not being used.
 #'
 #' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations

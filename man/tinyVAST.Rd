@@ -144,17 +144,26 @@ Fits a vector autoregressive spatio-temporal (VAST) model using
 a minimal feature-set and a widely used interface.
 }
 \details{
-\code{tinyVAST} includes four basic inputs that specify the model structure:
+\code{tinyVAST} includes several basic inputs that specify the model structure:
 \itemize{
 \item \code{formula} specifies covariates and splines in a Generalized Additive Model;
-\item \code{space_term} specifies interactions among variables and over time, constructing
+\item \code{time_term} specifies interactions among variables and over time that
+are constant across space, constructing the time-variable interaction.
+\item \code{space_term} specifies interactions among variables and over time that occur
+based on the variable values at each location, constructing
 the space-variable interaction.
 \item \code{spacetime_term} specifies interactions among variables and over time, constructing
 the space-time-variable interaction.
-\item \code{spatial_domain} specifies spatial correlations
 }
 
-the default \code{spacetime_term=NULL} and \code{space_term=NULL} turns off all multivariate
+These inputs require defining the \emph{domain} of the model.  This includes:
+\itemize{
+\item \code{spatial_domain} specifies spatial domain, with determines spatial correlations
+\item \code{times} specifies the temporal domain, i.e., sequence of time-steps
+\item \code{variables} specifies the set of variables, i.e., the variables that will be modeled
+}
+
+The default \code{spacetime_term=NULL} and \code{space_term=NULL} turns off all multivariate
 and temporal indexing, such that \code{spatial_domain} is then ignored, and the model collapses
 to a generalized additive model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 the user must specify \code{spatial_domain} and either \code{space_term=""} or \code{spacetime_term=""}, where the latter
@@ -168,12 +177,17 @@ two are then parsed to include a single exogenous variance for the single variab
 }
 
 
-\strong{Binomial families}
-
-A binomial family can be specified in only one way:
+\strong{Model building notes}
+\itemize{
+\item \verb{binomial familes}:  A binomial family can be specified in only one way:
 the response is the observed proportion (proportion = successes / trials),
 and the 'weights' argument is used to specify the Binomial size (trials, N)
 parameter (\verb{proportion ~ ..., weights = N}).
+\item \verb{factor models}:  If a factor model is desired, the factor(s) must be named
+and included in the \code{variables}.  The factor is then modeled for \code{space_term},
+\code{time_term}, and \code{spacetime_term} and it's variance must be fixed a priori
+for any term where it is not being used.
+}
 }
 \examples{
 # Simulate a seperable two-dimensional AR1 spatial process
