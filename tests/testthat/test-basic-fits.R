@@ -77,8 +77,68 @@ test_that("cv::cv works", {
 #  }, regexp = "data_colnames")
 # })
 
+test_that("formula functions I(.) and poly(.,raw=TRUE) are parsed correctly", {
+  fit1 <- tinyVAST(
+    data = dat,
+    formula = n ~ poly(w, 3, raw=TRUE),
+    spatial_domain = mesh,
+    space_term = "",
+    control = tinyVASTcontrol(
+      verbose = TRUE,
+      newton_loops = 1,
+      silent = FALSE
+    )
+  )
+  fit2 <- tinyVAST(
+    data = dat,
+    formula = n ~ w + I(w^2) + I(w^3),
+    spatial_domain = mesh,
+    space_term = "",
+    control = tinyVASTcontrol(
+      verbose = TRUE,
+      newton_loops = 1,
+      silent = FALSE
+    )
+  )
+  expect_equal( as.numeric(fit1$opt$obj), as.numeric(fit2$opt$obj), tolerance = 1e-3  )
+})
+
+test_that("formula function poly(.,raw=FALSE) is parsed correctly when fitting and predicting to new data", {
+  fit1 <- tinyVAST(
+    data = dat,
+    formula = n ~ poly(w, 3),
+    spatial_domain = mesh,
+    space_term = "",
+    control = tinyVASTcontrol(
+      verbose = TRUE,
+      newton_loops = 1,
+      silent = FALSE
+    )
+  )
+  newcols = poly(dat$w, 3)
+  colnames(newcols) = paste0("w", 1:3)
+  dat = cbind( dat, newcols )
+  fit2 <- tinyVAST(
+    data = dat,
+    formula = n ~ 1 + w1 + w2 + w3,
+    spatial_domain = mesh,
+    space_term = "",
+    control = tinyVASTcontrol(
+      verbose = TRUE,
+      newton_loops = 1,
+      silent = FALSE
+    )
+  )
+  expect_equal( as.numeric(fit1$opt$obj), as.numeric(fit2$opt$obj), tolerance = 1e-3  )
+
+  #
+  pred1 = predict( fit1, newdata = dat[1:10,] )
+  pred2 = predict( fit2, newdata = dat[1:10,] )
+  expect_equal( pred1, pred2, tolerance = 1e-3  )
+})
+
+
 test_that("tinyVAST works as dsem", {
-  library(tinyVAST)
   data(isle_royale, package="dsem")
   
   # Convert to long-form

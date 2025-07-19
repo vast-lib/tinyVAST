@@ -9,7 +9,7 @@ ivector_minus_one <- function( ivector ){
   return(ivector)
 }
 
-# Modified from sdmTMB::make_anisotropy_spde
+# Modified from sdmTMB::make_anisotropy_spde, originally from geostatistical_delta-GLMM
 make_anisotropy_spde <-
 function( inla_mesh ){
 
@@ -39,6 +39,52 @@ function( inla_mesh ){
   return(ret)
 }
 
+# Recoded in R from https://github.com/pfmc-assessments/geostatistical_delta-GLMM/blob/master/inst/executables/geo_index_v4b.cpp#L18
+# Intended to show logic of geometric anisotropy
+# if H = diag(2), G is expected to match `fmesher::fm_fem(mesh)$g1`
+make_stiffness <-
+function( mesh,
+          loc = mesh$loc[,1:2], # Can swap in different values
+          H = diag(ncol(loc)) ){
+
+  # local objects to simplify code
+  tv = mesh$graph$tv
+  n = mesh$n
+  adjH = solve(H) * det(H)
+
+  # Extract edge vectors
+  if(missing(loc)) loc = mesh$loc
+  v0 = loc[ tv[,1], ]
+  v1 = loc[ tv[,2], ]
+  v2 = loc[ tv[,3], ]
+  e0 = v2 - v1
+  e1 = v0 - v2
+  e2 = v1 - v0
+
+  # Loop through triangles
+  G = Matrix::sparseMatrix(i = 1, j = 1, x = 0, dims = c(n, n))
+  for (i in seq_len(nrow(e0)) ){
+    # Get edges
+    edgemat = rbind( e0[i,], e1[i,], e2[i,] )
+    # Area from just the first two dimensions (x, y)
+    triangle_area = abs(det(edgemat[1:2,1:2])) / 2
+
+    # Local stiffness
+    G_tri = edgemat %*% adjH %*% t(edgemat)
+
+    # Assemble by summation
+    G[ tv[i,], tv[i,] ] = G[ tv[i,], tv[i,] ] + G_tri / (4*triangle_area)
+  }
+  return(G)
+}
+
+# Modified from sdmTMB
+check_tinyVAST_version <- function(version) {
+  if( utils::packageVersion("tinyVAST") != version ){
+    stop("Installed version of `tinyVAST` does not match the version used to
+          run model.  Please re-install the same version, or re-run the model.")
+  }
+}
 
 #rm_wsp <- function (x) {
 #  # from brms:::rm_wsp()
@@ -67,5 +113,75 @@ function( inla_mesh ){
 #  x2 <- grep("t2\\(", terms)
 #  c(x1, x2)
 #}
+
+#' @title Parse path
+#'
+#' @description \code{parse_path} is copied from \code{sem::parse.path}
+#'
+#' @param path character string indicating a one-headed or two-headed path
+#'        in a structural equation model
+#'
+#' @details
+#' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
+#'
+#' @return Tagged-list defining variables and direction for a specified path coefficient
+parse_path <-
+function( path ){
+  path.1 <- gsub("-", "", gsub(" ", "", path))
+  direction <- if(regexpr("<>", path.1) > 0){
+    2
+  }else if(regexpr("<", path.1) > 0){
+    -1
+  }else if(regexpr(">", path.1) > 0){
+    1
+  }else{
+    stop(paste("ill-formed path:", path))
+  }
+  path.1 <- strsplit(path.1, "[<>]")[[1]]
+  out = list(first = path.1[1], second = path.1[length(path.1)], direction = direction)
+  return(out)
+}
+
+
+#' @title Classify variables path
+#'
+#' @description \code{classify_variables} is copied from \code{sem:::classifyVariables}
+#'
+#' @param model syntax for structural equation model
+#'
+#' @details
+#' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
+#'
+#' @return Tagged-list defining exogenous and endogenous variables
+classify_variables <-
+function( model ){
+
+    variables <- logical(0)
+    for (paths in model[, 1]) {
+        vars <- gsub(pattern=" ", replacement="", x=paths)
+        vars <- sub("-*>", "->", sub("<-*", "<-", vars))
+        if (grepl("<->", vars)) {
+            vars <- strsplit(vars, "<->")[[1]]
+            if (is.na(variables[vars[1]]))
+                variables[vars[1]] <- FALSE
+            if (is.na(variables[vars[2]]))
+                variables[vars[2]] <- FALSE
+        }
+        else if (grepl("->", vars)) {
+            vars <- strsplit(vars, "->")[[1]]
+            if (is.na(variables[vars[1]]))
+                variables[vars[1]] <- FALSE
+            variables[vars[2]] <- TRUE
+        }
+        else if (grepl("<-", vars)) {
+            vars <- strsplit(vars, "<-")[[1]]
+            if (is.na(variables[vars[2]]))
+                variables[vars[2]] <- FALSE
+            variables[vars[1]] <- TRUE
+        }
+        else stop("incorrectly specified model", call. = FALSE)
+    }
+    list(endogenous = names(variables[variables]), exogenous = names(variables[!variables]))
+}
 
 

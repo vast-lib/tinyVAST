@@ -255,6 +255,12 @@ function( dsem,
   model$par[model$par == ""] <- NA
   model <- cbind( "path"=model$path, "lag"=model$lag, "name"=model$par, "start"=model$start)
 
+  # Standardize notation, i.e., eliminate spaces and then use " <-> " for 2-headed arrows
+  # necessary to pattern match missing covariances in next step
+  model[,1] = gsub(pattern=" ", replacement="", x=model[,1] )
+  model[,1] = gsub(pattern="<->", replacement=" <-> ", x=model[,1] )
+
+  # Add missing covariances
   if( !is.null(covs) ){
     for (cov in covs) {
       vars <- strsplit(cov, "[ ,]+")[[1]]
@@ -265,6 +271,8 @@ function( dsem,
         p2 = if (i==j) paste("V[", vars[i], "]", sep = "") else paste("C[",vars[i], ",", vars[j], "]", sep = "")
         p3 = NA
         row <- c(p1, 0, p2, p3)
+        #path_without_spaces = gsub(pattern=" ", replacement="", x=model[,1])
+        #path_with_spaces = gsub(pattern="<->", replacement=" <-> ", x=path_without_spaces )
         if( any((row[1]==model[,1]) & (row[2]==model[,2])) ){
           next
         }else{

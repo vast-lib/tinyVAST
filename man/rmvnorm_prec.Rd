@@ -4,22 +4,22 @@
 \alias{rmvnorm_prec}
 \title{Multivariate Normal Random Deviates using Sparse Precision}
 \usage{
-rmvnorm_prec(Q, n = 1, mean = rep(0, nrow(Q)))
+rmvnorm_prec(prec, n = 1, mu = rep(0, nrow(prec)))
 }
 \arguments{
-\item{Q}{sparse precision (inverse-covariance) matrix.}
+\item{prec}{sparse precision (inverse-covariance) matrix.}
 
 \item{n}{number of observations.}
 
-\item{mean}{mean vector.}
+\item{mu}{mean vector.}
 }
 \value{
-a matrix with dimension \code{length(mean)} by
+a matrix with dimension \code{length(mu)} by
 \code{n}, containing realized draws from the specified
 mean and precision
 }
 \description{
 This function provides a random number generator for
 the multivariate normal distribution with mean equal
-to \code{mean} and sparse precision matrix \code{Q}.
+to \code{mu} and sparse precision matrix \code{prec}.
 }

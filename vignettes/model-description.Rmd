@@ -8,6 +8,7 @@ vignette: >
   %\VignetteIndexEntry{tinyVAST model description}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
+bibliography: 'tinyVAST_vignettes.bib'
 editor_options: 
   markdown: 
     wrap: sentence
@@ -37,7 +38,7 @@ knitr::opts_chunk$set(
 
 # Bivariate generalized linear mixed model structure
 
-tinyVAST is a bivariate extension of a generalized linear mixed model (see Tables 1 and 2 for notation), which includes two linear predictors that each include four additive components:
+tinyVAST [@thorson_tinyvast_2025] is a bivariate extension of a generalized linear mixed model (see Tables 1 and 2 for notation), which includes two linear predictors that each include four additive components:
 
 1. *Spatial interactions among variables*:  The user can specify interactions among variables at a given site (or for spatially correlated latent variables) using arrow notation derived from path analysis, based on the interface from R package sem;
 
@@ -51,20 +52,21 @@ These four components are assembled into two linear predictors:
 
 $$
 \begin{aligned}
-p_{\PL 1,i} &= \underbrace{\B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1}}_\text{GAM} + \underbrace{\B A_{i} \B \Omega_{\PL 1,c[i]}}_\text{space_term} + \underbrace{\B D_{\PL 1,c[i],t[i]}}_\text{time_term} + \underbrace{\B A_i \B E_{\PL 1,c[i],t[i]}}_\text{spacetime_term}  \\
-p_{\PL 2,i} &= \underbrace{\B X_{\PL 2,i} \B \alpha_{\PL 2} + \B Z_{\PL 2,i} \B \gamma_{\PL 2}}_\text{GAM} + \underbrace{\B A_{i} \B \Omega_{\PL 2,c[i]}}_\text{space_term} + \underbrace{\B D_{\PL 2,c[i],t[i]}}_\text{time_term} + \underbrace{\B A_i \B E_{\PL 2,c[i],t[i]}}_\text{spacetime_term}
+p_{\PL 1,i} &= \underbrace{\B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1}}_\text{formula} + \underbrace{\B A_{i} \B \Omega_{\PL 1,c[i]}}_\text{space_term} + \underbrace{\B D_{\PL 1,c[i],t[i]}}_\text{time_term} + \underbrace{\B A_i \B E_{\PL 1,c[i],t[i]}}_\text{spacetime_term} + \underbrace{\B W_{\PL 1,i} (\B A_{i} \B \Xi_{\PL 1})^{\PL T} }_\text{spatially_varying}  \\
+p_{\PL 2,i} &= \underbrace{\B X_{\PL 2,i} \B \alpha_{\PL 2} + \B Z_{\PL 2,i} \B \gamma_{\PL 2}}_\text{formula} + \underbrace{\B A_{i} \B \Omega_{\PL 2,c[i]}}_\text{space_term} + \underbrace{\B D_{\PL 2,c[i],t[i]}}_\text{time_term} + \underbrace{\B A_i \B E_{\PL 2,c[i],t[i]}}_\text{spacetime_term} + \underbrace{\B W_{\PL 2,i} (\B A_{i} \B \Xi_{\PL 2})^{\PL T} }_\text{spatially_varying}
 \end{aligned}
 $$
 
 where
 
 -   $p_{\PL 1,i}$ is the first linear predictor;
--   $\B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1}$ is the GAM component 
+-   $\B X_{\PL 1,i} \B \alpha_{\PL 1} + \B Z_{\PL 1,i} \B \gamma_{\PL 1}$ is the contribution of the GAM component specified using a formula parsed by package `mgcv`; 
 -   $\B \alpha_{\PL 1}$ is the GAM fixed effects with associated design matrix $\B X_{\PL 1}$, where $\B X_{\PL 1,i}$ is the row of the design matrix for sample $i$;
 -   $\B \gamma_{\PL 1}$ is the GAM random effects with associated design matrix $\B Z$, where $\B Z_{\PL 1,i}$ is the row of the design matrix;
--   $\B A_{i} \B \Omega_{\PL 1,c[i]}$ is the projection of the space-veriable interaction $\B \Omega$ to sample $i$, where $\B A$ is the interpolation matrix with dimension $I \times S$ such that row $\B A_{i}$ interpolates spatial vector $\B \Omega_{\PL 1,c[i]}$ for sample $i$ and variable $c[i]$;
--   $\B D_{\PL 1,c[i],t[i]}$ is the time-variable interaction $\B D$ for sample $i$;
--   $\B A_i \B E_{\PL 1,c[i],t[i]}$ is the projection of the space-variable-time interaction $\B E$ to sample $i$;
+-   $\B A_{i} \B \Omega_{\PL 1,c[i]}$ is contribution of the space-veriable interaction $\B \Omega$ projected to sample $i$, where $\B A$ is the interpolation matrix with dimension $I \times S$ such that row $\B A_{i}$ interpolates spatial vector $\B \Omega_{\PL 1,c[i]}$ for sample $i$ and variable $c[i]$;
+-   $\B D_{\PL 1,c[i],t[i]}$ is the contribution of the time-variable interaction $\B D$ for sample $i$;
+-   $\B A_i \B E_{\PL 1,c[i],t[i]}$ is the contribution of the space-variable-time interaction $\B E$ projected to sample $i$;
+-   $\B W_{\PL 1,i} \B A_{i} \B \Xi_{\PL 1,c[i]}$ is the contribution of spatially varying coefficients, i.e., a zero-centered and spatially varying slope $\Xi_{\PL 1,c[i]}$ that is projected to the location of samples, where these local slopes are then multiplied by  user-supplied covariates in design matrix $W_{\PL 1,i}$ 
 
 and  terms are defined similarly for the second linear predictor $p_{\PL 2,i}$ except using subscript-2. The linear predictors are then passed through a bivariate inverse-link function to specify the distribution for errors:
 
@@ -97,7 +99,7 @@ $$
 \end{aligned}
 $$
 
-while for the Poisson-linked link function we specify a complemetary log-log link for encounter probabilities and define the second link function such that $\mu_{\PL 1,i} \mu_{\PL 2,i} = e^{p_{\PL 1,i}} e^{p_{\PL 2,i}}$:
+while for the Poisson-linked link function [@thorson_three_2018] we specify a complemetary log-log link for encounter probabilities and define the second link function such that $\mu_{\PL 1,i} \mu_{\PL 2,i} = e^{p_{\PL 1,i}} e^{p_{\PL 2,i}}$:
 
 $$
 \begin{aligned}
@@ -109,13 +111,15 @@ where $e^{p_{\PL 1,i}}$ is the density for an underlying point process, and $e^{
 
 In either the conventional or Poisson-linked delta model, $\mu_{\PL 1,i} = \mathrm{Pr}(Y>0)$ is the encounter probability (and is fitted with a Bernoulli distribution), while $\mu_{\PL 2,i}$ is the central tendancy for positive values, i.e., $\mu_{\PL 2,i} = \mathbb{E}(Y | Y>0)$.
 
+Usefully, the interface allows analysts to specify a different distribution $e_i$ for different partitions of the data.  This allows the model to jointly analyze different data types [@gruss_developing_2019], or data with different magnitudes of sampling error.  
+
 # Spatial domains
 
-Linear predictors include spatially autocorrelated latent variables.  These variables are treated as Gaussian Markov random fields (GMRFs), and evaluating the probability density of GMRFs involves calculating the precision matrix $\B Q_{\PL{domain}} = \B \Sigma^{-1}$ as the inverse of the spatial covariance matrix.  tinyVAST involves three options for specifying this spatial precision:
+Linear predictors include spatially autocorrelated latent variables.  These variables are treated as Gaussian Markov random fields (GMRFs), and evaluating the probability density of GMRFs involves calculating the precision matrix $\B Q_{\PL{domain}} = \B \Sigma^{-1}$ as the inverse of the spatial covariance matrix [@thorson_spatio-temporal_2024].  tinyVAST involves three options for specifying this spatial precision:
 
 ### Stochastic partial differentiaul equation (SPDE)
 
-The analyst can approximate spatial variation over a continuous two-dimensional surface by constructing finite element mesh (FEM), treating the value at vertices as a GMRF, and then using bilinear interpolation (i.e., a piecewise linear approximation) to interpolate from vertices to the spatial domain.  In this case, the precision is constructred as:
+The analyst can approximate spatial variation over a continuous two-dimensional surface by constructing finite element mesh (FEM), treating the value at vertices as a GMRF, and then using bilinear interpolation (i.e., a piecewise linear approximation) to interpolate from vertices to the spatial domain.  This method was developed by [@lindgren_explicit_2011], as popularized in the software R-INLA  [@lindgren_continuous_2012], first implemented in TMB by [@thorson_importance_2014], and using elements constructed by R-package `fmesher` [@lindgren_fmesher_2023]. In this case, the precision is constructed as:
 
 $$
 \B Q_{\PL{domain}} = \tau^2 ( \kappa^4 \B M_{\PL 0} + 2\kappa^2 \B M_{\PL 1} + \B M_{\PL 2} )
@@ -124,7 +128,7 @@ where every row $\B A_i$ of the interpolation matrix $\B A$ is nonzero for only 
 
 ### Simultaneous autoregressive (SAR):
 
-Alternatively, the analyst can specify an areal model representing the value within spatial strata:
+Alternatively, the analyst can apply a simultaneous autoregressive process [@ver_hoef_relationship_2018], specifying an areal model that represents the value within spatial strata:
 
 $$
 \B Q_{\PL{domain}} = \tau^2 (\B I - \kappa \B A^*)^2 
@@ -133,7 +137,7 @@ where $\B A^*$ is the adjacency matrix of the graph specified by the analyst, $\
 
 ### Stream networks using a tail-down exponential correlation function
 
-Finally, the analyst can specify that sites are partially correlated if they are adjacent along a stream network (while ignoring flow direction).  This results in an Onstein-Uhlenbeck process along the stream network, or an *exponential tail-down* model:
+Finally, the analyst can specify that sites are partially correlated if they are adjacent along a stream network (while ignoring flow direction).  This results in an Onstein-Uhlenbeck process along the stream network [@charsley_catchment-scale_2023], or an *exponential tail-down* model:
 
 $$
 \B{Q}_{\PL{domain}} = \B{(I+D-P)}^T \B{I+D}^{-1} \B{(I+D-P)}
@@ -158,7 +162,7 @@ tinyVAST also involves specifying a structural equation model (SEM).  This SEM b
 1. *Weak interpretation*: as an expressive interface to parameterize the correlation among variables, using as many or few parameters as might be appropriate; or
 2. *Strong interpretation*: as a structural causal model, allowing predictions about the consequence of counterfactual changes to the system.
 
-To specify a SEM, the user uses *arrow notation* derived from package `sem`.  For example, to specify a linear model this involves:
+To specify a SEM, the user uses *arrow notation* derived from package `sem` [@fox_structural_2006], as described in TMB by [@thorson_spatio-temporal_2024].  For example, to specify a linear model this involves:
 
 ```{r echo=TRUE, eval=FALSE}
 w1 -> w2, b_12
@@ -221,7 +225,7 @@ where this precision matrix $\B Q$ is then used as a modular component in the la
 
 # Dynamic structural equation models
 
-Similarly, tinyVAST involves specifying dynamic structural equation models (DSEM).  To specify a DSEM, the user uses *arrow-and-lag notation*.  For example, to specify a univariate first-order autoregressive process:
+Similarly, tinyVAST involves specifying dynamic structural equation models (DSEM) [@thorson_dynamic_2024].  To specify a DSEM, the user uses *arrow-and-lag notation*.  For example, to specify a univariate first-order autoregressive process:
 
 ```{r echo=TRUE, eval=FALSE}
 w1 -> w1, 1, rho, 0.8
@@ -261,11 +265,11 @@ $$
 \mathrm{vec}(\B \Omega) \sim \mathrm{MVN}(\B 0, \B Q_{\PL{space\_term}} \otimes \B Q_{\PL{domain}})
 $$
 
-where the precision matrix $\B Q_{\PL{space\_term}} \otimes \B Q_{\PL{domain}}$ has dimension $SC \times SC$, to match the length of $\mathrm{vec}(\B \Omega)$.
+where the precision matrix $\B Q_{\PL{space\_term}} \otimes \B Q_{\PL{domain}}$ has dimension $SC \times SC$, to match the length of $\mathrm{vec}(\B \Omega)$.  This specification generalizes spatial factor analysis [@thorson_spatial_2015] and spatial dynamic factor analysis [@thorson_joint_2016].
 
 # Generalized additive model
 
-Finally, the analyst can specify a generalized additive model using syntax from package mgcv.  For example this might involve:
+The analyst can specify a generalized additive model using syntax from package `mgcv` [@wood_generalized_2006], and parsed into TMB using an interface developed by `sdmTMB` [@anderson_sdmtmb_nodate].  For example this might involve:
 
 ```{r echo=TRUE, eval=FALSE}
 count ~ year + offset(log_area) + s(depth) + s(species, bs="re")
@@ -277,6 +281,18 @@ $$
 \B \gamma \sim \mathrm{GMRF}( \B 0, \B Q_{\PL{gam}})
 $$
 where $\B Q_{\PL{gam}}$ is a blockwise diagonal matrix, assembled from estimated variance parameters and matrices constructed by mgcv.  
+
+# Spatially varying coefficients
+
+Finally, the analyst can account for spatial variation in the relationship between a specified covariate and the estimated response.  This is done by specifying a spatially varying coefficient (SVC) [@thorson_spatially_2023], and this can be used e.g. to account for spatially varying differences in catchability/detectability [@gruss_spatially_2023] or to account for nonlocal impacts of regional oceanographic indices [@thorson_measuring_2019].  This involves estimating each SVC $l \in \{1,2,...,L\}$ as a zero-centered Gaussian Markov random field while estimating its corresponding variance $\sigma_{\PL{\xi},l}^2$:
+
+$$
+\Xi_{\PL 1,l} \sim \mathrm{GMRF}( \B 0, \sigma_{\PL{\xi},l}^{-2} \B Q_{\PL{domain}} )
+$$
+
+Any covariate specified as an SVC it is also typically specified in the `formula` to estimate a non-zero mean for the SVC. If the estimated variance of the SVC approaches zero, it then suggests that the covariate slope does not vary spatially.  
+
+# Notation summary
 
 ```{r indices}
 subscripts <- tibble::tribble(
@@ -311,3 +327,4 @@ knitr::kable(symbols, caption = "Table 2: Symbol notation, code representation (
   ))
 ```
 
+# Works cited

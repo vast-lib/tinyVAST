@@ -233,7 +233,67 @@ test_that("deviance residuals for Bernoulli works", {
   resid2 = residuals( myglm, type="deviance" )
   expect_equal( as.numeric(resid1), as.numeric(resid2),
                 tolerance=1e-3 )
+  expect_equal( as.numeric(coef(myglm)), as.numeric(mytiny$opt$par),
+                tolerance=1e-3 )
 })
+
+test_that("deviance residuals for Binomial works", {
+  skip_on_cran()
+  #skip_on_ci()
+
+  # simulate data
+  set.seed(101)
+  x = rnorm(100)
+  mu = plogis(1 + 0.5*x)
+  size = rpois(100, lambda = 3)
+  #size = rep(2, 100)
+  success = rbinom( n=100, prob=mu, size=size )
+  y = success / ifelse( size==0, 1, size )
+
+  # using logit-link
+  mytiny = tinyVAST( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("logit"),
+                     weights = size )
+  if( FALSE ){
+    mu = predict(mytiny)
+    pow = function(a,b)a^b
+    ysize = y * size
+    musize = mu * size
+    p1 = ifelse( y==0, 0, ysize * log(ysize / musize) )
+    p2 = ifelse( (size-ysize)==0, 0, (size - ysize) * log((size - ysize)/(size - musize)) )
+    resid1 = sign(y - mu) * pow(2 * (p1 + p2), 0.5)
+  }
+  resid1 = residuals( mytiny, type="deviance" )
+
+  #
+  myglm = glm( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("logit"),
+                     weights = size )
+  resid2 = residuals( myglm, type="deviance" )
+  expect_equal( as.numeric(resid1), as.numeric(resid2),
+                tolerance=1e-3 )
+  expect_equal( as.numeric(coef(myglm)), as.numeric(mytiny$opt$par),
+                tolerance=1e-3 )
+
+  # Using cloglog
+  mytiny = tinyVAST( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("cloglog"),
+                     weights = size )
+  resid1 = residuals( mytiny, type="deviance" )
+  myglm = glm( y ~ 1 + x,
+                     data = data.frame(x=x, y=y),
+                     family = binomial("cloglog"),
+                     weights = size )
+  resid2 = residuals( myglm, type="deviance" )
+  expect_equal( as.numeric(resid1), as.numeric(resid2),
+                tolerance=1e-3 )
+  expect_equal( as.numeric(coef(myglm)), as.numeric(mytiny$opt$par),
+                tolerance=1e-3 )
+})
+
 
 test_that("delta-gamma works", {
   skip_on_cran()

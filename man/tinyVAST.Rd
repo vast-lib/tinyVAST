@@ -21,8 +21,7 @@ tinyVAST(
   delta_options = list(formula = ~1),
   spatial_varying = NULL,
   weights = NULL,
-  control = tinyVASTcontrol(),
-  ...
+  control = tinyVASTcontrol()
 )
 }
 \arguments{
@@ -61,7 +60,8 @@ Alternatively, can be a named list of
 these functions, with names that match levels of
 \code{data$distribution_column} to allow different
 families by row of data. Delta model families are possible, and see
-\code{\link[tinyVAST:families]{Families}} for delta-model options,}
+\code{\link[tinyVAST:families]{Families}} for delta-model options.
+For binomial family options, see 'Binomial families' in the Details section below.}
 
 \item{space_columns}{A string or character vector that indicates
 the column(s) of \code{data} indicating the location of each sample.
@@ -75,7 +75,10 @@ coordinates for each sample.}
 \code{\link[fmesher:fm_mesh_2d]{fmesher::fm_mesh_2d()}} to apply the SPDE method,
 \code{\link[igraph:make_empty_graph]{igraph::make_empty_graph()}} for independent time-series,
 \code{\link[igraph:make_graph]{igraph::make_graph()}} to apply a simultaneous autoregressive (SAR)
-process, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
+process to a user-supplied graph, \code{\link[=sfnetwork_mesh]{sfnetwork_mesh()}} for stream networks,
+or class \code{sfc_GEOMETRY} e.g constructed using \link[sf:st_make_grid]{sf::st_make_grid}
+to apply a SAR to an areal model with adjacency
+based on the geometry of the object,
 or \code{NULL} to specify a single site.  If using \code{igraph} then the
 graph must have vertex names \code{V(graph)$name} that match
 levels of \code{data[,'space_columns']}}
@@ -117,8 +120,6 @@ Thee weights argument needs to be a vector and not a name of the variable in the
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings.}
-
-\item{...}{Not used.}
 }
 \value{
 An object (list) of class \code{tinyVAST}. Elements include:
@@ -143,17 +144,26 @@ Fits a vector autoregressive spatio-temporal (VAST) model using
 a minimal feature-set and a widely used interface.
 }
 \details{
-\code{tinyVAST} includes four basic inputs that specify the model structure:
+\code{tinyVAST} includes several basic inputs that specify the model structure:
 \itemize{
 \item \code{formula} specifies covariates and splines in a Generalized Additive Model;
-\item \code{space_term} specifies interactions among variables and over time, constructing
+\item \code{time_term} specifies interactions among variables and over time that
+are constant across space, constructing the time-variable interaction.
+\item \code{space_term} specifies interactions among variables and over time that occur
+based on the variable values at each location, constructing
 the space-variable interaction.
 \item \code{spacetime_term} specifies interactions among variables and over time, constructing
 the space-time-variable interaction.
-\item \code{spatial_domain} specifies spatial correlations
 }
 
-the default \code{spacetime_term=NULL} and \code{space_term=NULL} turns off all multivariate
+These inputs require defining the \emph{domain} of the model.  This includes:
+\itemize{
+\item \code{spatial_domain} specifies spatial domain, with determines spatial correlations
+\item \code{times} specifies the temporal domain, i.e., sequence of time-steps
+\item \code{variables} specifies the set of variables, i.e., the variables that will be modeled
+}
+
+The default \code{spacetime_term=NULL} and \code{space_term=NULL} turns off all multivariate
 and temporal indexing, such that \code{spatial_domain} is then ignored, and the model collapses
 to a generalized additive model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 the user must specify \code{spatial_domain} and either \code{space_term=""} or \code{spacetime_term=""}, where the latter
@@ -164,6 +174,19 @@ two are then parsed to include a single exogenous variance for the single variab
    Univariate spatio-temporal model, or multiple independence spatio-temporal variables \tab specify \code{spatial_domain} and \code{spacetime_term=""}, where the latter is then parsed to include a single exogenous variance for the single variable \cr
    Multivariate spatial model including interactions \tab specify \code{spatial_domain} and use \code{space_term} to specify spatial interactions \cr
    Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) \tab specify \code{spatial_domain} and use \code{spacetime_term=""} to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of \code{spacetime_term} and \code{spatial_domain} \cr
+}
+
+
+\strong{Model building notes}
+\itemize{
+\item \verb{binomial familes}:  A binomial family can be specified in only one way:
+the response is the observed proportion (proportion = successes / trials),
+and the 'weights' argument is used to specify the Binomial size (trials, N)
+parameter (\verb{proportion ~ ..., weights = N}).
+\item \verb{factor models}:  If a factor model is desired, the factor(s) must be named
+and included in the \code{variables}.  The factor is then modeled for \code{space_term},
+\code{time_term}, and \code{spacetime_term} and it's variance must be fixed a priori
+for any term where it is not being used.
 }
 }
 \examples{

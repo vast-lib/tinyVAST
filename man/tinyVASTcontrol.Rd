@@ -22,9 +22,11 @@ tinyVASTcontrol(
   calculate_deviance_explained = TRUE,
   run_model = TRUE,
   suppress_nlminb_warnings = TRUE,
+  suppress_user_warnings = FALSE,
   get_rsr = FALSE,
   extra_reporting = FALSE,
-  use_anisotropy = FALSE
+  use_anisotropy = FALSE,
+  sar_adjacency = "queen"
 )
 }
 \arguments{
@@ -82,6 +84,9 @@ explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 from \code{nlminb} arising when a function evaluation is NA, which
 are then replaced with Inf and avoided during estimation}
 
+\item{suppress_user_warnings}{whether to suppress warnings from
+package author regarding dangerous or non-standard options}
+
 \item{get_rsr}{Experimental option, whether to report restricted spatial
 regression (RSR) adjusted estimator for covariate responses}
 
@@ -90,6 +95,10 @@ regression (RSR) adjusted estimator for covariate responses}
 
 \item{use_anisotropy}{Whether to estimate two parameters representing
 geometric anisotropy}
+
+\item{sar_adjacency}{Whether to use queen or rook adjacency when defining
+a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
+(default is queen)}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or

@@ -47,9 +47,9 @@
 #' # fit using tinyVAST
 #' fit = tinyVAST( data = red_snapper,
 #'                 formula = formula,
-#'                 sem = "logdens <-> logdens, sd_space",
+#'                 space_term = "logdens <-> logdens, sd_space",
 #'                 space_columns = c("Lon",'Lat'),
-#'                 spatial_graph = mesh,
+#'                 spatial_domain = mesh,
 #'                 family = tweedie(link="log"),
 #'                 variable_column = "var",
 #'                 control = tinyVASTcontrol( getsd = FALSE,
@@ -62,6 +62,7 @@
 cAIC <-
 function( object ){
 
+  check_tinyVAST_version( object$internal$packageVersion )
   #what = match.arg(what)
   #requireNamespace(Matrix)
   data = object$tmb_inputs$tmb_data

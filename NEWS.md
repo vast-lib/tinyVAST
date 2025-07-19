@@ -1,3 +1,23 @@
+# tinyVAST 1.2.0
+
+* Adding a new spatial domain using `sf::st_make_grid`
+* Adding option for geometric anisotropy when using `sf::st_make_grid`
+* Fix bug in deviance for lognormal distribution in delta models (h/t Sean
+  Anderson for finding it)
+* Change family = "binomial" to use `weights` as number of Binomial trials N
+* Fix `deviance_explained` to work with non-default `weights` argument
+* Add `fit$internal$packageVersion` to allow `predict`, `cAIC` etc to check
+  and throw error if there's a package inconsistency between object and installed
+  package
+* Add `conditional_gmrf` to do conditional simulations from a GMRF
+* Add `project` to project tinyVAST forward in time
+* Eliminate `...` argument to `tinyVAST` so that it's obvious if an argument
+  is mis-named.
+* Fix bug which previously resulted in non-converged models, where including DSEM arrow
+  "x<->x, 0, sd_xy" would improperly add another term "x <-> x, 0, V[x]" because
+  it didn't previously parse the whitespaces when detecting missing covariances
+  (h/t Jon Reum for flagging the issue)
+
 # tinyVAST 1.1.1
 
 * Adding option for geometric anisotropy when using the SPDE method

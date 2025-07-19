@@ -29,6 +29,7 @@ reference:
   - parse_path
   - get_data.tinyVAST
   - GetResponse.tinyVAST
+  - conditional_gmrf
 
 - title: 'Fitting and diagnostics'
   desc: |
@@ -59,6 +60,7 @@ reference:
   - predict.tinyVAST
   - integrate_output
   - sample_variable
+  - project
 
 - title: 'Interpret output'
   desc: |

@@ -22,7 +22,7 @@ effect and \code{n} columns, using the sparse precision matrix
 defined in Charsley et al. (2023)
 }
 \description{
-Simulate values from a GMRF using a tail-up exponential
+Simulate values from a GMRF using a tail-down (flow-unconnected) exponential
 model on a stream network
 }
 \references{

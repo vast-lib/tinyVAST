@@ -131,7 +131,8 @@ function( stream ){
 
 #' @title Simulate GMRF for stream network
 #'
-#' @description Simulate values from a GMRF using a tail-up exponential
+#' @description
+#' Simulate values from a GMRF using a tail-down (flow-unconnected) exponential
 #' model on a stream network
 #'
 #' @param sfnetwork_mesh Output from \code{\link{sfnetwork_mesh}}
@@ -192,7 +193,7 @@ function( sfnetwork_mesh,
 
 
   #
-  if(what=="samples") out = rmvnorm_prec( n=n, mean=rep(0,nrow(Q)), Q=Q )
+  if(what=="samples") out = rmvnorm_prec( n = n, mu = rep(0,nrow(Q)), prec = Q )
   if(what=="Q") out = Q
   return(out)
 }

@@ -2,32 +2,32 @@
 #'
 #' @description This function provides a random number generator for
 #'              the multivariate normal distribution with mean equal
-#'              to `mean` and sparse precision matrix `Q`.
+#'              to `mu` and sparse precision matrix `prec`.
 #'
-#' @param Q sparse precision (inverse-covariance) matrix.
+#' @param prec sparse precision (inverse-covariance) matrix.
 #' @param n number of observations.
-#' @param mean mean vector.
+#' @param mu mean vector.
 #'
-#' @return a matrix with dimension \code{length(mean)} by
+#' @return a matrix with dimension \code{length(mu)} by
 #'         \code{n}, containing realized draws from the specified
 #'         mean and precision
 #'
 #' @export
 rmvnorm_prec <-
-function( Q,
+function( prec,
           n = 1,
-          mean = rep(0,nrow(Q)) ) {
+          mu = rep(0,nrow(prec)) ) {
 
   # Simulate values
-  z0 = matrix( rnorm(length(mean) * n), ncol=n)
+  z0 = matrix( rnorm(length(mu) * n), ncol=n)
 
   # Q = t(P) * L * t(L) * P
-  L = Matrix::Cholesky(Q, super=TRUE)
+  L = Matrix::Cholesky(prec, super=TRUE)
 
   # Calculate t(P) * solve(t(L)) * z0 in two steps
   z = Matrix::solve(L, z0, system = "Lt") # z = Lt^-1 * z
   z = Matrix::solve(L, z, system = "Pt") # z = Pt    * z
-  return(mean + as.matrix(z))
+  return(mu + as.matrix(z))
 }
 
 #' @title Rotate factors to match Principal-Components Analysis
@@ -79,76 +79,6 @@ function( L_tf,
 }
 
 
-#' @title Parse path
-#'
-#' @description \code{parse_path} is copied from \code{sem::parse.path}
-#'
-#' @param path character string indicating a one-headed or two-headed path
-#'        in a structural equation model
-#'
-#' @details
-#' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
-#'
-#' @return Tagged-list defining variables and direction for a specified path coefficient
-parse_path <-
-function( path ){
-  path.1 <- gsub("-", "", gsub(" ", "", path))
-  direction <- if(regexpr("<>", path.1) > 0){
-    2
-  }else if(regexpr("<", path.1) > 0){
-    -1
-  }else if(regexpr(">", path.1) > 0){
-    1
-  }else{
-    stop(paste("ill-formed path:", path))
-  }
-  path.1 <- strsplit(path.1, "[<>]")[[1]]
-  out = list(first = path.1[1], second = path.1[length(path.1)], direction = direction)
-  return(out)
-}
-
-
-#' @title Classify variables path
-#'
-#' @description \code{classify_variables} is copied from \code{sem:::classifyVariables}
-#'
-#' @param model syntax for structural equation model
-#'
-#' @details
-#' Copied from package `sem` under licence GPL (>= 2) with permission from John Fox
-#'
-#' @return Tagged-list defining exogenous and endogenous variables
-classify_variables <-
-function( model ){
-
-    variables <- logical(0)
-    for (paths in model[, 1]) {
-        vars <- gsub(pattern=" ", replacement="", x=paths)
-        vars <- sub("-*>", "->", sub("<-*", "<-", vars))
-        if (grepl("<->", vars)) {
-            vars <- strsplit(vars, "<->")[[1]]
-            if (is.na(variables[vars[1]]))
-                variables[vars[1]] <- FALSE
-            if (is.na(variables[vars[2]]))
-                variables[vars[2]] <- FALSE
-        }
-        else if (grepl("->", vars)) {
-            vars <- strsplit(vars, "->")[[1]]
-            if (is.na(variables[vars[1]]))
-                variables[vars[1]] <- FALSE
-            variables[vars[2]] <- TRUE
-        }
-        else if (grepl("<-", vars)) {
-            vars <- strsplit(vars, "<-")[[1]]
-            if (is.na(variables[vars[2]]))
-                variables[vars[2]] <- FALSE
-            variables[vars[1]] <- TRUE
-        }
-        else stop("incorrectly specified model", call. = FALSE)
-    }
-    list(endogenous = names(variables[variables]), exogenous = names(variables[!variables]))
-}
-
 #' Reload a previously fitted model
 #'
 #' \code{reload_model} allows a user to save a fitted model, reload it in a new
@@ -164,6 +94,7 @@ reload_model <-
 function( x,
           check_gradient = TRUE ){
 
+  check_tinyVAST_version( x$internal$packageVersion )
   # Retape
   #obj = x$obj
   #obj$retape()
@@ -248,6 +179,8 @@ function( object,
           sample_fixed = TRUE,
           seed = 123456 ){
 
+  check_tinyVAST_version( object$internal$packageVersion )
+
   # Rebuild object with newdata
   if( !is.null(newdata) ){
     tmb_data2 = add_predictions( object = object, newdata = newdata )
@@ -276,31 +209,21 @@ function( object,
     stop( variable_name, " not found in `Obj$report()` or `Obj$env$parList()`; please choose check your requested variable name from available list: ", paste(names(Output),collapse=", ") )
   }
 
-  #### Local function
-  # Sample from GMRF using sparse precision
-  rmvnorm_prec <- function(mu, prec, n.sims, seed) {
-    set.seed(seed)
-    z <- matrix(rnorm(length(mu) * n.sims), ncol=n.sims)
-    L <- Cholesky(prec, super=TRUE)
-    z <- solve(L, z, system = "Lt") ## z = Lt^-1 %*% z
-    z <- solve(L, z, system = "Pt") ## z = Pt    %*% z
-    z <- as.matrix(z)
-    return(mu + z)
-  }
-
   # Sample from joint distribution
   if( sample_fixed==TRUE ){
     # Informative error messages
     if( !("jointPrecision" %in% names(object$sdrep)) ){
       stop("jointPrecision not present in object$sdrep; please re-run with `getJointPrecision=TRUE`")
     }
-    u_zr = rmvnorm_prec( mu=object$obj$env$last.par.best, prec=object$sdrep$jointPrecision, n.sims=n_samples, seed=seed)
+    set.seed(seed)
+    u_zr = rmvnorm_prec( mu = object$obj$env$last.par.best, prec = object$sdrep$jointPrecision, n = n_samples)
     # apply( u_zr, MARGIN=2, FUN=function(vec){sum(abs(vec)==Inf)})
     # u_zr[-object$obj$env$random,1]
   }else{
     u_zr = object$obj$env$last.par.best %o% rep(1, n_samples)
     Q = object$obj$env$spHess( random = TRUE, par = object$obj$env$last.par.best )
-    MC = rmvnorm_prec( mu=object$obj$env$last.par.best[object$obj$env$lrandom()], prec=Q, n.sims=n_samples, seed=seed)
+    set.seed(seed)
+    MC = rmvnorm_prec( mu = object$obj$env$last.par.best[object$obj$env$lrandom()], prec = Q, n = n_samples)
     #MC = object$obj$env$MC( keep=TRUE, n=n_samples, antithetic=FALSE )
     #u_zr[object$obj$env$random,] = attr(MC, "samples")
     u_zr[object$obj$env$lrandom(),] = MC
@@ -393,6 +316,7 @@ function( x,
                        time_column = x$internal$time_column,
                        variable_column = x$internal$variable_column,
                        times = x$internal$times,
+                       weights = x$internal$weights,
                        variables = x$internal$variables,
                        delta_options = list( formula = null_delta_formula ),
                        distribution_column = x$internal$distribution_column) 

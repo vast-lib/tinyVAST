@@ -121,7 +121,7 @@ test_that("A model with s(x, bs = 'fs') works", {
   d <- subset(sdmTMB::pcod, density > 0)
   d = as.data.frame(d)
   d$yearf <- as.factor(d$year)
-  m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, by = year, bs = "fs"), data = d, method = "REML")
+  m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, by = year, bs = "fs"), data = d, REML = FALSE)
   m_v <- tinyVAST(
     data = d,
     formula = log(density) ~ s(depth_scaled, by = year, bs = "fs")
@@ -146,8 +146,8 @@ test_that("A model with s(x, bs = 'gp') works", {
   skip_on_ci()
   d <- subset(sdmTMB::pcod, density > 0)
   d = as.data.frame(d)
-  m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
-  m_v <- tinyVAST(log(density) ~ s(depth_scaled, bs = "gp"), data = d, method = "REML")
+  m_mgcv <- mgcv::gam(log(density) ~ s(depth_scaled, bs = "gp"), data = d, REML = TRUE)
+  m_v <- tinyVAST(log(density) ~ s(depth_scaled, bs = "gp"), data = d, control = tinyVASTcontrol(reml = TRUE))
   m_s <- sdmTMB::sdmTMB(log(density) ~ s(depth_scaled, bs = "gp"), data = d, spatial = "off")
   p <- predict(m_mgcv)
   p_s <- predict(m_s)$est

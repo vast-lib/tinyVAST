@@ -33,7 +33,8 @@
 #'        these functions, with names that match levels of
 #'        \code{data$distribution_column} to allow different
 #'        families by row of data. Delta model families are possible, and see
-#'        \code{\link[tinyVAST:families]{Families}} for delta-model options,
+#'        \code{\link[tinyVAST:families]{Families}} for delta-model options.
+#'        For binomial family options, see 'Binomial families' in the Details section below.
 #' @param space_columns A string or character vector that indicates
 #'        the column(s) of `data` indicating the location of each sample.
 #'        When `spatial_domain` is an `igraph` object, `space_columns` is a string with
@@ -45,7 +46,10 @@
 #'        [fmesher::fm_mesh_2d()] to apply the SPDE method,
 #'        [igraph::make_empty_graph()] for independent time-series,
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
-#'        process, [sfnetwork_mesh()] for stream networks,
+#'        process to a user-supplied graph, [sfnetwork_mesh()] for stream networks,
+#'        or class \code{sfc_GEOMETRY} e.g constructed using [sf::st_make_grid]
+#'        to apply a SAR to an areal model with adjacency
+#'        based on the geometry of the object,
 #'        or `NULL` to specify a single site.  If using `igraph` then the
 #'        graph must have vertex names \code{V(graph)$name} that match
 #'        levels of \code{data[,'space_columns']}
@@ -78,18 +82,24 @@
 #'        Thee weights argument needs to be a vector and not a name of the variable in the data frame.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings.
-#' @param ... Not used.
 #'
 #' @details
-#' `tinyVAST` includes four basic inputs that specify the model structure:
+#' `tinyVAST` includes several basic inputs that specify the model structure:
 #' * `formula` specifies covariates and splines in a Generalized Additive Model;
-#' * `space_term` specifies interactions among variables and over time, constructing
+#' * `time_term` specifies interactions among variables and over time that
+#'   are constant across space, constructing the time-variable interaction.
+#' * `space_term` specifies interactions among variables and over time that occur
+#'   based on the variable values at each location, constructing
 #'   the space-variable interaction.
 #' * `spacetime_term` specifies interactions among variables and over time, constructing
 #'   the space-time-variable interaction.
-#' * `spatial_domain` specifies spatial correlations
 #'
-#' the default `spacetime_term=NULL` and `space_term=NULL` turns off all multivariate
+#' These inputs require defining the _domain_ of the model.  This includes:
+#' * `spatial_domain` specifies spatial domain, with determines spatial correlations
+#' * `times` specifies the temporal domain, i.e., sequence of time-steps
+#' * `variables` specifies the set of variables, i.e., the variables that will be modeled
+#'
+#' The default `spacetime_term=NULL` and `space_term=NULL` turns off all multivariate
 #' and temporal indexing, such that `spatial_domain` is then ignored, and the model collapses
 #' to a generalized additive model using \code{\link[mgcv]{gam}}.  To specify a univariate spatial model,
 #' the user must specify `spatial_domain` and either `space_term=""` or `spacetime_term=""`, where the latter
@@ -103,6 +113,18 @@
 #' | Multivariate spatial model including interactions | specify `spatial_domain` and use `space_term` to specify spatial interactions |
 #' | Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
 #'
+#' **Model building notes**
+#'
+#' * `binomial familes`:  A binomial family can be specified in only one way:
+#'   the response is the observed proportion (proportion = successes / trials),
+#'   and the 'weights' argument is used to specify the Binomial size (trials, N)
+#'   parameter (`proportion ~ ..., weights = N`).
+#'
+#' * `factor models`:  If a factor model is desired, the factor(s) must be named
+#'   and included in the `variables`.  The factor is then modeled for `space_term`,
+#'   `time_term`, and `spacetime_term` and it's variance must be fixed a priori
+#'   for any term where it is not being used.
+#'
 #' @importFrom igraph as_adjacency_matrix ecount
 #' @importFrom sem specifyModel specifyEquations
 #' @importFrom corpcor pseudoinverse
@@ -111,12 +133,14 @@
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict
+#' @importFrom utils packageVersion
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
 #' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv
+#' @importFrom sf st_relate st_coordinates st_centroid st_within st_crs
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
@@ -190,8 +214,7 @@ function( formula,
           delta_options = list(formula = ~ 1),
           spatial_varying = NULL,
           weights = NULL,
-          control = tinyVASTcontrol(),
-          ... ){
+          control = tinyVASTcontrol() ){
 
   # https://roxygen2.r-lib.org/articles/rd-formatting.html#tables for roxygen formatting
   start_time = Sys.time()
@@ -414,7 +437,35 @@ function( formula,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
     estimate_H = FALSE
-  }else{
+  }else if( is(spatial_domain, "sfc_GEOMETRY") ){
+    # SAR with geometric anisotropy
+    spatial_method_code = 5
+    n_s = length(spatial_domain)
+    if( control$sar_adjacency == "rook" ){
+      st_adjacent <- function(m, ...) st_relate(m, m, pattern="F***1****", ...)
+    }else{
+      st_adjacent <- function(m, ...) st_relate(m, m, pattern = "F***T****", ...)
+    }
+    grid_A = st_adjacent(spatial_domain, sparse=TRUE)
+    A_ss = as(grid_A, "sparseMatrix")
+    grid_xy = st_coordinates(st_centroid(spatial_domain))
+    tripA = mat2triplet(A_ss)
+    spatial_list = list(
+      i_z = tripA$i,
+      j_z = tripA$j,
+      delta_z2 = grid_xy[tripA$i,] - grid_xy[tripA$j,]
+    )
+    sf_coords = st_as_sf( data,
+                          coords = space_columns,
+                          crs = st_crs(spatial_domain) )
+    s_i = as.integer(st_within( sf_coords, spatial_domain ))
+    A_is = sparseMatrix( i = seq_along(s_i),
+                         j = s_i,
+                         x = 1,
+                         dims = c(length(s_i),length(spatial_domain)) )
+    estimate_kappa = TRUE
+    estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+  }else if( is.null(spatial_domain) ) {
     # Single-site
     spatial_method_code = 3
     n_s = 1
@@ -425,9 +476,13 @@ function( formula,
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
     estimate_kappa = FALSE
     estimate_H = FALSE
+  }else{
+    stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
   Atriplet = Matrix::mat2triplet(A_is)
-  if(n_s>1000) warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
+  if( (n_s>1000) & isFALSE(control$suppress_user_warnings) ){
+    warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
+  }
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
@@ -672,7 +727,12 @@ function( formula,
   }else if( spatial_method_code %in% 4 ){
     tmb_data$graph_sz = as.matrix(spatial_list[,c('from','to')]) - 1
     tmb_data$dist_s = spatial_list[,c('dist')]
+  }else if( spatial_method_code %in% 5 ){
+    tmb_data$i_z = spatial_list$i_z - 1
+    tmb_data$j_z = spatial_list$j_z - 1
+    tmb_data$delta_z2 = spatial_list$delta_z2
   }
+
 
   # make params
   tmb_par = list(
@@ -775,7 +835,9 @@ function( formula,
     # Check shape but not numeric values, and give informative error
     attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
     # Compare dimensions by multiplying both by zero
-    warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
+    if( isFALSE(control$suppress_user_warnings) ){
+      warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
+    }
     if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
       tmb_par = control$tmb_par
     }else{
@@ -884,6 +946,7 @@ function( formula,
     delta_spacetime_term_ram = delta_spacetime_term_ram,                                  # for `add_predictions`
     delta_space_term_ram = delta_space_term_ram,                                    # for `add_predictions`
     delta_time_term_ram = delta_time_term_ram,                                    # for `add_predictions`
+    delta_formula = delta_options$formula,
     delta_spacetime_term = delta_options$spacetime_term,
     delta_space_term = delta_options$space_term,
     delta_time_term = delta_options$time_term,
@@ -899,7 +962,9 @@ function( formula,
     parlist = obj$env$parList(par=obj$env$last.par.best),
     Hess_fixed = Hess_fixed,
     control = control,
-    family = family                                       # for `add_predictions`
+    family = family,                                       # for `add_predictions`
+    weights = weights,
+    packageVersion = packageVersion("tinyVAST")
   )
   out = list(
     data = data,
@@ -967,12 +1032,17 @@ function( formula,
 #' @param suppress_nlminb_warnings whether to suppress uniformative warnings
 #'        from \code{nlminb} arising when a function evaluation is NA, which
 #'        are then replaced with Inf and avoided during estimation
+#' @param suppress_user_warnings whether to suppress warnings from
+#'        package author regarding dangerous or non-standard options
 #' @param get_rsr Experimental option, whether to report restricted spatial
 #'        regression (RSR) adjusted estimator for covariate responses
 #' @param extra_reporting Whether to report a much larger set of quantities via
 #'        \code{obj$env$report()}
 #' @param use_anisotropy Whether to estimate two parameters representing
 #'        geometric anisotropy
+#' @param sar_adjacency Whether to use queen or rook adjacency when defining
+#'        a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
+#'        (default is queen)
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
@@ -998,9 +1068,11 @@ function( nlminb_loops = 1,
           calculate_deviance_explained = TRUE,
           run_model = TRUE,
           suppress_nlminb_warnings = TRUE,
+          suppress_user_warnings = FALSE,
           get_rsr = FALSE,
           extra_reporting = FALSE,
-          use_anisotropy = FALSE ){
+          use_anisotropy = FALSE,
+          sar_adjacency = "queen" ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -1024,9 +1096,11 @@ function( nlminb_loops = 1,
     calculate_deviance_explained = calculate_deviance_explained,
     run_model = run_model,
     suppress_nlminb_warnings = suppress_nlminb_warnings,
+    suppress_user_warnings = suppress_user_warnings,
     get_rsr = get_rsr,
     extra_reporting = extra_reporting,
-    use_anisotropy = use_anisotropy
+    use_anisotropy = use_anisotropy,
+    sar_adjacency = sar_adjacency
   ), class = "tinyVASTcontrol" )
 }
 

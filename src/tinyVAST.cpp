@@ -70,6 +70,44 @@ Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
   return M;
 }
 
+// Q_SAR( log_kappa, H, n_s, i_z, j_z, delta_z2 )
+// New matrix-notation precision constructor for tail-down exponential stream network
+template<class Type>
+Eigen::SparseMatrix<Type> Q_SAR( Type rho,
+                                     matrix<Type> H,
+                                     int n_s,
+                                     vector<int> i_z,
+                                     vector<int> j_z,
+                                     matrix<Type> delta_z2 ){
+
+  //d_z = sqrt((delta_z2 %*% H)^2 %*% matrix(1,nrow=2,ncol=1))[,1]
+  matrix<Type> deltaprime_z2 = delta_z2 * H;
+  vector<Type> dist2_z( i_z.size() );
+  for( int z = 0; z < i_z.size(); z++ ){
+    dist2_z(z) = pow(deltaprime_z2(z,0),2.0) + pow(deltaprime_z2(z,1),2.0);
+  }
+  vector<Type> weight_z = exp( -1.0 * dist2_z );
+
+  // Make weight matrix
+  Eigen::SparseMatrix<Type> W_ss = vectorsToSparseMatrix( i_z,
+                                                          j_z,
+                                                          weight_z,
+                                                          n_s );
+
+  // Row-normalize W_ss
+  for( int row = 0; row < n_s; row ++ ){
+    Type rowsum = W_ss.row(row).sum();
+    W_ss.row(row) /= rowsum;
+  }
+
+  // Assemble
+  Eigen::SparseMatrix<Type> I_ss( n_s, n_s );
+  I_ss.setIdentity();
+  Eigen::SparseMatrix<Type> IminusP_ss = I_ss - rho * W_ss;
+  Eigen::SparseMatrix<Type> Q = IminusP_ss.transpose() * IminusP_ss;
+  return Q;
+}
+
 // New matrix-notation precision constructor for tail-down exponential stream network
 template<class Type>
 Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
@@ -473,6 +511,44 @@ Type dlnorm( Type x,
   if(give_log) return logres; else return exp(logres);
 }
 
+// dlnorm
+template<class Type>
+Type dbinom_custom( Type x,
+             Type log_prob,
+             Type log_one_minus_prob,
+             Type size,
+             int give_log = 0 ){
+
+  // size choose x
+  Type logres = lgamma(size + 1.0) - lgamma(x + 1.0) - lgamma(size - x + 1.0);
+  // p^x * (1-p)^(size-x)
+  logres += x * log_prob  +  (size-x) * log_one_minus_prob;
+  if(give_log) return logres; else return exp(logres);
+}
+
+// dlnorm
+template<class Type>
+Type devresid_binom( Type y,
+                     Type weight,  // weight = size
+                     Type mu ){
+
+  Type y_weight = y * weight;
+  Type mu_weight = mu * weight;
+  Type p1, p2;
+  if(y_weight == 0){
+    p1 = 0.0;
+  }else{
+    p1 = y_weight * log(y_weight / mu_weight);
+  }
+  if( (weight - y_weight) == 0 ){
+    p2 = 0.0;
+  }else{
+    p2 = (weight - y_weight) * log( (weight - y_weight) / (weight - mu_weight) );
+  }
+  Type devresid = sign(y - mu) * pow(2 * (p1 + p2), 0.5);
+  return devresid;
+}
+
 // Deviance for the Tweedie
 // https://en.wikipedia.org/wiki/Tweedie_distribution#Properties
 template<class Type>
@@ -544,13 +620,15 @@ Type one_predictor_likelihood( Type &y,
       break;
     case logit_link:
       mu = invlogit(p);
-      logmu = log(mu);
-      log_one_minus_mu = log( invlogit(-1 * p) );
+      //logmu = log(mu);
+      logmu = p - logspace_add( Type(0.0), p );
+      //log_one_minus_mu = log( invlogit(-1 * p) );
+      log_one_minus_mu = 0.0 - logspace_add( Type(0.0), p );
       break;
     case cloglog_link:
-      mu = Type(1.0) - exp( -1*exp(p) );
-      logmu = logspace_sub( Type(0.0), -1*exp(p) );
-      log_one_minus_mu = -1*exp(p);
+      mu = Type(1.0) - exp( -1 * exp(p) );
+      logmu = logspace_sub( Type(0.0), -1.0 * exp(p) );
+      log_one_minus_mu = -1.0 * exp(p);
       break;
     default:
       error("Link not implemented.");
@@ -587,15 +665,18 @@ Type one_predictor_likelihood( Type &y,
         }
         break;
       case binomial_family:
-        if(y==0){
-          nll -= weight * log_one_minus_mu;
-        }else{
-          nll -= weight * logmu;
-        }
+        //if(y==0){
+        //  nll -= weight * log_one_minus_mu;
+        //}else{
+        //  nll -= weight * logmu;
+        //}
+        nll -= dbinom_custom( y * weight, logmu, log_one_minus_mu, weight, true );
         if(isDouble<Type>::value && of->do_simulate){
-          y = rbinom( Type(1), mu );
+          y = rbinom( weight, mu );
         }
-        devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
+        // TODO:  Update deviance residual for Trials = weight
+        //devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
+        devresid = devresid_binom( y, weight, mu );
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
         nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
@@ -700,7 +781,7 @@ Type two_predictor_likelihood( Type y,
         //  break;
         case lognormal_family:
           nll -= weight * dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
-          dev += pow( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), 2.0 );
+          dev += pow( log(y) - (logmu2 - 0.5*exp(2.0*log_sigma_segment(0))), 2.0 );
           if(isDouble<Type>::value && of->do_simulate){
             y = exp(rnorm( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
           }
@@ -864,18 +945,20 @@ Type objective_function<Type>::operator() (){
   // Spatial distribution
   PARAMETER( log_kappa );
   PARAMETER_VECTOR( ln_H_input );
+  // Anisotropy elements
+  matrix<Type> H( 2, 2 );
+  H(0,0) = exp(ln_H_input(0));
+  H(1,0) = ln_H_input(1);
+  H(0,1) = ln_H_input(1);
+  H(1,1) = (1+ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
+  REPORT( H );
+  // Spatial settings
   Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
   if( spatial_options(0)==1 ){
     // Using INLA
     //DATA_STRUCT(spatial_list, R_inla::spde_t);
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
-    // Anisotropy elements
-    matrix<Type> H( 2, 2 );
-    H(0,0) = exp(ln_H_input(0));
-    H(1,0) = ln_H_input(1);
-    H(0,1) = ln_H_input(1);
-    H(1,1) = (1+ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
     // Build precision
     //Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
     Q_ss = R_inla::Q_spde( spatial_list, exp(log_kappa), H );
@@ -908,6 +991,15 @@ Type objective_function<Type>::operator() (){
     REPORT( Q_ss );
     //Eigen::SparseMatrix<Type> Q2_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
     //REPORT( Q2_ss );
+  }else if( spatial_options(0)==5 ){
+    DATA_IVECTOR( i_z );
+    DATA_IVECTOR( j_z );
+    DATA_MATRIX( delta_z2 );
+    log_tau = Type(0.0);
+    // rho = inverse_cloglog( log_theta )
+    Type rho = exp(-1.0 * exp(log_kappa));
+    REPORT( rho );
+    Q_ss = Q_SAR( rho, H, n_s, i_z, j_z, delta_z2 );
   }
   REPORT( log_tau );
 
@@ -1166,7 +1258,7 @@ Type objective_function<Type>::operator() (){
   REPORT( p_i );
   REPORT( p2_i );
   REPORT( mu_i );                      // Needed for `residuals.tinyVAST`
-  //REPORT( Q_ss );
+  REPORT( Q_ss );                      // Needed for forming precision of epsilon_sct in `project(.)`
   REPORT( devresid_i );
   REPORT( deviance );
   REPORT( nll );
