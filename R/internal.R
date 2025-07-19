@@ -9,7 +9,7 @@ ivector_minus_one <- function( ivector ){
   return(ivector)
 }
 
-# Modified from sdmTMB::make_anisotropy_spde
+# Modified from sdmTMB::make_anisotropy_spde, originally from geostatistical_delta-GLMM
 make_anisotropy_spde <-
 function( inla_mesh ){
 
@@ -37,6 +37,42 @@ function( inla_mesh ){
                G0 = spde$c0,
                G0_inv = as(Matrix::diag(1/Matrix::diag(spde$c0)),"TsparseMatrix") )
   return(ret)
+}
+
+# Recoded in R from https://github.com/pfmc-assessments/geostatistical_delta-GLMM/blob/master/inst/executables/geo_index_v4b.cpp#L18
+# Intended to show logic of geometric anisotropy
+# if H = diag(2), G is expected to match `fmesher::fm_fem(mesh)$g1`
+make_stiffness <-
+function( mesh,
+          H = diag(2) ){
+
+  # local objects to simplify code
+  dims = 1:2
+  tv = mesh$graph$tv
+  n = mesh$n
+  adjH = solve(H) * det(H)
+
+  # Extract edge vectors
+  v0 = mesh$loc[ tv[,1], dims]
+  v1 = mesh$loc[ tv[,2], dims]
+  v2 = mesh$loc[ tv[,3], dims]
+  e0 = v2 - v1
+  e1 = v0 - v2
+  e2 = v1 - v0
+
+  # Loop through triangles
+  G = Matrix::sparseMatrix(i = 1, j = 1, x = 0, dims = c(n, n))
+  for (i in seq_along(nrow(e0)) ){
+    triangle_area = abs(det(edgemat[1:2,])) / 2
+    edgemat = rbind( e0[i,], e1[i,], e2[i,] )
+
+    # Local stiffness
+    G_tri = edgemat %*% adjH %*% t(edgemat)
+
+    # Assemble by summation
+    G[ tv[i,], tv[i,] ] = G[ tv[i,], tv[i,] ] + G_tri / (4*triangle_area)
+  }
+  return(G)
 }
 
 # Modified from sdmTMB
