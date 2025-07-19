@@ -44,27 +44,30 @@ function( inla_mesh ){
 # if H = diag(2), G is expected to match `fmesher::fm_fem(mesh)$g1`
 make_stiffness <-
 function( mesh,
-          H = diag(2) ){
+          loc = mesh$loc[,1:2], # Can swap in different values
+          H = diag(ncol(loc)) ){
 
   # local objects to simplify code
-  dims = 1:2
   tv = mesh$graph$tv
   n = mesh$n
   adjH = solve(H) * det(H)
 
   # Extract edge vectors
-  v0 = mesh$loc[ tv[,1], dims]
-  v1 = mesh$loc[ tv[,2], dims]
-  v2 = mesh$loc[ tv[,3], dims]
+  if(missing(loc)) loc = mesh$loc
+  v0 = loc[ tv[,1], ]
+  v1 = loc[ tv[,2], ]
+  v2 = loc[ tv[,3], ]
   e0 = v2 - v1
   e1 = v0 - v2
   e2 = v1 - v0
 
   # Loop through triangles
   G = Matrix::sparseMatrix(i = 1, j = 1, x = 0, dims = c(n, n))
-  for (i in seq_along(nrow(e0)) ){
-    triangle_area = abs(det(edgemat[1:2,])) / 2
+  for (i in seq_len(nrow(e0)) ){
+    # Get edges
     edgemat = rbind( e0[i,], e1[i,], e2[i,] )
+    # Area from just the first two dimensions (x, y)
+    triangle_area = abs(det(edgemat[1:2,1:2])) / 2
 
     # Local stiffness
     G_tri = edgemat %*% adjH %*% t(edgemat)
