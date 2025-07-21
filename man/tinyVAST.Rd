@@ -15,7 +15,7 @@ tinyVAST(
   spatial_varying = NULL,
   weights = NULL,
   spatial_domain = NULL,
-  kappa_formula = ~0,
+  development = list(),
   control = tinyVASTcontrol(),
   space_columns = c("x", "y"),
   time_column = "time",
@@ -87,9 +87,8 @@ or \code{NULL} to specify a single site.  If using \code{igraph} then the
 graph must have vertex names \code{V(graph)$name} that match
 levels of \code{data[,'space_columns']}}
 
-\item{kappa_formula}{a right-sided formula, used only when \code{spatial_domain} is
-an SPDE mesh equiped with vertex covariates using \code{\link[=add_vertex_covariates]{add_vertex_covariates()}}
-(EXPERIMENTAL: subject to change at any time)}
+\item{development}{Specify options that are under active development.  Please do
+not use these features without coordinating with the package authors.}
 
 \item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
 settings.}

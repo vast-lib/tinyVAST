@@ -1,5 +1,5 @@
 
-devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force = TRUE )
+#devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force = TRUE )
 
 library(tinyVAST)
 
@@ -32,10 +32,12 @@ fit <- tinyVAST(
   formula = density ~ s(depth),
   data = as.data.frame(pcod_2011),
   space_term = "",
-  #spatial_domain = mesh,
-  spatial_domain = mesh_with_covs,
+  spatial_domain = mesh,
+  #spatial_domain = mesh_with_covs,
   family = tweedie(link = "log"),
-  kappa_formula = ~ depth_scaled,
+  development = list(
+  #  kappa_formula = ~ depth_scaled
+  ),
   space_columns = c('X','Y'),
   control = tinyVASTcontrol( use_anisotropy = TRUE, run_model = TRUE )
 )

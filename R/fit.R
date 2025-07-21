@@ -35,9 +35,6 @@
 #'        families by row of data. Delta model families are possible, and see
 #'        \code{\link[tinyVAST:families]{Families}} for delta-model options.
 #'        For binomial family options, see 'Binomial families' in the Details section below.
-#' @param kappa_formula a right-sided formula, used only when \code{spatial_domain} is
-#'        an SPDE mesh equiped with vertex covariates using [add_vertex_covariates()]
-#'        (EXPERIMENTAL: subject to change at any time)
 #' @param space_columns A string or character vector that indicates
 #'        the column(s) of `data` indicating the location of each sample.
 #'        When `spatial_domain` is an `igraph` object, `space_columns` is a string with
@@ -85,6 +82,8 @@
 #'        Thee weights argument needs to be a vector and not a name of the variable in the data frame.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings.
+#' @param development Specify options that are under active development.  Please do
+#'        not use these features without coordinating with the package authors.
 #'
 #' @details
 #' `tinyVAST` includes several basic inputs that specify the model structure:
@@ -211,7 +210,7 @@ function( formula,
           spatial_varying = NULL,
           weights = NULL,
           spatial_domain = NULL,
-          kappa_formula = ~ 0,
+          development = list(),
           control = tinyVASTcontrol(),
           # Indexing
           space_columns = c("x","y"),
@@ -228,6 +227,13 @@ function( formula,
   assertClass(control, "tinyVASTcontrol")
   assertDataFrame(data)
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
+
+  # Add `development` stuff
+  if( !is.null(development$kappa_formula) ){
+    kappa_formula = development$kappa_formula
+  }else{
+    kappa_formula = ~ 0
+  }
 
   # Input conflicts
   matched_call = match.call()
