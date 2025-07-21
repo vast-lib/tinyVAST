@@ -1059,7 +1059,6 @@ Type objective_function<Type>::operator() (){
   }
   // Using SPDE with covariate-based anisotropy and geometric anisotropy
   if( spatial_options(0)==6 ){
-    // Using INLA
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
     // Build precision
     Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H );
