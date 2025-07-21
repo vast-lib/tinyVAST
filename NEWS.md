@@ -1,3 +1,10 @@
+# tinyVAST 1.3.0
+
+* Adding `add_vertex_covariates` to associate mesh vertices with covariates
+  (h\t Sean Anderson)
+* Adding option for covariate-based anisotropy, while also allowing geometric
+  anisotropy.
+
 # tinyVAST 1.2.0
 
 * Adding a new spatial domain using `sf::st_make_grid`

@@ -70,6 +70,53 @@ Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
   return M;
 }
 
+// make stiffness G1 from covariates in columns of E0, E1, E2
+template<class Type>
+Eigen::SparseMatrix<Type> G_spde_covariates( R_inla::spde_aniso_t<Type> spde,
+                                              matrix<Type> H_jj ){
+
+  // Extract objects
+  vector<Type> area_t = spde.Tri_Area;
+  matrix<Type> edge0_tj = spde.E0;
+  matrix<Type> edge1_tj = spde.E1;
+  matrix<Type> edge2_tj = spde.E2;
+  matrix<int> s_tv = spde.TV;         // dim = n_t \times n_v
+  int n_s = spde.n_s;
+  int n_t = s_tv.rows();
+  int n_v = s_tv.cols();              // number of vertices per triangle
+  int n_j = edge0_tj.cols();          // number of covariates (default = 2)
+
+  // Output
+  Eigen::SparseMatrix<Type> G_ss(n_s, n_s);
+
+  // Objects to assemble triangle contributions
+  matrix<Type> edges_vj( n_v, n_j );
+  matrix<Type> Gt_vv( n_v, n_v );
+
+  // Calculate adjugate of H
+  //matrix<Type> adjH_jj = H_jj.inverse() * H_jj.determinant();  // CAUSES CRASH
+  matrix<Type> adjH_jj = H_jj.adjoint();
+
+  // Assemble stiffness G
+  for( int t=0; t<n_t; t++ ){
+    edges_vj.row(0) = edge0_tj.row(t);
+    edges_vj.row(1) = edge1_tj.row(t);
+    edges_vj.row(2) = edge2_tj.row(t);
+
+    // Make local stiffness
+    Gt_vv = edges_vj * adjH_jj * edges_vj.transpose();
+
+    // Assemble
+    Eigen::SparseMatrix<Type> Gt_ss( n_s, n_s );
+    for(int v1 = 0; v1 < 3; v1++ ){
+    for(int v2 = 0; v2 < 3; v2++ ){
+      Gt_ss.coeffRef( s_tv(t,v1), s_tv(t,v2) ) = Gt_vv(v1,v2);
+    }}
+    G_ss += Gt_ss / ( 4.0 * area_t(t) );
+  }
+  return G_ss;
+}
+
 // Q_SAR( log_kappa, H, n_s, i_z, j_z, delta_z2 )
 // New matrix-notation precision constructor for tail-down exponential stream network
 template<class Type>
@@ -945,28 +992,33 @@ Type objective_function<Type>::operator() (){
   // Spatial distribution
   PARAMETER( log_kappa );
   PARAMETER_VECTOR( ln_H_input );
+
   // Anisotropy elements
-  matrix<Type> H( 2, 2 );
+  matrix<Type> H( ln_H_input.size(), ln_H_input.size() );
+  H.setZero();
   H(0,0) = exp(ln_H_input(0));
   H(1,0) = ln_H_input(1);
   H(0,1) = ln_H_input(1);
-  H(1,1) = (1+ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
+  H(1,1) = (1.0 + ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
+  for( int i=2; i<ln_H_input.size(); i++ ){
+    H(i,i) = exp(ln_H_input(i));
+  }
+
   REPORT( H );
   // Spatial settings
   Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
+  // Using INLA with geometric anisotropy
   if( spatial_options(0)==1 ){
-    // Using INLA
-    //DATA_STRUCT(spatial_list, R_inla::spde_t);
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
     // Build precision
-    //Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
     Q_ss = R_inla::Q_spde( spatial_list, exp(log_kappa), H );
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
     Type range = pow(8.0, 0.5) / exp( log_kappa );
     REPORT( range );
-  }else if( spatial_options(0)==2 ){
-    /// Using SAR
+  }
+  /// Using SAR
+  if( spatial_options(0)==2 ){
     DATA_SPARSE_MATRIX( Adj );
     Eigen::SparseMatrix<Type> I_ss( Adj.rows(), Adj.rows() );
     Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
@@ -974,13 +1026,15 @@ Type objective_function<Type>::operator() (){
     Lspatial_ss = ( I_ss - exp(log_kappa)*Adj );
     log_tau = 0.0;
     Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
-  }else if( spatial_options(0)==3 ){
-    // Off, but using INLA inputs
+  }
+  // Off, but using INLA inputs
+  if( spatial_options(0)==3 ){
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, Type(1.0));
     log_tau = Type(0.0);
-  }else if( spatial_options(0)==4 ){
-    // stream-network
+  }
+  // stream-network
+  if( spatial_options(0)==4 ){
     DATA_IMATRIX( graph_sz );
     DATA_VECTOR( dist_s );
     Q_ss = Q_network2( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
@@ -991,7 +1045,9 @@ Type objective_function<Type>::operator() (){
     REPORT( Q_ss );
     //Eigen::SparseMatrix<Type> Q2_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
     //REPORT( Q2_ss );
-  }else if( spatial_options(0)==5 ){
+  }
+  // Using a SAR with geometric anisotropy
+  if( spatial_options(0)==5 ){
     DATA_IVECTOR( i_z );
     DATA_IVECTOR( j_z );
     DATA_MATRIX( delta_z2 );
@@ -1000,6 +1056,17 @@ Type objective_function<Type>::operator() (){
     Type rho = exp(-1.0 * exp(log_kappa));
     REPORT( rho );
     Q_ss = Q_SAR( rho, H, n_s, i_z, j_z, delta_z2 );
+  }
+  // Using SPDE with covariate-based anisotropy and geometric anisotropy
+  if( spatial_options(0)==6 ){
+    // Using INLA
+    DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
+    // Build precision
+    Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H );
+    REPORT( G1 );
+    Q_ss = exp(4.0*log_kappa)*spatial_list.G0 + Type(2.0)*exp(2.0*log_kappa)*G1 + G1*spatial_list.G0_inv*G1;
+    log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
+    REPORT( Q_ss );
   }
   REPORT( log_tau );
 

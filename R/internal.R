@@ -11,21 +11,27 @@ ivector_minus_one <- function( ivector ){
 
 # Modified from sdmTMB::make_anisotropy_spde, originally from geostatistical_delta-GLMM
 make_anisotropy_spde <-
-function( inla_mesh ){
+function( inla_mesh,
+          covariates ){
 
   spde = fm_fem( inla_mesh )
-  Dset <- 1:2
+  if( missing(covariates) ){
+    loc = inla_mesh$loc[,1:2]
+  }else{
+    if(nrow(inla_mesh$loc) != nrow(covariates)) stop("Check `covariates` in `make_anisotropy_spde`")
+    loc = cbind( inla_mesh$loc[,1:2], covariates )
+  }
   TV <- inla_mesh$graph$tv
-  V0 <- inla_mesh$loc[TV[, 1], Dset]
-  V1 <- inla_mesh$loc[TV[, 2], Dset]
-  V2 <- inla_mesh$loc[TV[, 3], Dset]
+  V0 <- loc[ TV[,1], ]
+  V1 <- loc[ TV[,2], ]
+  V2 <- loc[ TV[,3], ]
   E0 <- V2 - V1
   E1 <- V0 - V2
   E2 <- V1 - V0
   TmpFn <- function(Vec1, Vec2) abs(det(rbind(Vec1, Vec2)))
   Tri_Area <- rep(NA, nrow(E0))
   for (i in seq_len(length(Tri_Area))){
-    Tri_Area[i] <- TmpFn(E0[i,], E1[i,])/2
+    Tri_Area[i] <- TmpFn( E0[i,1:2], E1[i,1:2] ) / 2
   }
   ret <- list( n_s = inla_mesh$n,
                n_tri = nrow(TV),

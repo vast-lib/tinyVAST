@@ -204,24 +204,24 @@ function( formula,
           space_term = NULL,
           spacetime_term = NULL,
           family = gaussian(),
-          space_columns = c("x","y"),
+          delta_options = list(formula = ~ 1),
+          spatial_varying = NULL,
+          weights = NULL,
           spatial_domain = NULL,
+          kappa_formula = ~ 0,
+          control = tinyVASTcontrol(),
+          # Indexing
+          space_columns = c("x","y"),
           time_column = "time",
           times = NULL,
           variable_column = "var",
           variables = NULL,
-          distribution_column = "dist",
-          delta_options = list(formula = ~ 1),
-          spatial_varying = NULL,
-          weights = NULL,
-          control = tinyVASTcontrol() ){
+          distribution_column = "dist" ){
 
   # https://roxygen2.r-lib.org/articles/rd-formatting.html#tables for roxygen formatting
   start_time = Sys.time()
 
   # General error checks
-  #if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`", call. = FALSE)
-  #if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
   assertClass(control, "tinyVASTcontrol")
   assertDataFrame(data)
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
@@ -229,13 +229,18 @@ function( formula,
   # Input conflicts
   matched_call = match.call()
   if( isTRUE(as.character(matched_call$family) == "family") ){
-    stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name")
+    stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name", call. = FALSE)
+  }
+  if( !is(spatial_domain,"vertex_coords") ){
+    if( kappa_formula != as.formula("~0") ){
+      stop("specifying `kappa_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
+    }
   }
 
   # Haven't tested for extra levels
   tmpdata = droplevels(data)
   if( !identical(tmpdata,data) ){
-    stop("`data` has some factor with extra levels. Please retry after running `data = droplevels(data)` on the input `data`")
+    stop("`data` has some factor with extra levels. Please retry after running `data = droplevels(data)` on the input `data`", call. = FALSE)
   }
 
   ##############
@@ -407,16 +412,33 @@ function( formula,
   # Spatial domain constructor
   ##############
 
-  if( is(spatial_domain,"fm_mesh_2d") ){
+  # n_Hpars is the number of params in H AND the dim of H
+  n_Hpars = 2
+
+  # Parse each `spatial_domain`
+  if( is(spatial_domain,"vertex_coords") ){
+    # Parse covariate matrix
+    R_sk = model.matrix(
+      update.formula( old = kappa_formula, new = "~ . + 0" ),
+      spatial_domain$vertex_covariates
+    )
+    # covariate-based anisotropy
+    n_s = spatial_domain$n
+    spatial_method_code = 6
+    spatial_list = make_anisotropy_spde( spatial_domain, covariates = R_sk )
+    A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
+    n_Hpars = ncol( spatial_list$E0 )
+    estimate_kappa = TRUE
+    estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+  }else if( is(spatial_domain,"fm_mesh_2d") ){
     # SPDE
     n_s = spatial_domain$n
     spatial_method_code = 1
-    #spde = fm_fem( spatial_domain )
-    #spatial_list = list("M0"=spde$c0, "M1"=spde$g1, "M2"=spde$g2)
     spatial_list = make_anisotropy_spde( spatial_domain )
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
+    n_Hpars = 2
     estimate_kappa = TRUE
-    estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+    estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"igraph") ) {
     # SAR
     spatial_method_code = 2
@@ -427,7 +449,7 @@ function( formula,
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
     estimate_kappa = ifelse( ecount(spatial_domain)>0, TRUE, FALSE )
-    estimate_H = FALSE
+    estimate_anisotropy = FALSE
   }else if( is(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
     # stream network
     spatial_method_code = 4
@@ -436,7 +458,7 @@ function( formula,
     A_is = sfnetwork_evaluator( stream = spatial_domain$stream,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
-    estimate_H = FALSE
+    estimate_anisotropy = FALSE
   }else if( is(spatial_domain, "sfc_GEOMETRY") ){
     # SAR with geometric anisotropy
     spatial_method_code = 5
@@ -464,7 +486,7 @@ function( formula,
                          x = 1,
                          dims = c(length(s_i),length(spatial_domain)) )
     estimate_kappa = TRUE
-    estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+    estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is.null(spatial_domain) ) {
     # Single-site
     spatial_method_code = 3
@@ -475,7 +497,7 @@ function( formula,
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
     estimate_kappa = FALSE
-    estimate_H = FALSE
+    estimate_anisotropy = FALSE
   }else{
     stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
@@ -720,7 +742,7 @@ function( formula,
     W_gz = matrix(0,nrow=0,ncol=2),
     V_gz = matrix(0,nrow=0,ncol=2)
   )
-  if( spatial_method_code %in% c(1,3) ){
+  if( spatial_method_code %in% c(1,3,6) ){
     tmb_data$spatial_list = spatial_list
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
@@ -765,7 +787,7 @@ function( formula,
 
     eps = numeric(0),
     log_kappa = log(1),
-    ln_H_input = c(0, 0)
+    ln_H_input = rep(0, n_Hpars)
   )
 
   # Telescoping
@@ -819,8 +841,8 @@ function( formula,
   }
 
   # Map off ln_H_input
-  if( isFALSE(estimate_H) ){
-    tmb_map$ln_H_input = factor( c(NA,NA) )
+  if( isFALSE(estimate_anisotropy) ){
+    tmb_map$ln_H_input = factor( c(NA, NA, seq_along(tmb_par$ln_H_input[-c(1:2)])) )
   }
 
   # 

@@ -11,17 +11,18 @@ tinyVAST(
   space_term = NULL,
   spacetime_term = NULL,
   family = gaussian(),
-  space_columns = c("x", "y"),
+  delta_options = list(formula = ~1),
+  spatial_varying = NULL,
+  weights = NULL,
   spatial_domain = NULL,
+  kappa_formula = ~0,
+  control = tinyVASTcontrol(),
+  space_columns = c("x", "y"),
   time_column = "time",
   times = NULL,
   variable_column = "var",
   variables = NULL,
-  distribution_column = "dist",
-  delta_options = list(formula = ~1),
-  spatial_varying = NULL,
-  weights = NULL,
-  control = tinyVASTcontrol()
+  distribution_column = "dist"
 )
 }
 \arguments{
@@ -63,13 +64,16 @@ families by row of data. Delta model families are possible, and see
 \code{\link[tinyVAST:families]{Families}} for delta-model options.
 For binomial family options, see 'Binomial families' in the Details section below.}
 
-\item{space_columns}{A string or character vector that indicates
-the column(s) of \code{data} indicating the location of each sample.
-When \code{spatial_domain} is an \code{igraph} object, \code{space_columns} is a string with
-with levels matching the names of vertices of that object.
-When \code{spatial_domain} is an \code{fmesher} or \code{sfnetwork} object,
-space_columns is a character vector indicating columns of \code{data} with
-coordinates for each sample.}
+\item{delta_options}{a named list with slots for \code{formula},
+\code{space_term}, and \code{spacetime_term}. These specify options for the
+second linear predictor of a delta model, and are only used (or estimable)
+when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
+
+\item{spatial_varying}{a formula specifying spatially varying coefficients.}
+
+\item{weights}{A numeric vector representing optional likelihood weights for the
+data likelihood. Weights do not have to sum to one and are not internally modified.
+Thee weights argument needs to be a vector and not a name of the variable in the data frame.}
 
 \item{spatial_domain}{Object that represents spatial relationships, either using
 \code{\link[fmesher:fm_mesh_2d]{fmesher::fm_mesh_2d()}} to apply the SPDE method,
@@ -82,6 +86,17 @@ based on the geometry of the object,
 or \code{NULL} to specify a single site.  If using \code{igraph} then the
 graph must have vertex names \code{V(graph)$name} that match
 levels of \code{data[,'space_columns']}}
+
+\item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
+settings.}
+
+\item{space_columns}{A string or character vector that indicates
+the column(s) of \code{data} indicating the location of each sample.
+When \code{spatial_domain} is an \code{igraph} object, \code{space_columns} is a string with
+with levels matching the names of vertices of that object.
+When \code{spatial_domain} is an \code{fmesher} or \code{sfnetwork} object,
+space_columns is a character vector indicating columns of \code{data} with
+coordinates for each sample.}
 
 \item{time_column}{A character string indicating the column of \code{data}
 listing the time-interval for each sample, from the set of times
@@ -106,20 +121,6 @@ listing the distribution for each sample, from the set of names
 in argument \code{family}.
 if \code{variables=NULL}, then it is filled in as the unique values
 from \code{data$variables}.}
-
-\item{delta_options}{a named list with slots for \code{formula},
-\code{space_term}, and \code{spacetime_term}. These specify options for the
-second linear predictor of a delta model, and are only used (or estimable)
-when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
-
-\item{spatial_varying}{a formula specifying spatially varying coefficients.}
-
-\item{weights}{A numeric vector representing optional likelihood weights for the
-data likelihood. Weights do not have to sum to one and are not internally modified.
-Thee weights argument needs to be a vector and not a name of the variable in the data frame.}
-
-\item{control}{Output from \code{\link[=tinyVASTcontrol]{tinyVASTcontrol()}}, used to define user
-settings.}
 }
 \value{
 An object (list) of class \code{tinyVAST}. Elements include:
