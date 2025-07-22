@@ -50,16 +50,17 @@ function( inla_mesh,
 # if H = diag(2), G is expected to match `fmesher::fm_fem(mesh)$g1`
 make_stiffness <-
 function( mesh,
-          loc = mesh$loc[,1:2], # Can swap in different values
-          H = diag(ncol(loc)) ){
+          loc, # Can swap in different values
+          H ){
 
   # local objects to simplify code
+  if(missing(loc)) loc = mesh$loc[,1:2]
+  if(missing(H)) H = diag( rep(1,ncol(loc)) )
   tv = mesh$graph$tv
   n = mesh$n
   adjH = solve(H) * det(H)
 
   # Extract edge vectors
-  if(missing(loc)) loc = mesh$loc
   v0 = loc[ tv[,1], ]
   v1 = loc[ tv[,2], ]
   v2 = loc[ tv[,3], ]
