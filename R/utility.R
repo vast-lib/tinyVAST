@@ -588,8 +588,10 @@ function( Q,
 
   # Takahashi-Davis variance for sparsity pattern of chol(Q)
   # TODO:  re-use cholQp
+  Q = as(Q, "CsparseMatrix")
   cholQp = cholPermute(Q = Q)
   Vsparse_ss = Takahashi_Davis(Q, cholQp = cholQp$Qpermchol, P = cholQp$P)
+  #Vsparse_ss = Takahashi_Davis(Q)
 
   # Get marginal variance at vertices ... not used but sanity check
   # Dense version
