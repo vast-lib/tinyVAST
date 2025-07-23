@@ -4,6 +4,8 @@
   (h\t Sean Anderson)
 * Adding option for covariate-based anisotropy, while also allowing geometric
   anisotropy.
+* Adding `spatial_cor` to use sparse matrices to compute the correlation between
+  a `coord` and `pred` coordinates, e.g. to visualize covariate-based anisotropy
 
 # tinyVAST 1.2.0
 
