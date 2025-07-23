@@ -554,3 +554,85 @@ function( object,
   return(V_kk)
 }
 
+#' @title Approximate spatial correlation
+#'
+#' @description Extract the approximated spatial correlation between one coordinate
+#' and other coordinates using a sparse precision and SPDE mesh
+#'
+#' @param Q sparse precision matrix
+#' @param mesh SPDE mesh
+#' @param coord vector of length-2 with spatial coordinates for focal point
+#' @param pred matrix with two columns and multiple rows, with location
+#'        for points to predict correlation
+#'
+#' @importFrom sparseinv cholPermute Takahashi_Davis
+#'
+#' @return
+#' A vector with length \code{nrow(pred)} giving the spatial correlation
+#'
+#' @export
+spatial_cor <-
+function( Q,
+          mesh,
+          coord,
+          pred ){
+
+  # Get projection matrices
+  if( is(mesh,"fm_mesh_2d" ) ){
+    # Projection from mesh to coord
+    A_is = fm_evaluator( mesh, loc=matrix(coord,nrow=1) )$proj$A
+    A_gs = fm_evaluator( mesh, loc=pred )$proj$A
+  }else{
+    stop("`get_corr` not implemented for supplied `spatial_domain`")
+  }
+
+  # Takahashi-Davis variance for sparsity pattern of chol(Q)
+  # TODO:  re-use cholQp
+  cholQp = cholPermute(Q = Q)
+  Vsparse_ss = Takahashi_Davis(Q, cholQp = cholQp$Qpermchol, P = cholQp$P)
+
+  # Get marginal variance at vertices ... not used but sanity check
+  # Dense version
+  # var_s = diag(solve(Q))
+  # Sparse version == dense version
+  # var_s = diag(Vsparse_ss)
+
+  # Confirm all nonzero in Q are nonzero in Vsparse
+  if(FALSE){
+    ij1 = matrix( unlist(mat2triplet(Q)[c("i","j")]), ncol = 2)
+    ij2 = matrix( unlist(mat2triplet(Vsparse)[c("i","j")]), ncol = 2)
+    Match = match( ij1, ij2 )
+    sum( is.na(Match[1]) ) # if all Q in Vsparse, then nonmatch = 0
+  }
+
+  # Get marginal predictive variance
+  # Sparse version
+  vsparse_g = diag(A_gs %*% Vsparse_ss %*% t(A_gs)) # _equals_ dense version
+  vsparse_i = diag(A_is %*% Vsparse_ss %*% t(A_is)) # _equals_ dense version
+  # Dense version:
+  if( FALSE ){
+    vdense_g = diag(A_gs %*% solve(Q) %*% t(A_gs))
+    vdense_i = diag(A_is %*% solve(Q) %*% t(A_is))
+    range( c(vsparse_g,vsparse_i) - c(vdense_g,vdense_i) )
+  }
+
+  # Get covariance from coord to pred as weighted average of vertices
+  A_zs = rbind( A_is, A_gs )
+  # Sparse version without covariance among vertices
+  #cov_s = solve( Q, t(A_is) )
+  #cov_g = (A_gs %*% cov_s)[,1]
+  # Sparse version
+  cov_sz = solve( Q, t(A_zs) )
+  csparse_g = (A_is %*% cov_sz)[1,-1]
+  # Dense version
+  if( FALSE ){
+    V_zz = A_zs %*% solve(Q) %*% t(A_zs)
+    cdense_g = V_zz[1,-1]
+    range( csparse_g - cdense_g )
+  }
+
+  # Calculate correlation
+  cor_g = csparse_g / sqrt(vsparse_g) / sqrt(vsparse_i)
+  return(cor_g)
+}
+

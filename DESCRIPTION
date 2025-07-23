@@ -41,7 +41,8 @@ Imports:
     sdmTMB,
     dsem (>= 1.6.0),
     insight,
-    cv
+    cv,
+    sparseinv
 Suggests:
     ggplot2,
     knitr,
@@ -58,8 +59,7 @@ Suggests:
     plyr,
     DHARMa,
     glmmTMB,
-    tibble,
-    sparseinv
+    tibble
 LinkingTo:
     RcppEigen,
     TMB
