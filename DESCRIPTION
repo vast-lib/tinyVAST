@@ -59,6 +59,7 @@ Suggests:
     DHARMa,
     glmmTMB,
     tibble,
+    sparseinv
 LinkingTo:
     RcppEigen,
     TMB
