@@ -236,6 +236,8 @@ performance = rbind(
   CV = c( cv::cv(fit0)[['CV crit']], cv::cv(fit1)[['CV crit']] )
 )
 
+intersects = st_intersects(sf_bathy, domain)
+sf_plot = sf_bathy[ which(as.integer(intersects)==1) ]
 pred = st_coordinates(st_centroid(sf_plot)) / 1000
 r1 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[1,]), pred = pred )
 r2 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[2,]), pred = pred )
