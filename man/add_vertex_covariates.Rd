@@ -64,10 +64,20 @@ mesh <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10)
 mesh_with_covs <- add_vertex_covariates(
   mesh,
   data = qcs_grid,
-  covariates = c("depth_scaled", "depth_scaled2"),
+  covariates = c("depth"),
   coords = c("X", "Y")
 )
 head(mesh_with_covs$vertex_covariates)
+
+# Visualize what we've done:
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  df <- as.data.frame(mesh_with_covs$loc[,1:2])
+  df <- cbind(df, mesh_with_covs$vertex_covariates)
+  ggplot() +
+    geom_raster(data = qcs_grid, aes(X, Y, fill = depth), alpha = 0.7) +
+    geom_point(data = df, aes(V1, V2, fill = depth), colour = "#00000010", pch = 21) +
+    scale_fill_viridis_c(option = "G", trans = "log", direction = -1)
+}
 
 # Piped version
 mesh_with_covs <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
