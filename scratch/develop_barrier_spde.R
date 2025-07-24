@@ -101,12 +101,15 @@ intersected = st_intersects( vertex_sf, boundary_sf )
 which_land = which(lengths(intersected) == 1)
 mesh_with_covs$vertex_covariates = data.frame( "land" = ifelse(lengths(intersected)==1, 10, 0) )
 class(mesh_with_covs) <- c("vertex_coords", class(mesh_with_covs))
+mesh_with_covs$triangle_covariates = data.frame( 
+  "land" = ifelse(seq_len(nrow(mesh$graph$tv)) %in% bspde$barrier_triangles, 1, 0)
+)
 
 # Run
 tv0 <- tinyVAST(
   density ~ 1,  # s(depth, k = 3)
   data = as.data.frame(pcod),
-  spatial_domain = mesh,
+  spatial_domain = mesh_with_covs,
   space_term = "",
   space_columns = c("X","Y"),
   family = tweedie(link = "log")
@@ -124,7 +127,8 @@ tv <- tinyVAST(
   spatial_domain = mesh_with_covs,
   space_term = "",
   development = list(
-    kappa_formula = ~ land
+    #kappa_formula = ~ land
+    triangle_formula = ~ land
   ),
   space_columns = c("X","Y"),
   family = tweedie(link = "log")

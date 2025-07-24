@@ -229,20 +229,28 @@ function( formula,
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   # Add `development` stuff
-  if( !is.null(development$kappa_formula) ){
-    kappa_formula = development$kappa_formula
+  if( !is.null(development$vertex_formula) ){
+    vertex_formula = development$vertex_formula
   }else{
-    kappa_formula = ~ 0
+    vertex_formula = ~ 0
   }
-
+  if( !is.null(development$triangle_formula) ){
+    triangle_formula = development$triangle_formula
+  }else{
+    triangle_formula = ~ 0
+  }
+  
   # Input conflicts
   matched_call = match.call()
   if( isTRUE(as.character(matched_call$family) == "family") ){
     stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name", call. = FALSE)
   }
   if( !is(spatial_domain,"vertex_coords") ){
-    if( kappa_formula != as.formula("~0") ){
-      stop("specifying `kappa_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
+    if( vertex_formula != as.formula("~0") ){
+      stop("specifying `vertex_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
+    }
+    if( triangle_formula != as.formula("~0") ){
+      stop("specifying `triangle_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
   }
 
@@ -428,8 +436,12 @@ function( formula,
   if( is(spatial_domain,"vertex_coords") ){
     # Parse covariate matrix
     R_sk = model.matrix(
-      update.formula( old = kappa_formula, new = "~ . + 0" ),
+      update.formula( old = vertex_formula, new = "~ . + 0" ),
       spatial_domain$vertex_covariates
+    )
+    V_zk = model.matrix(
+      update.formula( old = triangle_formula, new = "~ . + 0" ),
+      spatial_domain$triangle_covariates
     )
     # covariate-based anisotropy
     n_s = spatial_domain$n
@@ -751,8 +763,11 @@ function( formula,
     W_gz = matrix(0,nrow=0,ncol=2),
     V_gz = matrix(0,nrow=0,ncol=2)
   )
-  if( spatial_method_code %in% c(1,3,6) ){
+  if( spatial_method_code %in% c(1,3) ){
     tmb_data$spatial_list = spatial_list
+  }else if( spatial_method_code %in% 6 ){
+    tmb_data$spatial_list = spatial_list
+    tmb_data$V_zk = V_zk
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
   }else if( spatial_method_code %in% 4 ){
@@ -817,6 +832,9 @@ function( formula,
   }
   if( nrow(delta_time_term_ram$output$ram)==0 ){
     tmb_par$delta2_tc = tmb_par$delta2_tc[,numeric(0),drop=FALSE]
+  }
+  if( spatial_method_code %in% 6 ){
+    tmb_par$triangle_k = rep( 0, ncol(V_zk) )
   }
 
   # Turn off initial conditions ... cutting from model

@@ -24,14 +24,18 @@ if( case == "pcod_2011" ){
   data = data.frame( pcod_2011[,c('X','Y','density','year')], covar = pcod_2011[,'depth'] )
 
   # Piped version
-  mesh <- fmesher::fm_mesh_2d(pcod_2011[, c("X", "Y")], cutoff = 5)
+  mesh <- fmesher::fm_mesh_2d(pcod_2011[, c("X", "Y")], cutoff = 2)
   mesh_with_covs <- add_vertex_covariates(
     mesh,
     bathy,
     covariates = "covar",
     coords  = c("X", "Y")
   )
-  xy_i = matrix( c( 500, 5685 ), nrow = 1 )
+
+  #
+  #plot( x = bathy$X, y = bathy$Y, col = viridisLite::viridis(10)[cut(bathy$covar,breaks=10)], cex = 1, pch = 20 )
+  #xy_i = bathy[ which.max(bathy$covar), c("X","Y") ]
+  xy_i = data.frame( 415, 5783 )
 }
 if( case == "GOA_pcod" ){
   load_sql_data()
@@ -140,6 +144,9 @@ if( case == "NorPac_pcod" ){
   xy_i = data.frame( X = c(-224000, -1178000), Y = c(908000, 1279000)  ) / 1e5
 }
 
+#
+plot( x = bathy$X, y = bathy$Y, col = viridis() )
+
 # Plot covar
 ggplot(bathy) +
     geom_tile( aes(X, Y, fill = covar) )  +  # , colour = "grey50"
@@ -158,7 +165,7 @@ polygon_i = RANN::nn2( data = mesh$loc[,1:2], query = xy_i, k = 1 )
 #  mesh_with_covs$vertex_covariates
 #)
 
-fit1 <- tinyVAST(
+fit0 <- tinyVAST(
   formula = density ~ 0 + s(covar),    # 0 + factor(year)
   data = data,
   space_term = "",
@@ -173,7 +180,7 @@ fit1 <- tinyVAST(
 )
 
 # Fit a Tweedie spatial random field GLMM with a smoother for covar:
-fit2 <- tinyVAST(
+fit1 <- tinyVAST(
   formula = density ~ 0 + s(covar),    # 0 + factor(year)
   data = data,
   space_term = "",
@@ -190,10 +197,17 @@ fit2 <- tinyVAST(
   control = tinyVASTcontrol( use_anisotropy = FALSE, run_model = TRUE, trace = 1 )
 )
 
+# Compare performance
+performance = rbind(
+  AIC = c( "null" = AIC(fit0), "covar" = AIC(fit1)),
+  cAIC = c( cAIC(fit0), cAIC(fit1) ),
+  CV = c( cv::cv(fit0)[['CV crit']], cv::cv(fit1)[['CV crit']] )
+)
+
 
 
 # Plot Omega
-#bathy$omega = predict(fit1, what = "pomega_g", newdata = bathy )
+#bathy$omega = predict(fit0, what = "pomega_g", newdata = bathy )
 #ggplot(bathy, aes(X, Y, fill = omega)) +
 #    geom_tile() +
 #    coord_fixed()
@@ -205,45 +219,67 @@ fit2 <- tinyVAST(
 #obj = MakeADFun( data = fit$tmb_data, par = fit$tmb_par, map = fit$tmb_map, random = fit$tmb_random,
 #                 DLL = "tinyVAST" )
 
+#
+trun = \(v, threshold = 0.95){
+  v = ifelse( is.na(v), 0, v )
+  ord = order(v, decreasing = TRUE )
+  cum = cumsum( v[ord] )
+  above = ( cum < (max(cum) * threshold) )
+  index = which.max( which(above) )
+  v = ifelse( seq_along(v) %in% ord[seq_len(index)], v, NA )
+  return(v)
+}
+
 # Compute initial density
 A_gs = fmesher::fm_evaluator( mesh, loc=as.matrix(bathy[c('X','Y')]) )$proj$A
 v0_s = rep(0, mesh$n)
 v0_s[polygon_i$nn.idx] = 1
 bathy$v0_g = as.numeric(A_gs %*% v0_s)
-bathy$v0_g = ifelse( bathy$v0_g < 1e-6, NA, bathy$v0_g )
+#bathy$v0_g = trun( bathy$v0_g, threshold = 0.95 )
+bathy$v0_g = ifelse( bathy$v0_g > 0.1, bathy$v0_g, NA )
 
 #
 #ggplot(bathy, aes(X, Y, fill = v0_g)) +
 #    geom_tile()  +
 #    coord_fixed()
 
-# Compute diffused density
-G1 = fit1$rep$G1
-log_kappa = fit1$opt$par['log_kappa']
-invD = ( Matrix::Diagonal(n = mesh$n) + exp(-2 * log_kappa) * fit1$tmb_inputs$tmb_data$spatial_list$G0_inv %*% G1 )
-v1_s = Matrix::solve( invD, v0_s )
-bathy$v1_g = as.numeric(A_gs %*% v1_s)
-bathy$v1_g = ifelse( bathy$v1_g < 1e-6, NA, bathy$v1_g )
+# Compute diffused density   /  correlation
+#G1 = fit0$rep$G1
+#log_kappa = fit0$opt$par['log_kappa']
+#invD = ( Matrix::Diagonal(n = mesh$n) + exp(-2 * log_kappa) * fit0$tmb_inputs$tmb_data$spatial_list$G0_inv %*% G1 )
+v1_s = Matrix::solve( fit0$rep$Q_ss, v0_s )
+bathy$v1_g = as.numeric(A_gs %*% v1_s / max(v1_s))
+#bathy$v1_g = trun( bathy$v1_g, threshold = 0.95 )
+bathy$v1_g = ifelse( bathy$v1_g > 0.1, bathy$v1_g, NA )
 
-# Compute diffused density
-G1 = fit2$rep$G1
-log_kappa = fit2$opt$par['log_kappa']
-invD = ( Matrix::Diagonal(n = mesh$n) + exp(-2 * log_kappa) * fit2$tmb_inputs$tmb_data$spatial_list$G0_inv %*% G1 )
-v2_s = Matrix::solve( invD, v0_s )
-bathy$v2_g = as.numeric(A_gs %*% v2_s)
-bathy$v2_g = ifelse( bathy$v2_g < 1e-6, NA, bathy$v2_g )
-
+# Compute diffused density   /  correlation
+#G1 = fit1$rep$G1
+#log_kappa = fit1$opt$par['log_kappa']
+#invD = ( Matrix::Diagonal(n = mesh$n) + exp(-2 * log_kappa) * fit1$tmb_inputs$tmb_data$spatial_list$G0_inv %*% G1 )
+v2_s = Matrix::solve( fit1$rep$Q_ss, v0_s )
+bathy$v2_g = as.numeric(A_gs %*% v2_s / max(v2_s))
+#bathy$v2_g = trun( bathy$v2_g, threshold = 0.95 )
+bathy$v2_g = ifelse( bathy$v2_g > 0.1, bathy$v2_g, NA )
 
 #
-p0 = ggplot(bathy, aes(X, Y, fill = v0_g )) +
+pbathy = ggplot(bathy, aes(X, Y, fill = covar )) +
     geom_tile()  +
-    coord_fixed() + scale_fill_continuous(trans = "log")
-p1 = ggplot(bathy, aes(X, Y, fill = v1_g )) +
+    coord_fixed()
+pinit = ggplot(bathy, aes(X, Y, fill = v0_g )) +
     geom_tile()  +
-    coord_fixed() + scale_fill_continuous(trans = "log")
-p2 = ggplot(bathy, aes(X, Y, fill = v2_g )) +
+    coord_fixed() + #scale_fill_continuous(trans = "log") +
+    scale_x_continuous( limits = xy_i[[1]] + c(-1,1) * 25 ) +
+    scale_y_continuous( limits = xy_i[[2]] + c(-1,1) * 25 )
+p0 = ggplot(bathy, aes(X, Y, fill = v1_g )) +
     geom_tile()  +
-    coord_fixed() + scale_fill_continuous(trans = "log")
-grid.arrange( arrangeGrob(p0, p1, p2, nrow=1) )
-ggsave( file = R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\scratch\aniso.png)', width = 5, height = 5,
-        plot = grid.arrange(arrangeGrob(p0, p1, nrow=2)) )
+    coord_fixed() + #scale_fill_continuous(trans = "log") +
+    scale_x_continuous( limits = xy_i[[1]] + c(-1,1) * 25 ) +
+    scale_y_continuous( limits = xy_i[[2]] + c(-1,1) * 25 )
+p1 = ggplot(bathy, aes(X, Y, fill = v2_g )) +
+    geom_tile()  +
+    coord_fixed() + #scale_fill_continuous(trans = "log") +
+    scale_x_continuous( limits = xy_i[[1]] + c(-1,1) * 25 ) +
+    scale_y_continuous( limits = xy_i[[2]] + c(-1,1) * 25 )
+pfull = grid.arrange( arrangeGrob(pinit, pbathy, p0, p1, nrow=2) )
+ggsave( file = R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\scratch\aniso.png)', width = 8, height = 8,
+        plot = pfull )
