@@ -240,7 +240,12 @@ function( formula,
     triangle_formula = ~ 0
   }
   
-  # Input conflicts
+  # Avoid name conflict
+  if( "fake" %in% colnames(spatial_domain$triangle_covariates) ){
+    stop("change colnames in `triangle_covariates` to avoid `fake`")
+  }
+
+    # Input conflicts
   matched_call = match.call()
   if( isTRUE(as.character(matched_call$family) == "family") ){
     stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name", call. = FALSE)
@@ -439,10 +444,14 @@ function( formula,
       update.formula( old = vertex_formula, new = "~ . + 0" ),
       spatial_domain$vertex_covariates
     )
-    V_zk = model.matrix(
-      update.formula( old = triangle_formula, new = "~ . + 0" ),
-      spatial_domain$triangle_covariates
-    )
+    #V_zk = model.matrix(
+    #  update.formula( old = ~ AK + GOA + BS, new = "~ . + 0" ),
+    #  spatial_domain$triangle_covariates
+    #)
+    gam_setup = mgcv::gam( update.formula( old = ~ AK + GOA + BS, new = "fake ~ . + 0" ), 
+                           data = cbind( "fake" = 0, spatial_domain$triangle_covariates ), 
+                           fit = FALSE )
+    V_zk = cbind( offset = gam_setup$offset, gam_setup$X ) # First is always the offset
     # covariate-based anisotropy
     n_s = spatial_domain$n
     spatial_method_code = 6
@@ -870,6 +879,11 @@ function( formula,
   # Map off ln_H_input
   if( isFALSE(estimate_anisotropy) ){
     tmb_map$ln_H_input = factor( c(NA, NA, seq_along(tmb_par$ln_H_input[-c(1:2)])) )
+  }
+
+  # Map off offset for triangle_k
+  if( spatial_method_code %in% 6 ){
+    tmb_map$triangle_k = factor( c(NA, seq_len(ncol(tmb_data$V_zk)-1)) )
   }
 
   # 

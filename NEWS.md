@@ -1,11 +1,9 @@
 # tinyVAST 1.3.0
 
-* Adding `add_vertex_covariates` to associate mesh vertices with covariates
-  (h\t Sean Anderson)
-* Adding option for covariate-based anisotropy, while also allowing geometric
-  anisotropy.
-* Adding `spatial_cor` to use sparse matrices to compute the correlation between
-  a `coord` and `pred` coordinates, e.g. to visualize covariate-based anisotropy
+* Adding `add_vertex_covariates` to associate mesh vertices with covariates (h\t Sean Anderson)
+* Adding option for covariate-based anisotropy using `vertex_formula`, while also allowing geometric anisotropy.
+* Adding option for barriers using `triangle_formula` which permits an offset for barrier covariates
+* Adding `spatial_cor` to use sparse matrices to compute the correlation between a `coord` and `pred` coordinates, e.g. to visualize covariate-based anisotropy
 
 # tinyVAST 1.2.0
 

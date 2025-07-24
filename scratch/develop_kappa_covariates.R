@@ -102,7 +102,7 @@ if( case == "NorPac_pcod" ){
   # Make indicator for region
   if( TRUE ){
     # Set up grid ... keeping excess before making covariates
-    sf_bathy = st_make_grid( domain, cellsize = 50*1e3 )
+    sf_bathy = st_make_grid( domain, cellsize = 25*1e3 )
     intersects = st_intersects(sf_bathy, domain)
     sf_plot = sf_bathy[ which(as.integer(intersects)==1) ]
     bathy = st_coordinates(st_centroid(sf_bathy))
@@ -120,22 +120,23 @@ if( case == "NorPac_pcod" ){
     bathy[,c("X","Y")] = bathy[,c("X","Y")] / 1000
   }
   # Make bathymetry
-  if( FALSE ){
+  if( TRUE ){
     # GOA bathymetry
-    load( R'(C:\Users\James.Thorson\Desktop\Work files\AFSC\2025-07 -- covariates for log_tau in SPDE\GOA_bathy.rda)')
+    load( R'(C:\Users\James.Thorson\Desktop\Work files\AFSC\2025-07 -- covariate anisotropy SPDE\GOA_bathy.rda)')
     GOA_bathy = terra::unwrap(GOA_bathy)
     GOA_bathy = terra::aggregate(GOA_bathy, fact = 5)
     GOA_bathy_df = as.data.frame(GOA_bathy, xy = TRUE)
-    colnames(GOA_bathy_df) = c( "X", "Y", "covar" )
+    colnames(GOA_bathy_df) = c( "X", "Y", "depth" )
     #
-    BS_bathy = terra::rast( R'(C:\Users\James.Thorson\Desktop\Work files\AFSC\2025-07 -- covariates for log_tau in SPDE\Bathy.grd)' )
+    BS_bathy = terra::rast( R'(C:\Users\James.Thorson\Desktop\Work files\AFSC\2025-07 -- covariate anisotropy SPDE\Bathy.grd)' )
     BS_bathy = terra::aggregate(BS_bathy, fact = 5)
     BS_bathy_df = as.data.frame(BS_bathy, xy = TRUE)
-    colnames(BS_bathy_df) = c( "X", "Y", "covar" )
+    colnames(BS_bathy_df) = c( "X", "Y", "depth" )
     #
-    bathy = rbind( GOA_bathy_df, BS_bathy_df)
-    bathy[,c("X","Y")] = bathy[,c("X","Y")] / 1e5
-    bathy[,"covar"] = bathy[,"covar"] / 1e3
+    combo_bathy = rbind( GOA_bathy_df, BS_bathy_df)
+    nni = RANN::nn2( data = combo_bathy[,c("X","Y")] / 1000, 
+                     query = bathy[,c("X","Y")], k = 1 )$nn.idx[,1]
+    bathy$depth = combo_bathy[nni,'depth']
   }
 
   #
@@ -147,13 +148,13 @@ if( case == "NorPac_pcod" ){
   data[,c("X","Y")] = sf_project( to = st_crs(domain), from = st_crs(4326), pts = data[,c("X","Y")] ) / 1e3
 
   # Make mesh
-  mesh_cov = mesh = fmesher::fm_mesh_2d(data[, c("X", "Y")], cutoff = 25 )  # 0.5 for Lon-Lat
-  #mesh_with_covs <- add_vertex_covariates(
-  #  mesh,
-  #  bathy,
-  #  covariates = c("GOA","BS","AK"),
-  #  coords  = c("X", "Y")
-  #)
+  mesh = fmesher::fm_mesh_2d(data[, c("X", "Y")], cutoff = 25 )  # 0.5 for Lon-Lat
+  mesh_cov <- add_vertex_covariates(
+    mesh,
+    bathy,
+    covariates = c("depth"),
+    coords  = c("X", "Y")
+  )
   n_tri <- length(mesh$graph$tv[, 1]) 
   posTri <- matrix(0, n_tri, 2)
   for (t in 1:n_tri) {
@@ -164,11 +165,11 @@ if( case == "NorPac_pcod" ){
   mesh_cov$triangle_covariates = data.frame(
     bathy[nni,c("GOA","BS","AK")]
   )
-  mesh_cov$vertex_covariates = data.frame( matrix(nrow=mesh$n,ncol=0) )
+  #mesh_cov$vertex_covariates = data.frame( matrix(nrow=mesh$n,ncol=0) )
   class(mesh_cov) <- c("vertex_coords", class(mesh))
   plot(mesh)
-  #points( x = mesh$loc[,1], y = mesh$loc[,2], 
-  #        col = viridisLite::viridis(10)[cut(mesh_cov$vertex[,1],breaks=10)] )
+  points( x = mesh$loc[,1], y = mesh$loc[,2], 
+          col = viridisLite::viridis(10)[cut(mesh_cov$vertex[,1],breaks=10)] )
   points( x = posTri[,1], y = posTri[,2], 
           col = viridisLite::viridis(10)[cut(mesh_cov$triangle[,3],breaks=10)] )
   
@@ -221,7 +222,8 @@ fit1 <- tinyVAST(
   spatial_domain = mesh_cov,
   family = tweedie(link = "log"),
   development = list(
-    triangle_formula = ~ AK + GOA + BS
+    triangle_formula = ~ offset(AK) + GOA + BS,
+    vertex_formula = ~ depth
   ),
   space_columns = c('X','Y'),
   time_column = "year",
@@ -243,7 +245,7 @@ r1 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[1,]), pre
 r2 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[2,]), pred = pred )
 
 sf_plot = st_sf( sf_plot, r1 = r1, r2 = r2 )
-plot( sf_plot )
+plot( sf_plot, border=NA )
 
 # Plot Omega
 #bathy$omega = predict(fit0, what = "pomega_g", newdata = bathy )
