@@ -4,7 +4,16 @@
 \alias{add_vertex_covariates}
 \title{Add vertex covariates to a mesh}
 \usage{
-add_vertex_covariates(mesh, data, covariates, coords, power = 2)
+add_vertex_covariates(
+  mesh,
+  data,
+  covariates,
+  coords,
+  power = 2,
+  method = c("gstat", "rann"),
+  k = 10,
+  barrier = NULL
+)
 }
 \arguments{
 \item{mesh}{A mesh object from \pkg{fmesher} or \pkg{sdmTMB} (for
@@ -15,11 +24,25 @@ add_vertex_covariates(mesh, data, covariates, coords, power = 2)
 
 \item{covariates}{Character vector of covariate column names to interpolate.}
 
-\item{coords}{Character vector of coordinate column names.
-Ignored if data is an \pkg{sf} object.}
+\item{coords}{Character vector of coordinate column names. Ignored if data is
+an \pkg{sf} object.}
 
-\item{power}{Numeric power parameter for inverse distance weighting
-(default \code{2}; Euclidean squared decay).}
+\item{power}{Numeric power parameter for inverse distance weighting (default
+\code{2}; Euclidean squared decay).}
+
+\item{method}{Interpolation method. Options: \code{"gstat"} (default, exact
+inverse distance weighting using gstat package) or \code{"rann"} (fast k-nearest
+neighbours inverse distance weighting using \pkg{RANN} package for very
+large datasets).}
+
+\item{k}{Number of nearest neighbours to use for \code{"rann"} method (default
+\code{10}). Ignored for \code{"gstat"} method.}
+
+\item{barrier}{Optional \pkg{sf} polygon object defining barrier regions. If
+provided, adds a logical \code{barrier} column to \code{vertex_covariates} where
+\code{TRUE} indicates vertices inside the barrier polygon and \code{FALSE} indicates
+vertices outside. E.g., in the case of modelling fish in the ocean, \code{TRUE}
+represents vertices over land and \code{FALSE} represents vertices over water.}
 }
 \value{
 Modified mesh object with a \code{vertex_covariates} element added and
@@ -27,9 +50,12 @@ class \code{vertex_cov} added.
 }
 \description{
 Interpolates covariate values from a data frame to mesh vertices using
-inverse distance weighting.
+inverse distance weighting (IDW). Uses \pkg{gstat} for exact IDW
+interpolation by default, with an optional high-performance \pkg{RANN} method
+for very large datasets.
 }
 \examples{
+\dontshow{if (requireNamespace("RANN", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(sdmTMB)
 library(sf)
 
@@ -48,7 +74,7 @@ mesh_with_covs <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
   add_vertex_covariates(
     qcs_grid,
     covariates = c("depth_scaled", "depth_scaled2"),
-    coords  = c("X", "Y")
+    coords = c("X", "Y")
   )
 
 # With sf objects (coords automatically extracted)
@@ -60,4 +86,15 @@ mesh_sf <- fmesher::fm_mesh_2d(pcod_sf, cutoff = 10) |>
 # With sdmTMB mesh (coordinate names and mesh automatically detected)
 mesh <- make_mesh(pcod, c("X", "Y"), cutoff = 10) |>
   add_vertex_covariates(qcs_grid, c("depth"))
+
+# Use RANN method for very large datasets (much faster)
+mesh_fast <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
+  add_vertex_covariates(
+    qcs_grid,
+    covariates = c("depth_scaled", "depth_scaled2"),
+    coords = c("X", "Y"),
+    method = "rann",
+    k = 15
+  )
+\dontshow{\}) # examplesIf}
 }

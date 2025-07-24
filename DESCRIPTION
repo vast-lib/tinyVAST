@@ -42,7 +42,8 @@ Imports:
     dsem (>= 1.6.0),
     insight,
     cv,
-    sparseinv
+    sparseinv,
+    gstat
 Suggests:
     ggplot2,
     knitr,
@@ -59,7 +60,8 @@ Suggests:
     plyr,
     DHARMa,
     glmmTMB,
-    tibble
+    tibble,
+    RANN
 LinkingTo:
     RcppEigen,
     TMB
