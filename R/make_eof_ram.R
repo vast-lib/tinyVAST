@@ -59,7 +59,7 @@ function( times,
   for( from in seq_len(nrow(Q_names)) ){
   for( to in seq_len(nrow(Q_names)) ){
     if( (as.character(Q_names[to,1]) %in% rownames(L_tz)) & (as.character(Q_names[from,1]) %in% colnames(L_tz)) ){
-      if( !is.na(L_tz[as.character(Q_names[to,1]),as.character(Q_names[from,1])]) ){
+      if( !is.na(L_tz[as.character(Q_names[to,1]),as.character(Q_names[from,1])]) & (Q_names[to,2] == Q_names[from,2]) ){
         ram_new = c( 1, to, from, L_tz[as.character(Q_names[to,1]),as.character(Q_names[from,1])], 0.01 )
         ram = rbind( ram, ram_new )
       }

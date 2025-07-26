@@ -4,6 +4,7 @@
 * Adding option for covariate-based anisotropy using `vertex_formula`, while also allowing geometric anisotropy.
 * Adding option for barriers using `triangle_formula` which permits an offset for barrier covariates
 * Adding `spatial_cor` to use sparse matrices to compute the correlation between a `coord` and `pred` coordinates, e.g. to visualize covariate-based anisotropy
+* Fix `make_eof_ram` to work as intended for multivariate models, e.g., having a separate response map and shared indices across variables
 
 # tinyVAST 1.2.0
 
