@@ -583,3 +583,131 @@ test_that("add_vertex_covariates RANN k parameter edge cases", {
   expect_true("vertex_covariates" %in% names(result_k1))
   expect_true(all(is.finite(result_k1$vertex_covariates$depth)))
 })
+
+test_that("add_vertex_covariates creates triangle_covariates", {
+  # Create a simple test mesh
+  set.seed(123)
+  coords <- data.frame(
+    X = c(0, 2, 0, 2),
+    Y = c(0, 0, 2, 2)
+  )
+  mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
+
+  # Create test data with known values
+  test_data <- data.frame(
+    X = c(0, 2, 0, 2),
+    Y = c(0, 0, 2, 2),
+    depth = c(10, 20, 30, 40)
+  )
+
+  # Test that triangle_covariates is created
+  result <- add_vertex_covariates(
+    mesh = mesh,
+    data = test_data,
+    covariates = "depth",
+    coords = c("X", "Y")
+  )
+
+  # Check that triangle_covariates exists
+  expect_true("triangle_covariates" %in% names(result))
+  expect_true("depth" %in% names(result$triangle_covariates))
+  expect_true(is.data.frame(result$triangle_covariates))
+
+  # Check that number of rows matches number of triangles
+  n_triangles <- nrow(mesh$graph$tv)
+  expect_equal(nrow(result$triangle_covariates), n_triangles)
+
+  # Check that all triangle centers have interpolated values
+  expect_true(all(!is.na(result$triangle_covariates$depth)))
+  expect_true(all(is.finite(result$triangle_covariates$depth)))
+
+  # Check that interpolated values are within reasonable range
+  depth_values <- result$triangle_covariates$depth
+  expect_true(all(depth_values >= min(test_data$depth)))
+  expect_true(all(depth_values <= max(test_data$depth)))
+})
+
+test_that("add_vertex_covariates triangle_covariates with multiple covariates", {
+  # Create a simple test mesh
+  coords <- data.frame(X = c(0, 1, 0, 1), Y = c(0, 0, 1, 1))
+  mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
+
+  # Create test data with multiple covariates
+  test_data <- data.frame(
+    X = c(0.5, 1.5),
+    Y = c(0.5, 0.5),
+    depth = c(10, 20),
+    temperature = c(5, 15),
+    salinity = c(35, 30)
+  )
+
+  # Test with multiple covariates
+  result <- add_vertex_covariates(
+    mesh = mesh,
+    data = test_data,
+    covariates = c("depth", "temperature", "salinity"),
+    coords = c("X", "Y")
+  )
+
+  # Check that all covariates are present in triangle_covariates
+  expect_true(all(c("depth", "temperature", "salinity") %in% names(result$triangle_covariates)))
+
+  # Check dimensions
+  expect_equal(ncol(result$triangle_covariates), 3)
+  expect_equal(nrow(result$triangle_covariates), nrow(mesh$graph$tv))
+
+  # Check that all values are finite
+  expect_true(all(is.finite(result$triangle_covariates$depth)))
+  expect_true(all(is.finite(result$triangle_covariates$temperature)))
+  expect_true(all(is.finite(result$triangle_covariates$salinity)))
+})
+
+test_that("add_vertex_covariates triangle_covariates with barrier", {
+  library(sf)
+
+  # Create a simple test mesh
+  set.seed(123)
+  coords <- data.frame(
+    X = c(0, 1, 2, 0, 1, 2),
+    Y = c(0, 0, 0, 1, 1, 1)
+  )
+  mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
+
+  # Create test covariate data
+  test_data <- data.frame(
+    X = c(0.5, 1.5),
+    Y = c(0.5, 0.5),
+    depth = c(10, 20)
+  )
+
+  # Create a barrier polygon that covers roughly the left half
+  barrier_coords <- matrix(c(
+    -0.5, -0.5,
+    1.0, -0.5,
+    1.0, 1.5,
+    -0.5, 1.5,
+    -0.5, -0.5
+  ), ncol = 2, byrow = TRUE)
+
+  barrier_polygon <- st_polygon(list(barrier_coords))
+  barrier_sf <- st_sfc(barrier_polygon)
+  barrier_sf <- st_sf(data.frame(id = 1), geometry = barrier_sf)
+
+  # Test with barrier
+  result <- add_vertex_covariates(
+    mesh = mesh,
+    data = test_data,
+    covariates = "depth",
+    coords = c("X", "Y"),
+    barrier = barrier_sf
+  )
+
+  # Check that barrier column is added to triangle_covariates
+  expect_true("barrier" %in% names(result$triangle_covariates))
+
+  # Check that barrier column is logical
+  expect_type(result$triangle_covariates$barrier, "logical")
+
+  # Check that we have barrier values for all triangles
+  expect_equal(length(result$triangle_covariates$barrier), nrow(mesh$graph$tv))
+})

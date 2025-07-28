@@ -26,8 +26,10 @@
 #'   vertices outside. E.g., in the case of modelling fish in the ocean, `TRUE`
 #'   represents vertices over land and `FALSE` represents vertices over water.
 #'
-#' @return Modified mesh object with a `vertex_covariates` element added and
-#'   class `vertex_cov` added.
+#' @return Modified mesh object with `vertex_covariates` and `triangle_covariates` 
+#'   elements added and class `vertex_cov` added. The `vertex_covariates` data frame 
+#'   contains covariate values interpolated at mesh vertices, and `triangle_covariates` 
+#'   contains covariate values interpolated at triangle centers.
 #' @export
 #'
 #' @examplesIf requireNamespace("RANN", quietly = TRUE)
@@ -128,17 +130,27 @@ add_vertex_covariates <-
     # Extract mesh vertex coordinates (first 2 columns are X, Y)
     mesh_vertices <- fm_mesh$loc[, 1:2, drop = FALSE]
 
-    # Initialize result matrix
+    # Calculate triangle centers
+    triangle_centers <- .calculate_triangle_centers(fm_mesh)
+
+    # Initialize result matrices
     vertex_covs <- matrix(NA, nrow = nrow(mesh_vertices), ncol = length(covariates))
     colnames(vertex_covs) <- covariates
+    
+    triangle_covs <- matrix(NA, nrow = nrow(triangle_centers), ncol = length(covariates))
+    colnames(triangle_covs) <- covariates
 
+    # Interpolate at vertices
     if (method == "gstat") {
       vertex_covs <- .interpolate_gstat(mesh_vertices, data, covariates, coords, power)
+      triangle_covs <- .interpolate_gstat(triangle_centers, data, covariates, coords, power)
     } else if (method == "rann") {
       vertex_covs <- .interpolate_rann(mesh_vertices, data, covariates, coords, power, k)
+      triangle_covs <- .interpolate_rann(triangle_centers, data, covariates, coords, power, k)
     }
 
     mesh$vertex_covariates <- as.data.frame(vertex_covs)
+    mesh$triangle_covariates <- as.data.frame(triangle_covs)
 
     # Add barrier detection if barrier polygon is provided
     if (!is.null(barrier)) {
@@ -153,20 +165,50 @@ add_vertex_covariates <-
       )
       vertex_sf <- sf::st_as_sf(vertex_coords, coords = c("X", "Y"))
 
+      # Convert triangle centers to sf points
+      triangle_coords <- data.frame(
+        X = triangle_centers[, 1],
+        Y = triangle_centers[, 2]
+      )
+      triangle_sf <- sf::st_as_sf(triangle_coords, coords = c("X", "Y"))
+
       # Set CRS to match barrier if barrier has one
       if (!is.na(sf::st_crs(barrier))) {
         sf::st_crs(vertex_sf) <- sf::st_crs(barrier)
+        sf::st_crs(triangle_sf) <- sf::st_crs(barrier)
       }
 
-      intersected <- sf::st_intersects(vertex_sf, barrier)
-      barrier_col <- lengths(intersected) > 0
+      # Check intersections for vertices
+      vertex_intersected <- sf::st_intersects(vertex_sf, barrier)
+      vertex_barrier_col <- lengths(vertex_intersected) > 0
+      mesh$vertex_covariates$barrier <- vertex_barrier_col
 
-      mesh$vertex_covariates$barrier <- barrier_col
+      # Check intersections for triangle centers
+      triangle_intersected <- sf::st_intersects(triangle_sf, barrier)
+      triangle_barrier_col <- lengths(triangle_intersected) > 0
+      mesh$triangle_covariates$barrier <- triangle_barrier_col
     }
 
     class(mesh) <- c("vertex_coords", class(mesh))
     mesh
   }
+
+.calculate_triangle_centers <- function(fm_mesh) {
+  # Get triangle vertex indices
+  triangles <- fm_mesh$graph$tv
+  vertices <- fm_mesh$loc[, 1:2, drop = FALSE]
+  
+  # Calculate centers as mean of triangle vertices
+  n_triangles <- nrow(triangles)
+  centers <- matrix(0, nrow = n_triangles, ncol = 2)
+  
+  for (i in seq_len(n_triangles)) {
+    triangle_verts <- triangles[i, ]
+    centers[i, ] <- colMeans(vertices[triangle_verts, , drop = FALSE])
+  }
+  
+  return(centers)
+}
 
 .prepare_interpolation_data <- function(mesh_vertices, data, covariates, coords) {
   # Initialize result matrix
