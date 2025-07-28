@@ -231,6 +231,15 @@ fit1 <- tinyVAST(
   control = tinyVASTcontrol( use_anisotropy = FALSE, run_model = TRUE, trace = 1 )
 )
 
+# Plot correlations
+intersects = st_intersects(sf_bathy, domain)
+sf_plot = sf_bathy[ which(as.integer(intersects)==1) ]
+pred = st_coordinates(st_centroid(sf_plot)) / 1000
+r1 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[1,]), pred = pred )
+r2 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[2,]), pred = pred )
+sf_plot = st_sf( sf_plot, r1 = r1, r2 = r2 )
+plot( sf_plot, border=NA )
+
 # Compare performance
 performance = rbind(
   AIC = c( "null" = AIC(fit0), "covar" = AIC(fit1)),
@@ -238,14 +247,6 @@ performance = rbind(
   CV = c( cv::cv(fit0)[['CV crit']], cv::cv(fit1)[['CV crit']] )
 )
 
-intersects = st_intersects(sf_bathy, domain)
-sf_plot = sf_bathy[ which(as.integer(intersects)==1) ]
-pred = st_coordinates(st_centroid(sf_plot)) / 1000
-r1 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[1,]), pred = pred )
-r2 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[2,]), pred = pred )
-
-sf_plot = st_sf( sf_plot, r1 = r1, r2 = r2 )
-plot( sf_plot, border=NA )
 
 # Plot Omega
 #bathy$omega = predict(fit0, what = "pomega_g", newdata = bathy )
