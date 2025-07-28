@@ -73,7 +73,9 @@ Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
 // make stiffness G1 from covariates in columns of E0, E1, E2
 template<class Type>
 Eigen::SparseMatrix<Type> G_spde_covariates( R_inla::spde_aniso_t<Type> spde,
-                                              matrix<Type> H_jj ){
+                                              matrix<Type> H_jj,
+                                              matrix<Type> V_zk,
+                                              vector<Type> triangle_k ){
 
   // Extract objects
   vector<Type> area_t = spde.Tri_Area;
@@ -81,6 +83,7 @@ Eigen::SparseMatrix<Type> G_spde_covariates( R_inla::spde_aniso_t<Type> spde,
   matrix<Type> edge1_tj = spde.E1;
   matrix<Type> edge2_tj = spde.E2;
   matrix<int> s_tv = spde.TV;         // dim = n_t \times n_v
+  matrix<Type> triangle_t1 = V_zk * triangle_k.matrix();
   int n_s = spde.n_s;
   int n_t = s_tv.rows();
   int n_v = s_tv.cols();              // number of vertices per triangle
@@ -104,7 +107,7 @@ Eigen::SparseMatrix<Type> G_spde_covariates( R_inla::spde_aniso_t<Type> spde,
     edges_vj.row(2) = edge2_tj.row(t);
 
     // Make local stiffness
-    Gt_vv = edges_vj * adjH_jj * edges_vj.transpose();
+    Gt_vv = (edges_vj * adjH_jj * edges_vj.transpose()) * exp(triangle_t1(t,0));
 
     // Assemble
     Eigen::SparseMatrix<Type> Gt_ss( n_s, n_s );
@@ -1060,8 +1063,10 @@ Type objective_function<Type>::operator() (){
   // Using SPDE with covariate-based anisotropy and geometric anisotropy
   if( spatial_options(0)==6 ){
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
+    DATA_MATRIX( V_zk );
+    PARAMETER_VECTOR( triangle_k );
     // Build precision
-    Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H );
+    Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H, V_zk, triangle_k );
     REPORT( G1 );
     Q_ss = exp(4.0*log_kappa)*spatial_list.G0 + Type(2.0)*exp(2.0*log_kappa)*G1 + G1*spatial_list.G0_inv*G1;
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );

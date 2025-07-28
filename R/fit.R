@@ -229,20 +229,33 @@ function( formula,
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   # Add `development` stuff
-  if( !is.null(development$kappa_formula) ){
-    kappa_formula = development$kappa_formula
+  if( !is.null(development$vertex_formula) ){
+    vertex_formula = development$vertex_formula
   }else{
-    kappa_formula = ~ 0
+    vertex_formula = ~ 0
+  }
+  if( !is.null(development$triangle_formula) ){
+    triangle_formula = development$triangle_formula
+  }else{
+    triangle_formula = ~ 0
+  }
+  
+  # Avoid name conflict
+  if( "fake" %in% colnames(spatial_domain$triangle_covariates) ){
+    stop("change colnames in `triangle_covariates` to avoid `fake`")
   }
 
-  # Input conflicts
+    # Input conflicts
   matched_call = match.call()
   if( isTRUE(as.character(matched_call$family) == "family") ){
     stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name", call. = FALSE)
   }
   if( !is(spatial_domain,"vertex_coords") ){
-    if( kappa_formula != as.formula("~0") ){
-      stop("specifying `kappa_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
+    if( vertex_formula != as.formula("~0") ){
+      stop("specifying `vertex_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
+    }
+    if( triangle_formula != as.formula("~0") ){
+      stop("specifying `triangle_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
   }
 
@@ -428,9 +441,21 @@ function( formula,
   if( is(spatial_domain,"vertex_coords") ){
     # Parse covariate matrix
     R_sk = model.matrix(
-      update.formula( old = kappa_formula, new = "~ . + 0" ),
+      update.formula( old = vertex_formula, new = "~ . + 0" ),
       spatial_domain$vertex_covariates
     )
+    #V_zk = model.matrix(
+    #  update.formula( old = ~ AK + GOA + BS, new = "~ . + 0" ),
+    #  spatial_domain$triangle_covariates
+    #)
+    if( triangle_formula != as.formula("~0") ){
+      gam_setup = mgcv::gam( update.formula( old = triangle_formula, new = "fake ~ . + 0" ), 
+                             data = cbind( "fake" = 0, spatial_domain$triangle_covariates ), 
+                             fit = FALSE )
+      V_zk = cbind( offset = gam_setup$offset, gam_setup$X ) # First is always the offset
+    }else{
+      V_zk = matrix( 0, ncol = 1, nrow = nrow(spatial_domain$triangle_covariates) )
+    }
     # covariate-based anisotropy
     n_s = spatial_domain$n
     spatial_method_code = 6
@@ -751,8 +776,11 @@ function( formula,
     W_gz = matrix(0,nrow=0,ncol=2),
     V_gz = matrix(0,nrow=0,ncol=2)
   )
-  if( spatial_method_code %in% c(1,3,6) ){
+  if( spatial_method_code %in% c(1,3) ){
     tmb_data$spatial_list = spatial_list
+  }else if( spatial_method_code %in% 6 ){
+    tmb_data$spatial_list = spatial_list
+    tmb_data$V_zk = V_zk
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
   }else if( spatial_method_code %in% 4 ){
@@ -818,6 +846,9 @@ function( formula,
   if( nrow(delta_time_term_ram$output$ram)==0 ){
     tmb_par$delta2_tc = tmb_par$delta2_tc[,numeric(0),drop=FALSE]
   }
+  if( spatial_method_code %in% 6 ){
+    tmb_par$triangle_k = rep( 1, ncol(V_zk) )    # Use 1, so that offset if included has value of 1
+  }
 
   # Turn off initial conditions ... cutting from model
   #if( control$estimate_delta0==FALSE ){
@@ -852,6 +883,11 @@ function( formula,
   # Map off ln_H_input
   if( isFALSE(estimate_anisotropy) ){
     tmb_map$ln_H_input = factor( c(NA, NA, seq_along(tmb_par$ln_H_input[-c(1:2)])) )
+  }
+
+  # Map off offset for triangle_k
+  if( spatial_method_code %in% 6 ){
+    tmb_map$triangle_k = factor( c(NA, seq_len(ncol(tmb_data$V_zk)-1)) )
   }
 
   # 
