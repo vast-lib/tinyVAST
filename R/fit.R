@@ -448,10 +448,14 @@ function( formula,
     #  update.formula( old = ~ AK + GOA + BS, new = "~ . + 0" ),
     #  spatial_domain$triangle_covariates
     #)
-    gam_setup = mgcv::gam( update.formula( old = triangle_formula, new = "fake ~ . + 0" ), 
-                           data = cbind( "fake" = 0, spatial_domain$triangle_covariates ), 
-                           fit = FALSE )
-    V_zk = cbind( offset = gam_setup$offset, gam_setup$X ) # First is always the offset
+    if( triangle_formula != as.formula("~0") ){
+      gam_setup = mgcv::gam( update.formula( old = triangle_formula, new = "fake ~ . + 0" ), 
+                             data = cbind( "fake" = 0, spatial_domain$triangle_covariates ), 
+                             fit = FALSE )
+      V_zk = cbind( offset = gam_setup$offset, gam_setup$X ) # First is always the offset
+    }else{
+      V_zk = matrix( 0, ncol = 0, nrow = nrow(spatial_domain$triangle_covariates) )
+    }
     # covariate-based anisotropy
     n_s = spatial_domain$n
     spatial_method_code = 6
