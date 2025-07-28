@@ -843,7 +843,7 @@ function( formula,
     tmb_par$delta2_tc = tmb_par$delta2_tc[,numeric(0),drop=FALSE]
   }
   if( spatial_method_code %in% 6 ){
-    tmb_par$triangle_k = rep( 0, ncol(V_zk) )
+    tmb_par$triangle_k = rep( 1, ncol(V_zk) )    # Use 1, so that offset if included has value of 1
   }
 
   # Turn off initial conditions ... cutting from model
