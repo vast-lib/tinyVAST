@@ -1,4 +1,4 @@
-#' Add vertex covariates to a mesh
+#' Add mesh covariates to vertices and triangles
 #'
 #' Interpolates covariate values from a data frame to mesh vertices using
 #' inverse distance weighting (IDW). Uses \pkg{gstat} for exact IDW
@@ -21,10 +21,13 @@
 #' @param k Number of nearest neighbours to use for `"rann"` method (default
 #'   `10`). Ignored for `"gstat"` method.
 #' @param barrier Optional \pkg{sf} polygon object defining barrier regions. If
-#'   provided, adds a logical `barrier` column to `vertex_covariates` where
-#'   `TRUE` indicates vertices inside the barrier polygon and `FALSE` indicates
-#'   vertices outside. E.g., in the case of modelling fish in the ocean, `TRUE`
-#'   represents vertices over land and `FALSE` represents vertices over water.
+#'   provided, adds a logical `barrier` column to both `vertex_covariates` and 
+#'   `triangle_covariates`. E.g., in the case of modelling fish in the ocean, 
+#'   `TRUE` represents vertices/triangle centers over land and `FALSE` represents 
+#'   vertices/triangle centers over water. For triangles, also adds a 
+#'   `barrier_proportion` column indicating the proportion of each triangle's area 
+#'   that intersects with the barrier polygon (0 = no intersection, 1 = triangle 
+#'   completely within barrier).
 #'
 #' @return Modified mesh object with `vertex_covariates` and `triangle_covariates` 
 #'   elements added and class `vertex_cov` added. The `vertex_covariates` data frame 
@@ -38,7 +41,7 @@
 #'
 #' # Regular data frame
 #' mesh <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10)
-#' mesh_with_covs <- add_vertex_covariates(
+#' mesh_with_covs <- add_mesh_covariates(
 #'   mesh,
 #'   data = qcs_grid,
 #'   covariates = c("depth"),
@@ -58,7 +61,7 @@
 #'
 #' # Piped version
 #' mesh_with_covs <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
-#'   add_vertex_covariates(
+#'   add_mesh_covariates(
 #'     qcs_grid,
 #'     covariates = c("depth_scaled", "depth_scaled2"),
 #'     coords = c("X", "Y")
@@ -68,22 +71,22 @@
 #' pcod_sf <- st_as_sf(pcod, coords = c("X", "Y"))
 #' grid_sf <- st_as_sf(qcs_grid, coords = c("X", "Y"))
 #' mesh_sf <- fmesher::fm_mesh_2d(pcod_sf, cutoff = 10) |>
-#'   add_vertex_covariates(grid_sf, c("depth"))
+#'   add_mesh_covariates(grid_sf, c("depth"))
 #'
 #' # With sdmTMB mesh (coordinate names and mesh automatically detected)
 #' mesh <- make_mesh(pcod, c("X", "Y"), cutoff = 10) |>
-#'   add_vertex_covariates(qcs_grid, c("depth"))
+#'   add_mesh_covariates(qcs_grid, c("depth"))
 #'
 #' # Use RANN method for very large datasets (much faster)
 #' mesh_fast <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
-#'   add_vertex_covariates(
+#'   add_mesh_covariates(
 #'     qcs_grid,
 #'     covariates = c("depth_scaled", "depth_scaled2"),
 #'     coords = c("X", "Y"),
 #'     method = "rann",
 #'     k = 15
 #'   )
-add_vertex_covariates <-
+add_mesh_covariates <-
   function(mesh,
            data,
            covariates,
@@ -187,6 +190,17 @@ add_vertex_covariates <-
       triangle_intersected <- sf::st_intersects(triangle_sf, barrier)
       triangle_barrier_col <- lengths(triangle_intersected) > 0
       mesh$triangle_covariates$barrier <- triangle_barrier_col
+      
+      # Calculate triangle intersection proportions
+      triangle_polygons <- .create_triangle_polygons(fm_mesh)
+      
+      # Set CRS to match barrier if barrier has one
+      if (!is.na(sf::st_crs(barrier))) {
+        sf::st_crs(triangle_polygons) <- sf::st_crs(barrier)
+      }
+      
+      triangle_intersection_props <- .calculate_intersection_proportions(triangle_polygons, barrier)
+      mesh$triangle_covariates$barrier_proportion <- triangle_intersection_props
     }
 
     class(mesh) <- c("vertex_coords", class(mesh))
@@ -207,7 +221,61 @@ add_vertex_covariates <-
     centers[i, ] <- colMeans(vertices[triangle_verts, , drop = FALSE])
   }
   
-  return(centers)
+  centers
+}
+
+.create_triangle_polygons <- function(fm_mesh) {
+  # Get triangle vertex indices and vertex coordinates
+  triangles <- fm_mesh$graph$tv
+  vertices <- fm_mesh$loc[, 1:2, drop = FALSE]
+  
+  n_triangles <- nrow(triangles)
+  triangle_list <- vector("list", n_triangles)
+  
+  for (i in seq_len(n_triangles)) {
+    # Get the three vertices of the triangle
+    triangle_verts <- triangles[i, ]
+    tri_coords <- vertices[triangle_verts, , drop = FALSE]
+    
+    # Close the polygon by repeating first vertex
+    tri_coords_closed <- rbind(tri_coords, tri_coords[1, , drop = FALSE])
+    
+    # Create polygon
+    triangle_list[[i]] <- sf::st_polygon(list(tri_coords_closed))
+  }
+  
+  # Create sf object
+  triangle_sf <- sf::st_sfc(triangle_list)
+  triangle_sf <- sf::st_sf(triangle_id = seq_len(n_triangles), geometry = triangle_sf)
+  
+  triangle_sf
+}
+
+.calculate_intersection_proportions <- function(triangle_polygons, barrier) {
+  n_triangles <- nrow(triangle_polygons)
+  proportions <- numeric(n_triangles)
+  
+  for (i in seq_len(n_triangles)) {
+    triangle <- triangle_polygons[i, ]
+    triangle_area <- as.numeric(sf::st_area(triangle))
+    
+    if (triangle_area == 0) {
+      proportions[i] <- 0
+      next
+    }
+    
+    # Calculate intersection (suppress sf attribute warnings)
+    intersection <- suppressWarnings(sf::st_intersection(triangle, barrier))
+    
+    if (nrow(intersection) == 0) {
+      proportions[i] <- 0
+    } else {
+      intersection_area <- sum(as.numeric(sf::st_area(intersection)))
+      proportions[i] <- pmin(intersection_area / triangle_area, 1.0)
+    }
+  }
+  
+  proportions
 }
 
 .prepare_interpolation_data <- function(mesh_vertices, data, covariates, coords) {
@@ -235,7 +303,7 @@ add_vertex_covariates <-
     )
   }
 
-  return(list(vertex_covs = vertex_covs, prepared_data = prepared_data))
+  list(vertex_covs = vertex_covs, prepared_data = prepared_data)
 }
 
 .interpolate_gstat <- function(mesh_vertices, data, covariates, coords, power) {
@@ -270,7 +338,7 @@ add_vertex_covariates <-
     vertex_covs[, j] <- predicted$var1.pred
   }
 
-  return(vertex_covs)
+  vertex_covs
 }
 
 .interpolate_rann <- function(mesh_vertices, data, covariates, coords, power, k) {
@@ -307,5 +375,5 @@ add_vertex_covariates <-
     }
   }
 
-  return(vertex_covs)
+  vertex_covs
 }

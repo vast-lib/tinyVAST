@@ -1,4 +1,4 @@
-test_that("add_vertex_covariates works with barrier parameter", {
+test_that("add_mesh_covariates works with barrier parameter", {
   library(sf)
 
   # Create a simple test mesh
@@ -30,7 +30,7 @@ test_that("add_vertex_covariates works with barrier parameter", {
   barrier_sf <- st_sf(data.frame(id = 1), geometry = barrier_sf)
 
   # Test without barrier
-  mesh_no_barrier <- add_vertex_covariates(
+  mesh_no_barrier <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -38,7 +38,7 @@ test_that("add_vertex_covariates works with barrier parameter", {
   )
 
   # Test with barrier
-  mesh_with_barrier <- add_vertex_covariates(
+  mesh_with_barrier <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -66,7 +66,7 @@ test_that("add_vertex_covariates works with barrier parameter", {
   }
 })
 
-test_that("add_vertex_covariates barrier error handling", {
+test_that("add_mesh_covariates barrier error handling", {
   # Create a simple test mesh
   coords <- data.frame(X = c(0, 1, 0, 1), Y = c(0, 0, 1, 1))
   mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
@@ -75,7 +75,7 @@ test_that("add_vertex_covariates barrier error handling", {
 
   # Test with non-sf barrier object
   expect_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = "depth",
@@ -86,7 +86,7 @@ test_that("add_vertex_covariates barrier error handling", {
   )
 })
 
-test_that("add_vertex_covariates barrier with different CRS", {
+test_that("add_mesh_covariates barrier with different CRS", {
   library(sf)
 
   # Create a simple test mesh
@@ -105,7 +105,7 @@ test_that("add_vertex_covariates barrier with different CRS", {
 
   # Should work without error (CRS gets transferred to vertices)
   expect_no_error({
-    result <- add_vertex_covariates(
+    result <- add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = "depth",
@@ -115,7 +115,7 @@ test_that("add_vertex_covariates barrier with different CRS", {
   })
 
   # Should have barrier column
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -125,7 +125,7 @@ test_that("add_vertex_covariates barrier with different CRS", {
   expect_true("barrier" %in% names(result$vertex_covariates))
 })
 
-test_that("add_vertex_covariates basic covariate interpolation", {
+test_that("add_mesh_covariates basic covariate interpolation", {
   # Create a simple test mesh
   set.seed(123)
   coords <- data.frame(
@@ -142,7 +142,7 @@ test_that("add_vertex_covariates basic covariate interpolation", {
   )
 
   # Test basic interpolation
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -174,7 +174,7 @@ test_that("add_vertex_covariates basic covariate interpolation", {
   }
 })
 
-test_that("add_vertex_covariates multiple covariates", {
+test_that("add_mesh_covariates multiple covariates", {
   # Create a simple test mesh
   coords <- data.frame(X = c(0, 1, 0, 1), Y = c(0, 0, 1, 1))
   mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
@@ -189,7 +189,7 @@ test_that("add_vertex_covariates multiple covariates", {
   )
 
   # Test with multiple covariates
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = c("depth", "temperature", "salinity"),
@@ -209,7 +209,7 @@ test_that("add_vertex_covariates multiple covariates", {
   expect_true(all(is.finite(result$vertex_covariates$salinity)))
 })
 
-test_that("add_vertex_covariates with sf objects", {
+test_that("add_mesh_covariates with sf objects", {
   library(sf)
 
   # Create a simple test mesh
@@ -224,7 +224,7 @@ test_that("add_vertex_covariates with sf objects", {
   )
 
   # Test with sf input (coords should be ignored)
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_points,
     covariates = c("depth", "temperature"),
@@ -239,7 +239,7 @@ test_that("add_vertex_covariates with sf objects", {
   expect_true(all(is.finite(result$vertex_covariates$temperature)))
 })
 
-test_that("add_vertex_covariates handles missing values", {
+test_that("add_mesh_covariates handles missing values", {
   # Create a simple test mesh
   coords <- data.frame(X = c(0, 1, 0, 1), Y = c(0, 0, 1, 1))
   mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
@@ -254,7 +254,7 @@ test_that("add_vertex_covariates handles missing values", {
 
   # Test that function handles missing values gracefully
   expect_warning(
-    result <- add_vertex_covariates(
+    result <- add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = c("depth", "temperature"),
@@ -270,7 +270,7 @@ test_that("add_vertex_covariates handles missing values", {
   expect_true(all(is.finite(result$vertex_covariates$temperature)))
 })
 
-test_that("add_vertex_covariates inverse distance weighting", {
+test_that("add_mesh_covariates inverse distance weighting", {
   # Create a test mesh with vertex at (1, 1)
   coords <- data.frame(X = c(0, 2, 1), Y = c(0, 0, 1))
   mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
@@ -283,7 +283,7 @@ test_that("add_vertex_covariates inverse distance weighting", {
   )
 
   # Test with default power (should be 2)
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -301,7 +301,7 @@ test_that("add_vertex_covariates inverse distance weighting", {
   expect_true(interpolated_value > 15 && interpolated_value < 25)
 })
 
-test_that("add_vertex_covariates error conditions", {
+test_that("add_mesh_covariates error conditions", {
   # Create a simple test mesh
   coords <- data.frame(X = c(0, 1, 0, 1), Y = c(0, 0, 1, 1))
   mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
@@ -310,7 +310,7 @@ test_that("add_vertex_covariates error conditions", {
 
   # Test missing coordinate columns
   expect_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = "depth",
@@ -321,7 +321,7 @@ test_that("add_vertex_covariates error conditions", {
 
   # Test missing covariate columns
   expect_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = "missing_depth",
@@ -332,7 +332,7 @@ test_that("add_vertex_covariates error conditions", {
 
   # Test non-data.frame input
   expect_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = mesh,
       data = "not_a_dataframe",
       covariates = "depth",
@@ -343,7 +343,7 @@ test_that("add_vertex_covariates error conditions", {
 
   # Test invalid mesh type
   expect_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = "not_a_mesh",
       data = test_data,
       covariates = "depth",
@@ -354,7 +354,7 @@ test_that("add_vertex_covariates error conditions", {
 })
 
 # Tests for interpolation methods gstat and RANN
-test_that("add_vertex_covariates method parameter validation", {
+test_that("add_mesh_covariates method parameter validation", {
   # Create a simple test mesh
   coords <- data.frame(X = c(0, 1, 0, 1), Y = c(0, 0, 1, 1))
   mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
@@ -363,7 +363,7 @@ test_that("add_vertex_covariates method parameter validation", {
 
   # Test valid method arguments
   expect_no_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = "depth",
@@ -373,7 +373,7 @@ test_that("add_vertex_covariates method parameter validation", {
   )
 
   expect_no_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = "depth",
@@ -384,7 +384,7 @@ test_that("add_vertex_covariates method parameter validation", {
 
   # Test invalid method argument
   expect_error(
-    add_vertex_covariates(
+    add_mesh_covariates(
       mesh = mesh,
       data = test_data,
       covariates = "depth",
@@ -395,7 +395,7 @@ test_that("add_vertex_covariates method parameter validation", {
   )
 })
 
-test_that("add_vertex_covariates gstat method produces correct results", {
+test_that("add_mesh_covariates gstat method produces correct results", {
   skip_if_not_installed("sp")
 
   # Create a simple test mesh
@@ -411,7 +411,7 @@ test_that("add_vertex_covariates gstat method produces correct results", {
   )
 
   # Test gstat method
-  result_gstat <- add_vertex_covariates(
+  result_gstat <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -431,7 +431,7 @@ test_that("add_vertex_covariates gstat method produces correct results", {
   expect_true(all(depth_values <= max(test_data$depth)))
 })
 
-test_that("add_vertex_covariates RANN method produces correct results", {
+test_that("add_mesh_covariates RANN method produces correct results", {
   skip_if_not_installed("RANN")
 
   # Create a simple test mesh
@@ -447,7 +447,7 @@ test_that("add_vertex_covariates RANN method produces correct results", {
   )
 
   # Test RANN method with different k values
-  result_rann_k5 <- add_vertex_covariates(
+  result_rann_k5 <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -456,7 +456,7 @@ test_that("add_vertex_covariates RANN method produces correct results", {
     k = 5
   )
 
-  result_rann_k2 <- add_vertex_covariates(
+  result_rann_k2 <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -486,7 +486,7 @@ test_that("add_vertex_covariates RANN method produces correct results", {
   expect_true(correlation > 0.8) # Should be highly correlated
 })
 
-test_that("add_vertex_covariates methods comparison", {
+test_that("add_mesh_covariates methods comparison", {
   skip_if_not_installed("RANN")
 
   # Create a larger test dataset for meaningful comparison
@@ -506,7 +506,7 @@ test_that("add_vertex_covariates methods comparison", {
   )
 
   # Compare gstat and RANN methods
-  result_gstat <- add_vertex_covariates(
+  result_gstat <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -514,7 +514,7 @@ test_that("add_vertex_covariates methods comparison", {
     method = "gstat"
   )
 
-  result_rann <- add_vertex_covariates(
+  result_rann <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -542,7 +542,7 @@ test_that("add_vertex_covariates methods comparison", {
   expect_true(max(gstat_range[1], rann_range[1]) < min(gstat_range[2], rann_range[2]))
 })
 
-test_that("add_vertex_covariates RANN k parameter edge cases", {
+test_that("add_mesh_covariates RANN k parameter edge cases", {
   skip_if_not_installed("RANN")
 
   # Create a simple test mesh
@@ -557,7 +557,7 @@ test_that("add_vertex_covariates RANN k parameter edge cases", {
   )
 
   # Test with k larger than number of data points
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -571,7 +571,7 @@ test_that("add_vertex_covariates RANN k parameter edge cases", {
   expect_true(all(is.finite(result$vertex_covariates$depth)))
 
   # Test with k = 1
-  result_k1 <- add_vertex_covariates(
+  result_k1 <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -584,7 +584,7 @@ test_that("add_vertex_covariates RANN k parameter edge cases", {
   expect_true(all(is.finite(result_k1$vertex_covariates$depth)))
 })
 
-test_that("add_vertex_covariates creates triangle_covariates", {
+test_that("add_mesh_covariates creates triangle_covariates", {
   # Create a simple test mesh
   set.seed(123)
   coords <- data.frame(
@@ -601,7 +601,7 @@ test_that("add_vertex_covariates creates triangle_covariates", {
   )
 
   # Test that triangle_covariates is created
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -627,7 +627,7 @@ test_that("add_vertex_covariates creates triangle_covariates", {
   expect_true(all(depth_values <= max(test_data$depth)))
 })
 
-test_that("add_vertex_covariates triangle_covariates with multiple covariates", {
+test_that("add_mesh_covariates triangle_covariates with multiple covariates", {
   # Create a simple test mesh
   coords <- data.frame(X = c(0, 1, 0, 1), Y = c(0, 0, 1, 1))
   mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
@@ -642,7 +642,7 @@ test_that("add_vertex_covariates triangle_covariates with multiple covariates", 
   )
 
   # Test with multiple covariates
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = c("depth", "temperature", "salinity"),
@@ -662,7 +662,7 @@ test_that("add_vertex_covariates triangle_covariates with multiple covariates", 
   expect_true(all(is.finite(result$triangle_covariates$salinity)))
 })
 
-test_that("add_vertex_covariates triangle_covariates with barrier", {
+test_that("add_mesh_covariates triangle_covariates with barrier", {
   library(sf)
 
   # Create a simple test mesh
@@ -694,7 +694,7 @@ test_that("add_vertex_covariates triangle_covariates with barrier", {
   barrier_sf <- st_sf(data.frame(id = 1), geometry = barrier_sf)
 
   # Test with barrier
-  result <- add_vertex_covariates(
+  result <- add_mesh_covariates(
     mesh = mesh,
     data = test_data,
     covariates = "depth",
@@ -710,4 +710,66 @@ test_that("add_vertex_covariates triangle_covariates with barrier", {
 
   # Check that we have barrier values for all triangles
   expect_equal(length(result$triangle_covariates$barrier), nrow(mesh$graph$tv))
+
+  # Check that barrier_proportion column is added
+  expect_true("barrier_proportion" %in% names(result$triangle_covariates))
+
+  # Check that barrier_proportion is numeric and between 0 and 1
+  expect_type(result$triangle_covariates$barrier_proportion, "double")
+  expect_true(all(result$triangle_covariates$barrier_proportion >= 0))
+  expect_true(all(result$triangle_covariates$barrier_proportion <= 1))
+
+  # Check that we have proportion values for all triangles
+  expect_equal(length(result$triangle_covariates$barrier_proportion), nrow(mesh$graph$tv))
+})
+
+test_that("add_mesh_covariates barrier_proportion calculates correctly", {
+  library(sf)
+
+  # Create a simple rectangular mesh
+  coords <- data.frame(
+    X = c(0, 2, 0, 2),
+    Y = c(0, 0, 2, 2)
+  )
+  mesh <- fmesher::fm_mesh_2d(coords, cutoff = 0.5)
+
+  # Create test covariate data
+  test_data <- data.frame(
+    X = c(1, 1),
+    Y = c(0.5, 1.5),
+    depth = c(10, 20)
+  )
+
+  # Create a barrier polygon that covers exactly half of the mesh area
+  # This should create different intersection proportions for different triangles
+  barrier_coords <- matrix(c(
+    0, 0,
+    1, 0,
+    1, 2,
+    0, 2,
+    0, 0
+  ), ncol = 2, byrow = TRUE)
+
+  barrier_polygon <- st_polygon(list(barrier_coords))
+  barrier_sf <- st_sfc(barrier_polygon)
+  barrier_sf <- st_sf(data.frame(id = 1), geometry = barrier_sf)
+
+  # Test with barrier
+  result <- add_mesh_covariates(
+    mesh = mesh,
+    data = test_data,
+    covariates = "depth",
+    coords = c("X", "Y"),
+    barrier = barrier_sf
+  )
+
+  # Check that barrier_proportion values make sense
+  proportions <- result$triangle_covariates$barrier_proportion
+
+  # All proportions should be valid (between 0 and 1)
+  expect_true(all(proportions >= 0))
+  expect_true(all(proportions <= 1))
+
+  # With this barrier design, we should have at least some non-zero proportions
+  expect_true(any(proportions > 0))
 })
