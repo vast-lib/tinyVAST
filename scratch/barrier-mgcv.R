@@ -1,3 +1,4 @@
+#devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force = TRUE )
 # example from ?mgcv::smooth.construct.so.smooth.spec
 
 library(mgcv)
@@ -139,7 +140,7 @@ mesh_cov = mesh
 mesh_cov$vertex_covariates = data.frame(matrix(nrow=mesh$n,ncol=0))
 #mesh_cov$triangle_covariates = data.frame(matrix(nrow=nrow(mesh$graph$tv),ncol=0))
 mesh_cov$triangle_covariates = data.frame(
-  land = ifelse( seq_len(nrow(mesh$graph$tv)) %in% barrier.triangles, 1, 0 )
+  barrier = ifelse( seq_len(nrow(mesh$graph$tv)) %in% barrier.triangles, -log(10), 0 )
 )
 class(mesh_cov) <- c("vertex_coords", class(mesh))
 
@@ -157,7 +158,7 @@ tvb <- tinyVAST(
   data = as.data.frame(dat), 
   spatial_domain = mesh_cov,
   development = list(
-    triangle_formula = ~ land
+    triangle_formula = ~ offset(barrier)    # Negative -log(10)
   ),
   space_term = ""
 )

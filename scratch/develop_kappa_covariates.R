@@ -93,6 +93,12 @@ if( case == "NorPac_pcod" ){
   domain = st_union( BS, st_geometry(GOA) )
   #domain = st_transform( domain, crs = )
 
+  # Make grid
+  sf_bathy = st_make_grid( domain, cellsize = 25*1e3 )
+  #intersects = st_intersects(sf_bathy, domain)
+  #sf_plot = sf_bathy[ which(as.integer(intersects)==1) ]
+  sf_plot = st_intersection( sf_bathy, domain )
+
   # map
   AK = ne_states(country = "united states of america") # , regions = "alaska" )
   AK = AK[pmatch("Alas", AK$name_en),]
@@ -102,9 +108,6 @@ if( case == "NorPac_pcod" ){
   # Make indicator for region
   if( TRUE ){
     # Set up grid ... keeping excess before making covariates
-    sf_bathy = st_make_grid( domain, cellsize = 25*1e3 )
-    intersects = st_intersects(sf_bathy, domain)
-    sf_plot = sf_bathy[ which(as.integer(intersects)==1) ]
     bathy = st_coordinates(st_centroid(sf_bathy))
     # Add GOA
     intersects_GOA = st_intersects(sf_bathy, GOA)
@@ -167,26 +170,29 @@ if( case == "NorPac_pcod" ){
   )
   #mesh_cov$vertex_covariates = data.frame( matrix(nrow=mesh$n,ncol=0) )
   class(mesh_cov) <- c("vertex_coords", class(mesh))
+
+  # Define predictions to visualize
+  xy_i = data.frame( X = c(-200, -1000), Y = c(650, 1279)  ) 
+
+  # Plot
   plot(mesh)
-  points( x = mesh$loc[,1], y = mesh$loc[,2], 
-          col = viridisLite::viridis(10)[cut(mesh_cov$vertex[,1],breaks=10)] )
+  #points( x = mesh$loc[,1], y = mesh$loc[,2], 
+  #        col = viridisLite::viridis(10)[cut(mesh_cov$vertex[,1],breaks=10)] )
   points( x = posTri[,1], y = posTri[,2], 
-          col = viridisLite::viridis(10)[cut(mesh_cov$triangle[,3],breaks=10)] )
-  
-  #
-  xy_i = data.frame( X = c(0, -1000000), Y = c(908000, 1279000)  ) / 1e3
+          col = viridisLite::viridis(10)[cut(mesh_cov$triangle[,3],breaks=10)], pch = 20, cex = 0.2 )
+  points( x = xy_i$X, y = xy_i$Y, col = "red", pch = 20 )
 }
 
 #
-plot( x = bathy$X, y = bathy$Y, col = viridis() )
+#plot( x = bathy$X, y = bathy$Y, col = viridis() )
 
 # Plot covar
-ggplot(bathy) +
-    geom_tile( aes(X, Y, fill = covar) )  +  # , colour = "grey50"
-    coord_fixed()
+#ggplot(bathy) +
+#    geom_tile( aes(X, Y, fill = covar) )  +  # , colour = "grey50"
+#    coord_fixed()
 
 # Which polygon to plot
-polygon_i = RANN::nn2( data = mesh$loc[,1:2], query = xy_i, k = 1 )
+#polygon_i = RANN::nn2( data = mesh$loc[,1:2], query = xy_i, k = 1 )
 
 # Inputs
 #spatial_domain = mesh_with_covs
@@ -212,6 +218,10 @@ fit0 <- tinyVAST(
   control = tinyVASTcontrol( use_anisotropy = FALSE, run_model = TRUE, trace = 1 )
 )
 
+# Rescale barrier ... negative for land
+mesh_cov$triangle_covariates[,'AK'] = ifelse( mesh_cov$triangle_covariates[,'AK'] == 0, 0, -log(10) )
+# mesh_cov$vertex_covariates[,'depth'] = (mesh_cov$vertex_covariates[,'depth'] - 200) / 1000
+
 # Fit a Tweedie spatial random field GLMM with a smoother for covar:
 fit1 <- tinyVAST(
   formula = density ~ 1,    # 0 + factor(year)
@@ -222,22 +232,26 @@ fit1 <- tinyVAST(
   spatial_domain = mesh_cov,
   family = tweedie(link = "log"),
   development = list(
-    triangle_formula = ~ offset(AK) + GOA + BS,
-    vertex_formula = ~ depth
+    vertex_formula = ~ depth,
+    # Don't include both GOA and EBS ...  estimating kappa beyond data has no information 
+    triangle_formula = ~ AK + GOA # + GOA    #  
   ),
   space_columns = c('X','Y'),
   time_column = "year",
   times = 1982:2024,
   control = tinyVASTcontrol( use_anisotropy = FALSE, run_model = TRUE, trace = 1 )
 )
+# fit1$tmb_inputs$tmb_data$V_zk
+# fit1$internal$parlist$triangle_k
+
+#
+#solve(fit1$rep$H) * det(fit1$rep$H)
 
 # Plot correlations
-intersects = st_intersects(sf_bathy, domain)
-sf_plot = sf_bathy[ which(as.integer(intersects)==1) ]
 pred = st_coordinates(st_centroid(sf_plot)) / 1000
 r1 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[1,]), pred = pred )
 r2 = spatial_cor( Q = fit1$rep$Q, mesh = mesh, coord = as.numeric(xy_i[2,]), pred = pred )
-sf_plot = st_sf( sf_plot, r1 = r1, r2 = r2 )
+sf_plot = st_sf( st_geometry(sf_plot), r1 = r1, r2 = r2 )
 plot( sf_plot, border=NA )
 
 # Compare performance
