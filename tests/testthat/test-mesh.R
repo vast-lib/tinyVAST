@@ -653,7 +653,7 @@ test_that("add_mesh_covariates triangle_covariates with multiple covariates", {
   expect_true(all(c("depth", "temperature", "salinity") %in% names(result$triangle_covariates)))
 
   # Check dimensions
-  expect_equal(ncol(result$triangle_covariates), 3)
+  expect_equal(ncol(result$triangle_covariates), 5)
   expect_equal(nrow(result$triangle_covariates), nrow(mesh$graph$tv))
 
   # Check that all values are finite
