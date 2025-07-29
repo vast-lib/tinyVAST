@@ -38,7 +38,7 @@
 #' @examplesIf requireNamespace("RANN", quietly = TRUE)
 #' library(sdmTMB)
 #' library(sf)
-#'
+#' 
 #' # Regular data frame
 #' mesh <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10)
 #' mesh_with_covs <- add_mesh_covariates(
@@ -48,17 +48,24 @@
 #'   coords = c("X", "Y")
 #' )
 #' head(mesh_with_covs$vertex_covariates)
-#'
+#' 
 #' # Visualize what we've done:
 #' if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'   library(ggplot2)
 #'   df <- as.data.frame(mesh_with_covs$loc[,1:2])
 #'   df <- cbind(df, mesh_with_covs$vertex_covariates)
 #'   ggplot() +
 #'     geom_raster(data = qcs_grid, aes(X, Y, fill = depth), alpha = 0.7) +
 #'     geom_point(data = df, aes(V1, V2, fill = depth), colour = "#00000010", pch = 21) +
 #'     scale_fill_viridis_c(option = "G", trans = "log", direction = -1)
+#' 
+#'   df_tri <- mesh_with_covs$triangle_covariates
+#'   ggplot() +
+#'     geom_raster(data = qcs_grid, aes(X, Y, fill = depth), alpha = 0.7) +
+#'     geom_point(data = df_tri, aes(x = .x_triangle, y = .y_triangle, fill = depth), colour = "#00000010", pch = 21) +
+#'     scale_fill_viridis_c(option = "G", trans = "log", direction = -1)
 #' }
-#'
+#' 
 #' # Piped version
 #' mesh_with_covs <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
 #'   add_mesh_covariates(
@@ -66,17 +73,17 @@
 #'     covariates = c("depth_scaled", "depth_scaled2"),
 #'     coords = c("X", "Y")
 #'   )
-#'
+#' 
 #' # With sf objects (coords automatically extracted)
 #' pcod_sf <- st_as_sf(pcod, coords = c("X", "Y"))
 #' grid_sf <- st_as_sf(qcs_grid, coords = c("X", "Y"))
 #' mesh_sf <- fmesher::fm_mesh_2d(pcod_sf, cutoff = 10) |>
 #'   add_mesh_covariates(grid_sf, c("depth"))
-#'
+#' 
 #' # With sdmTMB mesh (coordinate names and mesh automatically detected)
 #' mesh <- make_mesh(pcod, c("X", "Y"), cutoff = 10) |>
 #'   add_mesh_covariates(qcs_grid, c("depth"))
-#'
+#' 
 #' # Use RANN method for very large datasets (much faster)
 #' mesh_fast <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
 #'   add_mesh_covariates(
@@ -154,6 +161,8 @@ add_mesh_covariates <-
 
     mesh$vertex_covariates <- as.data.frame(vertex_covs)
     mesh$triangle_covariates <- as.data.frame(triangle_covs)
+    mesh$triangle_covariates$.x_triangle <- triangle_centers[, 1]
+    mesh$triangle_covariates$.y_triangle <- triangle_centers[, 2]
 
     # Add barrier detection if barrier polygon is provided
     if (!is.null(barrier)) {
