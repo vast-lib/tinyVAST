@@ -1,134 +1,388 @@
-#' Add vertex covariates to a mesh
+#' Add mesh covariates to vertices and triangles
 #'
 #' Interpolates covariate values from a data frame to mesh vertices using
-#' inverse distance weighting.
+#' inverse distance weighting (IDW). Uses \pkg{gstat} for exact IDW
+#' interpolation by default, with an optional high-performance \pkg{RANN} method
+#' for very large datasets.
 #'
 #' @param mesh A mesh object from \pkg{fmesher} or \pkg{sdmTMB} (for
 #'   [sdmTMB::sdmTMB()] models only).
 #' @param data A data frame with coordinate columns and covariate columns, or an
 #'   \pkg{sf} object.
 #' @param covariates Character vector of covariate column names to interpolate.
-#' @param coords Character vector of coordinate column names.
-#'   Ignored if data is an \pkg{sf} object.
-#' @param power Numeric power parameter for inverse distance weighting
-#'  (default `2`; Euclidean squared decay).
+#' @param coords Character vector of coordinate column names. Ignored if data is
+#'   an \pkg{sf} object.
+#' @param power Numeric power parameter for inverse distance weighting (default
+#'   `2`; Euclidean squared decay).
+#' @param method Interpolation method. Options: `"gstat"` (default, exact
+#'   inverse distance weighting using gstat package) or `"rann"` (fast k-nearest
+#'   neighbours inverse distance weighting using \pkg{RANN} package for very
+#'   large datasets).
+#' @param k Number of nearest neighbours to use for `"rann"` method (default
+#'   `10`). Ignored for `"gstat"` method.
+#' @param barrier Optional \pkg{sf} polygon object defining barrier regions. If
+#'   provided, adds a logical `barrier` column to both `vertex_covariates` and 
+#'   `triangle_covariates`. E.g., in the case of modelling fish in the ocean, 
+#'   `TRUE` represents vertices/triangle centers over land and `FALSE` represents 
+#'   vertices/triangle centers over water. For triangles, also adds a 
+#'   `barrier_proportion` column indicating the proportion of each triangle's area 
+#'   that intersects with the barrier polygon (0 = no intersection, 1 = triangle 
+#'   completely within barrier).
 #'
-#' @return Modified mesh object with a `vertex_covariates` element added and
-#' class `vertex_cov` added.
+#' @return Modified mesh object with `vertex_covariates` and `triangle_covariates` 
+#'   elements added and class `vertex_cov` added. The `vertex_covariates` data frame 
+#'   contains covariate values interpolated at mesh vertices, and `triangle_covariates` 
+#'   contains covariate values interpolated at triangle centers.
 #' @export
 #'
-#' @examples
+#' @examplesIf requireNamespace("RANN", quietly = TRUE)
 #' library(sdmTMB)
 #' library(sf)
-#'
+#' 
 #' # Regular data frame
 #' mesh <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10)
-#' mesh_with_covs <- add_vertex_covariates(
+#' mesh_with_covs <- add_mesh_covariates(
 #'   mesh,
 #'   data = qcs_grid,
-#'   covariates = c("depth_scaled", "depth_scaled2"),
+#'   covariates = c("depth"),
 #'   coords = c("X", "Y")
 #' )
 #' head(mesh_with_covs$vertex_covariates)
-#'
+#' 
+#' # Visualize what we've done:
+#' if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'   library(ggplot2)
+#'   df <- as.data.frame(mesh_with_covs$loc[,1:2])
+#'   df <- cbind(df, mesh_with_covs$vertex_covariates)
+#'   ggplot() +
+#'     geom_raster(data = qcs_grid, aes(X, Y, fill = depth), alpha = 0.7) +
+#'     geom_point(data = df, aes(V1, V2, fill = depth), colour = "#00000010", pch = 21) +
+#'     scale_fill_viridis_c(option = "G", trans = "log", direction = -1)
+#' 
+#'   df_tri <- mesh_with_covs$triangle_covariates
+#'   ggplot() +
+#'     geom_raster(data = qcs_grid, aes(X, Y, fill = depth), alpha = 0.7) +
+#'     geom_point(data = df_tri, aes(x = .x_triangle, y = .y_triangle, fill = depth), colour = "#00000010", pch = 21) +
+#'     scale_fill_viridis_c(option = "G", trans = "log", direction = -1)
+#' }
+#' 
 #' # Piped version
 #' mesh_with_covs <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
-#'   add_vertex_covariates(
+#'   add_mesh_covariates(
 #'     qcs_grid,
 #'     covariates = c("depth_scaled", "depth_scaled2"),
-#'     coords  = c("X", "Y")
+#'     coords = c("X", "Y")
 #'   )
-#'
+#' 
 #' # With sf objects (coords automatically extracted)
 #' pcod_sf <- st_as_sf(pcod, coords = c("X", "Y"))
 #' grid_sf <- st_as_sf(qcs_grid, coords = c("X", "Y"))
 #' mesh_sf <- fmesher::fm_mesh_2d(pcod_sf, cutoff = 10) |>
-#'   add_vertex_covariates(grid_sf, c("depth"))
-#'
+#'   add_mesh_covariates(grid_sf, c("depth"))
+#' 
 #' # With sdmTMB mesh (coordinate names and mesh automatically detected)
 #' mesh <- make_mesh(pcod, c("X", "Y"), cutoff = 10) |>
-#'   add_vertex_covariates(qcs_grid, c("depth"))
+#'   add_mesh_covariates(qcs_grid, c("depth"))
+#' 
+#' # Use RANN method for very large datasets (much faster)
+#' mesh_fast <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10) |>
+#'   add_mesh_covariates(
+#'     qcs_grid,
+#'     covariates = c("depth_scaled", "depth_scaled2"),
+#'     coords = c("X", "Y"),
+#'     method = "rann",
+#'     k = 15
+#'   )
+add_mesh_covariates <-
+  function(mesh,
+           data,
+           covariates,
+           coords,
+           power = 2,
+           method = c("gstat", "rann"),
+           k = 10,
+           barrier = NULL) {
+    method <- match.arg(method)
 
-add_vertex_covariates <-
-function( mesh,
-          data,
-          covariates,
-          coords,
-          power = 2) {
+    if (inherits(mesh, "sdmTMBmesh")) {
+      fm_mesh <- mesh$mesh
+      coords <- mesh$xy_cols
+    } else if (inherits(mesh, "fm_mesh_2d")) {
+      fm_mesh <- mesh
+    } else {
+      stop("mesh must be a fm_mesh_2d or sdmTMBmesh object", call. = FALSE)
+    }
 
-  if (inherits(mesh, "sdmTMBmesh")) {
-    fm_mesh <- mesh$mesh
-    coords <- mesh$xy_cols
-  } else if (inherits(mesh, "fm_mesh_2d")) {
-    fm_mesh <- mesh
-  } else {
-    stop("mesh must be a fm_mesh_2d or sdmTMBmesh object", call. = FALSE)
+    if (!is.data.frame(data)) {
+      stop("data must be a data frame", call. = FALSE)
+    }
+
+    # Handle sf objects
+    if (inherits(data, "sf")) {
+      coords_matrix <- sf::st_coordinates(data)
+      data_coords_df <- data.frame(
+        X = coords_matrix[, 1],
+        Y = coords_matrix[, 2]
+      )
+      # Combine with attribute data (drop geometry)
+      data <- cbind(sf::st_drop_geometry(data), data_coords_df)
+      coords <- c("X", "Y")
+    }
+
+    if (!all(coords %in% names(data))) {
+      stop("Coordinate columns ", paste(coords, collapse = ", "), " not found in data", call. = FALSE)
+    }
+
+    if (!all(covariates %in% names(data))) {
+      stop("Covariate columns ", paste(covariates, collapse = ", "), " not found in data", call. = FALSE)
+    }
+
+    # Extract mesh vertex coordinates (first 2 columns are X, Y)
+    mesh_vertices <- fm_mesh$loc[, 1:2, drop = FALSE]
+
+    # Calculate triangle centers
+    triangle_centers <- .calculate_triangle_centers(fm_mesh)
+
+    # Initialize result matrices
+    vertex_covs <- matrix(NA, nrow = nrow(mesh_vertices), ncol = length(covariates))
+    colnames(vertex_covs) <- covariates
+    
+    triangle_covs <- matrix(NA, nrow = nrow(triangle_centers), ncol = length(covariates))
+    colnames(triangle_covs) <- covariates
+
+    # Interpolate at vertices
+    if (method == "gstat") {
+      vertex_covs <- .interpolate_gstat(mesh_vertices, data, covariates, coords, power)
+      triangle_covs <- .interpolate_gstat(triangle_centers, data, covariates, coords, power)
+    } else if (method == "rann") {
+      vertex_covs <- .interpolate_rann(mesh_vertices, data, covariates, coords, power, k)
+      triangle_covs <- .interpolate_rann(triangle_centers, data, covariates, coords, power, k)
+    }
+
+    mesh$vertex_covariates <- as.data.frame(vertex_covs)
+    mesh$triangle_covariates <- as.data.frame(triangle_covs)
+    mesh$triangle_covariates$.x_triangle <- triangle_centers[, 1]
+    mesh$triangle_covariates$.y_triangle <- triangle_centers[, 2]
+
+    # Add barrier detection if barrier polygon is provided
+    if (!is.null(barrier)) {
+      if (!inherits(barrier, "sf")) {
+        stop("barrier must be an sf object", call. = FALSE)
+      }
+
+      # Convert mesh vertices to sf points
+      vertex_coords <- data.frame(
+        X = mesh_vertices[, 1],
+        Y = mesh_vertices[, 2]
+      )
+      vertex_sf <- sf::st_as_sf(vertex_coords, coords = c("X", "Y"))
+
+      # Convert triangle centers to sf points
+      triangle_coords <- data.frame(
+        X = triangle_centers[, 1],
+        Y = triangle_centers[, 2]
+      )
+      triangle_sf <- sf::st_as_sf(triangle_coords, coords = c("X", "Y"))
+
+      # Set CRS to match barrier if barrier has one
+      if (!is.na(sf::st_crs(barrier))) {
+        sf::st_crs(vertex_sf) <- sf::st_crs(barrier)
+        sf::st_crs(triangle_sf) <- sf::st_crs(barrier)
+      }
+
+      # Check intersections for vertices
+      vertex_intersected <- sf::st_intersects(vertex_sf, barrier)
+      vertex_barrier_col <- lengths(vertex_intersected) > 0
+      mesh$vertex_covariates$barrier <- vertex_barrier_col
+
+      # Check intersections for triangle centers
+      triangle_intersected <- sf::st_intersects(triangle_sf, barrier)
+      triangle_barrier_col <- lengths(triangle_intersected) > 0
+      mesh$triangle_covariates$barrier <- triangle_barrier_col
+      
+      # Calculate triangle intersection proportions
+      triangle_polygons <- .create_triangle_polygons(fm_mesh)
+      
+      # Set CRS to match barrier if barrier has one
+      if (!is.na(sf::st_crs(barrier))) {
+        sf::st_crs(triangle_polygons) <- sf::st_crs(barrier)
+      }
+      
+      triangle_intersection_props <- .calculate_intersection_proportions(triangle_polygons, barrier)
+      mesh$triangle_covariates$barrier_proportion <- triangle_intersection_props
+    }
+
+    class(mesh) <- c("vertex_coords", class(mesh))
+    mesh
   }
 
-  if (!is.data.frame(data)) {
-    stop("data must be a data frame", call. = FALSE)
+.calculate_triangle_centers <- function(fm_mesh) {
+  # Get triangle vertex indices
+  triangles <- fm_mesh$graph$tv
+  vertices <- fm_mesh$loc[, 1:2, drop = FALSE]
+  
+  # Calculate centers as mean of triangle vertices
+  n_triangles <- nrow(triangles)
+  centers <- matrix(0, nrow = n_triangles, ncol = 2)
+  
+  for (i in seq_len(n_triangles)) {
+    triangle_verts <- triangles[i, ]
+    centers[i, ] <- colMeans(vertices[triangle_verts, , drop = FALSE])
   }
+  
+  centers
+}
 
-  # Handle sf objects
-  if (inherits(data, "sf")) {
-    coords_matrix <- sf::st_coordinates(data)
-    data_coords_df <- data.frame(
-      X = coords_matrix[, 1],
-      Y = coords_matrix[, 2]
-    )
-    # Combine with attribute data (drop geometry)
-    data <- cbind(sf::st_drop_geometry(data), data_coords_df)
-    coords <- c("X", "Y")
+.create_triangle_polygons <- function(fm_mesh) {
+  # Get triangle vertex indices and vertex coordinates
+  triangles <- fm_mesh$graph$tv
+  vertices <- fm_mesh$loc[, 1:2, drop = FALSE]
+  
+  n_triangles <- nrow(triangles)
+  triangle_list <- vector("list", n_triangles)
+  
+  for (i in seq_len(n_triangles)) {
+    # Get the three vertices of the triangle
+    triangle_verts <- triangles[i, ]
+    tri_coords <- vertices[triangle_verts, , drop = FALSE]
+    
+    # Close the polygon by repeating first vertex
+    tri_coords_closed <- rbind(tri_coords, tri_coords[1, , drop = FALSE])
+    
+    # Create polygon
+    triangle_list[[i]] <- sf::st_polygon(list(tri_coords_closed))
   }
+  
+  # Create sf object
+  triangle_sf <- sf::st_sfc(triangle_list)
+  triangle_sf <- sf::st_sf(triangle_id = seq_len(n_triangles), geometry = triangle_sf)
+  
+  triangle_sf
+}
 
-  if (!all(coords %in% names(data))) {
-    stop("Coordinate columns ", paste(coords, collapse = ", "), " not found in data", call. = FALSE)
+.calculate_intersection_proportions <- function(triangle_polygons, barrier) {
+  n_triangles <- nrow(triangle_polygons)
+  proportions <- numeric(n_triangles)
+  
+  for (i in seq_len(n_triangles)) {
+    triangle <- triangle_polygons[i, ]
+    triangle_area <- as.numeric(sf::st_area(triangle))
+    
+    if (triangle_area == 0) {
+      proportions[i] <- 0
+      next
+    }
+    
+    # Calculate intersection (suppress sf attribute warnings)
+    intersection <- suppressWarnings(sf::st_intersection(triangle, barrier))
+    
+    if (nrow(intersection) == 0) {
+      proportions[i] <- 0
+    } else {
+      intersection_area <- sum(as.numeric(sf::st_area(intersection)))
+      proportions[i] <- pmin(intersection_area / triangle_area, 1.0)
+    }
   }
+  
+  proportions
+}
 
-  if (!all(covariates %in% names(data))) {
-    stop("Covariate columns ", paste(covariates, collapse = ", "), " not found in data", call. = FALSE)
-  }
-
-  # Extract mesh vertex coordinates (first 2 columns are X, Y)
-  mesh_vertices <- fm_mesh$loc[, 1:2, drop = FALSE]
-
+.prepare_interpolation_data <- function(mesh_vertices, data, covariates, coords) {
   # Initialize result matrix
   vertex_covs <- matrix(NA, nrow = nrow(mesh_vertices), ncol = length(covariates))
   colnames(vertex_covs) <- covariates
 
+  # Validate and prepare data for each covariate
+  prepared_data <- list()
   for (j in seq_along(covariates)) {
     cov <- covariates[j]
-
-    # Remove rows with missing covariate values
     valid_rows <- !is.na(data[[cov]])
-    data_coords <- as.matrix(data[valid_rows, coords, drop = FALSE])
-    data_values <- data[valid_rows, cov]
 
-    if (length(data_values) == 0) {
+    if (sum(valid_rows) == 0) {
       warning("No non-missing values for covariate ", cov, call. = FALSE)
+      prepared_data[[j]] <- NULL
       next
     }
 
-    # Calculate distances and interpolate for each vertex
-    for (i in seq_len(nrow(mesh_vertices))) {
-      dx <- data_coords[, 1] - mesh_vertices[i, 1]
-      dy <- data_coords[, 2] - mesh_vertices[i, 2]
-      distances_sq <- dx^2 + dy^2
+    data_subset <- data[valid_rows, ]
+    prepared_data[[j]] <- list(
+      coords = as.matrix(data_subset[, coords, drop = FALSE]),
+      values = data_subset[[cov]],
+      subset = data_subset
+    )
+  }
 
-      # Handle case where vertex coincides exactly with a data point
-      if (any(distances_sq == 0)) {
-        vertex_covs[i, j] <- data_values[which(distances_sq == 0)[1]]
+  list(vertex_covs = vertex_covs, prepared_data = prepared_data)
+}
+
+.interpolate_gstat <- function(mesh_vertices, data, covariates, coords, power) {
+  prep <- .prepare_interpolation_data(mesh_vertices, data, covariates, coords)
+  vertex_covs <- prep$vertex_covs
+
+  pred_coords <- data.frame(
+    x = mesh_vertices[, 1],
+    y = mesh_vertices[, 2]
+  )
+  pred_coords_sf <- sf::st_as_sf(pred_coords, coords = c("x", "y"))
+
+  for (j in seq_along(covariates)) {
+    if (is.null(prep$prepared_data[[j]])) next
+
+    cov <- covariates[j]
+    data_subset <- prep$prepared_data[[j]]$subset
+
+    data_sf <- sf::st_as_sf(data_subset, coords = coords)
+
+    # Create IDW model
+    idw_model <- gstat::gstat(
+      formula = as.formula(paste(cov, "~ 1")),
+      data = data_sf,
+      set = list(idp = power)
+    )
+    invisible(capture.output({ # suppress [inverse distance weighted interpolation]
+      predicted <- predict(idw_model, pred_coords_sf)
+    }))
+
+    # Extract predicted values
+    vertex_covs[, j] <- predicted$var1.pred
+  }
+
+  vertex_covs
+}
+
+.interpolate_rann <- function(mesh_vertices, data, covariates, coords, power, k) {
+  if (!requireNamespace("RANN", quietly = TRUE)) {
+    stop("Package 'RANN' is required for method='rann'. Please install it.", call. = FALSE)
+  }
+
+  prep <- .prepare_interpolation_data(mesh_vertices, data, covariates, coords)
+  vertex_covs <- prep$vertex_covs
+
+  for (j in seq_along(covariates)) {
+    if (is.null(prep$prepared_data[[j]])) next
+
+    data_coords <- prep$prepared_data[[j]]$coords
+    data_values <- prep$prepared_data[[j]]$values
+
+    # Use RANN for fast k-nearest neighbour search
+    nn_result <- RANN::nn2(data_coords, mesh_vertices, k = min(k, nrow(data_coords)))
+
+    # Apply IDW using only k nearest neighbors for each vertex
+    for (i in seq_len(nrow(mesh_vertices))) {
+      neighbor_indices <- nn_result$nn.idx[i, ]
+      neighbor_distances <- nn_result$nn.dists[i, ]
+
+      # Handle exact matches
+      if (any(neighbor_distances == 0)) {
+        vertex_covs[i, j] <- data_values[neighbor_indices[which(neighbor_distances == 0)[1]]]
       } else {
-        # Inverse distance weighting
-        distances <- sqrt(distances_sq)
-        weights <- 1 / (distances^power)
-        vertex_covs[i, j] <- sum(weights * data_values) / sum(weights)
+        # IDW with k nearest neighbors
+        weights <- 1 / (neighbor_distances^power)
+        neighbor_values <- data_values[neighbor_indices]
+        vertex_covs[i, j] <- sum(weights * neighbor_values) / sum(weights)
       }
     }
   }
 
-  mesh$vertex_covariates <- as.data.frame(vertex_covs)
-  class(mesh) <- c("vertex_coords", class(mesh))
-  mesh
+  vertex_covs
 }
-
