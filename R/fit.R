@@ -685,6 +685,10 @@ function( formula,
   }
   distributions = build_distributions( family )
 
+  # Convert weights to size for binomial as special case
+  size_i = ifelse( distributions$family_code[distributions$e_i,] == 5, weight_i, 1 )
+  weight_i = ifelse( distributions$family_code[distributions$e_i,] == 5, 1, weight_i )
+
   ##############
   # Build spatially varying
   ##############
@@ -729,6 +733,7 @@ function( formula,
     c_i = ivector_minus_one(c_i), # -1 to convert to CPP index, and keep as integer-vector
     offset_i = gam_basis$offset_i,
     weights_i = weights_i,
+    size_i = size_i,
     family_ez = distributions$family_code,
     link_ez = distributions$link_code,
     components_e = distributions$components,
