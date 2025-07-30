@@ -386,6 +386,8 @@ function( object,
   # Check newdata for missing variables and/or factors
   pred_set = unique(unlist(sapply( object$internal[c('gam_setup','delta_gam_setup')],
                             FUN=\(x) all.vars(x$pred.formula) ) ))
+  pred_set = union( pred_set, all.vars(object$internal$spatial_varying) )
+  pred_set = union( pred_set, all.vars(object$internal$delta_spatial_varying) )
   for( pred in pred_set ){
     if( !(pred %in% colnames(newdata)) ){
       stop("Missing ", pred, " in newdata")
