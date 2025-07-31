@@ -26,7 +26,8 @@ tinyVASTcontrol(
   get_rsr = FALSE,
   extra_reporting = FALSE,
   use_anisotropy = FALSE,
-  sar_adjacency = "queen"
+  sar_adjacency = "queen",
+  barrier_stiffness = 0.01
 )
 }
 \arguments{
@@ -99,6 +100,12 @@ geometric anisotropy}
 \item{sar_adjacency}{Whether to use queen or rook adjacency when defining
 a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 (default is queen)}
+
+\item{barrier_stiffness}{The ratio of local stiffness (the scale of diffusion
+rate and resulting decorrelation distance) for barriers relative to normal areas
+in the SPDE method when using \code{add_mesh_covariates}.  The
+default \code{barrier_stiffness = 0.01} is the value from Bakka et al.
+2019.}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or

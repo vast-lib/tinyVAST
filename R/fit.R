@@ -852,7 +852,8 @@ function( formula,
     tmb_par$delta2_tc = tmb_par$delta2_tc[,numeric(0),drop=FALSE]
   }
   if( spatial_method_code %in% 6 ){
-    tmb_par$triangle_k = c( 1, rep(0, ncol(V_zk)-1) )    # Use 1 for first value (corresponds to offset)
+    # First value corresponds to `barrier` from `triangle_formula = offset(barrier)`
+    tmb_par$triangle_k = c( log(control$barrier_stiffness), rep(0, ncol(V_zk)-1) )
   }
 
   # Turn off initial conditions ... cutting from model
@@ -1115,6 +1116,11 @@ function( formula,
 #' @param sar_adjacency Whether to use queen or rook adjacency when defining
 #'        a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 #'        (default is queen)
+#' @param barrier_stiffness The ratio of local stiffness (the scale of diffusion
+#'        rate and resulting decorrelation distance) for barriers relative to normal areas
+#'        in the SPDE method when using \code{add_mesh_covariates}.  The
+#'        default \code{barrier_stiffness = 0.01} is the value from Bakka et al.
+#'        2019.
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
@@ -1144,7 +1150,8 @@ function( nlminb_loops = 1,
           get_rsr = FALSE,
           extra_reporting = FALSE,
           use_anisotropy = FALSE,
-          sar_adjacency = "queen" ){
+          sar_adjacency = "queen",
+          barrier_stiffness = 0.01 ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -1172,7 +1179,8 @@ function( nlminb_loops = 1,
     get_rsr = get_rsr,
     extra_reporting = extra_reporting,
     use_anisotropy = use_anisotropy,
-    sar_adjacency = sar_adjacency
+    sar_adjacency = sar_adjacency,
+    barrier_stiffness = barrier_stiffness
   ), class = "tinyVASTcontrol" )
 }
 
