@@ -686,8 +686,8 @@ function( formula,
   distributions = build_distributions( family )
 
   # Convert weights to size for binomial as special case
-  size_i = ifelse( distributions$family_code[distributions$e_i,] == 5, weights_i, 1 )
-  weights_i = ifelse( distributions$family_code[distributions$e_i,] == 5, 1, weights_i )
+  size_i = ifelse( distributions$family_code[distributions$e_i,1] == 4, weights_i, 1 )
+  weights_i = ifelse( distributions$family_code[distributions$e_i,1] == 4, 1, weights_i )
 
   ##############
   # Build spatially varying
