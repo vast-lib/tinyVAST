@@ -135,7 +135,7 @@
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict as.formula
-#' @importFrom utils packageVersion
+#' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
 #' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet
