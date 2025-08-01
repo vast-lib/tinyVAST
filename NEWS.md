@@ -7,6 +7,7 @@
 * Fix `make_eof_ram` to work as intended for multivariate models, e.g., having a separate response map and shared indices across variables (previously had a shared response map and shared indices, i.e., collapsed to univariate model)
 * Fix bug arising in `predict` when `spatially_varying` involved a column of `newdata` that was expecting a factor, but provided a `character-vector`. Now coercers to factors using the levels of the original `data` (same behavior as for `formula`)
 * Export `fit$rep$negloglik_i` as log-likelihood for each datum, for use in calculating out-of-sample predictive score
+* Turn off SE reporting during index calculations (as speedup), and allow SE reporting for `mu_g` in `predict`
 
 # tinyVAST 1.2.0
 

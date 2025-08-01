@@ -712,16 +712,17 @@ function( formula,
   ##############
 
   # Make options
-  spatial_options = c(
+  model_options = c(
     spatial_method_code,
     ifelse( control$gmrf_parameterization=="separable", 0, 1),
     ifelse( isFALSE(control$get_rsr), 0, 1),
-    ifelse( isFALSE(control$extra_reporting), 0, 1)
+    ifelse( isFALSE(control$extra_reporting), 0, 1),
+    0
   )
 
   # make dat
   tmb_data = list(
-    spatial_options = spatial_options,
+    model_options = model_options,
     y_i = gam_basis$y_i,
     X_ij = gam_basis$X_ij,
     Z_ik = gam_basis$Z_ik,

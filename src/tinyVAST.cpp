@@ -287,7 +287,7 @@ Type gamma_distribution( vector<Type> gamma_k,
 // distribution/projection for omega
 template<class Type>
 array<Type> omega_distribution( array<Type> omega_sc,
-                                 vector<int> spatial_options,
+                                 vector<int> model_options,
                                  Eigen::SparseMatrix<Type> Rho_cc,
                                  Eigen::SparseMatrix<Type> Gamma_cc,
                                  Eigen::SparseMatrix<Type> Gammainv_cc,
@@ -301,7 +301,7 @@ array<Type> omega_distribution( array<Type> omega_sc,
     I_cc.setIdentity();
     if( omega_sc.size()>0 ){ // PARALLEL_REGION
       Eigen::SparseMatrix<Type> IminusRho_cc = I_cc - Rho_cc;
-      if( spatial_options(1) == 0 ){
+      if( model_options(1) == 0 ){
         // Separable precision ... Option-1
         //Eigen::SparseMatrix<Type> Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
         //Eigen::SparseMatrix<Type> Q_cc = Linv_cc.transpose() * Linv_cc;
@@ -359,7 +359,7 @@ Type xi_distribution( array<Type> xi_sl,
 // distribution/projection for epsilon
 template<class Type>
 array<Type> epsilon_distribution( array<Type> epsilon_stc,
-                                  vector<int> spatial_options,
+                                  vector<int> model_options,
                                   Eigen::SparseMatrix<Type> Rho_hh,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
                                   Eigen::SparseMatrix<Type> Gammainv_hh,
@@ -377,7 +377,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
     int h;
 
     //if( epsilon_stc.size()>0 ){ // PARALLEL_REGION
-    // Reshape for either spatial_options
+    // Reshape for either model_options
     array<Type> epsilon_hs( n_h, n_s );
     for( int s=0; s<n_s; s++ ){
     for( int t=0; t<n_t; t++ ){
@@ -387,7 +387,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
     }}}
     Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
 
-    if( spatial_options(1) == 0 ){
+    if( model_options(1) == 0 ){
       // Separable precision ... Option-1
       //Eigen::SparseMatrix<Type> Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
       //Eigen::SparseMatrix<Type> Q_hh = Linv_hh.transpose() * Linv_hh;
@@ -431,7 +431,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
 // distribution/projection for epsilon
 template<class Type>
 array<Type> delta_distribution( array<Type> delta_tc,
-                                  vector<int> spatial_options,
+                                  vector<int> model_options,
                                   Eigen::SparseMatrix<Type> Rho_hh,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
                                   Eigen::SparseMatrix<Type> Gammainv_hh,
@@ -446,7 +446,7 @@ array<Type> delta_distribution( array<Type> delta_tc,
     I_hh.setIdentity();
     int h;
 
-    // Reshape for either spatial_options
+    // Reshape for either model_options
     array<Type> delta_h1( n_h, 1 );
     for( int t=0; t<n_t; t++ ){
     for( int c=0; c<n_c; c++ ){
@@ -455,7 +455,7 @@ array<Type> delta_distribution( array<Type> delta_tc,
     }}
     Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
 
-    if( spatial_options(1) == 0 ){
+    if( model_options(1) == 0 ){
       Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
       matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
       Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
@@ -905,11 +905,12 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( S2block );
 
   // Spatial objects
-  DATA_IVECTOR( spatial_options );   //
-  // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off;  spatial_options(0)==4: stream-network
-  // spatial_options(1)==0: use GMRF(Q) to evaluate density;  spatial_options(1)==1: use GMRF(I) and project by Q^{-0.5} to evaluate density
-  // spatial_options(2)==0: no RSS; spatial_options(2)==1: yes RSR
-  // spatial_options(3)==0: no extra reporting; spatial_options(3)==1: yes extra reporting
+  DATA_IVECTOR( model_options );   //
+  // model_options(0)==1: SPDE;  model_options(0)==2: SAR;  model_options(0)==3: Off;  model_options(0)==4: stream-network
+  // model_options(1)==0: use GMRF(Q) to evaluate density;  model_options(1)==1: use GMRF(I) and project by Q^{-0.5} to evaluate density
+  // model_options(2)==0: no RSS; model_options(2)==1: yes RSR
+  // model_options(3)==0: no extra reporting; model_options(3)==1: yes extra reporting
+  // model_options(4)==0: no SE for _g; model_options(4)==1: SE for p_g;  model_options(4)==2: SE for mu_g
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -1013,7 +1014,7 @@ Type objective_function<Type>::operator() (){
   Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
   // Using INLA with geometric anisotropy
-  if( spatial_options(0)==1 ){
+  if( model_options(0)==1 ){
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
     // Build precision
     Q_ss = R_inla::Q_spde( spatial_list, exp(log_kappa), H );
@@ -1022,7 +1023,7 @@ Type objective_function<Type>::operator() (){
     REPORT( range );
   }
   /// Using SAR
-  if( spatial_options(0)==2 ){
+  if( model_options(0)==2 ){
     DATA_SPARSE_MATRIX( Adj );
     Eigen::SparseMatrix<Type> I_ss( Adj.rows(), Adj.rows() );
     Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
@@ -1032,13 +1033,13 @@ Type objective_function<Type>::operator() (){
     Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
   }
   // Off, but using INLA inputs
-  if( spatial_options(0)==3 ){
+  if( model_options(0)==3 ){
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, Type(1.0));
     log_tau = Type(0.0);
   }
   // stream-network
-  if( spatial_options(0)==4 ){
+  if( model_options(0)==4 ){
     DATA_IMATRIX( graph_sz );
     DATA_VECTOR( dist_s );
     Q_ss = Q_network2( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
@@ -1051,7 +1052,7 @@ Type objective_function<Type>::operator() (){
     //REPORT( Q2_ss );
   }
   // Using a SAR with geometric anisotropy
-  if( spatial_options(0)==5 ){
+  if( model_options(0)==5 ){
     DATA_IVECTOR( i_z );
     DATA_IVECTOR( j_z );
     DATA_MATRIX( delta_z2 );
@@ -1062,7 +1063,7 @@ Type objective_function<Type>::operator() (){
     Q_ss = Q_SAR( rho, H, n_s, i_z, j_z, delta_z2 );
   }
   // Using SPDE with covariate-based anisotropy and geometric anisotropy
-  if( spatial_options(0)==6 ){
+  if( model_options(0)==6 ){
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
     DATA_MATRIX( V_zk );
     PARAMETER_VECTOR( triangle_k );
@@ -1106,21 +1107,21 @@ Type objective_function<Type>::operator() (){
   Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(2) );
 
   // space_term
-  omega_sc = omega_distribution( omega_sc, spatial_options, Rho_cc,
+  omega_sc = omega_distribution( omega_sc, model_options, Rho_cc,
                                    Gamma_cc, Gammainv_cc, Q_ss, nll );
-  omega2_sc = omega_distribution( omega2_sc, spatial_options, Rho2_cc,
+  omega2_sc = omega_distribution( omega2_sc, model_options, Rho2_cc,
                                    Gamma2_cc, Gammainv2_cc, Q_ss, nll );
 
   // spacetime_term
-  epsilon_stc = epsilon_distribution( epsilon_stc, spatial_options, Rho_hh,
+  epsilon_stc = epsilon_distribution( epsilon_stc, model_options, Rho_hh,
                                      Gamma_hh, Gammainv_hh, Q_ss, nll );
-  epsilon2_stc = epsilon_distribution( epsilon2_stc, spatial_options, Rho2_hh,
+  epsilon2_stc = epsilon_distribution( epsilon2_stc, model_options, Rho2_hh,
                                        Gamma2_hh, Gammainv2_hh, Q_ss, nll );
 
   // time_term
-  delta_tc = delta_distribution( delta_tc, spatial_options, Rho_time_hh,
+  delta_tc = delta_distribution( delta_tc, model_options, Rho_time_hh,
                                      Gamma_time_hh, Gammainv_time_hh, nll );
-  delta2_tc = delta_distribution( delta2_tc, spatial_options, Rho2_time_hh,
+  delta2_tc = delta_distribution( delta2_tc, model_options, Rho2_time_hh,
                                        Gamma2_time_hh, Gammainv2_time_hh, nll );
 
 
@@ -1201,7 +1202,7 @@ Type objective_function<Type>::operator() (){
   }
 
   // Restricted spatial regression correction
-  if( spatial_options(2) == 1 ){
+  if( model_options(2) == 1 ){
     matrix<Type> covX_jj = X_ij.transpose() * X_ij;
     matrix<Type> precisionX_jj = atomic::matinv(covX_jj);
     vector<Type> alphaprime_j = alpha_j + (precisionX_jj * (X_ij.transpose() * (pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i).matrix())).array();
@@ -1216,35 +1217,37 @@ Type objective_function<Type>::operator() (){
 
   // Predictions
   if( n_g > 0 ){
-    vector<Type> palpha_g = X_gj*alpha_j;
-    vector<Type> pgamma_g = Z_gk*gamma_k;
-    vector<Type> pepsilon_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pomega_g = multiply_omega( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pxi_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
-    vector<Type> pdelta_g = multiply_delta( delta_tc, t_g, c_g, n_g );
-    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g + pdelta_g + pxi_g;
+    vector<Type> palpha1_g = X_gj*alpha_j;
+    vector<Type> pgamma1_g = Z_gk*gamma_k;
+    vector<Type> pepsilon1_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha1_g.size() ) / exp(log_tau);
+    vector<Type> pomega1_g = multiply_omega( AomegaG_zz, AomegaG_z, omega_sc, palpha1_g.size() ) / exp(log_tau);
+    vector<Type> pxi1_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
+    vector<Type> pdelta1_g = multiply_delta( delta_tc, t_g, c_g, n_g );
+    vector<Type> p1_g = palpha1_g + pgamma1_g+ pepsilon1_g + pomega1_g + pdelta1_g + pxi1_g + offset_g ;
     // Second linear predictor
     vector<Type> palpha2_g = X2_gj*alpha2_j;
     vector<Type> pgamma2_g = Z2_gk*gamma2_k;
-    vector<Type> pepsilon2_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pomega2_g = multiply_omega( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pepsilon2_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha2_g.size() ) / exp(log_tau);
+    vector<Type> pomega2_g = multiply_omega( AomegaG_zz, AomegaG_z, omega2_sc, palpha2_g.size() ) / exp(log_tau);
     vector<Type> pxi2_g = multiply_xi( A_gs, xi2_sl, W2_gl ) / exp(log_tau);
     vector<Type> pdelta2_g = multiply_delta( delta2_tc, t_g, c_g, n_g );
     vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g + pdelta2_g + pxi2_g;
+    // Combined
+    vector<Type> p_g = p1_g + p2_g;
     vector<Type> mu_g( p_g.size() );
-    for( int g=0; g<p_g.size(); g++ ){
+    for( int g=0; g<p1_g.size(); g++ ){
       switch( link_ez(e_g(g),0) ){
         case identity_link:
-          mu_g(g) = p_g(g);
+          mu_g(g) = p1_g(g);
           break;
         case log_link:
-          mu_g(g) = exp(p_g(g));
+          mu_g(g) = exp(p1_g(g));
           break;
         case logit_link:
-          mu_g(g) = invlogit(p_g(g));
+          mu_g(g) = invlogit(p1_g(g));
           break;
         case cloglog_link:
-          mu_g(g) = Type(1.0) - exp( -1*exp(p_g(g)) );
+          mu_g(g) = Type(1.0) - exp( -1*exp(p1_g(g)) );
           break;
         default:
           error("Link not implemented.");
@@ -1314,13 +1317,13 @@ Type objective_function<Type>::operator() (){
       }
     }
 
-    REPORT( p_g );
-    REPORT( palpha_g );
-    REPORT( pgamma_g );
-    REPORT( pepsilon_g );
-    REPORT( pomega_g );
-    REPORT( pdelta_g );
-    REPORT( pxi_g );
+    REPORT( p1_g );
+    REPORT( palpha1_g );
+    REPORT( pgamma1_g );
+    REPORT( pepsilon1_g );
+    REPORT( pomega1_g );
+    REPORT( pdelta1_g );
+    REPORT( pxi1_g );
     REPORT( p2_g );
     REPORT( palpha2_g );
     REPORT( pgamma2_g );
@@ -1328,8 +1331,12 @@ Type objective_function<Type>::operator() (){
     REPORT( pomega2_g );
     REPORT( pdelta2_g );
     REPORT( pxi2_g );
+    REPORT( p_g );
     REPORT( mu_g );
-    ADREPORT( p_g );
+    if(model_options(4) == 1) ADREPORT( p1_g );   // Keeping original order, in case someone reloads
+    if(model_options(4) == 2) ADREPORT( p2_g );
+    if(model_options(4) == 3) ADREPORT( p_g );
+    if(model_options(4) == 4) ADREPORT( mu_g );
   }
 
   // Reporting
@@ -1346,7 +1353,7 @@ Type objective_function<Type>::operator() (){
   }
 
   //
-  if( spatial_options(3) == 1 ){
+  if( model_options(3) == 1 ){
     REPORT( Rho_hh );
     REPORT( Gamma_hh );
     REPORT( Gammainv_hh );

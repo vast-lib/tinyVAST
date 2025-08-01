@@ -11,7 +11,8 @@
 #'        bias-correction.
 #' @param what What REPORTed object to output, where
 #'        \code{mu_g} is the inverse-linked transformed predictor including both linear components,
-#'        \code{p_g} is the first linear predictor,
+#'        \code{p_g} is the sum of the first and second linear predictors (which only makes sense to inspect when using the Poisson-linked delta model),
+#'        \code{p1_g} is the first linear predictor,
 #'        \code{palpha_g} is the first predictor from fixed covariates in \code{formula},
 #'        \code{pgamma_g} is the first predictor from random covariates in \code{formula} (e.g., splines),
 #'        \code{pomega_g} is the first predictor from spatial variation,
@@ -38,7 +39,8 @@ predict.tinyVAST <-
 function( object,
           newdata,
           remove_origdata = FALSE,
-          what = c("mu_g", "p_g", "palpha_g", "pgamma_g", "pepsilon_g", "pomega_g", "pdelta_g", "pxi_g",
+          what = c("mu_g", "p_g",
+                   "p1_g", "palpha1_g", "pgamma1_g", "pepsilon1_g", "pomega1_g", "pdelta1_g", "pxi1_g",
                    "p2_g", "palpha2_g", "pgamma2_g", "pepsilon2_g", "pomega2_g", "pdelta2_g", "pxi2_g"),
           se.fit = FALSE,
           bias.correct = FALSE,
@@ -59,6 +61,16 @@ function( object,
                                newdata = newdata,
                                remove_origdata = remove_origdata )
 
+  # Change SEs
+  if( isTRUE(se.fit) ){
+    if( !(what %in% c("p_g","mu_g","p1_g","p2_g")) ) stop("se.fit=TRUE only works for what=`p_g`, `mu_g`, `p1_g`, `p2_g`", call. = FALSE)
+    if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE", call. = FALSE)
+    if( what == "p1_g" ) tmb_data2$model_options[5] = 1
+    if( what == "p2_g" ) tmb_data2$model_options[5] = 2
+    if( what == "p_g" ) tmb_data2$model_options[5] = 3
+    if( what == "mu_g" ) tmb_data2$model_options[5] = 4
+  }
+
   # Rebuild object
   newobj = MakeADFun( data = tmb_data2,
                       parameters = object$internal$parlist,
@@ -71,8 +83,6 @@ function( object,
 
   # Add standard errors
   if( isTRUE(se.fit) ){
-    if( !(what %in% "p_g") ) stop("se.fit=TRUE only works for what=`p_g`", call. = FALSE)
-    if( remove_origdata==TRUE ) stop("se.fit=TRUE only works for remove_origdata=FALSE", call. = FALSE)
     newsd = sdreport( obj = newobj,
                       par.fixed = object$opt$par,
                       hessian.fixed = object$internal$Hess_fixed,
@@ -244,6 +254,7 @@ function( object,
   tmb_data2 = add_predictions( object = object,
                                newdata = newdata ) # ,
                                # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
+  tmb_data2$model_options[c(3,5)] = 0     # Make sure no other SE reporting is used
 
   # Check for no random effects
   if( length(object$obj$env$random)==0 ){
