@@ -1202,6 +1202,9 @@ Type objective_function<Type>::operator() (){
   }
 
   // Restricted spatial regression correction
+  // t(A_is) %*% A_is = diag( 1s and 0s )
+  // SO:  could adjust pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i too
+  // e.g. p_omegaprime1_i = pomega1_i + Z (X^T X)^-1 Z^T pomega1_i, where Z = A^T X
   if( model_options(2) == 1 ){
     matrix<Type> covX_jj = X_ij.transpose() * X_ij;
     matrix<Type> precisionX_jj = atomic::matinv(covX_jj);
