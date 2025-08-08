@@ -46,7 +46,7 @@ function( Q,
     unobserved_idx <- setdiff(all_idx, observed_idx)
 
     # Partition Q
-    Q_oo <- Q[observed_idx, observed_idx, drop = FALSE]
+    #Q_oo <- Q[observed_idx, observed_idx, drop = FALSE]
     Q_ou <- Q[observed_idx, unobserved_idx, drop = FALSE]
     Q_uo <- Matrix::t(Q_ou)
     Q_uu <- Q[unobserved_idx, unobserved_idx, drop = FALSE]
