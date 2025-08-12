@@ -283,7 +283,7 @@ for( rI in 1:100 ){
 
 # Plot 90% interval for the index
 Index_tq = t(apply(Index_tr, MARGIN=1, FUN=quantile, probs=c(0.1,0.5,0.9) ))
-Index_tq[,2] = apply(Index_tr, MARGIN=1, FUN=mean)
+Index_tq[,2] = apply(Index_tr, MARGIN=1, FUN=median)
 matplot( y=Index_tq, x=rownames(Index_tq), log="y", col="black", lwd=c(1,2,1), type="l", lty="solid" )
 
 
@@ -370,5 +370,5 @@ for( rI in 1:100 ){
 
 # Plot 90% interval for the index
 Index2_tq = t(apply(Index2_tr, MARGIN=1, FUN=quantile, probs=c(0.1,0.5,0.9) ))
-Index2_tq[,2] = apply(Index2_tr, MARGIN=1, FUN=mean)
+Index2_tq[,2] = apply(Index2_tr, MARGIN=1, FUN=median)
 matplot( y=Index2_tq, x=rownames(Index2_tq), log="y", col="black", lwd=c(1,2,1), type="l", lty="solid" )
