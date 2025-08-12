@@ -240,3 +240,135 @@ for(i in seq_len(n_sims) ){
 }
 plot( x = row(Y),
       y = Y )
+
+
+################################
+# Run VAST projection demo
+################################
+
+# Load package
+setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\scratch)' )
+library(VAST)
+
+# load data set
+example = load_example( data_set="EBS_pollock" )
+
+# Make settings (turning off bias.correct to save time for example)
+settings = make_settings( n_x = 50,
+  Region = example$Region,
+  purpose = "index2",
+  bias.correct = FALSE )
+settings$RhoConfig[] = 4
+
+# Run model
+vast = fit_model( settings = settings,
+  Lat_i = example$sampling_data[,'Lat'],
+  Lon_i = example$sampling_data[,'Lon'],
+  t_i = example$sampling_data[,'Year'],
+  b_i = example$sampling_data[,'Catch_KG'],
+  a_i = example$sampling_data[,'AreaSwept_km2'],
+  newtonsteps = 0 )
+
+# Generate projections
+Index_tr = numeric(0)
+for( rI in 1:100 ){
+  Sim = project_model( x = vast,
+                        n_proj = 80,
+                        new_covariate_data = NULL,
+                        historical_uncertainty = "random",
+                        seed = rI )
+  Index_tr = cbind( Index_tr, strip_units(Sim$Index_ctl[1,,1]) )
+  #Index_tr = cbind( Index_tr, Sim$mean_Z_ctm[1,,2] )
+}
+
+# Plot 90% interval for the index
+Index_tq = t(apply(Index_tr, MARGIN=1, FUN=quantile, probs=c(0.1,0.5,0.9) ))
+Index_tq[,2] = apply(Index_tr, MARGIN=1, FUN=mean)
+matplot( y=Index_tq, x=rownames(Index_tq), log="y", col="black", lwd=c(1,2,1), type="l", lty="solid" )
+
+
+##############################
+# Compare with tinyVAST
+##############################
+
+# make extrapolation list
+extrap = data.frame(
+  vast$extrapolation_list$Data_Extrap[,c("Lon","Lat")],
+  AreaSwept_km2 = strip_units(vast$extrapolation_list$Area_km2_x)
+)
+
+#
+years = min(dat$Year):(max(dat$Year)+80)
+newdata = expand.grid( Year = years, Row = seq_len(nrow(extrap)) )
+newdata = cbind( newdata, extrap[newdata$Row,] )
+
+#
+library(fmesher)
+library(tinyVAST)
+
+# load data set
+example = VAST::load_example( data_set="EBS_pollock" )
+dat = example$sampling_data
+dat$var = "pollock"
+
+#
+mesh = fm_mesh_2d( dat[,c("Lon","Lat")], cutoff = 1 )
+
+#
+space_term = "
+  pollock <-> pollock, sd_space
+"
+time_term = "
+  pollock <-> pollock, 0, sd_time
+  pollock -> pollock, 1, ar1_time
+"
+spacetime_term = "
+  pollock <-> pollock, 0, sd_spacetime
+  pollock -> pollock, 1, ar1_spacetime
+"
+
+#
+tv = tinyVAST(
+  formula = Catch_KG ~ 1 + offset(log(AreaSwept_km2)),
+  data = dat,
+  space_term = space_term,
+  spacetime_term = spacetime_term,
+  time_term = time_term,
+  family = delta_gamma( type = "poisson-link" ),
+  delta_options = list(
+    formula = ~ 1,
+    space_term = space_term,
+    spacetime_term = spacetime_term,
+    time_term = time_term
+  ),
+  spatial_domain = mesh,
+  control = tinyVASTcontrol(
+    trace = 1,
+    use_anisotropy = TRUE
+  ),
+  space_columns = c("Lon","Lat"),
+  time_column = "Year",
+  variable_column = "var",
+  variables = "pollock",
+  times = min(dat$Year):max(dat$Year)
+)
+
+Index2_tr = numeric(0)
+for( rI in 1:100 ){
+  message( Sys.time(), ": Finished ", rI )
+  proj = project(
+    object = tv,
+    newdata = newdata,
+    extra_times = (max(dat$Year)+1):max(newdata$Year),
+    past_var = TRUE,
+    future_var = TRUE,
+    parm_var = FALSE
+  )
+  index_t = tapply( proj, INDEX = newdata$Year, FUN = sum )
+  Index2_tr = cbind( Index2_tr, index_t )
+}
+
+# Plot 90% interval for the index
+Index2_tq = t(apply(Index2_tr, MARGIN=1, FUN=quantile, probs=c(0.1,0.5,0.9) ))
+Index2_tq[,2] = apply(Index2_tr, MARGIN=1, FUN=mean)
+matplot( y=Index2_tq, x=rownames(Index2_tq), log="y", col="black", lwd=c(1,2,1), type="l", lty="solid" )
