@@ -1006,7 +1006,9 @@ Type objective_function<Type>::operator() (){
   H(0,1) = ln_H_input(1);
   H(1,1) = (1.0 + ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
   for( int i=2; i<ln_H_input.size(); i++ ){
-    H(i,i) = exp(ln_H_input(i));
+    //H(i,i) = exp(ln_H_input(i));
+    // Allowing negative values allows vertex_formula = 0 + x + I(x+y) to be the saem as vertex_formula = 0 + x + I(x-y)
+    H(i,i) = ln_H_input(i);
   }
 
   REPORT( H );

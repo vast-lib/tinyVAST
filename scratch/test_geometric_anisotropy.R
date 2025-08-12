@@ -1,4 +1,6 @@
 
+devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force = TRUE )
+
 #
 library(fmesher)
 library(tinyVAST)
@@ -62,7 +64,7 @@ tv2 = tinyVAST(
     use_anisotropy = FALSE
   ),
   development = list(
-    vertex_formula = ~ 0 + y + I(x+y)
+    vertex_formula = ~ 0 + x + I(x-y)
   ),
   space_columns = c("Lon","Lat"),
   time_column = "Year",
@@ -71,3 +73,4 @@ tv2 = tinyVAST(
   times = min(dat$Year):max(dat$Year)
 )
 tv2$sdrep
+c(AIC(tv), AIC(tv2))
