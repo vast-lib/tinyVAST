@@ -228,7 +228,7 @@ function( object,
                           time_term = object$internal$delta_time_term,
                           spacetime_term = object$internal$delta_spacetime_term,
                           spatial_varying = object$internal$delta_spatial_varying ),
-    spatial_varying = object$internal$spatially_varying,
+    spatial_varying = object$internal$spatial_varying,
     weights = object$internal$weights,
     control = new_control
   )
@@ -433,7 +433,7 @@ function( object,
                           time_term = object$internal$delta_time_term,
                           spacetime_term = object$internal$delta_spacetime_term,
                           spatial_varying = object$internal$delta_spatial_varying ),
-    spatial_varying = object$internal$spatially_varying,
+    spatial_varying = object$internal$spatial_varying,
     weights = object$internal$weights,
     control = new_control
   )
