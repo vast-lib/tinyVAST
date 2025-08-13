@@ -230,7 +230,8 @@ function( object,
                           spatial_varying = object$internal$delta_spatial_varying ),
     spatial_varying = object$internal$spatial_varying,
     weights = object$internal$weights,
-    control = new_control
+    control = new_control,
+    development = object$internal$development
   )
 
   #
@@ -435,7 +436,8 @@ function( object,
                           spatial_varying = object$internal$delta_spatial_varying ),
     spatial_varying = object$internal$spatial_varying,
     weights = object$internal$weights,
-    control = new_control
+    control = new_control,
+    development = object$internal$development
   )
 
   ##############

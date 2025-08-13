@@ -1038,7 +1038,8 @@ function( formula,
     control = control,
     family = family,                                       # for `add_predictions`
     weights = weights,
-    packageVersion = packageVersion("tinyVAST")
+    packageVersion = packageVersion("tinyVAST"),
+    development = development
   )
   out = list(
     data = data,
