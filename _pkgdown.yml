@@ -19,6 +19,7 @@ articles:
   - web_only/empirical_orthogonal_functions
   - spatial_factor_analysis
   - web_only/VAST
+  - web_only/predator_expanded_diet
 
 reference:
 - title: internal

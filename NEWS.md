@@ -9,6 +9,7 @@
 * Export `fit$rep$negloglik_i` as log-likelihood for each datum, for use in calculating out-of-sample predictive score
 * Turn off SE reporting during index calculations (as speedup), and allow SE reporting for `mu_g` in `predict`
 * Fix bug arising in `project` when `spatial_varying` was specified
+* Adding web-only vignette showing predator-expanded diet estimator using joint model of specific stomach contents and predator density
 
 # tinyVAST 1.2.0
 
