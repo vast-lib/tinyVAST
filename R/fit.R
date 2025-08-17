@@ -76,7 +76,13 @@
 #'        \code{space_term}, and \code{spacetime_term}. These specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
-#' @param spatial_varying a formula specifying spatially varying coefficients.
+#' @param spatial_varying a formula specifying spatially varying coefficients (SVC). Note that
+#'        using formulas in R, \code{spatial_varying = ~ X} automatically adds an intercept
+#'        to implicitly read as \code{spatial_varying = ~ 1 + X}, so tinyVAST
+#'        then estimates an SVC for an intercept
+#'        in addition to covariate \code{X}. Therefore, if you only want an SVC
+#'        for a single covariate, use \code{spatial_varying = ~ 0 + X} to suppress
+#'        the default behavior of formulas in R.
 #' @param weights A numeric vector representing optional likelihood weights for the
 #'        data likelihood. Weights do not have to sum to one and are not internally modified.
 #'        Thee weights argument needs to be a vector and not a name of the variable in the data frame.
