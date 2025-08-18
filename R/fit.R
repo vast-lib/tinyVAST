@@ -692,8 +692,9 @@ function( formula,
   distributions = build_distributions( family )
 
   # Convert weights to size for binomial as special case
-  size_i = ifelse( distributions$family_code[distributions$e_i,1] == 4, weights_i, 1 )
-  weights_i = ifelse( distributions$family_code[distributions$e_i,1] == 4, 1, weights_i )
+  is_binomial = (distributions$family_code[distributions$e_i,1] == 4) & (distributions$family_code[distributions$e_i,2] == 99)
+  size_i = ifelse( is_binomial, weights_i, 1 )
+  weights_i = ifelse( is_binomial, 1, weights_i )
 
   ##############
   # Build spatially varying
