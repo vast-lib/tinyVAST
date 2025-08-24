@@ -1075,9 +1075,6 @@ function( formula,
 
 #' @title Control parameters for tinyVAST
 #'
-#' @inheritParams stats::nlminb
-#' @inheritParams TMB::MakeADFun
-#'
 #' @param nlminb_loops Integer number of times to call [stats::nlminb()].
 #' @param newton_loops Integer number of Newton steps to do after running
 #'   [stats::nlminb()].
@@ -1096,7 +1093,13 @@ function( formula,
 #' @param trace Parameter values are printed every `trace` iteration
 #'   for the outer optimizer. Passed to
 #'   `control` in [stats::nlminb()].
-#' @param gmrf_parameterization Parameterization to use for the Gaussian Markov 
+#' @param profile Character-vector passed to [TMB::MakeADFun] and see description
+#'        there.  Fixed effects that are highly correlated with random effects
+#'        can often be estimated faster (i.e., with fewer iterations) by adding
+#'        them to `profile`. The most common use-case is
+#'        \code{profile = c("alpha_j","alpha2_j")}.  However, doing so will have
+#'        a small impact on model estimates and predictions.
+#' @param gmrf_parameterization Parameterization to use for the Gaussian Markov
 #'        random field, where the default `separable` constructs a full-rank and
 #'        separable precision matrix, and the alternative `projection` constructs
 #'        a full-rank and IID precision for variables over time, and then projects

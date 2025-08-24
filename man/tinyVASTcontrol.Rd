@@ -52,7 +52,12 @@ for the outer optimizer. Passed to
 
 \item{verbose}{Output additional messages about model steps during fitting?}
 
-\item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
+\item{profile}{Character-vector passed to \link[TMB:MakeADFun]{TMB::MakeADFun} and see description
+there.  Fixed effects that are highly correlated with random effects
+can often be estimated faster (i.e., with fewer iterations) by adding
+them to \code{profile}. The most common use-case is
+\code{profile = c("alpha_j","alpha2_j")}.  However, doing so will have
+a small impact on model estimates and predictions.}
 
 \item{tmb_par}{list of parameters for starting values, with shape identical
 to \code{tinyVAST(...)$internal$parlist}}
