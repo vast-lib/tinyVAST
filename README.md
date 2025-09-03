@@ -60,7 +60,7 @@ habitat and climate assessments. Fisheries Research 210: 143–161.
 
 and [sdmTMB](https://github.com/pbs-assess/sdmTMB) R package:
 
-Anderson, S.C., E.J. Ward, P.A. English, L.A.K. Barnett. 2022. sdmTMB:
+Anderson, S.C., E.J. Ward, P.A. English, L.A.K. Barnett, J.T. Thorson. 2022. sdmTMB:
 an R package for fast, flexible, and user-friendly generalized linear
 mixed effects models with spatial and spatiotemporal random fields.
 bioRxiv 2022.03.24.485545; doi:
