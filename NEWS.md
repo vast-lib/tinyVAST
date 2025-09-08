@@ -12,6 +12,7 @@
 * Adding web-only vignette showing predator-expanded diet estimator using joint model of specific stomach contents and predator density
 * Fix bug arising when using `weights` argument using family of `delta_gamma` or `delta_lognormal`, where this 
   bug was introduced in release 1.2.0 (h/t Peri Gerson for identifying the issue)
+* Add vignette showing `project` function
 
 # tinyVAST 1.2.0
 
