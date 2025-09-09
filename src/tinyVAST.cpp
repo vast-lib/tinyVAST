@@ -106,8 +106,11 @@ Eigen::SparseMatrix<Type> G_spde_covariates( R_inla::spde_aniso_t<Type> spde,
     edges_vj.row(1) = edge1_tj.row(t);
     edges_vj.row(2) = edge2_tj.row(t);
 
-    // Make local stiffness
+    // Make local stiffness ... strictly positive
     Gt_vv = (edges_vj * adjH_jj * edges_vj.transpose()) * exp(triangle_t1(t,0));
+
+    // Make local stifness ... reverts to normal when triangle_t1 = 0, but not strictly positive
+    //Gt_vv = (edges_vj * adjH_jj * edges_vj.transpose()) * (1.0 * triangle_t1(t,0));
 
     // Assemble
     Eigen::SparseMatrix<Type> Gt_ss( n_s, n_s );

@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -159,3 +160,9 @@ However, analysts may prefer to model spatio-temporal variation as an AR1 proces
 
 For the Bering Sea capelin application below, preliminary analyses determined that spatio-temporal variation should be modelled as an AR1 process in both linear predictors of the spatio-temporal SDMs. 
 
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+### Works cited
