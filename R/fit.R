@@ -445,10 +445,19 @@ function( formula,
 
   # Parse each `spatial_domain`
   if( is(spatial_domain,"vertex_coords") ){
+    updated_vertex_formula = update.formula( old = vertex_formula, new = "~ . + 0" )
+    Terms <- terms(updated_vertex_formula, data = spatial_domain$vertex_covariates)
+    mf <- model.frame(
+      updated_vertex_formula,
+      data = spatial_domain$vertex_covariates,
+      na.action = na.pass,
+      drop.unused.levels = TRUE
+    )
     # Parse covariate matrix
     R_sk = model.matrix(
-      update.formula( old = vertex_formula, new = "~ . + 0" ),
-      spatial_domain$vertex_covariates
+      Terms,
+      data = mf,
+      na.action = na.pass
     )
     #V_zk = model.matrix(
     #  update.formula( old = ~ AK + GOA + BS, new = "~ . + 0" ),

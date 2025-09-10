@@ -21,18 +21,27 @@ function( inla_mesh,
     if(nrow(inla_mesh$loc) != nrow(covariates)) stop("Check `covariates` in `make_anisotropy_spde`")
     loc = cbind( inla_mesh$loc[,1:2], covariates )
   }
+
+  # Extract vertices
   TV <- inla_mesh$graph$tv
   V0 <- loc[ TV[,1], ]
   V1 <- loc[ TV[,2], ]
   V2 <- loc[ TV[,3], ]
-  E0 <- V2 - V1
-  E1 <- V0 - V2
-  E2 <- V1 - V0
+
+  # Fill NAs as needed
+  replace_NA = function(m) ifelse(is.na(m),0,m)
+  E0 <- replace_NA(V2 - V1)
+  E1 <- replace_NA(V0 - V2)
+  E2 <- replace_NA(V1 - V0)
+
+  # Get triangle areas
   TmpFn <- function(Vec1, Vec2) abs(det(rbind(Vec1, Vec2)))
   Tri_Area <- rep(NA, nrow(E0))
   for (i in seq_len(length(Tri_Area))){
     Tri_Area[i] <- TmpFn( E0[i,1:2], E1[i,1:2] ) / 2
   }
+
+  # Return it all
   ret <- list( n_s = inla_mesh$n,
                n_tri = nrow(TV),
                Tri_Area = Tri_Area,
