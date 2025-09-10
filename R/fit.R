@@ -466,6 +466,7 @@ function( formula,
     n_s = spatial_domain$n
     spatial_method_code = 6
     spatial_list = make_anisotropy_spde( spatial_domain, covariates = R_sk )
+    spatial_list$V_zk = V_zk
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     n_Hpars = ncol( spatial_list$E0 )
     estimate_kappa = TRUE
@@ -793,7 +794,7 @@ function( formula,
     tmb_data$spatial_list = spatial_list
   }else if( spatial_method_code %in% 6 ){
     tmb_data$spatial_list = spatial_list
-    tmb_data$V_zk = V_zk
+    #tmb_data$V_zk = V_zk
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
   }else if( spatial_method_code %in% 4 ){
@@ -901,7 +902,7 @@ function( formula,
 
   # Map off offset for triangle_k
   if( spatial_method_code %in% 6 ){
-    tmb_map$triangle_k = factor( c(NA, seq_len(ncol(tmb_data$V_zk)-1)) )
+    tmb_map$triangle_k = factor( c(NA, seq_len(ncol(tmb_data$spatial_list$V_zk)-1)) )
   }
 
   # 

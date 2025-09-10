@@ -51,7 +51,7 @@ adjoint = function(A){
 adjoint(H)
 
 #####################
-# EXPERIMENT
+# EXPERIMENT ... is WORKING
 #####################
 
 mesh_cov = add_mesh_covariates(

@@ -70,11 +70,40 @@ Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
   return M;
 }
 
+/** \brief Object containing all elements of an anisotropic SPDE object, i.e. eqn (20) in Lindgren et al. */
+// Modified from: https://github.com/kaskr/adcomp/blob/master/TMB/inst/include/tmbutils/R_inla.hpp
+template<class Type>
+struct spde_covariates_t{
+  int n_s;
+  //int n_tri;
+  vector<Type> Tri_Area;
+  matrix<Type> E0;
+  matrix<Type> E1;
+  matrix<Type> E2;
+  matrix<Type> V_zk;
+  matrix<int>  TV;
+  Eigen::SparseMatrix<Type> G0;
+  Eigen::SparseMatrix<Type> G0_inv;
+
+  // Define output
+  spde_covariates_t(SEXP x){  /* x = List passed from R */
+    n_s = CppAD::Integer(asVector<Type>(getListElement(x,"n_s"))[0]);
+    //n_tri = CppAD::Integer(asVector<Type>(getListElement(x,"n_tri"))[0]);
+    Tri_Area = asVector<Type>(getListElement(x,"Tri_Area"));
+    E0 = asMatrix<Type>(getListElement(x,"E0"));
+    E1 = asMatrix<Type>(getListElement(x,"E1"));
+    E2 = asMatrix<Type>(getListElement(x,"E2"));
+    V_zk = asMatrix<Type>(getListElement(x,"V_zk"));
+    TV = asMatrix<int>(getListElement(x,"TV"));
+    G0 = tmbutils::asSparseMatrix<Type>(getListElement(x,"G0"));
+    G0_inv = tmbutils::asSparseMatrix<Type>(getListElement(x,"G0_inv"));
+  }
+};
 // make stiffness G1 from covariates in columns of E0, E1, E2
 template<class Type>
-Eigen::SparseMatrix<Type> G_spde_covariates( R_inla::spde_aniso_t<Type> spde,
+Eigen::SparseMatrix<Type> G_spde_covariates( spde_covariates_t<Type> spde,
                                               matrix<Type> H_jj,
-                                              matrix<Type> V_zk,
+                                              //matrix<Type> V_zk,
                                               vector<Type> triangle_k ){
 
   // Extract objects
@@ -83,7 +112,7 @@ Eigen::SparseMatrix<Type> G_spde_covariates( R_inla::spde_aniso_t<Type> spde,
   matrix<Type> edge1_tj = spde.E1;
   matrix<Type> edge2_tj = spde.E2;
   matrix<int> s_tv = spde.TV;         // dim = n_t \times n_v
-  matrix<Type> triangle_t1 = V_zk * triangle_k.matrix();
+  matrix<Type> triangle_t1 = spde.V_zk * triangle_k.matrix();
   int n_s = spde.n_s;
   int n_t = s_tv.rows();
   int n_v = s_tv.cols();              // number of vertices per triangle
@@ -1069,11 +1098,12 @@ Type objective_function<Type>::operator() (){
   }
   // Using SPDE with covariate-based anisotropy and geometric anisotropy
   if( model_options(0)==6 ){
-    DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
-    DATA_MATRIX( V_zk );
+    DATA_STRUCT( spatial_list, spde_covariates_t );
+    //DATA_MATRIX( V_zk );
     PARAMETER_VECTOR( triangle_k );
     // Build precision
-    Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H, V_zk, triangle_k );
+    //Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H, V_zk, triangle_k );
+    Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H, triangle_k );
     REPORT( G1 );
     Q_ss = exp(4.0*log_kappa)*spatial_list.G0 + Type(2.0)*exp(2.0*log_kappa)*G1 + G1*spatial_list.G0_inv*G1;
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
