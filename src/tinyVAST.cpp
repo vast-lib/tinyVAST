@@ -106,6 +106,11 @@ Eigen::SparseMatrix<Type> G_spde_covariates( spde_covariates_t<Type> spde,
                                               //matrix<Type> V_zk,
                                               vector<Type> triangle_k ){
 
+  // TO ADD EDGE COVARIATES:
+  // 0.  add n_e = edge0_tj.rows()
+  // 1.  Add TE, where dim(TE) = n_t \times 3, listing the edge-number for each triangle-edge of n_e edges
+  // 2.  Add A_ek design matrix, where dim(A_ek) = n_e \times n_k (edge-covariates)
+
   // Extract objects
   vector<Type> area_t = spde.Tri_Area;
   matrix<Type> edge0_tj = spde.E0;
