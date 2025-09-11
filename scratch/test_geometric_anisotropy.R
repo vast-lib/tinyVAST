@@ -149,4 +149,171 @@ tv3 = tinyVAST(
   times = min(dat$Year):max(dat$Year)
 )
 
+############################
+# Larger domain
+############################
 
+#
+library(fmesher)
+library(tinyVAST)
+library(surveyjoin)
+library(sf)
+library(rnaturalearth)
+
+d <- get_data("sablefish")
+dat = as.data.frame(d)[,c('survey_name','lat_start','lon_start','effort','catch_weight')]
+dat = na.omit(dat)
+
+mesh = fm_mesh_2d( dat[,c('lon_start','lat_start')], cutoff = 0.5 )
+
+#
+nn = RANN::nn2( data = dat[,c('lon_start','lat_start')], query = mesh$loc[,1:2], k = 1 )
+survey_s = dat[nn$nn.idx, 'survey_name']
+
+mesh_cov = add_mesh_covariates(
+  mesh = mesh,
+  data = dat,
+  covariates = c(),
+  coords = c("lon_start","lat_start")
+)
+mesh_cov$vertex_covariates = data.frame(
+  x = (mesh$loc[,1]),
+  y = (mesh$loc[,2])
+)
+mesh_cov$vertex_covariates = cbind(
+  mesh_cov$vertex_covariates,
+  x_goa = ifelse( survey_s %in% c("Gulf of Alaska","Aleutian Islands"), mesh$loc[,1], NA ),
+  y_goa = ifelse( survey_s %in% c("Gulf of Alaska","Aleutian Islands"), mesh$loc[,2], NA ),
+  x_bs = ifelse( survey_s %in% c("Bering Sea Slope","eastern Bering Sea","northern Bering Sea"), mesh$loc[,1], NA ),
+  y_bs = ifelse( survey_s %in% c("Bering Sea Slope","eastern Bering Sea","northern Bering Sea"), mesh$loc[,2], NA ),
+  x_wc = ifelse( survey_s %in% c("Gulf of Alaska","Aleutian Islands","Bering Sea Slope","eastern Bering Sea","northern Bering Sea"), NA, mesh$loc[,1] ),
+  y_wc = ifelse( survey_s %in% c("Gulf of Alaska","Aleutian Islands","Bering Sea Slope","eastern Bering Sea","northern Bering Sea"), NA, mesh$loc[,2] )
+)
+
+map_sf = ne_countries( country = c("united states of america","russia","canada") )
+#map_sf = st_union(map_sf)
+intersected = st_intersects( st_make_valid(st_set_crs(fm_as_sfc(mesh), st_crs(map_sf))), st_make_valid(map_sf) )
+mesh_cov$triangle_covariates$barrier_polygon = ifelse( is.na(as.numeric(intersected)), 0, 1 )
+
+fit0 = tinyVAST(
+  data = dat,
+  formula = catch_weight ~ 1 + offset(log(effort)),
+  space_term = "",
+  space_columns = c("lon_start","lat_start"),
+  spatial_domain = mesh_cov,
+  family = tweedie(link = "log"),
+  control = tinyVASTcontrol(
+    trace=1,
+    getsd = FALSE,
+    profile = c("alpha_j"),
+    use_anisotropy = FALSE
+  ),
+  development = list(
+    #triangle_formula = ~ offset(barrier_polygon)
+  )
+)
+
+fit1 = tinyVAST(
+  data = dat,
+  formula = catch_weight ~ 1 + offset(log(effort)),
+  space_term = "",
+  space_columns = c("lon_start","lat_start"),
+  spatial_domain = mesh_cov,
+  family = tweedie(link = "log"),
+  control = tinyVASTcontrol(
+    trace=1,
+    getsd = FALSE,
+    profile = c("alpha_j"),
+    use_anisotropy = TRUE
+  ),
+  development = list(
+    #triangle_formula = ~ offset(barrier_polygon)
+  )
+)
+
+
+fit2 = tinyVAST(
+  data = dat,
+  formula = catch_weight ~ 1 + offset(log(effort)),
+  space_term = "",
+  space_columns = c("lon_start","lat_start"),
+  spatial_domain = mesh_cov,
+  family = tweedie(link = "log"),
+  control = tinyVASTcontrol(
+    trace=1,
+    getsd = FALSE,
+    profile = c("alpha_j"),
+    use_anisotropy = FALSE
+  ),
+  development = list(
+    #triangle_formula = ~ offset(barrier_polygon),
+    vertex_formula = ~ 0 + I(x + y) + y
+  )
+)
+
+fit3 = tinyVAST(
+  data = dat,
+  formula = catch_weight ~ 1 + offset(log(effort)),
+  space_term = "",
+  space_columns = c("lon_start","lat_start"),
+  spatial_domain = mesh_cov,
+  family = tweedie(link = "log"),
+  control = tinyVASTcontrol(
+    trace=1,
+    getsd = FALSE,
+    profile = c("alpha_j"),
+    use_anisotropy = FALSE
+  ),
+  development = list(
+    #triangle_formula = ~ offset(barrier_polygon),
+    vertex_formula = ~
+      #I(x + y) + y +
+      I(x_goa + y_goa) + y_goa +
+      I(x_wc + y_wc) + y_wc +
+      #I(x_bs + y_bs) + y_bs +
+      0
+  )
+)
+
+aic = sapply( FUN = AIC, list(fit0,fit1,fit2,fit3) )
+aic - min(aic)
+
+mesh_sf = fm_as_sfc( mesh )
+domain_sf = st_union( mesh_sf )
+grid_sf = st_make_grid( domain_sf, cellsize = 0.5*c(1,1) )
+grid_sf = st_intersection(grid_sf, domain_sf)
+pred = st_coordinates(st_centroid(grid_sf))
+
+r1 = spatial_cor(
+  fit3$rep$Q,
+  mesh = mesh_cov,
+  coord = c(-122, 36),
+  pred = pred
+)
+r2 = spatial_cor(
+  fit3$rep$Q,
+  mesh = mesh_cov,
+  coord = c(-130, 53),
+  pred = pred
+)
+r3 = spatial_cor(
+  fit3$rep$Q,
+  mesh = mesh_cov,
+  coord = c(-153, 57),
+  pred = pred
+)
+r4 = spatial_cor(
+  fit3$rep$Q,
+  mesh = mesh_cov,
+  coord = c(-171, 61),
+  pred = pred
+)
+
+#png( "aniso.png", width = 8, height = 8, res=200, units = "in" )
+  par(mfrow=c(2,2))
+  plot_sf = st_sf( st_geometry(grid_sf), r1 = r1, r2 = r2, r3 = r3, r4 = r4 )
+  for(i in 1:4){
+    plot(plot_sf[,i], border = NA, reset = FALSE, key.pos = NULL )
+    plot(map_sf, add=TRUE, col = "black", border=NA)
+  }
+#dev.off()
