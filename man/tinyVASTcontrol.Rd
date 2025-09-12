@@ -120,5 +120,5 @@ updated values supplied by the user for model settings
 Control parameters for tinyVAST
 }
 \references{
-Bakka, H., Vanhatalo, J., Illian, J., Simpson, D., Rue, H. (2019).  Non-stationary Gaussian models with physical barriers. Spatial Statistics, 29, 268-288. \url{https://doi.org/10.1016/j.spasta.2019.01.002}
+Bakka, H., Vanhatalo, J., Illian, J., Simpson, D., Rue, H. (2019).  Non-stationary Gaussian models with physical barriers. Spatial Statistics, 29, 268-288. \doi{10.1016/j.spasta.2019.01.002}
 }
