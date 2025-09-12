@@ -87,8 +87,9 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 
   df_tri <- mesh_with_covs$triangle_covariates
   ggplot() +
-    geom_raster(data = qcs_grid, aes(X, Y, fill = depth), alpha = 0.7) +
-    geom_point(data = df_tri, aes(x = .x_triangle, y = .y_triangle, fill = depth), colour = "#00000010", pch = 21) +
+    geom_raster( data = qcs_grid, aes(X, Y, fill = depth), alpha = 0.7) +
+    geom_point( data = df_tri, aes(x = .x_triangle, y = .y_triangle, fill = depth),
+                colour = "#00000010", pch = 21) +
     scale_fill_viridis_c(option = "G", trans = "log", direction = -1)
 }
 
