@@ -20,6 +20,8 @@ articles:
   - spatial_factor_analysis
   - web_only/VAST
   - web_only/predator_expanded_diet
+  - web_only/spatial_structural_models
+  - probabilistic_forecasts
 
 reference:
 - title: internal

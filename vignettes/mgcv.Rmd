@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -154,3 +155,9 @@ We can again use `visreg` to visualize response surfaces, although it doesn't se
 out = visreg2d( myfit, "x", "y", cond=list("group"=1), plot=FALSE )
 plot( out, main="f(x,y) for group=1")
 ```
+
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`

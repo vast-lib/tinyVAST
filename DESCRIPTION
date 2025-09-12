@@ -2,7 +2,7 @@ Type: Package
 Package: tinyVAST
 Title: Multivariate Spatio-Temporal Models using Structural Equations
 Version: 1.3.0
-Date: 2025-07-20
+Date: 2025-09-12
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
 	   role = c("aut", "cre"),
@@ -18,8 +18,8 @@ Description: Fits a wide variety of multivariate spatio-temporal models
     It includes time-variable, space-variable, and space-time-variable 
     interactions using dynamic structural equation models ('DSEM') 
     as expressive interface, and the 'mgcv' package to specify splines 
-    via the formula interface.  See Thorson et al. (2024)
-    <doi:10.48550/arXiv.2401.10193> for more details.
+    via the formula interface.  See Thorson et al. (2025)
+    <doi:10.1111/geb.70035> for more details.
 License: GPL-3
 Depends:
     R (>= 4.1.0)
@@ -72,6 +72,6 @@ Config/testthat/parallel: true
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://vast-lib.github.io/tinyVAST/
 BugReports: https://github.com/vast-lib/tinyVAST/issues

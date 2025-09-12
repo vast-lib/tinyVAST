@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -172,3 +173,9 @@ ggplot(p, aes(x=w, y=fit,
   ymin = fit - 1.96 * se.fit, ymax = fit + 1.96 * se.fit)) +
   geom_line() + geom_ribbon(alpha = 0.4)
 ```
+
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`

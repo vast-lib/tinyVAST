@@ -140,7 +140,7 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula binomial poisson predict as.formula
+#'   update.formula binomial poisson predict as.formula na.pass
 #' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
@@ -1145,7 +1145,7 @@ function( formula,
 #'        2019.
 #'
 #' @references
-#' Bakka, H., Vanhatalo, J., Illian, J., Simpson, D., Rue, H. (2019).  Non-stationary Gaussian models with physical barriers. Spatial Statistics, 29, 268-288. \url{https://doi.org/10.1016/j.spasta.2019.100279}
+#' Bakka, H., Vanhatalo, J., Illian, J., Simpson, D., Rue, H. (2019).  Non-stationary Gaussian models with physical barriers. Spatial Statistics, 29, 268-288. \url{https://doi.org/10.1016/j.spasta.2019.01.002}
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or

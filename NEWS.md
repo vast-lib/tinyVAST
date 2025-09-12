@@ -13,6 +13,7 @@
 * Fix bug arising when using `weights` argument using family of `delta_gamma` or `delta_lognormal`, where this 
   bug was introduced in release 1.2.0 (h/t Peri Gerson for identifying the issue)
 * Add vignette showing `project` function
+* Add a web-only vignette showing the sponge-coral-fish case study to illustrate spatial structural modelling
 
 # tinyVAST 1.2.0
 

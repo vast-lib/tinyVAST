@@ -60,7 +60,7 @@ interpolation by default, with an optional high-performance \pkg{RANN} method
 for very large datasets.
 }
 \examples{
-\dontshow{if (requireNamespace("RANN", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("RANN", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 library(sdmTMB)
 library(sf)
 
