@@ -21,7 +21,7 @@ articles:
   - web_only/VAST
   - web_only/predator_expanded_diet
   - web_only/spatial_structural_models
-  - probabilistic_forecasts
+  - web_only/probabilistic_forecasts
 
 reference:
 - title: internal

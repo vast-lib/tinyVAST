@@ -2,7 +2,7 @@
 title: "Probabilistic forecasts"
 author: "Arnaud Grüss, James T. Thorson, Andrew J. Allyn"
 output: rmarkdown::html_vignette
-bibliography: 'tinyVAST_vignettes.bib'
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Probabilistic forecasts}
   %\VignetteEngine{knitr::rmarkdown}
