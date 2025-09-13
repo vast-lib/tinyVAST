@@ -104,7 +104,6 @@ myfit = tinyVAST(
   space_columns = c("X", "Y"),
   variable_column = "Group4",
   variables = c("Coral", "Sponge", "Rock", "Flat", "Rock_trawl", "Flat_trawl"),
-  time_column = "time",
   distribution_column = "Group4",
   spatial_domain = mesh,
   control = control

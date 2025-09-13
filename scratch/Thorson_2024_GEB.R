@@ -6,14 +6,39 @@
 
 #
 if( FALSE ){
+  
   setwd( R'(C:\Users\James.Thorson\Desktop\Work files\Collaborations\2024 -- tinyVAST\Dryad\2025-04-04)' )
   combined_samples = read.csv( file="Formatted_data.csv" )
-  goaai_outline = st_read( "goaai_outline.shp" )
+  
+  # Dropping unused variables helps
+  combined_samples = combined_samples[,c('Year', 'Count', 'Group4', 'X', 'Y', 'AreaSwept')]
 
+  # Using integers helps very minimally
+  #combined_samples$Year = as.integer(combined_samples$Year)
+  #combined_samples$Count = as.integer(combined_samples$Count)
+  
+  # Rounding does not help
+  #combined_samples[,'AreaSwept'] = round(combined_samples[,'AreaSwept'],3)
+  #combined_samples[,c('X','Y')] = round(combined_samples[,c('X','Y')],0)
+  
+  # using package `float` does not help
+  #library(float)
+  #combined_samples[,'X'] = as.float(combined_samples[,'X'])
+  #combined_samples[,'Y'] = as.float(combined_samples[,'Y'])
+  #combined_samples[,'AreaSwept'] = as.float(combined_samples[,'AreaSwept'])
+  #combined_samples[,'Count'] = fl(combined_samples[,'Count'])
+  
+  # Simplify shapefile ... really important!
+  goaai_outline = st_read( "goaai_outline.shp" )
+  goaai_outline = st_simplify(goaai_outline, dTolerance = 1)
+  goaai_outline = st_make_valid(goaai_outline)
+  
   #
   alaska_sponge_coral_fish = list( combined_samples = combined_samples, goaai_outline = goaai_outline )
   setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
-  usethis::use_data(alaska_sponge_coral_fish)
+  usethis::use_data( alaska_sponge_coral_fish, 
+                     compress = c("gzip", "bzip2", "xz")[3],
+                     overwrite = TRUE)
 }
 
 library(tinyVAST)
