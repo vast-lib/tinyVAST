@@ -84,7 +84,6 @@ fit <- tinyVAST(
   ),
   spatial_domain = mesh,
   control = tinyVASTcontrol(
-    trace = 1,
     use_anisotropy = FALSE
   ),
   space_columns = c("Lon","Lat"),
