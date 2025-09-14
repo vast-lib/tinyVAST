@@ -8,6 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{pdp}
+bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}
@@ -26,6 +27,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -263,7 +265,7 @@ knitr::kable( c("Tweedie"=AIC(mytinyVAST),"delta-lognormal"=AIC(mydelta2)), digi
 
 # Bivariate spatio-temporal autoregressive model
 
-We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.  We first simulate artificial data for the sake of demonstration:
+We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction [@thorson_estimating_2017,@thorson_spatio-temporal_2019].  We first simulate artificial data for the sake of demonstration:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate settings
@@ -344,3 +346,9 @@ ggplot(Index, aes( time, Estimate )) +
   geom_point( aes(x=time, y=True), color = "red" )
 ```
 
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+### Works cited

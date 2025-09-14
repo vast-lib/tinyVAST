@@ -7,6 +7,7 @@ vignette: >
   %\VignetteIndexEntry{Age composition expansion}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}
@@ -18,6 +19,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -31,7 +33,7 @@ library(sf)
 ```
 
 tinyVAST is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
-We here explore the capacity to use area-expansion to calculate proportion-at-age using spatially unbalanced sampling data.
+We here explore the capacity to use area-expansion to calculate proportion-at-age using spatially unbalanced sampling data [@thorson_spatiotemporal_2018].
 
 # Expanding age-composition data
 To start, we load sampling data that has undergone first-stage expansion.  This arises when each primary sampling unit includes secondary subsampling of ages, and the subsampled proporrtion-at-age in each primary unit has been expanded to the total abundance in that primary sample:
@@ -197,3 +199,9 @@ ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
 ```
 
 
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+### Works cited

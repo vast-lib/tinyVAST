@@ -8,6 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{ggraph}
+bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}
@@ -19,6 +20,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE, dep=FALSE )
 # Build
@@ -35,7 +37,7 @@ options("tinyVAST.verbose" = FALSE)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
-We here show how it can fit a stream network model, where spatial correlations arise from stream distances along a network.
+We here show how it can fit a stream network model, where spatial correlations arise from stream distances along a network [@charsley_catchment-scale_2023,@hocking_geostatistical_2018].
 
 First, we load a shapefile representing a stream network, and convert it to _sfnetwork_ format.  This format includes
 edges representing stream segments, and nodes where edges connect.
@@ -127,3 +129,10 @@ plot( stream, main="omegahat_i")
 plot( st_sf(sf_plot,"omega"=omega_plot), add=TRUE, pch=19, cex=0.5, pal=viridis )
 plot( st_sf(extrap,"omega"=omega_i), add=TRUE, pch=19, cex=2, pal=viridis )
 ```
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+### Works cited

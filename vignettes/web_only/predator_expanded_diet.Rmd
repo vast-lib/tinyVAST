@@ -8,6 +8,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{sf}
+bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}
@@ -18,6 +19,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -33,7 +35,7 @@ library(ggplot2)
 
  # Joint model for stomach content, predator biomass catch rate, and predator-expanded-stomach-contents (PESCs)
 
-We developed an approach that fits a spatio-temporal model with `VAST` to both prey-biomass-per-predator-mass data (i.e., the ratio of prey biomass in stomachs to predator weight) and predator biomass catch rate data (predator biomass per unit area), to predict “predator-expanded-stomach-contents” (PESC; the product of prey-biomass-per-predator-biomass, predator biomass per unit area, and surface area). The PESC estimates can be used to visualize either the annual landscape of PESC (spatio-temporal variation), or can be aggregated across space to calculate annual variation in diet proportions (variation among prey items and among years). 
+We developed an approach that fits a spatio-temporal model with `VAST` to both prey-biomass-per-predator-mass data (i.e., the ratio of prey biomass in stomachs to predator weight) and predator biomass catch rate data (predator biomass per unit area), to predict “predator-expanded-stomach-contents” (PESC; the product of prey-biomass-per-predator-biomass, predator biomass per unit area, and surface area) [@gruss_spatio-temporal_2020]. The PESC estimates can be used to visualize either the annual landscape of PESC (spatio-temporal variation), or can be aggregated across space to calculate annual variation in diet proportions (variation among prey items and among years). 
 
 Here, we demonstrate our approach in a data-limited situation involving West Florida Shelf red grouper (Epinephelus morio, Epinephelidae) for 2011-2015. Four prey items are considered: crabs, fish, shrimps, and “other prey”. We demonstrate how diet proportions are calculated from the PESCs estimated by our model. 
 
@@ -205,3 +207,10 @@ ggplot( proportions ) +
   geom_point( aes(x = Year, y = prop) ) +
   facet_grid( vars(Category) )
 ```
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+### Works cited

@@ -1,13 +1,14 @@
 ---
 title: "Condition and density"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
 vignette: >
   %\VignetteIndexEntry{Condition and density}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: 'tinyVAST_vignettes.bib'
+bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}
@@ -20,6 +21,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE, dep=FALSE )
 # Build
@@ -34,8 +36,10 @@ library(ggplot2)
 ```
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
-We here show how it can fit a bivariate spatio-temporal model representing density dependence in physiological condition for fishes.  
+We here show how it can fit a bivariate spatio-temporal model representing density dependence in physiological condition for fishes [@thorson_spatio-temporal_2015].  
 This replicates a similar vignette provided for the VAST package, but showcases several improvements in interpretation and interface.
+
+# Data format
 
 We first load and combine the two data sets:
 
@@ -197,3 +201,10 @@ for( yearI in seq_len(nrow(cond_tz)) ){
 
 
 ```
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+### Works cited
