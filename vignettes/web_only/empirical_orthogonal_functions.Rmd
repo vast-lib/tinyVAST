@@ -1,8 +1,10 @@
 ---
 title: "Empirical orthogonal functions"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Empirical orthogonal functions}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,6 +20,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -31,8 +34,7 @@ set.seed(101)
 ```
 
 tinyVAST is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
-We here explore the capacity to specify a generalized linear latent variable model that is configured to
-generalize an empirical orthogonal function analysis.
+We here explore the capacity to specify a generalized linear latent variable model that is configured to generalize an empirical orthogonal function analysis [@thorson_defining_2020].
 
 # Empirical Orthogonal Function (EOF) analysis
 To start, we reformat data on September Sea ice concentrations:
@@ -116,9 +118,9 @@ L_tf = matrix( 0, nrow=length(unique(Data$year)), ncol=2,
 L_tf[lower.tri(L_tf,diag=TRUE)] = out$opt$par[names(out$opt$par)=="beta_z"]
 
 # Extract factor-responses
-EOF1_g = predict( out, cbind(newdata, year="EOF_1"), what="pepsilon_g" )
-EOF2_g = predict( out, cbind(newdata, year="EOF_2"), what="pepsilon_g" )
-omega_g = predict( out, cbind(newdata, year="EOF_2"), what="pomega_g" )
+EOF1_g = predict( out, cbind(newdata, year="EOF_1"), what="pepsilon1_g" )
+EOF2_g = predict( out, cbind(newdata, year="EOF_2"), what="pepsilon1_g" )
+omega_g = predict( out, cbind(newdata, year="EOF_2"), what="pomega1_g" )
 
 # Rotate responses and loadings
 rotated_results = rotate_pca( L_tf=L_tf, x_sf=cbind(EOF1_g,EOF2_g), order="decreasing" )
@@ -140,3 +142,10 @@ matplot( y=L_tf, x=unique(Data$year), type="l",
   legend( "top", ncol=n_eof, legend=paste0("EOF",1:n_eof),
           fill=viridisLite::viridis(n_eof) )
 ```
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+### Works cited

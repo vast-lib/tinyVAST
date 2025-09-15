@@ -19,6 +19,9 @@ articles:
   - web_only/empirical_orthogonal_functions
   - spatial_factor_analysis
   - web_only/VAST
+  - web_only/predator_expanded_diet
+  - web_only/spatial_structural_model
+  - web_only/probabilistic_forecasts
 
 reference:
 - title: internal
@@ -30,6 +33,8 @@ reference:
   - get_data.tinyVAST
   - GetResponse.tinyVAST
   - conditional_gmrf
+  - add_mesh_covariates
+  - spatial_cor
 
 - title: 'Fitting and diagnostics'
   desc: |
@@ -92,5 +97,8 @@ reference:
   - bering_sea_pollock_vast
   - red_snapper
   - red_snapper_shapefile
+  - alaska_sponge_coral_fish
+  - bering_sea_capelin_forecasts
+  - red_grouper_diet
 
 

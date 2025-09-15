@@ -1,3 +1,20 @@
+# tinyVAST 1.3.0
+
+* Adding `add_vertex_covariates` to associate mesh vertices with covariates (h\t Sean Anderson)
+* Adding option for covariate-based anisotropy using `vertex_formula`, while also allowing geometric anisotropy.
+* Adding option for barriers using `triangle_formula` which permits an offset for barrier covariates
+* Adding `spatial_cor` to use sparse matrices to compute the correlation between a `coord` and `pred` coordinates, e.g. to visualize covariate-based anisotropy
+* Fix `make_eof_ram` to work as intended for multivariate models, e.g., having a separate response map and shared indices across variables (previously had a shared response map and shared indices, i.e., collapsed to univariate model)
+* Fix bug arising in `predict` when `spatial_varying` involved a column of `newdata` that was expecting a factor, but provided a `character-vector`. Now coercers to factors using the levels of the original `data` (same behavior as for `formula`)
+* Export `fit$rep$negloglik_i` as log-likelihood for each datum, for use in calculating out-of-sample predictive score
+* Turn off SE reporting during index calculations (as speedup), and allow SE reporting for `mu_g` in `predict`
+* Fix bug arising in `project` when `spatial_varying` was specified
+* Adding web-only vignette showing predator-expanded diet estimator using joint model of specific stomach contents and predator density
+* Fix bug arising when using `weights` argument using family of `delta_gamma` or `delta_lognormal`, where this 
+  bug was introduced in release 1.2.0 (h/t Peri Gerson for identifying the issue)
+* Add vignette showing `project` function
+* Add a web-only vignette showing the sponge-coral-fish case study to illustrate spatial structural modelling
+
 # tinyVAST 1.2.0
 
 * Adding a new spatial domain using `sf::st_make_grid`

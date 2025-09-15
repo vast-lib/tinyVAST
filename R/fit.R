@@ -76,12 +76,20 @@
 #'        \code{space_term}, and \code{spacetime_term}. These specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
-#' @param spatial_varying a formula specifying spatially varying coefficients.
+#' @param spatial_varying a formula specifying spatially varying coefficients (SVC). Note that
+#'        using formulas in R, \code{spatial_varying = ~ X} automatically adds an intercept
+#'        to implicitly read as \code{spatial_varying = ~ 1 + X}, so tinyVAST
+#'        then estimates an SVC for an intercept
+#'        in addition to covariate \code{X}. Therefore, if you only want an SVC
+#'        for a single covariate, use \code{spatial_varying = ~ 0 + X} to suppress
+#'        the default behavior of formulas in R.
 #' @param weights A numeric vector representing optional likelihood weights for the
 #'        data likelihood. Weights do not have to sum to one and are not internally modified.
 #'        Thee weights argument needs to be a vector and not a name of the variable in the data frame.
 #' @param control Output from [tinyVASTcontrol()], used to define user
 #'        settings.
+#' @param development Specify options that are under active development.  Please do
+#'        not use these features without coordinating with the package authors.
 #'
 #' @details
 #' `tinyVAST` includes several basic inputs that specify the model structure:
@@ -132,8 +140,8 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula binomial poisson predict
-#' @importFrom utils packageVersion
+#'   update.formula binomial poisson predict as.formula na.pass
+#' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
 #' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet
@@ -204,38 +212,63 @@ function( formula,
           space_term = NULL,
           spacetime_term = NULL,
           family = gaussian(),
-          space_columns = c("x","y"),
+          delta_options = list(formula = ~ 1),
+          spatial_varying = NULL,
+          weights = NULL,
           spatial_domain = NULL,
+          development = list(),
+          control = tinyVASTcontrol(),
+          # Indexing
+          space_columns = c("x","y"),
           time_column = "time",
           times = NULL,
           variable_column = "var",
           variables = NULL,
-          distribution_column = "dist",
-          delta_options = list(formula = ~ 1),
-          spatial_varying = NULL,
-          weights = NULL,
-          control = tinyVASTcontrol() ){
+          distribution_column = "dist" ){
 
   # https://roxygen2.r-lib.org/articles/rd-formatting.html#tables for roxygen formatting
   start_time = Sys.time()
 
   # General error checks
-  #if( isFALSE(is(control, "tinyVASTcontrol")) ) stop("`control` must be made by `tinyVASTcontrol()`", call. = FALSE)
-  #if( !is.data.frame(data) ) stop("`data` must be a data frame", call. = FALSE)
   assertClass(control, "tinyVASTcontrol")
   assertDataFrame(data)
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
-  # Input conflicts
+  # Add `development` stuff
+  if( !is.null(development$vertex_formula) ){
+    vertex_formula = development$vertex_formula
+  }else{
+    vertex_formula = ~ 0
+  }
+  if( !is.null(development$triangle_formula) ){
+    triangle_formula = development$triangle_formula
+  }else{
+    triangle_formula = ~ 0
+  }
+  
+  # Avoid name conflict
+  if( "fake" %in% colnames(spatial_domain$triangle_covariates) ){
+    stop("change colnames in `triangle_covariates` to avoid `fake`")
+  }
+
+    # Input conflicts
   matched_call = match.call()
   if( isTRUE(as.character(matched_call$family) == "family") ){
-    stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name")
+    stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name", call. = FALSE)
+  }
+  if( !is(spatial_domain,"vertex_coords") ){
+    if( vertex_formula != as.formula("~0") ){
+      stop("specifying `vertex_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
+    }
+    if( triangle_formula != as.formula("~0") ){
+      stop("specifying `triangle_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
+    }
   }
 
   # Haven't tested for extra levels
   tmpdata = droplevels(data)
   if( !identical(tmpdata,data) ){
-    stop("`data` has some factor with extra levels. Please retry after running `data = droplevels(data)` on the input `data`")
+    stop("`data` has some factor with extra levels. Please retry after running `data = droplevels(data)` on the input `data`", call. = FALSE)
   }
 
   ##############
@@ -407,16 +440,55 @@ function( formula,
   # Spatial domain constructor
   ##############
 
-  if( is(spatial_domain,"fm_mesh_2d") ){
+  # n_Hpars is the number of params in H AND the dim of H
+  n_Hpars = 2
+
+  # Parse each `spatial_domain`
+  if( is(spatial_domain,"vertex_coords") ){
+    updated_vertex_formula = update.formula( old = vertex_formula, new = "~ . + 0" )
+    Terms <- terms(updated_vertex_formula, data = spatial_domain$vertex_covariates)
+    mf <- model.frame(
+      updated_vertex_formula,
+      data = spatial_domain$vertex_covariates,
+      na.action = na.pass,
+      drop.unused.levels = TRUE
+    )
+    # Parse covariate matrix
+    R_sk = model.matrix(
+      Terms,
+      data = mf,
+      na.action = na.pass
+    )
+    #V_zk = model.matrix(
+    #  update.formula( old = ~ AK + GOA + BS, new = "~ . + 0" ),
+    #  spatial_domain$triangle_covariates
+    #)
+    if( triangle_formula != as.formula("~0") ){
+      gam_setup = mgcv::gam( update.formula( old = triangle_formula, new = "fake ~ . + 0" ), 
+                             data = cbind( "fake" = 0, spatial_domain$triangle_covariates ), 
+                             fit = FALSE )
+      V_zk = cbind( offset = gam_setup$offset, gam_setup$X ) # First is always the offset
+    }else{
+      V_zk = matrix( 0, ncol = 1, nrow = nrow(spatial_domain$triangle_covariates) )
+    }
+    # covariate-based anisotropy
+    n_s = spatial_domain$n
+    spatial_method_code = 6
+    spatial_list = make_anisotropy_spde( spatial_domain, covariates = R_sk )
+    spatial_list$V_zk = V_zk
+    A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
+    n_Hpars = ncol( spatial_list$E0 )
+    estimate_kappa = TRUE
+    estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+  }else if( is(spatial_domain,"fm_mesh_2d") ){
     # SPDE
     n_s = spatial_domain$n
     spatial_method_code = 1
-    #spde = fm_fem( spatial_domain )
-    #spatial_list = list("M0"=spde$c0, "M1"=spde$g1, "M2"=spde$g2)
     spatial_list = make_anisotropy_spde( spatial_domain )
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
+    n_Hpars = 2
     estimate_kappa = TRUE
-    estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+    estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"igraph") ) {
     # SAR
     spatial_method_code = 2
@@ -427,7 +499,7 @@ function( formula,
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
     estimate_kappa = ifelse( ecount(spatial_domain)>0, TRUE, FALSE )
-    estimate_H = FALSE
+    estimate_anisotropy = FALSE
   }else if( is(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
     # stream network
     spatial_method_code = 4
@@ -436,7 +508,7 @@ function( formula,
     A_is = sfnetwork_evaluator( stream = spatial_domain$stream,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
-    estimate_H = FALSE
+    estimate_anisotropy = FALSE
   }else if( is(spatial_domain, "sfc_GEOMETRY") ){
     # SAR with geometric anisotropy
     spatial_method_code = 5
@@ -464,7 +536,7 @@ function( formula,
                          x = 1,
                          dims = c(length(s_i),length(spatial_domain)) )
     estimate_kappa = TRUE
-    estimate_H = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+    estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is.null(spatial_domain) ) {
     # Single-site
     spatial_method_code = 3
@@ -475,7 +547,7 @@ function( formula,
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
     estimate_kappa = FALSE
-    estimate_H = FALSE
+    estimate_anisotropy = FALSE
   }else{
     stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
@@ -629,6 +701,11 @@ function( formula,
   }
   distributions = build_distributions( family )
 
+  # Convert weights to size for binomial as special case
+  is_binomial = (distributions$family_code[distributions$e_i,1] == 4) & (distributions$family_code[distributions$e_i,2] == 99)
+  size_i = ifelse( is_binomial, weights_i, 1 )
+  weights_i = ifelse( is_binomial, 1, weights_i )
+
   ##############
   # Build spatially varying
   ##############
@@ -652,16 +729,17 @@ function( formula,
   ##############
 
   # Make options
-  spatial_options = c(
+  model_options = c(
     spatial_method_code,
     ifelse( control$gmrf_parameterization=="separable", 0, 1),
     ifelse( isFALSE(control$get_rsr), 0, 1),
-    ifelse( isFALSE(control$extra_reporting), 0, 1)
+    ifelse( isFALSE(control$extra_reporting), 0, 1),
+    0
   )
 
   # make dat
   tmb_data = list(
-    spatial_options = spatial_options,
+    model_options = model_options,
     y_i = gam_basis$y_i,
     X_ij = gam_basis$X_ij,
     Z_ik = gam_basis$Z_ik,
@@ -673,6 +751,7 @@ function( formula,
     c_i = ivector_minus_one(c_i), # -1 to convert to CPP index, and keep as integer-vector
     offset_i = gam_basis$offset_i,
     weights_i = weights_i,
+    size_i = size_i,
     family_ez = distributions$family_code,
     link_ez = distributions$link_code,
     components_e = distributions$components,
@@ -722,6 +801,9 @@ function( formula,
   )
   if( spatial_method_code %in% c(1,3) ){
     tmb_data$spatial_list = spatial_list
+  }else if( spatial_method_code %in% 6 ){
+    tmb_data$spatial_list = spatial_list
+    #tmb_data$V_zk = V_zk
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
   }else if( spatial_method_code %in% 4 ){
@@ -765,7 +847,7 @@ function( formula,
 
     eps = numeric(0),
     log_kappa = log(1),
-    ln_H_input = c(0, 0)
+    ln_H_input = rep(0, n_Hpars)
   )
 
   # Telescoping
@@ -786,6 +868,10 @@ function( formula,
   }
   if( nrow(delta_time_term_ram$output$ram)==0 ){
     tmb_par$delta2_tc = tmb_par$delta2_tc[,numeric(0),drop=FALSE]
+  }
+  if( spatial_method_code %in% 6 ){
+    # First value corresponds to `barrier` from `triangle_formula = offset(barrier)`
+    tmb_par$triangle_k = c( log(control$barrier_stiffness), rep(0, ncol(V_zk)-1) )
   }
 
   # Turn off initial conditions ... cutting from model
@@ -819,8 +905,13 @@ function( formula,
   }
 
   # Map off ln_H_input
-  if( isFALSE(estimate_H) ){
-    tmb_map$ln_H_input = factor( c(NA,NA) )
+  if( isFALSE(estimate_anisotropy) ){
+    tmb_map$ln_H_input = factor( c(NA, NA, seq_along(tmb_par$ln_H_input[-c(1:2)])) )
+  }
+
+  # Map off offset for triangle_k
+  if( spatial_method_code %in% 6 ){
+    tmb_map$triangle_k = factor( c(NA, seq_len(ncol(tmb_data$spatial_list$V_zk)-1)) )
   }
 
   # 
@@ -964,7 +1055,8 @@ function( formula,
     control = control,
     family = family,                                       # for `add_predictions`
     weights = weights,
-    packageVersion = packageVersion("tinyVAST")
+    packageVersion = packageVersion("tinyVAST"),
+    development = development
   )
   out = list(
     data = data,
@@ -993,9 +1085,6 @@ function( formula,
 
 #' @title Control parameters for tinyVAST
 #'
-#' @inheritParams stats::nlminb
-#' @inheritParams TMB::MakeADFun
-#'
 #' @param nlminb_loops Integer number of times to call [stats::nlminb()].
 #' @param newton_loops Integer number of Newton steps to do after running
 #'   [stats::nlminb()].
@@ -1014,7 +1103,13 @@ function( formula,
 #' @param trace Parameter values are printed every `trace` iteration
 #'   for the outer optimizer. Passed to
 #'   `control` in [stats::nlminb()].
-#' @param gmrf_parameterization Parameterization to use for the Gaussian Markov 
+#' @param profile Character-vector passed to [TMB::MakeADFun] and see description
+#'        there.  Fixed effects that are highly correlated with random effects
+#'        can often be estimated faster (i.e., with fewer iterations) by adding
+#'        them to `profile`. The most common use-case is
+#'        \code{profile = c("alpha_j","alpha2_j")}.  However, doing so will have
+#'        a small impact on model estimates and predictions.
+#' @param gmrf_parameterization Parameterization to use for the Gaussian Markov
 #'        random field, where the default `separable` constructs a full-rank and
 #'        separable precision matrix, and the alternative `projection` constructs
 #'        a full-rank and IID precision for variables over time, and then projects
@@ -1043,6 +1138,14 @@ function( formula,
 #' @param sar_adjacency Whether to use queen or rook adjacency when defining
 #'        a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 #'        (default is queen)
+#' @param barrier_stiffness The ratio of local stiffness (the scale of diffusion
+#'        rate and resulting decorrelation distance) for barriers relative to normal areas
+#'        in the SPDE method when using \code{add_mesh_covariates}.  The
+#'        default \code{barrier_stiffness = 0.01} is the value from Bakka et al.
+#'        2019.
+#'
+#' @references
+#' Bakka, H., Vanhatalo, J., Illian, J., Simpson, D., Rue, H. (2019).  Non-stationary Gaussian models with physical barriers. Spatial Statistics, 29, 268-288. \doi{10.1016/j.spasta.2019.01.002}
 #'
 #' @return
 #' An object (list) of class `tinyVASTcontrol`, containing either default or
@@ -1072,7 +1175,8 @@ function( nlminb_loops = 1,
           get_rsr = FALSE,
           extra_reporting = FALSE,
           use_anisotropy = FALSE,
-          sar_adjacency = "queen" ){
+          sar_adjacency = "queen",
+          barrier_stiffness = 0.01 ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
 
@@ -1100,7 +1204,8 @@ function( nlminb_loops = 1,
     get_rsr = get_rsr,
     extra_reporting = extra_reporting,
     use_anisotropy = use_anisotropy,
-    sar_adjacency = sar_adjacency
+    sar_adjacency = sar_adjacency,
+    barrier_stiffness = barrier_stiffness
   ), class = "tinyVASTcontrol" )
 }
 

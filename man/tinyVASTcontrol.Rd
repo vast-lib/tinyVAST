@@ -26,7 +26,8 @@ tinyVASTcontrol(
   get_rsr = FALSE,
   extra_reporting = FALSE,
   use_anisotropy = FALSE,
-  sar_adjacency = "queen"
+  sar_adjacency = "queen",
+  barrier_stiffness = 0.01
 )
 }
 \arguments{
@@ -51,7 +52,12 @@ for the outer optimizer. Passed to
 
 \item{verbose}{Output additional messages about model steps during fitting?}
 
-\item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
+\item{profile}{Character-vector passed to \link[TMB:MakeADFun]{TMB::MakeADFun} and see description
+there.  Fixed effects that are highly correlated with random effects
+can often be estimated faster (i.e., with fewer iterations) by adding
+them to \code{profile}. The most common use-case is
+\code{profile = c("alpha_j","alpha2_j")}.  However, doing so will have
+a small impact on model estimates and predictions.}
 
 \item{tmb_par}{list of parameters for starting values, with shape identical
 to \code{tinyVAST(...)$internal$parlist}}
@@ -99,6 +105,12 @@ geometric anisotropy}
 \item{sar_adjacency}{Whether to use queen or rook adjacency when defining
 a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 (default is queen)}
+
+\item{barrier_stiffness}{The ratio of local stiffness (the scale of diffusion
+rate and resulting decorrelation distance) for barriers relative to normal areas
+in the SPDE method when using \code{add_mesh_covariates}.  The
+default \code{barrier_stiffness = 0.01} is the value from Bakka et al.
+2019.}
 }
 \value{
 An object (list) of class \code{tinyVASTcontrol}, containing either default or
@@ -106,4 +118,7 @@ updated values supplied by the user for model settings
 }
 \description{
 Control parameters for tinyVAST
+}
+\references{
+Bakka, H., Vanhatalo, J., Illian, J., Simpson, D., Rue, H. (2019).  Non-stationary Gaussian models with physical barriers. Spatial Statistics, 29, 268-288. \doi{10.1016/j.spasta.2019.01.002}
 }

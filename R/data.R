@@ -92,3 +92,50 @@ NULL
 #' @keywords data
 NULL
 
+#' Data to demonstrate model-based diet proportions
+#'
+#' Data to estimate predator-expanded stomach contents (PESC), i.e.,
+#' a multi-prey single-predator model for stomach contents of red grouper
+#' in the Gulf of Mexico that also estimates biomass density for red grouper.
+#' Diet proportions are then the product of predicted diet proportions and prey
+#' specific consumption, normalized across prey categories. Copied from
+#' VAST data set \code{PESC_example_red_grouper}
+#'
+#' @name red_grouper_diet
+#' @docType data
+#' @usage data(red_grouper_diet)
+#' @keywords data
+NULL
+
+#' Data to demonstrate probabilistic forecasting
+#'
+#' Data to estimate probabilistic forecasting, which bridges uncertainty
+#' between short-term (decadal) projections and long-term (end-of-century)
+#' forecasts.  Here we use capelin sampling from a survey trawl survey
+#' in the eastern and northern Bering Sea, as well as annual
+#' sea surface temperature anomalies.  The data set includes data frames
+#' for both the fitted data \code{Data} and the projected values \code{New_Data}
+#'
+#' @name bering_sea_capelin_forecasts
+#' @docType data
+#' @usage data(bering_sea_capelin_forecasts)
+#' @keywords data
+NULL
+
+#' Data to analyze sponge-coral-fish associations
+#'
+#' Data used in
+#' \href{https://onlinelibrary.wiley.com/doi/10.1111/geb.70035}{Thorson et al. 2025}
+#' and copied from \href{https://zenodo.org/records/15001896}{Zenodo} to allow
+#' inclusion as a package vignette.  This includes bottom-trawl samples of rockfish
+#' and flatfish from the Alaska Fisheries Science Center in the Gulf of Alaska
+#' and Aleutian Islands, and drop-camera samples of rockfish, flatfish, sponges,
+#' and corals from the Alaska Fisheries Science Center and
+#' funded by the Deep Sea Coral Initiative.
+#'
+#' @name alaska_sponge_coral_fish
+#' @docType data
+#' @usage data(alaska_sponge_coral_fish)
+#' @keywords data
+NULL
+

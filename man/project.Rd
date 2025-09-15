@@ -23,7 +23,8 @@ project(
 
 \item{what}{What REPORTed object to output, where
 \code{mu_g} is the inverse-linked transformed predictor including both linear components,
-\code{p_g} is the first linear predictor,
+\code{p_g} is the sum of the first and second linear predictors (which only makes sense to inspect when using the Poisson-linked delta model),
+\code{p1_g} is the first linear predictor,
 \code{palpha_g} is the first predictor from fixed covariates in \code{formula},
 \code{pgamma_g} is the first predictor from random covariates in \code{formula} (e.g., splines),
 \code{pomega_g} is the first predictor from spatial variation,

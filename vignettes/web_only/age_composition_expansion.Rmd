@@ -1,8 +1,10 @@
 ---
 title: "Age composition expansion"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Age composition expansion}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,6 +20,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -31,32 +34,46 @@ library(sf)
 ```
 
 tinyVAST is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
-We here explore the capacity to use area-expansion to calculate proportion-at-age using spatially unbalanced sampling data.
+We here explore the capacity to use area-expansion to calculate proportion-at-age using spatially unbalanced sampling data [@thorson_spatiotemporal_2018].
 
 # Expanding age-composition data
-To start, we load sampling data that has undergone first-stage expansion.  This arises when each primary sampling unit includes secondary subsampling of ages, and the subsampled proporrtion-at-age in each primary unit has been expanded to the total abundance in that primary sample:
+
+To start, we load sampling data that has undergone first-stage expansion.  This arises when each primary sampling unit includes secondary subsampling of ages, and the subsampled proportion-at-age in each primary unit has been expanded to the total abundance in that primary sample:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 data( bering_sea_pollock_ages )
 
-# subset to Years 2010-2023 (to speed up the example)
-Data = subset( bering_sea_pollock_ages, Year >= 2010 )
+# subset to Years 2017-2023 (to speed up the example)
+Data = subset( bering_sea_pollock_ages, Year >= 2017 )
 
 # Add Year-_Age interaction
 Data$Age = factor( paste0("Age_",Data$Age) )
 Data$Year_Age = interaction( Data$Year, Data$Age )
 
 # Project data to UTM
-Data = st_as_sf( Data, 
-                   coords = c('Lon','Lat'),
-                   crs = st_crs(4326) )
-Data = st_transform( Data, 
-                        crs = st_crs("+proj=utm +zone=2 +units=km") )
+Data = st_as_sf( 
+  Data, 
+  coords = c('Lon','Lat'),
+  crs = st_crs(4326) 
+)
+Data = st_transform( 
+  Data, 
+  crs = st_crs("+proj=utm +zone=2 +units=km") 
+)
+
 # Add UTM coordinates as columns X & Y
 Data = cbind( st_drop_geometry(Data), st_coordinates(Data) )
+
+# Make spatial domain
+mesh = fm_mesh_2d( 
+  loc = Data[,c("X","Y")],
+  cutoff = 50 
+)
 ```
 
-Next, we construct the various inputs to _tinyVAST_
+## Model specification
+
+Next, we construct the various inputs to _tinyVAST_.  We specify a separate variance for spatial variation by age, separate variance for spatio-temporal variation by age, and a shared magnitude of AR1 correlations over time.  In other examples, the analyst might want to specify some of the spatial and spatio-temporal variance terms as having a value that is shared among ages, to ensure these variances are estimable:  
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # adds different variances for each age
@@ -82,14 +99,18 @@ dsem = "
   Age_15 -> Age_15, 1, lag1
 "
 
-mesh = fm_mesh_2d( loc = Data[,c("X","Y")],
-                            cutoff = 50 )
+# Separate intercept for each Year-Age combination
+Formula = Abundance_per_hectare ~ 0 + Year_Age
+
+# 
 control = tinyVASTcontrol( getsd = FALSE,
                            profile = c("alpha_j"),  
                            trace = 0 )
 ```
 
-We could run the model with a log-linked Tweedie distribution and a single linear predictor:
+## Fitting the model
+
+We the fit the model with a log-linked Tweedie distribution and a single linear predictor:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Define separate tweedie family for each age
@@ -114,7 +135,7 @@ Family = list(
 # Fit model
 myfit = tinyVAST(
   data = Data,
-  formula = Abundance_per_hectare ~ 0 + Year_Age,
+  formula = Formula,
   space_term = sem,
   spacetime_term = dsem,
   family = Family,
@@ -127,7 +148,9 @@ myfit = tinyVAST(
 )
 ```
 
-After the model is fitted, we then apply area-expansion and the epsilon bias-correction method to predict abundance-at-age, and convert that to a proportion:
+## Area expansion and proportions
+
+After the model is fitted, we then apply area-expansion to predict abundance-at-age, and convert that to a proportion.  Below, we forgo epsilon bias-correction [@thorson_implementing_2016], but we strongly recommend it for real-world applications to avoid proportion estimates being biased low for ages with fewer samples (and therefore higher standard errors):
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Get shapefile for survey extent
@@ -159,10 +182,12 @@ for( j in seq_len(nrow(N_jz)) ){
     index1 = integrate_output( myfit,
                     area = areas,
                     newdata = newdata,
-                    apply.epsilon = TRUE,
+                    apply.epsilon = FALSE,
                     bias.correct = FALSE,
-                    intern = TRUE )
-    N_jz[j,'Biomass'] = index1[3] / 1e9
+                    intern = FALSE,
+                    getsd = FALSE )
+    #N_jz[j,'Biomass'] = index1[3] / 1e9
+    N_jz[j,'Biomass'] = index1[1] / 1e9
   }
 }
 N_ct = array( N_jz$Biomass, dim=c(length(myfit$internal$variables),length(unique(Data$Year))),
@@ -170,9 +195,9 @@ N_ct = array( N_jz$Biomass, dim=c(length(myfit$internal$variables),length(unique
 N_ct = N_ct / outer( rep(1,nrow(N_ct)), colSums(N_ct) )
 ```
 
-Finally, we can compare these estimates with those from package _VAST_.  Estimates differ somewhat
-because VAST used a delta-gamma distribution with spatio-temporal variation in two linear predictors, 
-and also used a different mesh.  
+## Comparison with VAST
+
+Finally, we can compare these estimates with those from package _VAST_ [@thorson_comparing_2017].  Estimates differ somewhat because VAST used a delta-gamma distribution with spatio-temporal variation in two linear predictors, used a different mesh, and we also skipped epsilon bias-correction for _tinyVAST_ to have a faster-running vignette.  
 
 ```{r agecomp, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Load VAST results for same data
@@ -184,11 +209,18 @@ rownames(myvast) = 1:15
 mytiny = N_ct
 rownames(mytiny) = 1:15
 
-#
-longvast = cbind( expand.grid(dimnames(myvast)), "p"=as.numeric(myvast), "method"="VAST" )
-longtiny = cbind( expand.grid(dimnames(mytiny)), "p"=as.numeric(mytiny), "method"="tinyVAST" )
+# Combine in long-form data frame (expected by ggplot)
+longvast = cbind( 
+  expand.grid(dimnames(myvast)), 
+  p = as.numeric(myvast), 
+  method = "VAST" )
+longtiny = cbind( 
+  expand.grid(dimnames(mytiny)), 
+  p = as.numeric(mytiny), 
+  method = "tinyVAST" )
 long = rbind( longvast, longtiny )
 
+# Plot with facet by age
 library(ggplot2)
 ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
   facet_grid( rows=vars(Var1), scales="free" ) +
@@ -197,3 +229,9 @@ ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
 ```
 
 
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+# Works cited

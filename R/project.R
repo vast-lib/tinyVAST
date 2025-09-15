@@ -46,7 +46,7 @@ function( Q,
     unobserved_idx <- setdiff(all_idx, observed_idx)
 
     # Partition Q
-    Q_oo <- Q[observed_idx, observed_idx, drop = FALSE]
+    #Q_oo <- Q[observed_idx, observed_idx, drop = FALSE]
     Q_ou <- Q[observed_idx, unobserved_idx, drop = FALSE]
     Q_uo <- Matrix::t(Q_ou)
     Q_uu <- Q[unobserved_idx, unobserved_idx, drop = FALSE]
@@ -228,9 +228,10 @@ function( object,
                           time_term = object$internal$delta_time_term,
                           spacetime_term = object$internal$delta_spacetime_term,
                           spatial_varying = object$internal$delta_spatial_varying ),
-    spatial_varying = object$internal$spatially_varying,
+    spatial_varying = object$internal$spatial_varying,
     weights = object$internal$weights,
-    control = new_control
+    control = new_control,
+    development = object$internal$development
   )
 
   #
@@ -433,9 +434,10 @@ function( object,
                           time_term = object$internal$delta_time_term,
                           spacetime_term = object$internal$delta_spacetime_term,
                           spatial_varying = object$internal$delta_spatial_varying ),
-    spatial_varying = object$internal$spatially_varying,
+    spatial_varying = object$internal$spatial_varying,
     weights = object$internal$weights,
-    control = new_control
+    control = new_control,
+    development = object$internal$development
   )
 
   ##############

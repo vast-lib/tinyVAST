@@ -70,6 +70,93 @@ Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
   return M;
 }
 
+/** \brief Object containing all elements of an anisotropic SPDE object, i.e. eqn (20) in Lindgren et al. */
+// Modified from: https://github.com/kaskr/adcomp/blob/master/TMB/inst/include/tmbutils/R_inla.hpp
+template<class Type>
+struct spde_covariates_t{
+  int n_s;
+  //int n_tri;
+  vector<Type> Tri_Area;
+  matrix<Type> E0;
+  matrix<Type> E1;
+  matrix<Type> E2;
+  matrix<Type> V_zk;
+  matrix<int>  TV;
+  Eigen::SparseMatrix<Type> G0;
+  Eigen::SparseMatrix<Type> G0_inv;
+
+  // Define output
+  spde_covariates_t(SEXP x){  /* x = List passed from R */
+    n_s = CppAD::Integer(asVector<Type>(getListElement(x,"n_s"))[0]);
+    //n_tri = CppAD::Integer(asVector<Type>(getListElement(x,"n_tri"))[0]);
+    Tri_Area = asVector<Type>(getListElement(x,"Tri_Area"));
+    E0 = asMatrix<Type>(getListElement(x,"E0"));
+    E1 = asMatrix<Type>(getListElement(x,"E1"));
+    E2 = asMatrix<Type>(getListElement(x,"E2"));
+    V_zk = asMatrix<Type>(getListElement(x,"V_zk"));
+    TV = asMatrix<int>(getListElement(x,"TV"));
+    G0 = tmbutils::asSparseMatrix<Type>(getListElement(x,"G0"));
+    G0_inv = tmbutils::asSparseMatrix<Type>(getListElement(x,"G0_inv"));
+  }
+};
+// make stiffness G1 from covariates in columns of E0, E1, E2
+template<class Type>
+Eigen::SparseMatrix<Type> G_spde_covariates( spde_covariates_t<Type> spde,
+                                              matrix<Type> H_jj,
+                                              //matrix<Type> V_zk,
+                                              vector<Type> triangle_k ){
+
+  // TO ADD EDGE COVARIATES:
+  // 0.  add n_e = edge0_tj.rows()
+  // 1.  Add TE, where dim(TE) = n_t \times 3, listing the edge-number for each triangle-edge of n_e edges
+  // 2.  Add A_ek design matrix, where dim(A_ek) = n_e \times n_k (edge-covariates)
+
+  // Extract objects
+  vector<Type> area_t = spde.Tri_Area;
+  matrix<Type> edge0_tj = spde.E0;
+  matrix<Type> edge1_tj = spde.E1;
+  matrix<Type> edge2_tj = spde.E2;
+  matrix<int> s_tv = spde.TV;         // dim = n_t \times n_v
+  matrix<Type> triangle_t1 = spde.V_zk * triangle_k.matrix();
+  int n_s = spde.n_s;
+  int n_t = s_tv.rows();
+  int n_v = s_tv.cols();              // number of vertices per triangle
+  int n_j = edge0_tj.cols();          // number of covariates (default = 2)
+
+  // Output
+  Eigen::SparseMatrix<Type> G_ss(n_s, n_s);
+
+  // Objects to assemble triangle contributions
+  matrix<Type> edges_vj( n_v, n_j );
+  matrix<Type> Gt_vv( n_v, n_v );
+
+  // Calculate adjugate of H
+  //matrix<Type> adjH_jj = H_jj.inverse() * H_jj.determinant();  // CAUSES CRASH
+  matrix<Type> adjH_jj = H_jj.adjoint();
+
+  // Assemble stiffness G
+  for( int t=0; t<n_t; t++ ){
+    edges_vj.row(0) = edge0_tj.row(t);
+    edges_vj.row(1) = edge1_tj.row(t);
+    edges_vj.row(2) = edge2_tj.row(t);
+
+    // Make local stiffness ... strictly positive
+    Gt_vv = (edges_vj * adjH_jj * edges_vj.transpose()) * exp(triangle_t1(t,0));
+
+    // Make local stifness ... reverts to normal when triangle_t1 = 0, but not strictly positive
+    //Gt_vv = (edges_vj * adjH_jj * edges_vj.transpose()) * (1.0 * triangle_t1(t,0));
+
+    // Assemble
+    Eigen::SparseMatrix<Type> Gt_ss( n_s, n_s );
+    for(int v1 = 0; v1 < 3; v1++ ){
+    for(int v2 = 0; v2 < 3; v2++ ){
+      Gt_ss.coeffRef( s_tv(t,v1), s_tv(t,v2) ) = Gt_vv(v1,v2);
+    }}
+    G_ss += Gt_ss / ( 4.0 * area_t(t) );
+  }
+  return G_ss;
+}
+
 // Q_SAR( log_kappa, H, n_s, i_z, j_z, delta_z2 )
 // New matrix-notation precision constructor for tail-down exponential stream network
 template<class Type>
@@ -237,7 +324,7 @@ Type gamma_distribution( vector<Type> gamma_k,
 // distribution/projection for omega
 template<class Type>
 array<Type> omega_distribution( array<Type> omega_sc,
-                                 vector<int> spatial_options,
+                                 vector<int> model_options,
                                  Eigen::SparseMatrix<Type> Rho_cc,
                                  Eigen::SparseMatrix<Type> Gamma_cc,
                                  Eigen::SparseMatrix<Type> Gammainv_cc,
@@ -251,7 +338,7 @@ array<Type> omega_distribution( array<Type> omega_sc,
     I_cc.setIdentity();
     if( omega_sc.size()>0 ){ // PARALLEL_REGION
       Eigen::SparseMatrix<Type> IminusRho_cc = I_cc - Rho_cc;
-      if( spatial_options(1) == 0 ){
+      if( model_options(1) == 0 ){
         // Separable precision ... Option-1
         //Eigen::SparseMatrix<Type> Linv_cc = Gammainv_cc * ( I_cc - Rho_cc );
         //Eigen::SparseMatrix<Type> Q_cc = Linv_cc.transpose() * Linv_cc;
@@ -309,7 +396,7 @@ Type xi_distribution( array<Type> xi_sl,
 // distribution/projection for epsilon
 template<class Type>
 array<Type> epsilon_distribution( array<Type> epsilon_stc,
-                                  vector<int> spatial_options,
+                                  vector<int> model_options,
                                   Eigen::SparseMatrix<Type> Rho_hh,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
                                   Eigen::SparseMatrix<Type> Gammainv_hh,
@@ -327,7 +414,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
     int h;
 
     //if( epsilon_stc.size()>0 ){ // PARALLEL_REGION
-    // Reshape for either spatial_options
+    // Reshape for either model_options
     array<Type> epsilon_hs( n_h, n_s );
     for( int s=0; s<n_s; s++ ){
     for( int t=0; t<n_t; t++ ){
@@ -337,7 +424,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
     }}}
     Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
 
-    if( spatial_options(1) == 0 ){
+    if( model_options(1) == 0 ){
       // Separable precision ... Option-1
       //Eigen::SparseMatrix<Type> Linv_hh = Gammainv_hh * ( I_hh - Rho_hh );
       //Eigen::SparseMatrix<Type> Q_hh = Linv_hh.transpose() * Linv_hh;
@@ -381,7 +468,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
 // distribution/projection for epsilon
 template<class Type>
 array<Type> delta_distribution( array<Type> delta_tc,
-                                  vector<int> spatial_options,
+                                  vector<int> model_options,
                                   Eigen::SparseMatrix<Type> Rho_hh,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
                                   Eigen::SparseMatrix<Type> Gammainv_hh,
@@ -396,7 +483,7 @@ array<Type> delta_distribution( array<Type> delta_tc,
     I_hh.setIdentity();
     int h;
 
-    // Reshape for either spatial_options
+    // Reshape for either model_options
     array<Type> delta_h1( n_h, 1 );
     for( int t=0; t<n_t; t++ ){
     for( int c=0; c<n_c; c++ ){
@@ -405,7 +492,7 @@ array<Type> delta_distribution( array<Type> delta_tc,
     }}
     Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
 
-    if( spatial_options(1) == 0 ){
+    if( model_options(1) == 0 ){
       Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
       matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
       Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
@@ -597,7 +684,7 @@ Type devresid_nbinom2( Type y,
 template<class Type>
 Type one_predictor_likelihood( Type &y,
                         Type p,
-                        Type weight,
+                        Type size,
                         int link,
                         int family,
                         vector<Type> log_sigma_segment,
@@ -637,28 +724,28 @@ Type one_predictor_likelihood( Type &y,
     // Distribution
     switch( family ){
       case gaussian_family:
-        nll -= weight * dnorm( y, mu, exp(log_sigma_segment(0)), true );
+        nll = -1 * dnorm( y, mu, exp(log_sigma_segment(0)), true );
         devresid = y - mu;
         if(isDouble<Type>::value && of->do_simulate){
           y = rnorm( mu, exp(log_sigma_segment(0)) );
         }
         break;
       case tweedie_family:
-        nll -= weight * dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+        nll = -1 * dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
         devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
         if(isDouble<Type>::value && of->do_simulate){
           y = rtweedie( mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
         }
         break;
       case lognormal_family:
-        nll -= weight * dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+        nll = -1 * dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
         devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
         if(isDouble<Type>::value && of->do_simulate){
           y = exp(rnorm( logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
         }
         break;
       case poisson_family:
-        nll -= weight * dpois( y, mu, true );
+        nll = -1 * dpois( y, mu, true );
         devresid = sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
         if(isDouble<Type>::value && of->do_simulate){
           y = rpois( mu );
@@ -666,20 +753,20 @@ Type one_predictor_likelihood( Type &y,
         break;
       case binomial_family:
         //if(y==0){
-        //  nll -= weight * log_one_minus_mu;
+        //  nll = -1 * log_one_minus_mu;
         //}else{
-        //  nll -= weight * logmu;
+        //  nll = -1 * logmu;
         //}
-        nll -= dbinom_custom( y * weight, logmu, log_one_minus_mu, weight, true );
+        nll = -1 * dbinom_custom( y * size, logmu, log_one_minus_mu, size, true );
         if(isDouble<Type>::value && of->do_simulate){
-          y = rbinom( weight, mu );
+          y = rbinom( size, mu );
         }
-        // TODO:  Update deviance residual for Trials = weight
+        // TODO:  Update deviance residual for Trials = size
         //devresid = sign(y - mu) * pow(-2*((1-y)*log(1.0-mu) + y*log(mu)), 0.5);
-        devresid = devresid_binom( y, weight, mu );
+        devresid = devresid_binom( y, size, mu );
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
-        nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
+        nll = -1 * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
         devresid = sign(y - mu) * pow(2 * ( (y-mu)/mu - log(y/mu) ), 0.5);
         if(isDouble<Type>::value && of->do_simulate){
           y = rgamma( exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)) );
@@ -687,7 +774,7 @@ Type one_predictor_likelihood( Type &y,
         break;
       case nbinom1_family:   // dnbinom_robust( x, log(mu_i), log(var - mu) )
         // var - mu = exp( log(mu) + log(theta) ) = theta * mu  -->  var = (theta+1) * mu
-        nll -= weight * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
+        nll = -1 * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
         devresid = devresid_nbinom2( y, logmu, logmu - log_sigma_segment(0) );    // theta = mu / phi
         if(isDouble<Type>::value && of->do_simulate){
           // rnbinom2( mu, var )
@@ -696,7 +783,7 @@ Type one_predictor_likelihood( Type &y,
         break;
       case nbinom2_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
         // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
-        nll -= weight * dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
+        nll = -1 * dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
         devresid = devresid_nbinom2( y, logmu, log_sigma_segment(0) );
         if(isDouble<Type>::value && of->do_simulate){
           // rnbinom2( mu, var )
@@ -716,7 +803,7 @@ template<class Type>
 Type two_predictor_likelihood( Type y,
                                Type p1,
                                Type p2,
-                               Type weight,
+                               Type size,
                                vector<int> link,
                                vector<int> family,
                                vector<Type> log_sigma_segment,
@@ -754,40 +841,40 @@ Type two_predictor_likelihood( Type y,
   if( !R_IsNA(asDouble(y)) ){
     // Distribution
     if( y == 0 ){
-      nll -= weight * log_one_minus_mu1;
+      nll = -1 * log_one_minus_mu1;
       dev = -2 * log_one_minus_mu1;
       if(isDouble<Type>::value && of->do_simulate){
         y = rbinom( Type(1), mu1 );
       }
     }
     if( y>0 ){  // Not if-else so y>0 triggered when simulating y>0
-      nll -= weight * logmu1;
+      nll = -1 * logmu1;
       dev = -2 * logmu1;
       //deviance1_i(i) = -2 * log_mu1(i);
       switch( family(1) ){
         case gaussian_family:
-          nll -= weight * dnorm( y, mu2, exp(log_sigma_segment(0)), true );
+          nll -= dnorm( y, mu2, exp(log_sigma_segment(0)), true );
           dev += pow(y - mu2, 2.0);
           if(isDouble<Type>::value && of->do_simulate){
             y = rnorm( mu2, exp(log_sigma_segment(0)) );
           }
           break;
         //case tweedie_family:
-        //  nll -= weight * dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+        //  nll -= dtweedie( y, mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
         //  devresid += devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
         //  if(isDouble<Type>::value && of->do_simulate){
         //    y = rtweedie( mu2, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
         //  }
         //  break;
         case lognormal_family:
-          nll -= weight * dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+          nll -= dlnorm( y, logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
           dev += pow( log(y) - (logmu2 - 0.5*exp(2.0*log_sigma_segment(0))), 2.0 );
           if(isDouble<Type>::value && of->do_simulate){
             y = exp(rnorm( logmu2 - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
           }
           break;
         //case poisson_family:
-        //  nll -= weight * dpois( y, mu2, true );
+        //  nll -= dpois( y, mu2, true );
         //  devresid += sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
         //  if(isDouble<Type>::value && of->do_simulate){
         //    y = rpois( mu2 );
@@ -795,7 +882,7 @@ Type two_predictor_likelihood( Type y,
         //  break;
         // case 4:  // Bernoulli
         case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
-          nll -= weight * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)), true );
+          nll -= dgamma( y, exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)), true );
           dev += 2 * ( (y-mu2)/mu2 - log(y/mu2) );
           if(isDouble<Type>::value && of->do_simulate){
             y = rgamma( exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)) );
@@ -846,6 +933,7 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( c_i );
   DATA_VECTOR( offset_i );
   DATA_VECTOR( weights_i );
+  DATA_VECTOR( size_i );  // Ignored unless family = binomial
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
   DATA_IVECTOR( Sblock );
@@ -854,11 +942,12 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( S2block );
 
   // Spatial objects
-  DATA_IVECTOR( spatial_options );   //
-  // spatial_options(0)==1: SPDE;  spatial_options(0)==2: SAR;  spatial_options(0)==3: Off;  spatial_options(0)==4: stream-network
-  // spatial_options(1)==0: use GMRF(Q) to evaluate density;  spatial_options(1)==1: use GMRF(I) and project by Q^{-0.5} to evaluate density
-  // spatial_options(2)==0: no RSS; spatial_options(2)==1: yes RSR
-  // spatial_options(3)==0: no extra reporting; spatial_options(3)==1: yes extra reporting
+  DATA_IVECTOR( model_options );   //
+  // model_options(0)==1: SPDE;  model_options(0)==2: SAR;  model_options(0)==3: Off;  model_options(0)==4: stream-network
+  // model_options(1)==0: use GMRF(Q) to evaluate density;  model_options(1)==1: use GMRF(I) and project by Q^{-0.5} to evaluate density
+  // model_options(2)==0: no RSS; model_options(2)==1: yes RSR
+  // model_options(3)==0: no extra reporting; model_options(3)==1: yes extra reporting
+  // model_options(4)==0: no SE for _g; model_options(4)==1: SE for p_g;  model_options(4)==2: SE for mu_g
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -945,28 +1034,35 @@ Type objective_function<Type>::operator() (){
   // Spatial distribution
   PARAMETER( log_kappa );
   PARAMETER_VECTOR( ln_H_input );
+
   // Anisotropy elements
-  matrix<Type> H( 2, 2 );
+  matrix<Type> H( ln_H_input.size(), ln_H_input.size() );
+  H.setZero();
   H(0,0) = exp(ln_H_input(0));
   H(1,0) = ln_H_input(1);
   H(0,1) = ln_H_input(1);
-  H(1,1) = (1+ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
+  H(1,1) = (1.0 + ln_H_input(1)*ln_H_input(1)) / exp(ln_H_input(0));
+  for( int i=2; i<ln_H_input.size(); i++ ){
+    //H(i,i) = exp(ln_H_input(i));
+    // Allowing negative values allows vertex_formula = 0 + x + I(x+y) to be the saem as vertex_formula = 0 + x + I(x-y)
+    H(i,i) = ln_H_input(i);
+  }
+
   REPORT( H );
   // Spatial settings
   Type log_tau = 0.0;
   Eigen::SparseMatrix<Type> Q_ss;
-  if( spatial_options(0)==1 ){
-    // Using INLA
-    //DATA_STRUCT(spatial_list, R_inla::spde_t);
+  // Using INLA with geometric anisotropy
+  if( model_options(0)==1 ){
     DATA_STRUCT( spatial_list, R_inla::spde_aniso_t );
     // Build precision
-    //Q_ss = R_inla::Q_spde(spatial_list, exp(log_kappa));
     Q_ss = R_inla::Q_spde( spatial_list, exp(log_kappa), H );
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
     Type range = pow(8.0, 0.5) / exp( log_kappa );
     REPORT( range );
-  }else if( spatial_options(0)==2 ){
-    /// Using SAR
+  }
+  /// Using SAR
+  if( model_options(0)==2 ){
     DATA_SPARSE_MATRIX( Adj );
     Eigen::SparseMatrix<Type> I_ss( Adj.rows(), Adj.rows() );
     Eigen::SparseMatrix<Type> Lspatial_ss( Adj.rows(), Adj.rows() );
@@ -974,13 +1070,15 @@ Type objective_function<Type>::operator() (){
     Lspatial_ss = ( I_ss - exp(log_kappa)*Adj );
     log_tau = 0.0;
     Q_ss = Lspatial_ss.transpose() * Lspatial_ss;
-  }else if( spatial_options(0)==3 ){
-    // Off, but using INLA inputs
+  }
+  // Off, but using INLA inputs
+  if( model_options(0)==3 ){
     DATA_STRUCT(spatial_list, R_inla::spde_t);
     Q_ss = R_inla::Q_spde(spatial_list, Type(1.0));
     log_tau = Type(0.0);
-  }else if( spatial_options(0)==4 ){
-    // stream-network
+  }
+  // stream-network
+  if( model_options(0)==4 ){
     DATA_IMATRIX( graph_sz );
     DATA_VECTOR( dist_s );
     Q_ss = Q_network2( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
@@ -991,7 +1089,9 @@ Type objective_function<Type>::operator() (){
     REPORT( Q_ss );
     //Eigen::SparseMatrix<Type> Q2_ss = Q_network( log_kappa, n_s, graph_sz.col(0), graph_sz.col(1), dist_s );  // Q_network( log_theta, n_s, parent_s, child_s, dist_s )
     //REPORT( Q2_ss );
-  }else if( spatial_options(0)==5 ){
+  }
+  // Using a SAR with geometric anisotropy
+  if( model_options(0)==5 ){
     DATA_IVECTOR( i_z );
     DATA_IVECTOR( j_z );
     DATA_MATRIX( delta_z2 );
@@ -1000,6 +1100,19 @@ Type objective_function<Type>::operator() (){
     Type rho = exp(-1.0 * exp(log_kappa));
     REPORT( rho );
     Q_ss = Q_SAR( rho, H, n_s, i_z, j_z, delta_z2 );
+  }
+  // Using SPDE with covariate-based anisotropy and geometric anisotropy
+  if( model_options(0)==6 ){
+    DATA_STRUCT( spatial_list, spde_covariates_t );
+    //DATA_MATRIX( V_zk );
+    PARAMETER_VECTOR( triangle_k );
+    // Build precision
+    //Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H, V_zk, triangle_k );
+    Eigen::SparseMatrix<Type> G1 = G_spde_covariates( spatial_list, H, triangle_k );
+    REPORT( G1 );
+    Q_ss = exp(4.0*log_kappa)*spatial_list.G0 + Type(2.0)*exp(2.0*log_kappa)*G1 + G1*spatial_list.G0_inv*G1;
+    log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
+    REPORT( Q_ss );
   }
   REPORT( log_tau );
 
@@ -1034,21 +1147,21 @@ Type objective_function<Type>::operator() (){
   Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(2) );
 
   // space_term
-  omega_sc = omega_distribution( omega_sc, spatial_options, Rho_cc,
+  omega_sc = omega_distribution( omega_sc, model_options, Rho_cc,
                                    Gamma_cc, Gammainv_cc, Q_ss, nll );
-  omega2_sc = omega_distribution( omega2_sc, spatial_options, Rho2_cc,
+  omega2_sc = omega_distribution( omega2_sc, model_options, Rho2_cc,
                                    Gamma2_cc, Gammainv2_cc, Q_ss, nll );
 
   // spacetime_term
-  epsilon_stc = epsilon_distribution( epsilon_stc, spatial_options, Rho_hh,
+  epsilon_stc = epsilon_distribution( epsilon_stc, model_options, Rho_hh,
                                      Gamma_hh, Gammainv_hh, Q_ss, nll );
-  epsilon2_stc = epsilon_distribution( epsilon2_stc, spatial_options, Rho2_hh,
+  epsilon2_stc = epsilon_distribution( epsilon2_stc, model_options, Rho2_hh,
                                        Gamma2_hh, Gammainv2_hh, Q_ss, nll );
 
   // time_term
-  delta_tc = delta_distribution( delta_tc, spatial_options, Rho_time_hh,
+  delta_tc = delta_distribution( delta_tc, model_options, Rho_time_hh,
                                      Gamma_time_hh, Gammainv_time_hh, nll );
-  delta2_tc = delta_distribution( delta2_tc, spatial_options, Rho2_time_hh,
+  delta2_tc = delta_distribution( delta2_tc, model_options, Rho2_time_hh,
                                        Gamma2_time_hh, Gammainv2_time_hh, nll );
 
 
@@ -1104,26 +1217,35 @@ Type objective_function<Type>::operator() (){
   // relative_deviance != devresid^2 for hurdle model
   vector<Type> mu_i( n_i );
   vector<Type> devresid_i( n_i );
+  vector<Type> negloglik_i( n_i );
   Type devresid = 0.0;
   Type deviance = 0.0;
   Type dev;
+  Type nll_tmp;
   for( int i=0; i<n_i; i++ ) {       // PARALLEL_REGION
     vector<Type> log_sigma_segment = log_sigma.segment( Edims_ez(e_i(i),0), Edims_ez(e_i(i),1) );
     // Link function
     if( components_e(e_i(i))==1 ){
-      mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), weights_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll, devresid, this );
+      mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), size_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll_tmp, devresid, this );
+      negloglik_i(i) = nll_tmp;
+      nll += weights_i(i) * nll_tmp;
       deviance += pow( devresid, 2.0 );
       devresid_i(i) = devresid;
     }
     if( components_e(e_i(i))==2 ){
-      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), weights_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll, dev, this );
+      mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), size_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll_tmp, dev, this );
+      negloglik_i(i) = nll_tmp;
+      nll += weights_i(i) * nll_tmp;
       deviance += dev;
       devresid_i(i) = NAN;
     }
   }
 
   // Restricted spatial regression correction
-  if( spatial_options(2) == 1 ){
+  // t(A_is) %*% A_is = diag( 1s and 0s )
+  // SO:  could adjust pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i too
+  // e.g. p_omegaprime1_i = pomega1_i + Z (X^T X)^-1 Z^T pomega1_i, where Z = A^T X
+  if( model_options(2) == 1 ){
     matrix<Type> covX_jj = X_ij.transpose() * X_ij;
     matrix<Type> precisionX_jj = atomic::matinv(covX_jj);
     vector<Type> alphaprime_j = alpha_j + (precisionX_jj * (X_ij.transpose() * (pomega1_i + pepsilon1_i + pxi1_i + pdelta1_i).matrix())).array();
@@ -1138,35 +1260,37 @@ Type objective_function<Type>::operator() (){
 
   // Predictions
   if( n_g > 0 ){
-    vector<Type> palpha_g = X_gj*alpha_j;
-    vector<Type> pgamma_g = Z_gk*gamma_k;
-    vector<Type> pepsilon_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pomega_g = multiply_omega( AomegaG_zz, AomegaG_z, omega_sc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pxi_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
-    vector<Type> pdelta_g = multiply_delta( delta_tc, t_g, c_g, n_g );
-    vector<Type> p_g = palpha_g + pgamma_g + offset_g + pepsilon_g + pomega_g + pdelta_g + pxi_g;
+    vector<Type> palpha1_g = X_gj*alpha_j;
+    vector<Type> pgamma1_g = Z_gk*gamma_k;
+    vector<Type> pepsilon1_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha1_g.size() ) / exp(log_tau);
+    vector<Type> pomega1_g = multiply_omega( AomegaG_zz, AomegaG_z, omega_sc, palpha1_g.size() ) / exp(log_tau);
+    vector<Type> pxi1_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
+    vector<Type> pdelta1_g = multiply_delta( delta_tc, t_g, c_g, n_g );
+    vector<Type> p1_g = palpha1_g + pgamma1_g+ pepsilon1_g + pomega1_g + pdelta1_g + pxi1_g + offset_g ;
     // Second linear predictor
     vector<Type> palpha2_g = X2_gj*alpha2_j;
     vector<Type> pgamma2_g = Z2_gk*gamma2_k;
-    vector<Type> pepsilon2_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha_g.size() ) / exp(log_tau);
-    vector<Type> pomega2_g = multiply_omega( AomegaG_zz, AomegaG_z, omega2_sc, palpha_g.size() ) / exp(log_tau);
+    vector<Type> pepsilon2_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha2_g.size() ) / exp(log_tau);
+    vector<Type> pomega2_g = multiply_omega( AomegaG_zz, AomegaG_z, omega2_sc, palpha2_g.size() ) / exp(log_tau);
     vector<Type> pxi2_g = multiply_xi( A_gs, xi2_sl, W2_gl ) / exp(log_tau);
     vector<Type> pdelta2_g = multiply_delta( delta2_tc, t_g, c_g, n_g );
     vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g + pdelta2_g + pxi2_g;
+    // Combined
+    vector<Type> p_g = p1_g + p2_g;
     vector<Type> mu_g( p_g.size() );
-    for( int g=0; g<p_g.size(); g++ ){
+    for( int g=0; g<p1_g.size(); g++ ){
       switch( link_ez(e_g(g),0) ){
         case identity_link:
-          mu_g(g) = p_g(g);
+          mu_g(g) = p1_g(g);
           break;
         case log_link:
-          mu_g(g) = exp(p_g(g));
+          mu_g(g) = exp(p1_g(g));
           break;
         case logit_link:
-          mu_g(g) = invlogit(p_g(g));
+          mu_g(g) = invlogit(p1_g(g));
           break;
         case cloglog_link:
-          mu_g(g) = Type(1.0) - exp( -1*exp(p_g(g)) );
+          mu_g(g) = Type(1.0) - exp( -1*exp(p1_g(g)) );
           break;
         default:
           error("Link not implemented.");
@@ -1236,13 +1360,13 @@ Type objective_function<Type>::operator() (){
       }
     }
 
-    REPORT( p_g );
-    REPORT( palpha_g );
-    REPORT( pgamma_g );
-    REPORT( pepsilon_g );
-    REPORT( pomega_g );
-    REPORT( pdelta_g );
-    REPORT( pxi_g );
+    REPORT( p1_g );
+    REPORT( palpha1_g );
+    REPORT( pgamma1_g );
+    REPORT( pepsilon1_g );
+    REPORT( pomega1_g );
+    REPORT( pdelta1_g );
+    REPORT( pxi1_g );
     REPORT( p2_g );
     REPORT( palpha2_g );
     REPORT( pgamma2_g );
@@ -1250,8 +1374,12 @@ Type objective_function<Type>::operator() (){
     REPORT( pomega2_g );
     REPORT( pdelta2_g );
     REPORT( pxi2_g );
+    REPORT( p_g );
     REPORT( mu_g );
-    ADREPORT( p_g );
+    if(model_options(4) == 1) ADREPORT( p1_g );   // Keeping original order, in case someone reloads
+    if(model_options(4) == 2) ADREPORT( p2_g );
+    if(model_options(4) == 3) ADREPORT( p_g );
+    if(model_options(4) == 4) ADREPORT( mu_g );
   }
 
   // Reporting
@@ -1262,12 +1390,13 @@ Type objective_function<Type>::operator() (){
   REPORT( devresid_i );
   REPORT( deviance );
   REPORT( nll );
+  REPORT( negloglik_i );
   SIMULATE{
     REPORT(y_i);
   }
 
   //
-  if( spatial_options(3) == 1 ){
+  if( model_options(3) == 1 ){
     REPORT( Rho_hh );
     REPORT( Gamma_hh );
     REPORT( Gammainv_hh );

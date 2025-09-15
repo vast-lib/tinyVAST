@@ -1,13 +1,15 @@
 ---
 title: "Vector autoregressive spatio-temporal models"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Vector autoregressive spatio-temporal models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{pdp}
+  %\VignetteDepends{sdmTMB}
 ---
 
 ```{r, include = FALSE}
@@ -26,6 +28,7 @@ knitr::opts_chunk$set(
   eval = EVAL,
   purl = EVAL
 )
+start_time = Sys.time()
 # Install locally
 #  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
 # Build
@@ -42,8 +45,13 @@ options("tinyVAST.verbose" = FALSE)
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
 We here explore the capacity to specify the vector-autoregressive spatio-temporal component.
 
-# Spatio-temporal autoregressive model
-We first explore the ability to specify a first-order autoregressive spatio-temporal process:
+# Univariate spatio-temporal autoregressive model
+
+We first explore the ability to specify a first-order autoregressive spatio-temporal process, i.e., a spatial Gompertz model [@thorson_importance_2014].  
+
+## Simulate univariate autoregressive process
+
+To do so, we simulate the process:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate settings
@@ -79,15 +87,31 @@ Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y),
                    mu = exp(as.vector(p_ts)) )
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$mu, phi=0.5, power=1.5 )
 mean(Data$n==0)
+```
 
+## Fit univariate spatio-temporal model
+
+We then specify and fit the same model
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
+# Spatial variable
+space_term = "
+  logn <-> logn, sd_space
+"
+
+# AR1 spatio-temporal variable
+spacetime_term = "
+  logn -> logn, 1, rho
+  logn <-> logn, 0, sd_spacetime
+"
+
 # fit model
 mytinyVAST = tinyVAST( 
-           space_term = "logn <-> logn, sd_space",
-           spacetime_term = "logn -> logn, 1, rho
-                             logn <-> logn, 0, sd_spacetime",
+           space_term = space_term,
+           spacetime_term = spacetime_term,
            data = Data,
            formula = n ~ 1,
            spatial_domain = mesh,
@@ -161,7 +185,9 @@ ggplot(Index, aes(time, Estimate)) +
   geom_point( aes(time, True), color = "red" )
 ```
 
-Next, we compare this against the current version of VAST
+## Comparison with VAST or sdmTMB
+
+Next, we compare this against the current version of VAST [@thorson_comparing_2017]
 ```{r, eval=updated_vast, echo=FALSE, message=FALSE}
 library(VAST)
 ```
@@ -196,13 +222,14 @@ myVAST
 ```{r, eval=!updated_vast, echo=FALSE, message=FALSE, include=FALSE}
 myVAST = list("total_time"=NA)
 ```
-Or with sdmTMB
+
+Or with sdmTMB [@anderson_sdmtmb_nodate]
 
 ```{r, eval=has_sdmTMB, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 library(sdmTMB)
 sdmTMB_mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
-start_time = Sys.time()
+start_time2 = Sys.time()
 mysdmTMB = sdmTMB(
   formula = n ~ 1,
   data = Data,
@@ -212,7 +239,7 @@ mysdmTMB = sdmTMB(
   time = "time",
   family = tweedie()
 )
-sdmTMBtime = Sys.time() - start_time
+sdmTMBtime = Sys.time() - start_time2
 ```
 ```{r, eval=!has_sdmTMB, echo=FALSE, message=FALSE, include=FALSE}
 sdmTMBtime = NA
@@ -226,24 +253,26 @@ Times = c( "tinyVAST" = mytinyVAST$run_time,
 knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 ```
 
-# Delta models
+## Delta models
 
-We can also fit these data using a delta model
+We can also fit this univariate spatio-temporal process using a Poisson-linked gamma delta model [@thorson_three_2018]
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # fit model
-mydelta2 = tinyVAST( data = Data,
-               formula = n ~ 1,
-               delta_options = list(
-                 formula = ~ 0 + factor(time),
-                 spacetime_term = "logn -> logn, 1, rho"),
-               family = delta_lognormal(type="poisson-link"),
-               spatial_domain = mesh )
+mydelta2 = tinyVAST( 
+  data = Data,
+  formula = n ~ 1,
+  delta_options = list(
+    formula = ~ 0 + factor(time),
+    spacetime_term = "logn -> logn, 1, rho"),
+  family = delta_lognormal(type="poisson-link"),
+  spatial_domain = mesh 
+)
 
 mydelta2
 ```
 
-And we can again use the `DHARMa` package to visualize simulation residuals:
+And we can again use the `DHARMa` package [@hartig_dharma_2017] to visualize conditional simulation quantile (a.k.a. Dunn-Smythe) residuals [@dunn_randomized_1996]:
 ```{r delta-DHARMa, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # simulate new data conditional on fixed effects
 # and sampling random effects from their predictive distribution
@@ -256,14 +285,29 @@ res = DHARMa::createDHARMa( simulatedResponse = y_ir,
 plot(res)
 ```
 
-We can then use AIC to compare the fit of the delta-model and Tweedie distribution:
+We can then use marginal and conditional AIC to compare the fit of the delta-model and Tweedie distribution:
 ```{r AIC-comparison, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-knitr::kable( c("Tweedie"=AIC(mytinyVAST),"delta-lognormal"=AIC(mydelta2)), digits=3)
+# AIC table
+AIC_table = cbind(
+  mAIC = c( "Tweedie" = AIC(mytinyVAST), 
+            "delta-lognormal" = AIC(mydelta2) ), 
+  cAIC = c( "Tweedie" = tinyVAST::cAIC(mytinyVAST), 
+            "delta-lognormal" = tinyVAST::cAIC(mydelta2) ) 
+)
+
+# Print table
+knitr::kable( 
+  AIC_table,
+  digits=3
+)
 ```
 
-# Bivariate spatio-temporal autoregressive model
+# Bivariate vector autoregressive spatio-temporal model
 
-We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction.  We first simulate artificial data for the sake of demonstration:
+We next highlight how to specify a bivariate spatio-temporal model with a cross-laggged (vector autoregressive) interaction [@thorson_estimating_2017,@thorson_spatio-temporal_2019]. 
+## Simulate bivariate model
+
+We first simulate artificial data for the sake of demonstration:
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Simulate settings
@@ -289,6 +333,8 @@ Data = data.frame( expand.grid(time=1:n_t, x=1:n_x, y=1:n_y, "var"=c("d1","d2"))
                    mu = exp(as.vector(d)))
 Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$mu, phi=0.5, power=1.5 )
 ```
+
+## Fit bivariate model
 
 We next set up inputs and run the model:
 
@@ -319,16 +365,35 @@ The values for `beta_z` again correspond to the specified value for interaction-
 
 We can again calculate the area-weighted total abundance and compare it with its true value:
 ```{r VAST-VAR-index, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
-# Predicted sample-weighted total
-Est1 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d1")) )
-Est2 = sapply( seq_len(n_t), FUN=\(t) integrate_output(out, newdata=subset(Data,time==t & var=="d2")) )
+# Predicted sample-weighted total 
+# for each year-variable combination
+Est1 = Est2 = NULL
+for( t in seq_len(n_t) ){
+  Est1 = rbind(Est1, integrate_output( 
+    out, 
+    newdata = subset(Data, time==t & var=="d1")
+  ))
+  Est2 = rbind(Est2, integrate_output( 
+    out, 
+    newdata = subset(Data, time==t & var=="d2")
+  ))
+}
 
 # True (latent) sample-weighted total
-True = tapply( Data$mu, INDEX=list("time"=Data$time,"var"=Data$var), FUN=sum )
+True = tapply( 
+  Data$mu, 
+  INDEX=list("time"=Data$time,"var"=Data$var), 
+  FUN=sum 
+)
 
-#
-Index = data.frame( expand.grid(dimnames(True)), "True"=as.vector(True) )
-Index = data.frame( Index, rbind(t(Est1), t(Est2)) )
+# Make long-form data frame for ggplot
+Index = data.frame( 
+  expand.grid(dimnames(True)), 
+  True = as.vector(True),
+  rbind(Est1, Est2)
+)
+
+# Format intervals for ggplot
 Index$low = Index[,'Est...bias.correct.'] - 1.96*Index[,'Std..Error']
 Index$high = Index[,'Est...bias.correct.'] + 1.96*Index[,'Std..Error']
 
@@ -344,3 +409,4 @@ ggplot(Index, aes( time, Estimate )) +
   geom_point( aes(x=time, y=True), color = "red" )
 ```
 
+# Works cited
