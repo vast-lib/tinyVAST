@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,9 @@
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -59,9 +62,9 @@
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">newdata</span>,</span>
 <span>  remove_origdata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mu_g"</span>, <span class="st">"p_g"</span>, <span class="st">"palpha_g"</span>, <span class="st">"pgamma_g"</span>, <span class="st">"pepsilon_g"</span>, <span class="st">"pomega_g"</span>, <span class="st">"pdelta_g"</span>,</span>
-<span>    <span class="st">"pxi_g"</span>, <span class="st">"p2_g"</span>, <span class="st">"palpha2_g"</span>, <span class="st">"pgamma2_g"</span>, <span class="st">"pepsilon2_g"</span>, <span class="st">"pomega2_g"</span>, <span class="st">"pdelta2_g"</span>,</span>
-<span>    <span class="st">"pxi2_g"</span><span class="op">)</span>,</span>
+<span>  what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mu_g"</span>, <span class="st">"p_g"</span>, <span class="st">"p1_g"</span>, <span class="st">"palpha1_g"</span>, <span class="st">"pgamma1_g"</span>, <span class="st">"pepsilon1_g"</span>, <span class="st">"pomega1_g"</span>,</span>
+<span>    <span class="st">"pdelta1_g"</span>, <span class="st">"pxi1_g"</span>, <span class="st">"p2_g"</span>, <span class="st">"palpha2_g"</span>, <span class="st">"pgamma2_g"</span>, <span class="st">"pepsilon2_g"</span>, <span class="st">"pomega2_g"</span>,</span>
+<span>    <span class="st">"pdelta2_g"</span>, <span class="st">"pxi2_g"</span><span class="op">)</span>,</span>
 <span>  se.fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  bias.correct <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -91,7 +94,8 @@ bias-correction.</p></dd>
 <dt id="arg-what">what<a class="anchor" aria-label="anchor" href="#arg-what"></a></dt>
 <dd><p>What REPORTed object to output, where
 <code>mu_g</code> is the inverse-linked transformed predictor including both linear components,
-<code>p_g</code> is the first linear predictor,
+<code>p_g</code> is the sum of the first and second linear predictors (which only makes sense to inspect when using the Poisson-linked delta model),
+<code>p1_g</code> is the first linear predictor,
 <code>palpha_g</code> is the first predictor from fixed covariates in <code>formula</code>,
 <code>pgamma_g</code> is the first predictor from random covariates in <code>formula</code> (e.g., splines),
 <code>pomega_g</code> is the first predictor from spatial variation,

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,9 @@
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -48,7 +51,24 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.2.0" id="tinyvast-120">tinyVAST 1.2.0<a class="anchor" aria-label="anchor" href="#tinyvast-120"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.3.0" id="tinyvast-130">tinyVAST 1.3.0<a class="anchor" aria-label="anchor" href="#tinyvast-130"></a></h2><p class="text-muted">CRAN release: 2025-09-13</p>
+<ul><li>Adding <code>add_vertex_covariates</code> to associate mesh vertices with covariates (hean Anderson)</li>
+<li>Adding option for covariate-based anisotropy using <code>vertex_formula</code>, while also allowing geometric anisotropy.</li>
+<li>Adding option for barriers using <code>triangle_formula</code> which permits an offset for barrier covariates</li>
+<li>Adding <code>spatial_cor</code> to use sparse matrices to compute the correlation between a <code>coord</code> and <code>pred</code> coordinates, e.g. to visualize covariate-based anisotropy</li>
+<li>Fix <code>make_eof_ram</code> to work as intended for multivariate models, e.g., having a separate response map and shared indices across variables (previously had a shared response map and shared indices, i.e., collapsed to univariate model)</li>
+<li>Fix bug arising in <code>predict</code> when <code>spatial_varying</code> involved a column of <code>newdata</code> that was expecting a factor, but provided a <code>character-vector</code>. Now coercers to factors using the levels of the original <code>data</code> (same behavior as for <code>formula</code>)</li>
+<li>Export <code>fit$rep$negloglik_i</code> as log-likelihood for each datum, for use in calculating out-of-sample predictive score</li>
+<li>Turn off SE reporting during index calculations (as speedup), and allow SE reporting for <code>mu_g</code> in <code>predict</code>
+</li>
+<li>Fix bug arising in <code>project</code> when <code>spatial_varying</code> was specified</li>
+<li>Adding web-only vignette showing predator-expanded diet estimator using joint model of specific stomach contents and predator density</li>
+<li>Fix bug arising when using <code>weights</code> argument using family of <code>delta_gamma</code> or <code>delta_lognormal</code>, where this bug was introduced in release 1.2.0 (h/t Peri Gerson for identifying the issue)</li>
+<li>Add vignette showing <code>project</code> function</li>
+<li>Add a web-only vignette showing the sponge-coral-fish case study to illustrate spatial structural modelling</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.2.0" id="tinyvast-120">tinyVAST 1.2.0<a class="anchor" aria-label="anchor" href="#tinyvast-120"></a></h2><p class="text-muted">CRAN release: 2025-07-19</p>
 <ul><li>Adding a new spatial domain using <code><a href="https://r-spatial.github.io/sf/reference/st_make_grid.html" class="external-link">sf::st_make_grid</a></code>
 </li>
 <li>Adding option for geometric anisotropy when using <code><a href="https://r-spatial.github.io/sf/reference/st_make_grid.html" class="external-link">sf::st_make_grid</a></code>
@@ -60,6 +80,7 @@
 <li>Add <code>conditional_gmrf</code> to do conditional simulations from a GMRF</li>
 <li>Add <code>project</code> to project tinyVAST forward in time</li>
 <li>Eliminate <code>...</code> argument to <code>tinyVAST</code> so that it’s obvious if an argument is mis-named.</li>
+<li>Fix bug which previously resulted in non-converged models, where including DSEM arrow “x&lt;-&gt;x, 0, sd_xy” would improperly add another term “x &lt;-&gt; x, 0, V[x]” because it didn’t previously parse the whitespaces when detecting missing covariances (h/t Jon Reum for flagging the issue)</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.1" id="tinyvast-111">tinyVAST 1.1.1<a class="anchor" aria-label="anchor" href="#tinyvast-111"></a></h2><p class="text-muted">CRAN release: 2025-05-07</p>

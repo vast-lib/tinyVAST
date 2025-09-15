@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,9 @@
     <li><a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../../news/index.html">Changelog</a></li>
@@ -94,7 +97,10 @@ Thorson</h4>
 autoregressive spatio-temporal (VAST) models using a minimal and
 user-friendly interface. We here show how it can fit a stream network
 model, where spatial correlations arise from stream distances along a
-network.</p>
+network <span class="citation">Hocking et al. (2018)</span>.</p>
+<div class="section level2">
+<h2 id="load-and-format-spatial-domain">Load and format spatial domain<a class="anchor" aria-label="anchor" href="#load-and-format-spatial-domain"></a>
+</h2>
 <p>First, we load a shapefile representing a stream network, and convert
 it to <em>sfnetwork</em> format. This format includes edges representing
 stream segments, and nodes where edges connect.</p>
@@ -103,7 +109,7 @@ stream segments, and nodes where edges connect.</p>
 <span>                   <span class="st">"East_Fork_Lewis_basin.shp"</span><span class="op">)</span>, quiet<span class="op">=</span><span class="cn">TRUE</span> <span class="op">)</span></span>
 <span><span class="va">stream</span> <span class="op">=</span> <span class="fu"><a href="https://luukvdmeer.github.io/sfnetworks/reference/as_sfnetwork.html" class="external-link">as_sfnetwork</a></span><span class="op">(</span><span class="va">stream</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">stream</span>, main<span class="op">=</span><span class="st">"East Fork Lewis Basin"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="stream_networks_files/figure-html/stream-shape-1.png" width="576"></p>
+<p><img src="stream_networks_files/figure-html/unnamed-chunk-2-1.png" width="576"></p>
 <p>We then convert it to an S3 class “sfnetwork_mesh” defined by
 <em>tinyVAST</em> for stream networks, and rescale distances to 1000 ft
 (to ensure that distances are 0.01 to 100, avoiding issues of numerical
@@ -112,6 +118,10 @@ under or overflow).</p>
 <code class="sourceCode R"><span><span class="co"># Rescale</span></span>
 <span><span class="va">graph</span> <span class="op">=</span> <span class="fu"><a href="../../reference/sfnetwork_mesh.html">sfnetwork_mesh</a></span><span class="op">(</span> <span class="va">stream</span> <span class="op">)</span></span>
 <span><span class="va">graph</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">dist</span> <span class="op">=</span> <span class="va">graph</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">dist</span> <span class="op">/</span> <span class="fl">1000</span>  <span class="co"># Convert distance scale</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="simulate-data">Simulate data<a class="anchor" aria-label="anchor" href="#simulate-data"></a>
+</h2>
 <p>Next, we’ll simulate a Gaussian Markov random field at stream
 vertices using <code>simulate_sfnetwork</code>, sample evenly spaced
 locations along the stream using <code>st_line_sample</code>, project
@@ -153,10 +163,12 @@ simulate data at those locations:</p>
 <span><span class="co"># Extract nodes and plot on network</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html" class="external-link">activate</a></span><span class="op">(</span><span class="va">stream</span>,<span class="st">"nodes"</span><span class="op">)</span><span class="op">)</span>, <span class="st">"omega"</span><span class="op">=</span><span class="va">omega_s</span><span class="op">)</span>,</span>
 <span>      add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="stream_networks_files/figure-html/stream-dens-1.png" width="576"></p>
-<p>Finally, we can fit the model, interpolate the GMRF along at dense
-locations along the stream network, and plot those with the true
-(simulated) values at the location of simulated samples.</p>
+<p><img src="stream_networks_files/figure-html/unnamed-chunk-5-1.png" width="576"></p>
+</div>
+<div class="section level2">
+<h2 id="fit-model">Fit model<a class="anchor" aria-label="anchor" href="#fit-model"></a>
+</h2>
+<p>Finally, we can fit the model:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fit model</span></span>
 <span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> data <span class="op">=</span> <span class="va">Data</span>,</span>
@@ -166,24 +178,69 @@ locations along the stream network, and plot those with the true
 <span>           variable_column <span class="op">=</span> <span class="st">"var"</span>,</span>
 <span>           time_column <span class="op">=</span> <span class="st">"time"</span>,</span>
 <span>           distribution_column <span class="op">=</span> <span class="st">"dist"</span>,</span>
-<span>           space_term <span class="op">=</span> <span class="st">""</span> <span class="op">)</span></span>
-<span></span>
-<span><span class="co">#</span></span>
+<span>           space_term <span class="op">=</span> <span class="st">""</span> <span class="op">)</span></span></code></pre></div>
+<p>We then predict the GMRF at dense locations along the stream network,
+and plot those with the true (simulated) values at the location of
+simulated samples.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Define plotting points</span></span>
 <span><span class="va">sf_plot</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html" class="external-link">st_union</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_line_sample.html" class="external-link">st_line_sample</a></span><span class="op">(</span> <span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html" class="external-link">activate</a></span><span class="op">(</span><span class="va">stream</span>,<span class="st">"edges"</span><span class="op">)</span>, density<span class="op">=</span><span class="fl">1</span><span class="op">/</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sf_plot</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_cast.html" class="external-link">st_cast</a></span><span class="op">(</span> <span class="va">sf_plot</span>, <span class="st">"POINT"</span> <span class="op">)</span></span>
-<span><span class="va">newdata</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> Count <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>                   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="va">sf_plot</span><span class="op">)</span>,</span>
-<span>                   var <span class="op">=</span> <span class="st">"species"</span>,  <span class="co"># Univariate model so only one value</span></span>
-<span>                   time <span class="op">=</span> <span class="st">"2020"</span>,    <span class="co"># no time-dynamics, so only one value</span></span>
-<span>                   dist <span class="op">=</span> <span class="st">"obs"</span> <span class="op">)</span>    <span class="co"># only one type of sampling in data</span></span>
+<span></span>
+<span><span class="co"># Format as `newdata` for prediction</span></span>
+<span><span class="va">newdata</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> </span>
+<span>  Count <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="va">sf_plot</span><span class="op">)</span>,</span>
+<span>  var <span class="op">=</span> <span class="st">"species"</span>,  <span class="co"># Univariate model so only one value</span></span>
+<span>  time <span class="op">=</span> <span class="st">"2020"</span>,    <span class="co"># no time-dynamics, so only one value</span></span>
+<span>  dist <span class="op">=</span> <span class="st">"obs"</span>    <span class="co"># only one type of sampling in data</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Extract predicted spatial variable</span></span>
 <span><span class="va">omega_plot</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span> <span class="va">out</span>, newdata <span class="op">=</span> <span class="va">newdata</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot estimated GMRF at sampled locations</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">stream</span>, main<span class="op">=</span><span class="st">"omegahat_i"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">sf_plot</span>,<span class="st">"omega"</span><span class="op">=</span><span class="va">omega_plot</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">0.5</span>, pal<span class="op">=</span><span class="va">viridis</span> <span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">extrap</span>,<span class="st">"omega"</span><span class="op">=</span><span class="va">omega_i</span><span class="op">)</span>, add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">2</span>, pal<span class="op">=</span><span class="va">viridis</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="stream_networks_files/figure-html/stream-pred-1.png" width="576"></p>
-  </main>
+<span><span class="co"># Plot stream object</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> </span>
+<span>  <span class="va">stream</span>, </span>
+<span>  main<span class="op">=</span><span class="st">"omegahat_i"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Add predicted spatial variable</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> </span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">sf_plot</span>,<span class="st">"omega"</span><span class="op">=</span><span class="va">omega_plot</span><span class="op">)</span>, </span>
+<span>  add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">0.5</span>, pal<span class="op">=</span><span class="va">viridis</span> </span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Add true (simulated) values</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> </span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">extrap</span>,<span class="st">"omega"</span><span class="op">=</span><span class="va">omega_i</span><span class="op">)</span>, </span>
+<span>  add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">2</span>, pal<span class="op">=</span><span class="va">viridis</span> </span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="stream_networks_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
+<p>Runtime for this vignette: 2.78 secs</p>
+</div>
+<div class="section level2">
+<h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-charsley_catchment-scale_2023" class="csl-entry">
+Charsley, Anthony R., Arnaud Grüss, James T. Thorson, Merrill B. Rudd,
+Shannan K. Crow, Bruno David, Erica K. Williams, and Simon D. Hoyle.
+2023. <span>“Catchment-Scale Stream Network Spatio-Temporal Models,
+Applied to the Freshwater Stages of a Diadromous Fish Species, Longfin
+Eel (<span>Anguilla</span> Dieffenbachii).”</span> <em>Fisheries
+Research</em> 259 (March): 106583. <a href="https://doi.org/10.1016/j.fishres.2022.106583" class="external-link">https://doi.org/10.1016/j.fishres.2022.106583</a>.
+</div>
+<div id="ref-hocking_geostatistical_2018" class="csl-entry">
+Hocking, Daniel J., James T. Thorson, Kyle O’Neil, and Benjamin H.
+Letcher. 2018. <span>“A Geostatistical State-Space Model of Animal
+Densities for Stream Networks.”</span> <em>Ecological Applications</em>
+28 (7): 1782–96. <a href="https://doi.org/10.1002/eap.1767" class="external-link">https://doi.org/10.1002/eap.1767</a>.
+</div>
+</div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

@@ -11,7 +11,10 @@
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/condition.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/empirical_orthogonal_functions.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/overview.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/predator_expanded_diet.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/probabilistic_forecasts.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/simultaneous_autoregressive_process.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/spatial_structural_model.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/stream_networks.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/VAST.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/authors.html</loc></url>
@@ -19,8 +22,11 @@
 <url><loc>https://vast-lib.github.io/tinyVAST/index.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/LICENSE-text.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/news/index.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/reference/add_mesh_covariates.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/add_predictions.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/reference/alaska_sponge_coral_fish.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/bering_sea.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/reference/bering_sea_capelin_forecasts.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/bering_sea_pollock_ages.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/bering_sea_pollock_vast.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/cAIC.html</loc></url>
@@ -41,6 +47,7 @@
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/predict.tinyVAST.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/print.tinyVAST.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/project.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/reference/red_grouper_diet.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/red_snapper.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/red_snapper_shapefile.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/reexports.html</loc></url>
@@ -55,6 +62,7 @@
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/sfnetwork_mesh.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/simulate.tinyVAST.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/simulate_sfnetwork.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/reference/spatial_cor.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/summary.tinyVAST.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/term_covariance.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/reference/tinyVAST.html</loc></url>

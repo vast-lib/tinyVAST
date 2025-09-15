@@ -9,7 +9,7 @@ a minimal feature-set and a widely used interface."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,9 @@ a minimal feature-set and a widely used interface."><meta property="og:image" co
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -64,17 +67,18 @@ a minimal feature-set and a widely used interface.</p>
 <span>  space_term <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  spacetime_term <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>,</span>
+<span>  delta_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>  spatial_varying <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  spatial_domain <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  development <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>,</span>
 <span>  time_column <span class="op">=</span> <span class="st">"time"</span>,</span>
 <span>  times <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  variable_column <span class="op">=</span> <span class="st">"var"</span>,</span>
 <span>  variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  distribution_column <span class="op">=</span> <span class="st">"dist"</span>,</span>
-<span>  delta_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span><span class="op">)</span>,</span>
-<span>  spatial_varying <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  control <span class="op">=</span> <span class="fu"><a href="tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  distribution_column <span class="op">=</span> <span class="st">"dist"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -132,14 +136,27 @@ families by row of data. Delta model families are possible, and see
 For binomial family options, see 'Binomial families' in the Details section below.</p></dd>
 
 
-<dt id="arg-space-columns">space_columns<a class="anchor" aria-label="anchor" href="#arg-space-columns"></a></dt>
-<dd><p>A string or character vector that indicates
-the column(s) of <code>data</code> indicating the location of each sample.
-When <code>spatial_domain</code> is an <code>igraph</code> object, <code>space_columns</code> is a string with
-with levels matching the names of vertices of that object.
-When <code>spatial_domain</code> is an <code>fmesher</code> or <code>sfnetwork</code> object,
-space_columns is a character vector indicating columns of <code>data</code> with
-coordinates for each sample.</p></dd>
+<dt id="arg-delta-options">delta_options<a class="anchor" aria-label="anchor" href="#arg-delta-options"></a></dt>
+<dd><p>a named list with slots for <code>formula</code>,
+<code>space_term</code>, and <code>spacetime_term</code>. These specify options for the
+second linear predictor of a delta model, and are only used (or estimable)
+when a <code>delta family</code> is used for some samples.</p></dd>
+
+
+<dt id="arg-spatial-varying">spatial_varying<a class="anchor" aria-label="anchor" href="#arg-spatial-varying"></a></dt>
+<dd><p>a formula specifying spatially varying coefficients (SVC). Note that
+using formulas in R, <code>spatial_varying = ~ X</code> automatically adds an intercept
+to implicitly read as <code>spatial_varying = ~ 1 + X</code>, so tinyVAST
+then estimates an SVC for an intercept
+in addition to covariate <code>X</code>. Therefore, if you only want an SVC
+for a single covariate, use <code>spatial_varying = ~ 0 + X</code> to suppress
+the default behavior of formulas in R.</p></dd>
+
+
+<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
+<dd><p>A numeric vector representing optional likelihood weights for the
+data likelihood. Weights do not have to sum to one and are not internally modified.
+Thee weights argument needs to be a vector and not a name of the variable in the data frame.</p></dd>
 
 
 <dt id="arg-spatial-domain">spatial_domain<a class="anchor" aria-label="anchor" href="#arg-spatial-domain"></a></dt>
@@ -154,6 +171,26 @@ based on the geometry of the object,
 or <code>NULL</code> to specify a single site.  If using <code>igraph</code> then the
 graph must have vertex names <code>V(graph)$name</code> that match
 levels of <code>data[,'space_columns']</code></p></dd>
+
+
+<dt id="arg-development">development<a class="anchor" aria-label="anchor" href="#arg-development"></a></dt>
+<dd><p>Specify options that are under active development.  Please do
+not use these features without coordinating with the package authors.</p></dd>
+
+
+<dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
+<dd><p>Output from <code><a href="tinyVASTcontrol.html">tinyVASTcontrol()</a></code>, used to define user
+settings.</p></dd>
+
+
+<dt id="arg-space-columns">space_columns<a class="anchor" aria-label="anchor" href="#arg-space-columns"></a></dt>
+<dd><p>A string or character vector that indicates
+the column(s) of <code>data</code> indicating the location of each sample.
+When <code>spatial_domain</code> is an <code>igraph</code> object, <code>space_columns</code> is a string with
+with levels matching the names of vertices of that object.
+When <code>spatial_domain</code> is an <code>fmesher</code> or <code>sfnetwork</code> object,
+space_columns is a character vector indicating columns of <code>data</code> with
+coordinates for each sample.</p></dd>
 
 
 <dt id="arg-time-column">time_column<a class="anchor" aria-label="anchor" href="#arg-time-column"></a></dt>
@@ -188,28 +225,6 @@ listing the distribution for each sample, from the set of names
 in argument <code>family</code>.
 if <code>variables=NULL</code>, then it is filled in as the unique values
 from <code>data$variables</code>.</p></dd>
-
-
-<dt id="arg-delta-options">delta_options<a class="anchor" aria-label="anchor" href="#arg-delta-options"></a></dt>
-<dd><p>a named list with slots for <code>formula</code>,
-<code>space_term</code>, and <code>spacetime_term</code>. These specify options for the
-second linear predictor of a delta model, and are only used (or estimable)
-when a <code>delta family</code> is used for some samples.</p></dd>
-
-
-<dt id="arg-spatial-varying">spatial_varying<a class="anchor" aria-label="anchor" href="#arg-spatial-varying"></a></dt>
-<dd><p>a formula specifying spatially varying coefficients.</p></dd>
-
-
-<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>A numeric vector representing optional likelihood weights for the
-data likelihood. Weights do not have to sum to one and are not internally modified.
-Thee weights argument needs to be a vector and not a name of the variable in the data frame.</p></dd>
-
-
-<dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
-<dd><p>Output from <code><a href="tinyVASTcontrol.html">tinyVASTcontrol()</a></code>, used to define user
-settings.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -255,22 +270,30 @@ passed during the call</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>tinyVAST</code> includes four basic inputs that specify the model structure:</p><ul><li><p><code>formula</code> specifies covariates and splines in a Generalized Additive Model;</p></li>
-<li><p><code>space_term</code> specifies interactions among variables and over time, constructing
+    <p><code>tinyVAST</code> includes several basic inputs that specify the model structure:</p><ul><li><p><code>formula</code> specifies covariates and splines in a Generalized Additive Model;</p></li>
+<li><p><code>time_term</code> specifies interactions among variables and over time that
+are constant across space, constructing the time-variable interaction.</p></li>
+<li><p><code>space_term</code> specifies interactions among variables and over time that occur
+based on the variable values at each location, constructing
 the space-variable interaction.</p></li>
 <li><p><code>spacetime_term</code> specifies interactions among variables and over time, constructing
 the space-time-variable interaction.</p></li>
-<li><p><code>spatial_domain</code> specifies spatial correlations</p></li>
-</ul><p>the default <code>spacetime_term=NULL</code> and <code>space_term=NULL</code> turns off all multivariate
+</ul><p>These inputs require defining the <em>domain</em> of the model.  This includes:</p><ul><li><p><code>spatial_domain</code> specifies spatial domain, with determines spatial correlations</p></li>
+<li><p><code>times</code> specifies the temporal domain, i.e., sequence of time-steps</p></li>
+<li><p><code>variables</code> specifies the set of variables, i.e., the variables that will be modeled</p></li>
+</ul><p>The default <code>spacetime_term=NULL</code> and <code>space_term=NULL</code> turns off all multivariate
 and temporal indexing, such that <code>spatial_domain</code> is then ignored, and the model collapses
 to a generalized additive model using <code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></code>.  To specify a univariate spatial model,
 the user must specify <code>spatial_domain</code> and either <code>space_term=""</code> or <code>spacetime_term=""</code>, where the latter
-two are then parsed to include a single exogenous variance for the single variable</p><table class="table table"><tr><td><strong>Model type</strong></td><td><strong>How to specify</strong></td></tr><tr><td>Generalized additive model</td><td>specify <code>spatial_domain=NULL</code> <code>space_term=""</code> and <code>spacetime_term=""</code>, and then use <code>formula</code> to specify splines and covariates</td></tr><tr><td>Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models)</td><td>specify <code>spatial_domain=NULL</code> and use <code>spacetime_term</code> to specify interactions among variables and over time</td></tr><tr><td>Univariate spatio-temporal model, or multiple independence spatio-temporal variables</td><td>specify <code>spatial_domain</code> and <code>spacetime_term=""</code>, where the latter is then parsed to include a single exogenous variance for the single variable</td></tr><tr><td>Multivariate spatial model including interactions</td><td>specify <code>spatial_domain</code> and use <code>space_term</code> to specify spatial interactions</td></tr><tr><td>Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables)</td><td>specify <code>spatial_domain</code> and use <code>spacetime_term=""</code> to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of <code>spacetime_term</code> and <code>spatial_domain</code></td></tr></table><p><strong>Binomial families</strong></p>
-<p>A binomial family can be specified in only one way:
+two are then parsed to include a single exogenous variance for the single variable</p><table class="table table"><tr><td><strong>Model type</strong></td><td><strong>How to specify</strong></td></tr><tr><td>Generalized additive model</td><td>specify <code>spatial_domain=NULL</code> <code>space_term=""</code> and <code>spacetime_term=""</code>, and then use <code>formula</code> to specify splines and covariates</td></tr><tr><td>Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models)</td><td>specify <code>spatial_domain=NULL</code> and use <code>spacetime_term</code> to specify interactions among variables and over time</td></tr><tr><td>Univariate spatio-temporal model, or multiple independence spatio-temporal variables</td><td>specify <code>spatial_domain</code> and <code>spacetime_term=""</code>, where the latter is then parsed to include a single exogenous variance for the single variable</td></tr><tr><td>Multivariate spatial model including interactions</td><td>specify <code>spatial_domain</code> and use <code>space_term</code> to specify spatial interactions</td></tr><tr><td>Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables)</td><td>specify <code>spatial_domain</code> and use <code>spacetime_term=""</code> to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of <code>spacetime_term</code> and <code>spatial_domain</code></td></tr></table><p><strong>Model building notes</strong></p><ul><li><p><code>binomial familes</code>:  A binomial family can be specified in only one way:
 the response is the observed proportion (proportion = successes / trials),
 and the 'weights' argument is used to specify the Binomial size (trials, N)
-parameter (<code>proportion ~ ..., weights = N</code>).</p>
-    </div>
+parameter (<code>proportion ~ ..., weights = N</code>).</p></li>
+<li><p><code>factor models</code>:  If a factor model is desired, the factor(s) must be named
+and included in the <code>variables</code>.  The factor is then modeled for <code>space_term</code>,
+<code>time_term</code>, and <code>spacetime_term</code> and it's variance must be fixed a priori
+for any term where it is not being used.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Details section of <code><a href="make_dsem_ram.html">make_dsem_ram()</a></code> for a summary of the math involved with constructing the DSEM, and <a href="https://doi.org/10.1111/2041-210X.14289" class="external-link">doi:10.1111/2041-210X.14289</a>
@@ -309,7 +332,7 @@ parameter (<code>proportion ~ ..., weights = N</code>).</p>
 <span class="r-in"><span><span class="co"># Run crossvalidation (too slow for CRAN)</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">CV</span> <span class="op">=</span> <span class="fu">cv</span><span class="fu">::</span><span class="fu"><a href="https://gmonette.github.io/cv/reference/cv.html" class="external-link">cv</a></span><span class="op">(</span> <span class="va">out</span>, k <span class="op">=</span> <span class="fl">4</span> <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> R RNG seed set to 299103</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> R RNG seed set to 635383</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(call, parent.frame()):</span> object 'mesh' not found</span>
 <span class="r-in"><span><span class="va">CV</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'CV' not found</span>

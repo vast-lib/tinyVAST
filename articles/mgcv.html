@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,9 @@
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -156,7 +159,7 @@ function:</p>
 <p>Alternatively, we can use <code>visreg</code> to visualize output,
 although it is disabled for CRAN vignette checks:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): "what" is not a</span></span>
@@ -169,7 +172,7 @@ although it is disabled for CRAN vignette checks:</p>
 <span><span class="co">#&gt; "what" is not a graphical parameter</span></span></code></pre></div>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"x"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"x"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in axis(side = side, at = at, labels = labels, ...): "what" is not a</span></span>
@@ -180,7 +183,7 @@ although it is disabled for CRAN vignette checks:</p>
 <span><span class="co">#&gt; Warning in title(...): "what" is not a graphical parameter</span></span></code></pre></div>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-7-2.png" width="576"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"w"</span>, by<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"w"</span>, by<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-7-3.png" width="576"></p>
 <p>Alternatively, we can calculate derived quantities via Monte Carlo
 integration of the estimated density function:</p>
@@ -227,9 +230,10 @@ integration of the estimated density function:</p>
 although it doesn’t seem possible to extract a grouped spatial term, so
 we here show only a single term:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="http://pbreheny.github.io/visreg/reference/visreg2d.html" class="external-link">visreg2d</a></span><span class="op">(</span> <span class="va">myfit</span>, <span class="st">"x"</span>, <span class="st">"y"</span>, cond<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"group"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>, plot<span class="op">=</span><span class="cn">FALSE</span> <span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="https://pbreheny.github.io/visreg/reference/visreg2d.html" class="external-link">visreg2d</a></span><span class="op">(</span> <span class="va">myfit</span>, <span class="st">"x"</span>, <span class="st">"y"</span>, cond<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"group"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>, plot<span class="op">=</span><span class="cn">FALSE</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">out</span>, main<span class="op">=</span><span class="st">"f(x,y) for group=1"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mgcv_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
+<p>Runtime for this vignette: 18.43 secs</p>
   </main>
 </div>
 

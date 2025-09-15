@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,9 @@
     <li><a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../../news/index.html">Changelog</a></li>
@@ -90,34 +93,55 @@ Thorson</h4>
 <p>tinyVAST is an R package for fitting vector autoregressive
 spatio-temporal (VAST) models. We here explore the capacity to use
 area-expansion to calculate proportion-at-age using spatially unbalanced
-sampling data.</p>
+sampling data <span class="citation">(Thorson and Haltuch
+2018)</span>.</p>
 <div class="section level2">
 <h2 id="expanding-age-composition-data">Expanding age-composition data<a class="anchor" aria-label="anchor" href="#expanding-age-composition-data"></a>
 </h2>
 <p>To start, we load sampling data that has undergone first-stage
 expansion. This arises when each primary sampling unit includes
-secondary subsampling of ages, and the subsampled proporrtion-at-age in
+secondary subsampling of ages, and the subsampled proportion-at-age in
 each primary unit has been expanded to the total abundance in that
 primary sample:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span> <span class="va">bering_sea_pollock_ages</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># subset to Years 2010-2023 (to speed up the example)</span></span>
-<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span> <span class="va">bering_sea_pollock_ages</span>, <span class="va">Year</span> <span class="op">&gt;=</span> <span class="fl">2010</span> <span class="op">)</span></span>
+<span><span class="co"># subset to Years 2017-2023 (to speed up the example)</span></span>
+<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span> <span class="va">bering_sea_pollock_ages</span>, <span class="va">Year</span> <span class="op">&gt;=</span> <span class="fl">2017</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add Year-_Age interaction</span></span>
 <span><span class="va">Data</span><span class="op">$</span><span class="va">Age</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Age_"</span>,<span class="va">Data</span><span class="op">$</span><span class="va">Age</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">Data</span><span class="op">$</span><span class="va">Year_Age</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interaction.html" class="external-link">interaction</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">$</span><span class="va">Year</span>, <span class="va">Data</span><span class="op">$</span><span class="va">Age</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Project data to UTM</span></span>
-<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span> <span class="va">Data</span>, </span>
-<span>                   coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Lon'</span>,<span class="st">'Lat'</span><span class="op">)</span>,</span>
-<span>                   crs <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">4326</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span> <span class="va">Data</span>, </span>
-<span>                        crs <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="st">"+proj=utm +zone=2 +units=km"</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span> </span>
+<span>  <span class="va">Data</span>, </span>
+<span>  coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Lon'</span>,<span class="st">'Lat'</span><span class="op">)</span>,</span>
+<span>  crs <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">4326</span><span class="op">)</span> </span>
+<span><span class="op">)</span></span>
+<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span> </span>
+<span>  <span class="va">Data</span>, </span>
+<span>  crs <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="st">"+proj=utm +zone=2 +units=km"</span><span class="op">)</span> </span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Add UTM coordinates as columns X &amp; Y</span></span>
-<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p>Next, we construct the various inputs to <em>tinyVAST</em></p>
+<span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html" class="external-link">st_coordinates</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Make spatial domain</span></span>
+<span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> </span>
+<span>  loc <span class="op">=</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>,<span class="st">"Y"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>  cutoff <span class="op">=</span> <span class="fl">50</span> </span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="model-specification">Model specification<a class="anchor" aria-label="anchor" href="#model-specification"></a>
+</h3>
+<p>Next, we construct the various inputs to <em>tinyVAST</em>. We
+specify a separate variance for spatial variation by age, separate
+variance for spatio-temporal variation by age, and a shared magnitude of
+AR1 correlations over time. In other examples, the analyst might want to
+specify some of the spatial and spatio-temporal variance terms as having
+a value that is shared among ages, to ensure these variances are
+estimable:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># adds different variances for each age</span></span>
 <span><span class="va">sem</span> <span class="op">=</span> <span class="st">""</span></span>
@@ -142,12 +166,18 @@ primary sample:</p>
 <span><span class="st">  Age_15 -&gt; Age_15, 1, lag1</span></span>
 <span><span class="st">"</span></span>
 <span></span>
-<span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> loc <span class="op">=</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>,<span class="st">"Y"</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>                            cutoff <span class="op">=</span> <span class="fl">50</span> <span class="op">)</span></span>
+<span><span class="co"># Separate intercept for each Year-Age combination</span></span>
+<span><span class="va">Formula</span> <span class="op">=</span> <span class="va">Abundance_per_hectare</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Year_Age</span></span>
+<span></span>
+<span><span class="co"># </span></span>
 <span><span class="va">control</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> getsd <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                           profile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha_j"</span><span class="op">)</span>,  </span>
 <span>                           trace <span class="op">=</span> <span class="fl">0</span> <span class="op">)</span></span></code></pre></div>
-<p>We could run the model with a log-linked Tweedie distribution and a
+</div>
+<div class="section level3">
+<h3 id="fitting-the-model">Fitting the model<a class="anchor" aria-label="anchor" href="#fitting-the-model"></a>
+</h3>
+<p>We the fit the model with a log-linked Tweedie distribution and a
 single linear predictor:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define separate tweedie family for each age</span></span>
@@ -172,7 +202,7 @@ single linear predictor:</p>
 <span><span class="co"># Fit model</span></span>
 <span><span class="va">myfit</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>  formula <span class="op">=</span> <span class="va">Abundance_per_hectare</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Year_Age</span>,</span>
+<span>  formula <span class="op">=</span> <span class="va">Formula</span>,</span>
 <span>  space_term <span class="op">=</span> <span class="va">sem</span>,</span>
 <span>  spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
 <span>  family <span class="op">=</span> <span class="va">Family</span>,</span>
@@ -183,9 +213,16 @@ single linear predictor:</p>
 <span>  spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
 <span>  control <span class="op">=</span> <span class="va">control</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>After the model is fitted, we then apply area-expansion and the
-epsilon bias-correction method to predict abundance-at-age, and convert
-that to a proportion:</p>
+</div>
+<div class="section level3">
+<h3 id="area-expansion-and-proportions">Area expansion and proportions<a class="anchor" aria-label="anchor" href="#area-expansion-and-proportions"></a>
+</h3>
+<p>After the model is fitted, we then apply area-expansion to predict
+abundance-at-age, and convert that to a proportion. Below, we forgo
+epsilon bias-correction <span class="citation">(Thorson and Kristensen
+2016)</span>, but we strongly recommend it for real-world applications
+to avoid proportion estimates being biased low for ages with fewer
+samples (and therefore higher standard errors):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get shapefile for survey extent</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span> <span class="va">bering_sea</span> <span class="op">)</span></span>
@@ -216,19 +253,27 @@ that to a proportion:</p>
 <span>    <span class="va">index1</span> <span class="op">=</span> <span class="fu"><a href="../../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span> <span class="va">myfit</span>,</span>
 <span>                    area <span class="op">=</span> <span class="va">areas</span>,</span>
 <span>                    newdata <span class="op">=</span> <span class="va">newdata</span>,</span>
-<span>                    apply.epsilon <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                    apply.epsilon <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                    bias.correct <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                    intern <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span>
-<span>    <span class="va">N_jz</span><span class="op">[</span><span class="va">j</span>,<span class="st">'Biomass'</span><span class="op">]</span> <span class="op">=</span> <span class="va">index1</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">/</span> <span class="fl">1e9</span></span>
+<span>                    intern <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                    getsd <span class="op">=</span> <span class="cn">FALSE</span> <span class="op">)</span></span>
+<span>    <span class="co">#N_jz[j,'Biomass'] = index1[3] / 1e9</span></span>
+<span>    <span class="va">N_jz</span><span class="op">[</span><span class="va">j</span>,<span class="st">'Biomass'</span><span class="op">]</span> <span class="op">=</span> <span class="va">index1</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="fl">1e9</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">N_ct</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span> <span class="va">N_jz</span><span class="op">$</span><span class="va">Biomass</span>, dim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">$</span><span class="va">internal</span><span class="op">$</span><span class="va">variables</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>              dimnames<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">$</span><span class="va">internal</span><span class="op">$</span><span class="va">variables</span>,<span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">N_ct</span> <span class="op">=</span> <span class="va">N_ct</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">N_ct</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">N_ct</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="comparison-with-vast">Comparison with VAST<a class="anchor" aria-label="anchor" href="#comparison-with-vast"></a>
+</h3>
 <p>Finally, we can compare these estimates with those from package
-<em>VAST</em>. Estimates differ somewhat because VAST used a delta-gamma
-distribution with spatio-temporal variation in two linear predictors,
-and also used a different mesh.</p>
+<em>VAST</em> <span class="citation">(Thorson and Barnett 2017)</span>.
+Estimates differ somewhat because VAST used a delta-gamma distribution
+with spatio-temporal variation in two linear predictors, used a
+different mesh, and we also skipped epsilon bias-correction for
+<em>tinyVAST</em> to have a faster-running vignette.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load VAST results for same data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">bering_sea_pollock_vast</span><span class="op">)</span></span>
@@ -239,17 +284,51 @@ and also used a different mesh.</p>
 <span><span class="va">mytiny</span> <span class="op">=</span> <span class="va">N_ct</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mytiny</span><span class="op">)</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span></span>
 <span></span>
-<span><span class="co">#</span></span>
-<span><span class="va">longvast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">myvast</span><span class="op">)</span><span class="op">)</span>, <span class="st">"p"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">myvast</span><span class="op">)</span>, <span class="st">"method"</span><span class="op">=</span><span class="st">"VAST"</span> <span class="op">)</span></span>
-<span><span class="va">longtiny</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">mytiny</span><span class="op">)</span><span class="op">)</span>, <span class="st">"p"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">mytiny</span><span class="op">)</span>, <span class="st">"method"</span><span class="op">=</span><span class="st">"tinyVAST"</span> <span class="op">)</span></span>
+<span><span class="co"># Combine in long-form data frame (expected by ggplot)</span></span>
+<span><span class="va">longvast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">myvast</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>  p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">myvast</span><span class="op">)</span>, </span>
+<span>  method <span class="op">=</span> <span class="st">"VAST"</span> <span class="op">)</span></span>
+<span><span class="va">longtiny</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">mytiny</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>  p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">mytiny</span><span class="op">)</span>, </span>
+<span>  method <span class="op">=</span> <span class="st">"tinyVAST"</span> <span class="op">)</span></span>
 <span><span class="va">long</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span> <span class="va">longvast</span>, <span class="va">longtiny</span> <span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Plot with facet by age</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">long</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Var2</span>, y<span class="op">=</span><span class="va">p</span>, col<span class="op">=</span><span class="va">method</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Var1</span><span class="op">)</span>, scales<span class="op">=</span><span class="st">"free"</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="age_composition_expansion_files/figure-html/agecomp-1.png" width="576"></p>
+<p>Runtime for this vignette: 21.34 mins</p>
+</div>
+</div>
+<div class="section level2">
+<h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-thorson_comparing_2017" class="csl-entry">
+Thorson, James T., and Lewis A. K. Barnett. 2017. <span>“Comparing
+Estimates of Abundance Trends and Distribution Shifts Using Single- and
+Multispecies Models of Fishes and Biogenic Habitat.”</span> <em>ICES
+Journal of Marine Science</em> 74 (5): 1311–21. <a href="https://doi.org/10.1093/icesjms/fsw193" class="external-link">https://doi.org/10.1093/icesjms/fsw193</a>.
+</div>
+<div id="ref-thorson_spatiotemporal_2018" class="csl-entry">
+Thorson, James T., and Melissa A. Haltuch. 2018. <span>“Spatiotemporal
+Analysis of Compositional Data: Increased Precision and Improved
+Workflow Using Model-Based Inputs to Stock Assessment.”</span>
+<em>Canadian Journal of Fisheries and Aquatic Sciences</em> 76 (3):
+401–14. <a href="https://doi.org/10.1139/cjfas-2018-0015" class="external-link">https://doi.org/10.1139/cjfas-2018-0015</a>.
+</div>
+<div id="ref-thorson_implementing_2016" class="csl-entry">
+Thorson, James T., and Kasper Kristensen. 2016. <span>“Implementing a
+Generic Method for Bias Correction in Statistical Models Using Random
+Effects, with Spatial and Population Dynamics Examples.”</span>
+<em>Fisheries Research</em> 175 (March): 66–74. <a href="https://doi.org/10.1016/j.fishres.2015.11.016" class="external-link">https://doi.org/10.1016/j.fishres.2015.11.016</a>.
+</div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
