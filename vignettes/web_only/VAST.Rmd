@@ -9,7 +9,7 @@ vignette: >
   %\VignetteIndexEntry{Vector autoregressive spatio-temporal models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{pdp}
+  %\VignetteDepends{sdmTMB}
 ---
 
 ```{r, include = FALSE}
@@ -229,7 +229,7 @@ Or with sdmTMB [@anderson_sdmtmb_nodate]
 library(sdmTMB)
 sdmTMB_mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
-start_time = Sys.time()
+start_time2 = Sys.time()
 mysdmTMB = sdmTMB(
   formula = n ~ 1,
   data = Data,
@@ -239,7 +239,7 @@ mysdmTMB = sdmTMB(
   time = "time",
   family = tweedie()
 )
-sdmTMBtime = Sys.time() - start_time
+sdmTMBtime = Sys.time() - start_time2
 ```
 ```{r, eval=!has_sdmTMB, echo=FALSE, message=FALSE, include=FALSE}
 sdmTMBtime = NA
@@ -408,10 +408,5 @@ ggplot(Index, aes( time, Estimate )) +
   geom_point( aes(x=time, y=Estimate), color = "black") +
   geom_point( aes(x=time, y=True), color = "red" )
 ```
-
-```{r, include = FALSE, warning=FALSE, message=FALSE}
-run_time = Sys.time() - start_time
-```
-Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
 
 # Works cited
