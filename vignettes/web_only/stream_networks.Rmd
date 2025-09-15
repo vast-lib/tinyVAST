@@ -1,14 +1,15 @@
 ---
 title: "Stream network models"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Stream network models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{ggraph}
-bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}
@@ -39,9 +40,11 @@ options("tinyVAST.verbose" = FALSE)
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models using a minimal and user-friendly interface.
 We here show how it can fit a stream network model, where spatial correlations arise from stream distances along a network [@charsley_catchment-scale_2023,@hocking_geostatistical_2018].
 
+# Load and format spatial domain
+
 First, we load a shapefile representing a stream network, and convert it to _sfnetwork_ format.  This format includes
 edges representing stream segments, and nodes where edges connect.
-```{r stream-shape, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
 stream <- st_read( file.path(system.file("stream_network",package="tinyVAST"),
                    "East_Fork_Lewis_basin.shp"), quiet=TRUE )
 stream = as_sfnetwork(stream)
@@ -56,6 +59,8 @@ issues of numerical under or overflow).
 graph = sfnetwork_mesh( stream )
 graph$table$dist = graph$table$dist / 1000  # Convert distance scale
 ```
+
+# Simulate data
 
 Next, we'll simulate a Gaussian Markov random field at stream vertices using `simulate_sfnetwork`,
 sample evenly spaced locations along the stream using `st_line_sample`,
@@ -92,7 +97,8 @@ Data = data.frame( Count = Count_i,
 ```
 
 We can visualize the GMRF at those locations using _sfnetwork_
-```{r stream-dens, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Plot stream
 plot(stream)
 # Extract nodes and plot on network
@@ -100,10 +106,10 @@ plot( st_sf(st_geometry(activate(stream,"nodes")), "omega"=omega_s),
       add=TRUE, pch=19, cex=2)
 ```
 
-Finally, we can fit the model, interpolate the GMRF along at dense locations along
-the stream network, and plot those with the true (simulated) values at the
-location of simulated samples.
-```{r stream-pred, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Fit model
+
+Finally, we can fit the model:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # fit model
 out = tinyVAST( data = Data,
            formula = Count ~ 1,
@@ -113,21 +119,44 @@ out = tinyVAST( data = Data,
            time_column = "time",
            distribution_column = "dist",
            space_term = "" )
+```
 
-#
+We then predict the GMRF at dense locations along the stream network, and plot those with the true (simulated) values at the location of simulated samples.
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Define plotting points
 sf_plot = st_union( st_line_sample( activate(stream,"edges"), density=1/1000))
 sf_plot = st_cast( sf_plot, "POINT" )
-newdata = data.frame( Count = NA,
-                   st_coordinates(sf_plot),
-                   var = "species",  # Univariate model so only one value
-                   time = "2020",    # no time-dynamics, so only one value
-                   dist = "obs" )    # only one type of sampling in data
+
+# Format as `newdata` for prediction
+newdata = data.frame( 
+  Count = NA,
+  st_coordinates(sf_plot),
+  var = "species",  # Univariate model so only one value
+  time = "2020",    # no time-dynamics, so only one value
+  dist = "obs"    # only one type of sampling in data
+)
+
+# Extract predicted spatial variable
 omega_plot = predict( out, newdata = newdata )
 
-# Plot estimated GMRF at sampled locations
-plot( stream, main="omegahat_i")
-plot( st_sf(sf_plot,"omega"=omega_plot), add=TRUE, pch=19, cex=0.5, pal=viridis )
-plot( st_sf(extrap,"omega"=omega_i), add=TRUE, pch=19, cex=2, pal=viridis )
+# Plot stream object
+plot( 
+  stream, 
+  main="omegahat_i"
+)
+
+# Add predicted spatial variable
+plot( 
+  st_sf(sf_plot,"omega"=omega_plot), 
+  add=TRUE, pch=19, cex=0.5, pal=viridis 
+)
+
+# Add true (simulated) values
+plot( 
+  st_sf(extrap,"omega"=omega_i), 
+  add=TRUE, pch=19, cex=2, pal=viridis 
+)
 ```
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
@@ -135,4 +164,4 @@ run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
 
-### Works cited
+# Works cited

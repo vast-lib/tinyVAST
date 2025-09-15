@@ -1,14 +1,15 @@
 ---
 title: "Predator expanded diet"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Predator expanded diet}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{sf}
-bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}

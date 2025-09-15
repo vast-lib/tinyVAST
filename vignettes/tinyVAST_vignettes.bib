@@ -128,6 +128,22 @@
 	pages = {1202--1212},
 }
 
+@article{thorson_implementing_2016,
+	title = {Implementing a generic method for bias correction in statistical models using random effects, with spatial and population dynamics examples},
+	volume = {175},
+	issn = {0165-7836},
+	url = {http://www.sciencedirect.com/science/article/pii/S0165783615301399},
+	doi = {10.1016/j.fishres.2015.11.016},
+	abstract = {Statistical models play an important role in fisheries science when reconciling ecological theory with available data for wild populations or experimental studies. Ecological models increasingly include both fixed and random effects, and are often estimated using maximum likelihood techniques. Quantities of biological or management interest (“derived quantities”) are then often calculated as nonlinear functions of fixed and random effect estimates. However, the conventional “plug-in” estimator for a derived quantity in a maximum likelihood mixed-effects model will be biased whenever the estimator is calculated as a nonlinear function of random effects. We therefore describe and evaluate a new “epsilon” estimator as a generic bias-correction estimator for derived quantities. We use simulated data to compare the epsilon-method with an existing bias-correction algorithm for estimating recruitment in four configurations of an age-structured population dynamics model. This simulation experiment shows that the epsilon-method and the existing bias-correction method perform equally well in data-rich contexts, but the epsilon-method is slightly less biased in data-poor contexts. We then apply the epsilon-method to a spatial regression model when estimating an index of population abundance, and compare results with an alternative bias-correction algorithm that involves Markov-chain Monte Carlo sampling. This example shows that the epsilon-method leads to a biologically significant difference in estimates of average abundance relative to the conventional plug-in estimator, and also gives essentially identical estimates to a sample-based bias-correction estimator. The epsilon-method has been implemented by us as a generic option in the open-source Template Model Builder software, and could be adapted within other mixed-effects modeling tools such as Automatic Differentiation Model Builder for random effects. It therefore has potential to improve estimation performance for mixed-effects models throughout fisheries science.},
+	urldate = {2016-03-31},
+	journal = {Fisheries Research},
+	author = {Thorson, James T. and Kristensen, Kasper},
+	month = mar,
+	year = {2016},
+	keywords = {Bias correction, Epsilon estimator, Mixed-effects model, Random effects, Stock assessment, Template Model Builder (TMB)},
+	pages = {66--74},
+}
+
 @article{thorson_joint_2016,
 	title = {Joint dynamic species distribution models: a tool for community ordination and spatio-temporal monitoring},
 	volume = {25},
@@ -157,6 +173,34 @@ Case study applications show that that JDSDMs can be used for species ordination
 	year = {2016},
 	keywords = {dynamic factor analysis, Geostatistics, species distribution model, Bering Sea, flight curve, spatio-temporal model, species co-occurrence, species ordination},
 	pages = {1144--1158},
+}
+
+@article{dunn_randomized_1996,
+	title = {Randomized quantile residuals},
+	volume = {5},
+	url = {http://www.tandfonline.com/doi/abs/10.1080/10618600.1996.10474708},
+	number = {3},
+	journal = {Journal of Computational and Graphical Statistics},
+	author = {Dunn, Peter K. and Smyth, Gordon K.},
+	year = {1996},
+	pages = {236--244},
+}
+
+@article{thorson_comparing_2017,
+	title = {Comparing estimates of abundance trends and distribution shifts using single- and multispecies models of fishes and biogenic habitat},
+	volume = {74},
+	issn = {1054-3139},
+	url = {https://academic.oup.com/icesjms/article/74/5/1311/2907795/Comparing-estimates-of-abundance-trends-and},
+	doi = {10.1093/icesjms/fsw193},
+	abstract = {Several approaches have been developed over the last decade to simultaneously estimate distribution or density for multiple species (e.g. “joint species distribution” or “multispecies occupancy” models). However, there has been little research comparing estimates of abundance trends or distribution shifts from these multispecies models with similar single-species estimates. We seek to determine whether a model including correlations among species (and particularly species that may affect habitat quality, termed “biogenic habitat”) improves predictive performance or decreases standard errors for estimates of total biomass and distribution shift relative to similar single-species models. To accomplish this objective, we apply a vector-autoregressive spatio-temporal (VAST) model that simultaneously estimates spatio-temporal variation in density for multiple species, and present an application of this model using data for eight US Pacific Coast rockfishes (Sebastes spp.), thornyheads (Sebastolobus spp.), and structure-forming invertebrates (SFIs). We identified three fish groups having similar spatial distribution (northern Sebastes, coastwide Sebastes, and Sebastolobus species), and estimated differences among groups in their association with SFI. The multispecies model was more parsimonious and had better predictive performance than fitting a single-species model to each taxon individually, and estimated fine-scale variation in density even for species with relatively few encounters (which the single-species model was unable to do). However, the single-species models showed similar abundance trends and distribution shifts to those of the multispecies model, with slightly smaller standard errors. Therefore, we conclude that spatial variation in density (and annual variation in these patterns) is correlated among fishes and SFI, with congeneric fishes more correlated than species from different genera. However, explicitly modelling correlations among fishes and biogenic habitat does not seem to improve precision for estimates of abundance trends or distribution shifts for these fishes.},
+	number = {5},
+	urldate = {2017-08-18},
+	journal = {ICES Journal of Marine Science},
+	author = {Thorson, James T. and Barnett, Lewis A. K.},
+	month = may,
+	year = {2017},
+	keywords = {fish distribution shift, Index standardization, joint dynamic species distribution model (JDSDM), Pacific rockfish, spatio-temporal model, structure-forming invertebrates.},
+	pages = {1311--1321},
 }
 
 @article{thorson_estimating_2017,
@@ -193,6 +237,15 @@ Case study applications show that that JDSDMs can be used for species ordination
 	year = {2018},
 	keywords = {brook trout, spatially explicit, spatiotemporal},
 	pages = {1782--1796},
+}
+
+@article{hartig_dharma_2017,
+	title = {{DHARMa}: residual diagnostics for hierarchical (multi-level/mixed) regression models},
+	volume = {5},
+	shorttitle = {{DHARMa}},
+	journal = {R package version 0.1},
+	author = {Hartig, Florian},
+	year = {2017},
 }
 
 @article{thorson_spatio-temporal_2019,

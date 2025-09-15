@@ -1,8 +1,10 @@
 ---
 title: "Simultaneous autoregressive process"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Simultaneous autoregressive process}
   %\VignetteEngine{knitr::rmarkdown}
@@ -38,6 +40,8 @@ options("tinyVAST.verbose" = FALSE)
 We here show how it can fit a multivariate second-order autoregressive (AR2) model including spatial correlations using
 a simultaneous autoregressive (SAR) process specified using _igraph_.
 
+# Load and format data
+
 To do so, we first load salmong returns, and remove 0s to allow comparison between Tweedie and lognormal distributions.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
@@ -48,6 +52,10 @@ salmon_returns$Biomass_nozeros = ifelse( salmon_returns$Biomass==0,
                                          NA, salmon_returns$Biomass )
 Data = na.omit(salmon_returns)
 ```
+
+# Analysis
+
+## Independent dynamics among populations
 
 We first explore an AR2 process, with independent variation among regions.
 This model shows a substantial first-order autocorrelation for sockeye and chum,
@@ -91,6 +99,8 @@ mytiny0 = tinyVAST(
 Summary = summary(mytiny0, what="spacetime_term")
 knitr::kable( Summary, digits=3)
 ```
+
+## Spatially correlated dynamics among populations
 
 We also explore an SAR process for adjacency among regions
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
@@ -158,6 +168,8 @@ Summary = summary(mytiny, what="spacetime_term")
 knitr::kable( Summary, digits=3)
 ```
 
+## Model selection and visualization
+
 We can use AIC to compare these two models.  This comparison suggests that spatial adjancency
 is not a parsimonious way to describe correlations among time-series.
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
@@ -186,4 +198,4 @@ run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
 
-### Works cited
+# Works cited

@@ -1,7 +1,9 @@
 ---
 title: "Probabilistic forecasts"
 author: "Arnaud Grüss, James T. Thorson, Andrew J. Allyn"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    toc: true
 bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Probabilistic forecasts}
@@ -30,7 +32,7 @@ library(tinyVAST)
 library(ggplot2)
 ```
 
- # Probabilistic forecasts with spatio-temporal species distribution models (SDMs)
+# Probabilistic forecasts with spatio-temporal models
 
 We developed new approaches for forecasting with spatio-temporal species distribution models (SDMs) that not only generate efficient predictions, but also separate and quantify different sources of prediction uncertainty [@gruss_probabilistic_nodate]. In these models, uncertainty can arise from:
 *	Past process errors — randomness in the estimated random effects that represent past temporal, spatial, or spatio-temporal variation.
@@ -45,6 +47,8 @@ These sources of uncertainty can be propagated with the function `project`, whic
 Here, we demonstrate one of our approaches, the "process error resampling approach", using fisheries-independent survey data for Bering Sea capelin (Mallotus villosus) and generating forecasts to the next century. 
 For Bering Sea capelin, we first fit a delta-Gamma model to biomass catch rate data and then use the fitted model to forecast the index of relative biomass to the next century.   
 
+## Load data and define mesh
+
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Load data
 data( bering_sea_capelin_forecasts )
@@ -53,7 +57,14 @@ Data$var <- "capelin"
 
 # Make mess
 mesh <- fm_mesh_2d( Data[,c("Lon","Lat")], cutoff = 1 )
+```
 
+## Define autoregressive structure 
+
+We next define an autoregressive structure to allow hotspots to be propagated forward in time.  For the Bering Sea capelin application below, preliminary analyses determined that spatio-temporal variation should be modelled as an AR1 process in both linear predictors of the spatio-temporal SDMs. However, dynamics could instead be fitted and forecasted using a single linear predictor using the Tweedie distribution.   
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Define spatial variation
 space_term <- "
   capelin <-> capelin, sd_space
@@ -67,7 +78,13 @@ spacetime_term <- "
   capelin <-> capelin, 0, sd_spacetime
   capelin -> capelin, 1, ar1_spacetime
 "
+```
 
+## Fit model
+
+Finally, we fit the model
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Fit the model (turning off use_anisotropy to save time)
 fit <- tinyVAST(
   formula = Wt ~ 1 + sst_anomaly + offset(log(AreaSwept_km2)),
@@ -94,6 +111,8 @@ fit <- tinyVAST(
   times = min(Data$Year):max(Data$Year)
 )
 ```
+
+## Projections and forecasts
 
 The process error resampling approach involves three steps. 
 * Step 1 consists of estimating uncertainty in the random effects of temporal, spatial and/or spatio-temporal variation using the precision (inner Hessian) matrix for random effects, conditional upon maximum-likelihood estimates for fixed effects; 
@@ -136,6 +155,8 @@ ggplot( DF, aes(x=Year) ) +
 
 ```
 
+## Alternative options
+
 Another approach to forecasting with spatio-temporal SDMs that we developed is the “conditional approach.” 
 The conditional approach implements only Step 3 from the process error resampling approach, and conditions samples for random effects in the forecast period using as initial conditions the empirical Bayes predictions of random effects in the most recent year of data.  
 To implement the conditional approach, the following settings are needed in the function `project`: `past_var = FALSE`, `future_var = TRUE`, and `parm_var = FALSE`.
@@ -147,21 +168,20 @@ The mixed effects resampling approach:
 However, preliminary analyses revealed that the mixed effects resampling approach work for some fish populations, but not others; in brief, the mixed effects resampling approach works well when variances are relatively low, but poorly for fish populations when variances are high and likely non-normal. 
 To implement the mixed effects resampling approach, the following settings are needed in the function `project`: `past_var = TRUE`, `future_var = TRUE`, and `parm_var = TRUE`.
 
-One important consideration when generating forecasts with spatio-temporal SDMs are autoregressive structures on temporal and spatio-temporal variation. 
+One important consideration when generating forecasts with spatio-temporal SDMs are autoregressive structures on temporal and spatio-temporal variation: 
 
-Regarding temporal variation, analysts may prefer to model temporal variation first as a first-order autoregressive (AR1) process and then, if the estimated degree of autocorrelation in temporal variation approaches one, as a random walk (RW) process. 
+* Regarding temporal variation, analysts may prefer to model temporal variation first as a first-order autoregressive (AR1) process and then, if the estimated degree of autocorrelation in temporal variation approaches one, as a random walk (RW) process. 
 If modelling temporal variation as an AR1 or a RW process proves unwarranted (e.g., because the variance of temporal variation approaches zero), it can instead be modelled (1) as an independent and identically distributed (IID) random effect, which sets the variance of temporal variation to zero, or, as a last resort, (1) as a constant, fixed effect, which sets both the estimated degree of autocorrelation in temporal variation and the variance of temporal variation to zero.
 Preliminary analyses are needed to identify the best autoregressive structures on temporal variation, allowing for both model estimation/convergence and sensible future predictions. 
 For the Bering Sea capelin application below, preliminary analyses determined that temporal variation should be modelled as a random IID effect in both linear predictors of the spatio-temporal SDMs. 
 
-Regarding spatio-temporal variation, analysts may model spatio-temporal variation as an AR1 process, a RW process, or an IID random effect.
+* Regarding spatio-temporal variation, analysts may model spatio-temporal variation as an AR1 process, a RW process, or an IID random effect.
 However, analysts may prefer to model spatio-temporal variation as an AR1 process rather than as a RW process, because the latter results in the spatio-temporal variation term having a variance across space that increases progressively during the forecast period. Then, when spatio-temporal variation is extrapolated to calculate densities, forecasted indices of relative abundance are progressively dominated by the predicted density at a few (or single) extrapolation location(s). 
 
-For the Bering Sea capelin application below, preliminary analyses determined that spatio-temporal variation should be modelled as an AR1 process in both linear predictors of the spatio-temporal SDMs. 
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
 run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
 
-### Works cited
+# Works cited

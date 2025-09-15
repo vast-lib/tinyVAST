@@ -1,13 +1,14 @@
 ---
 title: "Empirical orthogonal functions"
 author: "James T. Thorson"
-output: rmarkdown::html_vignette
-#output: rmarkdown::pdf_document
+output:
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Empirical orthogonal functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: '../tinyVAST_vignettes.bib'
 ---
 
 ```{r, include = FALSE}
@@ -117,9 +118,9 @@ L_tf = matrix( 0, nrow=length(unique(Data$year)), ncol=2,
 L_tf[lower.tri(L_tf,diag=TRUE)] = out$opt$par[names(out$opt$par)=="beta_z"]
 
 # Extract factor-responses
-EOF1_g = predict( out, cbind(newdata, year="EOF_1"), what="pepsilon_g" )
-EOF2_g = predict( out, cbind(newdata, year="EOF_2"), what="pepsilon_g" )
-omega_g = predict( out, cbind(newdata, year="EOF_2"), what="pomega_g" )
+EOF1_g = predict( out, cbind(newdata, year="EOF_1"), what="pepsilon1_g" )
+EOF2_g = predict( out, cbind(newdata, year="EOF_2"), what="pepsilon1_g" )
+omega_g = predict( out, cbind(newdata, year="EOF_2"), what="pomega1_g" )
 
 # Rotate responses and loadings
 rotated_results = rotate_pca( L_tf=L_tf, x_sf=cbind(EOF1_g,EOF2_g), order="decreasing" )

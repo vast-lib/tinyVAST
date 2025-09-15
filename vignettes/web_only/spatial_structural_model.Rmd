@@ -2,12 +2,13 @@
 title: "Spatial structural models"
 author: "James T. Thorson"
 output:
-  rmarkdown::html_vignette
+  rmarkdown::html_vignette:
+    toc: true
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Spatial structural models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: '../tinyVAST_vignettes.bib'
 editor_options: 
   markdown: 
     wrap: sentence
@@ -36,14 +37,32 @@ library(igraph)
 
 `tinyVAST` provides an expressive interface to specify structural interactions among variables using arrow or arrow-and-lag notation from structural equation models and dynamic structural equation models, respectively.  Here, we replicate the original analysis from [@thorson_tinyvast_2025]
 
+# Load data
+
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Load data
 data(alaska_sponge_coral_fish)
 combined_samples = alaska_sponge_coral_fish$combined_samples
 
+# Define the spatial mesh
+mesh = fm_mesh_2d( 
+  loc = combined_samples[,c('X','Y')],
+  cutoff = 10 # Value from original paper
+  #cutoff = 25 # Lower resolution to speed up vignette
+)
+```
+
+# Fit model
+
+We then define a separate intercept for each group and year, and a log-area offset
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Define formula
 Formula = Count ~ 0 + interaction(Group4,Year) + offset(log(AreaSwept))
+```
 
+We also specify the AIC-selected structural model from the original paper, which includes habitat-effects for camera-measured coral and sponge densities on camera-measured fish densities, separate habitat-effects for coral/sponge on trawl-measured fish densities, and proportional variation in fish density between camera and trawl measurements.
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Define arrow-and-lag notation
 space_term = "
   # Habitat effects on drop-camera measurements
@@ -63,16 +82,9 @@ space_term = "
   Flat -> Flat_trawl, NA, 1
   Rock -> Rock_trawl, NA, 1
 "
-
-# Define the spatial mesh
-mesh = fm_mesh_2d( 
-  loc = combined_samples[,c('X','Y')],
-  cutoff = 10 # Value from original paper
-  #cutoff = 25 # Lower resolution to speed up vignette
-)
 ```
 
-Here, we estimate separate measurement-error parameters for each of six variables 
+We also estimate separate measurement-error parameters for each of six variables 
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Specify distribution for each variable
@@ -109,6 +121,8 @@ myfit = tinyVAST(
   control = control
 )
 ```
+
+# Visualize structural linkages
 
 Finally, we use `igraph` to allow detailed control when plotting the estimated structural linkages among variables:
 
