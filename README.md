@@ -16,9 +16,7 @@
 [![](https://cranlogs.r-pkg.org/badges/grand-total/tinyVAST)](https://cran.r-project.org/package=tinyVAST)
 <!-- badges: end -->
 
-tinyVAST is an R package that fits multivariate spatio-temporal models while using Gaussian Markov random fields to represent nonseparable interactions among variables over time. See a preprint:
-
-Thorson, J. T., Anderson, S. C., Goddard, P., & Rooper, C. N. (2024). tinyVAST: R package with an expressive interface to specify lagged and simultaneous effects in multivariate spatio-temporal models (arXiv:2401.10193). arXiv. http://arxiv.org/abs/2401.10193
+tinyVAST is an R package that fits multivariate spatio-temporal models while using Gaussian Markov random fields to represent nonseparable interactions among variables over time. 
 
 ## Table of contents
 
