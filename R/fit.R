@@ -665,7 +665,7 @@ function( formula,
                          "binomial" = 0,
                          "bernoulli" = 0,
                          "Gamma" = 1,
-                         "student" = 1
+                         "student" = 2
                        )} )
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 

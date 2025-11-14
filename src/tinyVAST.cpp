@@ -804,7 +804,7 @@ Type one_predictor_likelihood( Type &y,
         break;
       case student_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
         // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
-        nll = -1 * dstudent( y, mu, exp(log_sigma_segment(0)), Type(3.0), true);
+        nll = -1 * dstudent( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
         devresid = NAN;
         if(isDouble<Type>::value && of->do_simulate){
           y = NAN;
@@ -910,7 +910,7 @@ Type two_predictor_likelihood( Type y,
           break;
         case student_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
           // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
-          nll -= dstudent( y, mu2, exp(log_sigma_segment(0)), Type(3.0), true);
+          nll -= dstudent( y, mu2, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
           //dev = NAN;
           if(isDouble<Type>::value && of->do_simulate){
             y = NAN;
