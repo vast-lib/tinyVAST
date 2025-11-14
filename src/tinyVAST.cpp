@@ -10,7 +10,8 @@ enum valid_family {
   binomial_family = 4,
   gamma_family = 5,
   nbinom1_family = 6,
-  nbinom2_family = 7
+  nbinom2_family = 7,
+  student_family = 8
 };
 
 enum valid_link {
@@ -651,6 +652,17 @@ Type devresid_tweedie( Type y,
   return devresid;
 }
 
+// COPIED from sdmTMB.cpp in sdmTMB package on Nov. 14, 2025
+template <class Type>
+Type dstudent(Type x, Type mean, Type sigma, Type df, int give_log = 0) {
+  // from metRology::dt.scaled()
+  // dt((x - mean)/sd, df, ncp = ncp, log = TRUE) - log(sd)
+  Type logres = dt((x - mean) / sigma, df, true) - log(sigma);
+  if (give_log)
+    return logres;
+  else
+    return exp(logres);
+}
 
 // Deviance for the Negative binomial
 //template<class Type>
@@ -790,6 +802,14 @@ Type one_predictor_likelihood( Type &y,
           y = rnbinom2( mu, mu * (Type(1.0) + mu / exp(log_sigma_segment(0))) );
         }
         break;
+      case student_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
+        // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
+        nll = -1 * dstudent( y, mu, exp(log_sigma_segment(0)), Type(3.0), true);
+        devresid = NAN;
+        if(isDouble<Type>::value && of->do_simulate){
+          y = NAN;
+        }
+        break;
       default:
         error("Distribution not implemented.");
     }
@@ -886,6 +906,14 @@ Type two_predictor_likelihood( Type y,
           dev += 2 * ( (y-mu2)/mu2 - log(y/mu2) );
           if(isDouble<Type>::value && of->do_simulate){
             y = rgamma( exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)) );
+          }
+          break;
+        case student_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
+          // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
+          nll -= dstudent( y, mu2, exp(log_sigma_segment(0)), Type(3.0), true);
+          //dev = NAN;
+          if(isDouble<Type>::value && of->do_simulate){
+            y = NAN;
           }
           break;
         default:

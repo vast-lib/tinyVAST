@@ -1,3 +1,7 @@
+# tinyVAST 1.4.0
+
+* Adding `student` distribution (currently hard-wiring df = 3), borrowing/importing code from sdmTMB
+
 # tinyVAST 1.3.0
 
 * Adding `add_vertex_covariates` to associate mesh vertices with covariates (h\t Sean Anderson)

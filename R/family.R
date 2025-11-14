@@ -37,6 +37,10 @@ sdmTMB::nbinom1
 #' @importFrom sdmTMB tweedie
 sdmTMB::tweedie
 
+#' @export
+#' @importFrom sdmTMB student
+sdmTMB::student
+
 #' Additional families
 #'
 #' Additional families compatible with [tinyVAST()].

@@ -55,7 +55,7 @@ space-time-variable interaction (i.e., the interaction occurs locally at each si
 \code{\link[=make_dsem_ram]{make_dsem_ram()}}  or \code{\link[=make_eof_ram]{make_eof_ram()}}.}
 
 \item{family}{A function returning a class \code{family}, including \code{\link[=gaussian]{gaussian()}},
-\code{\link[=lognormal]{lognormal()}}, \code{\link[=tweedie]{tweedie()}},  \code{\link[=binomial]{binomial()}},  \code{\link[=Gamma]{Gamma()}}, \code{\link[=poisson]{poisson()}},
+\code{\link[=lognormal]{lognormal()}}, \code{\link[=tweedie]{tweedie()}},  \code{\link[=binomial]{binomial()}},  \code{\link[=Gamma]{Gamma()}}, \code{\link[=student]{student()}}, \code{\link[=poisson]{poisson()}},
 \code{\link[=nbinom1]{nbinom1()}}, or \code{\link[=nbinom2]{nbinom2()}}.
 Alternatively, can be a named list of
 these functions, with names that match levels of

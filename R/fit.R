@@ -27,7 +27,7 @@
 #'        `spacetime_term=NULL` disables the space-variable interaction; see
 #'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param family A function returning a class \code{family}, including [gaussian()],
-#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], [poisson()],
+#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], [student()], [poisson()],
 #'        [nbinom1()], or [nbinom2()].
 #'        Alternatively, can be a named list of
 #'        these functions, with names that match levels of
@@ -664,7 +664,8 @@ function( formula,
                          "nbinom1" = 1,
                          "binomial" = 0,
                          "bernoulli" = 0,
-                         "Gamma" = 1
+                         "Gamma" = 1,
+                         "student" = 1
                        )} )
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
@@ -678,7 +679,8 @@ function( formula,
                          "bernoulli" = 4,
                          "Gamma" = 5,
                          "nbinom1" = 6,
-                         "nbinom2" = 7)[x$family])
+                         "nbinom2" = 7,
+                         "student" = 8)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=function(x){
                        pad_length(c("identity" = 0,
