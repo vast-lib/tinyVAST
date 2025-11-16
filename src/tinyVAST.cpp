@@ -820,7 +820,7 @@ Type one_predictor_likelihood( Type &y,
         nll = -1 * dstudent( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
         devresid = devresid_student( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)) );
         if(isDouble<Type>::value && of->do_simulate){
-          y = NAN;
+          y = mu + exp(log_sigma_segment(0)) * rt(1.0 + exp(log_sigma_segment(1)));
         }
         break;
       default:
@@ -926,7 +926,7 @@ Type two_predictor_likelihood( Type y,
           nll -= dstudent( y, mu2, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
           //dev = NAN;
           if(isDouble<Type>::value && of->do_simulate){
-            y = NAN;
+            y = mu2 + exp(log_sigma_segment(0)) * rt(1.0 + exp(log_sigma_segment(1)));
           }
           break;
         default:
