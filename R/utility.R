@@ -307,11 +307,20 @@ function( x,
     control_initial$nlminb_loops = 0
     control_initial$newton_loops = 0
   
+  # Fix extra dispersion for some families
+  null_family = x$internal$family
+  log_sigma = x$internal$parlist$log_sigma
+  for( i in seq_along(null_family) ){
+    if( null_family[[i]]$family == "student" ){
+      null_family[[i]]$df = 1 + exp(log_sigma[sum(x$internal$distributions$Nsigma_e[seq_len(i-1)])+2])
+    }
+  }
+  
   # Run null model to check that some parameters remain
   null_fit = tinyVAST( data = x$data,
                        formula = null_formula, 
                        control = control_initial,
-                       family = x$internal$family,
+                       family = null_family,
                        space_columns = x$internal$space_columns,
                        time_column = x$internal$time_column,
                        variable_column = x$internal$variable_column,
