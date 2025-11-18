@@ -374,3 +374,52 @@ test_that("Poisson-link delta-gamma works", {
                 tolerance=1e-3 )
 })
 
+test_that("student-t MLE, deviance residuals, and deviance explained", {
+  #skip_on_cran()
+  #skip_on_ci()
+  skip_if_not_installed("sdmTMB")
+  skip_if_not_installed("glmmTMB")
+  set.seed(101)
+
+  # Simulate
+  n = 200
+  dat <- data.frame(
+    X = runif(n), 
+    Y = runif(n),
+    a = rnorm(n), 
+    year = rep(1:6, length.out = n)
+  )
+  dat$b = rnorm(6)[dat$year]
+  dat$response = dat$a + dat$b + rt(n, df = 6)
+
+  # Compare with glmmTMB when estimating DF
+  fit0 = glmmTMB::glmmTMB(
+    response ~ 0 + a + factor(year),
+    data = dat,
+    family = glmmTMB::t_family()
+  ) # exp(fit0$fit$par["psi"])
+  fit1 = tinyVAST(
+    response ~ 0 + a + factor(year),
+    data = dat,
+    family = student( df = NULL )
+  ) # 1 + exp(fit1$internal$parlist$log_sigma[2])
+  fit2 = tinyVAST(
+    response ~ 0 + a + factor(year),
+    data = dat,
+    family = student( df = exp(fit0$fit$par["psi"]) )
+  )
+  expect_equal( fit0$fit$objective, fit1$opt$objective, tolerance=1e-3 )
+  expect_equal( fit0$fit$objective, fit2$opt$objective, tolerance=1e-3 )
+
+  # Compare with sdmTMB when fixing DF
+  mesh <- sdmTMB::make_mesh(dat, xy_cols = c("X", "Y"), cutoff = 0.1)
+  fit3 = sdmTMB::sdmTMB(
+    response ~ 0 + a + factor(year),
+    data = dat,
+    spatial = "off",
+    family = student( df = exp(fit0$fit$par["psi"]) ),
+    mesh = mesh
+  )
+  # fit3$internal$parlist$log_sigma
+  expect_equal( fit0$fit$objective, fit3$model$objective, tolerance=1e-3 )
+})

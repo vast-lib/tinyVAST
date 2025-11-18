@@ -680,7 +680,7 @@ function( formula,
                          "binomial" = c(),
                          "bernoulli" = c(),
                          "Gamma" = c(NA),
-                         "student" = c(NA, ifelse(is.null(x$df), NA, log(x$df)-1 ) )
+                         "student" = c(NA, ifelse(is.null(x$df), NA, log(x$df-1) ) )
                        )} )
     Nsigma_e = sapply(sigma_e, length)
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
