@@ -1,6 +1,7 @@
 # tinyVAST 1.4.0
 
 * Adding `student` distribution (currently hard-wiring df = 3), borrowing/importing code from sdmTMB
+* Changing `deviance_explained` to map off student DF at MLE to avoid negative values, in way that can be easily generalized.
 
 # tinyVAST 1.3.0
 
