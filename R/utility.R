@@ -311,7 +311,7 @@ function( x,
   null_family = x$internal$family
   log_sigma = x$internal$parlist$log_sigma
   for( i in seq_along(null_family) ){
-    if( null_family[[i]]$family == "student" ){
+    if( null_family[[i]]$family[length(null_family[[i]]$family)] == "student" ){
       null_family[[i]]$df = 1 + exp(log_sigma[sum(x$internal$distributions$Nsigma_e[seq_len(i-1)])+2])
     }
   }
