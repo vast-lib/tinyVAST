@@ -179,6 +179,9 @@ test_that("deviance residuals for tweedie match mgcv", {
                 tolerance=1e-2 )
   expect_equal( mytiny$deviance_explained, mgcv::summary.gam(mygam)$dev.expl,
                 tolerance=1e-2 )
+  # DEBUGGING
+  mytiny
+  mgcv::summary.gam(mygam)
 })
 
 test_that("deviance residuals for poisson works", {
