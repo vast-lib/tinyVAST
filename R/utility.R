@@ -301,23 +301,17 @@ function( x,
     control$calculate_deviance_explained = FALSE
     control$tmb_par = NULL
     control$tmb_map = NULL
+    control$suppress_user_warnings = TRUE
 
   # 
   control_initial = control
     control_initial$nlminb_loops = 0
     control_initial$newton_loops = 0
-  
-  # Fix extra dispersion for some families
+    control_initial$run_model = FALSE
+
+  # Build null model to check that some parameters remain
   null_family = x$internal$family
-  log_sigma = x$internal$parlist$log_sigma
-  for( i in seq_along(null_family) ){
-    if( null_family[[i]]$family[length(null_family[[i]]$family)] == "student" ){
-      null_family[[i]]$df = 1 + exp(log_sigma[sum(x$internal$distributions$Nsigma_e[seq_len(i-1)])+2])
-    }
-  }
-  
-  # Run null model to check that some parameters remain
-  null_fit = tinyVAST( data = x$data,
+  null_inputs = tinyVAST( data = x$data,
                        formula = null_formula, 
                        control = control_initial,
                        family = null_family,
@@ -329,6 +323,49 @@ function( x,
                        variables = x$internal$variables,
                        delta_options = list( formula = null_delta_formula ),
                        distribution_column = x$internal$distribution_column) 
+
+  # Fix extra dispersion for some families
+  #null_family = x$internal$family
+  #log_sigma = x$internal$parlist$log_sigma
+  #for( i in seq_along(null_family) ){
+  #  if( null_family[[i]]$family[length(null_family[[i]]$family)] == "student" ){
+  #    null_family[[i]]$df = 1 + exp(log_sigma[sum(x$internal$distributions$Nsigma_e[seq_len(i-1)])+2])
+  #  }
+  #}
+
+  # Modify map as needed
+  log_sigma = x$internal$parlist$log_sigma
+  control_initial$tmb_map = null_inputs$tmb_map
+  control_initial$tmb_par = null_inputs$tmb_par
+  # Updates
+  for( i in seq_along(null_family) ){
+    if( null_family[[i]]$family[length(null_family[[i]]$family)] == "student" ){
+      parnum = sum(x$internal$distributions$Nsigma_e[seq_len(i-1)]) + 2
+      control_initial$tmb_par$log_sigma[parnum] = log_sigma[parnum]
+      control_initial$tmb_map$log_sigma[parnum] = NA
+    }
+    if( null_family[[i]]$family[length(null_family[[i]]$family)] %in% c("nbinom1","nbinom2") ){
+      parnum = sum(x$internal$distributions$Nsigma_e[seq_len(i-1)]) + 1
+      control_initial$tmb_par$log_sigma[parnum] = log_sigma[parnum]
+      control_initial$tmb_map$log_sigma[parnum] = NA
+    }
+  }
+  control_initial$tmb_map$log_sigma = droplevels(control_initial$tmb_map$log_sigma)
+
+  # Build null model to check that some parameters remain
+  control_initial$run_model = TRUE
+  null_fit = tinyVAST( data = x$data,
+                       formula = null_formula,
+                       control = control_initial,
+                       family = null_family,
+                       space_columns = x$internal$space_columns,
+                       time_column = x$internal$time_column,
+                       variable_column = x$internal$variable_column,
+                       times = x$internal$times,
+                       weights = x$internal$weights,
+                       variables = x$internal$variables,
+                       delta_options = list( formula = null_delta_formula ),
+                       distribution_column = x$internal$distribution_column)
   null_obj = null_fit$obj
 
   # Run if some parameters remain

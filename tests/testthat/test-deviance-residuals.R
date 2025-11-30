@@ -36,6 +36,7 @@ test_that("deviance residuals for Gamma match glm", {
 test_that("nbinom1 and nbinom2 family matches glmmTMB", {
   skip_on_cran()
   #skip_on_ci()
+  library(mgcv)
   library(glmmTMB)
 
   set.seed(101)
@@ -63,6 +64,11 @@ test_that("nbinom1 and nbinom2 family matches glmmTMB", {
                 tolerance=1e-3 )
   expect_equal( as.numeric(resid(glmmTMB2,type="deviance")),
                 as.numeric(resid(tinyVAST2,type="deviance")),
+                tolerance=1e-3 )
+
+  # Compare deviance-explained with mgcv ... mgcv only does nbinom2
+  gam2 = gam( Y ~ 1 + X, family = mgcv::nb(), data = data )
+  expect_equal( tinyVAST2$deviance_explained, summary(gam2)$dev.expl,
                 tolerance=1e-3 )
   if( FALSE ){
     # nbinom2 matches
@@ -147,11 +153,13 @@ test_that("deviance residuals for tweedie match mgcv", {
   skip_if_not_installed("mgcv")
 
   set.seed(101)
-  y = tweedie::rtweedie( n=100, mu=2, phi=1, power=1.5 )
+  x = 0.1*rnorm(100)
+  mu = 2 * exp( x )
+  y = tweedie::rtweedie( n=100, mu=mu, phi=1, power=1.5 )
 
   #
-  mytiny = tinyVAST( y ~ 1,
-            data = data.frame(y=y),
+  mytiny = tinyVAST( y ~ 1 + x,
+            data = data.frame(y=y, x=x),
             family = tweedie(link = "log") )
   resid1 = residuals(mytiny, type="deviance")
 
@@ -165,9 +173,11 @@ test_that("deviance residuals for tweedie match mgcv", {
 
   #
   library(mgcv)
-  mygam = gam( y ~ 1, family=tw(link="log"))
+  mygam = gam( y ~ 1 + x, family=tw(link="log"))
   resid2 = residuals( mygam, type="deviance" )
   expect_equal( as.numeric(resid1), as.numeric(resid2),
+                tolerance=1e-3 )
+  expect_equal( mytiny$deviance_explained, summary(mygam)$dev.expl,
                 tolerance=1e-3 )
 })
 
