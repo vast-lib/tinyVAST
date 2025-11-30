@@ -177,7 +177,7 @@ test_that("deviance residuals for tweedie match mgcv", {
   resid2 = residuals( mygam, type="deviance" )
   expect_equal( as.numeric(resid1), as.numeric(resid2),
                 tolerance=1e-2 )
-  expect_equal( mytiny$deviance_explained, summary(mygam)$dev.expl,
+  expect_equal( mytiny$deviance_explained, mgcv::summary.gam(mygam)$dev.expl,
                 tolerance=1e-2 )
 })
 
