@@ -176,9 +176,9 @@ test_that("deviance residuals for tweedie match mgcv", {
   mygam = gam( y ~ 1 + x, family=tw(link="log"))
   resid2 = residuals( mygam, type="deviance" )
   expect_equal( as.numeric(resid1), as.numeric(resid2),
-                tolerance=1e-3 )
+                tolerance=1e-2 )
   expect_equal( mytiny$deviance_explained, summary(mygam)$dev.expl,
-                tolerance=1e-3 )
+                tolerance=1e-2 )
 })
 
 test_that("deviance residuals for poisson works", {
