@@ -154,7 +154,7 @@ test_that("deviance residuals for tweedie match mgcv", {
   skip_if_not_installed("mgcv")
 
   set.seed(101)
-  x = 0.1*rnorm(100)
+  x = rnorm(100)
   mu = 2 * exp( x )
   y = tweedie::rtweedie( n=100, mu=mu, phi=1, power=1.5 )
 
@@ -174,7 +174,7 @@ test_that("deviance residuals for tweedie match mgcv", {
 
   #
   library(mgcv)
-  mygam = gam( y ~ 1 + x, family=tw(link="log"))
+  mygam = gam( y ~ 1 + x, family=tw(link="log") )
   resid2 = residuals( mygam, type="deviance" )
   expect_equal( as.numeric(resid1), as.numeric(resid2),
                 tolerance=1e-2 )

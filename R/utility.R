@@ -339,7 +339,7 @@ function( x,
   control_initial$tmb_par = null_inputs$tmb_par
   # Updates
   for( i in seq_along(null_family) ){
-    if( null_family[[i]]$family[length(null_family[[i]]$family)] == "student" ){
+    if( null_family[[i]]$family[length(null_family[[i]]$family)] %in% c("student","tweedie") ){
       parnum = sum(x$internal$distributions$Nsigma_e[seq_len(i-1)]) + 2
       control_initial$tmb_par$log_sigma[parnum] = log_sigma[parnum]
       control_initial$tmb_map$log_sigma[parnum] = NA
