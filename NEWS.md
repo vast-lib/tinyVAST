@@ -2,6 +2,9 @@
 
 * Adding `student` distribution (currently hard-wiring df = 3), borrowing/importing code from sdmTMB
 * Changing `deviance_explained` to map off student DF at MLE to avoid negative values, in way that can be easily generalized.
+* Changing `deviance_explained` to map off overdispersion for negbin1 and negbin2
+* Changing `deviance_explained` to map of power parameter for tweedie distribution
+* add testthat checks comparing tweedie and negbin2 deviance-explained for tinyVAST with mgcv package
 
 # tinyVAST 1.3.0
 
