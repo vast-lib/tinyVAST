@@ -410,6 +410,8 @@ test_that("student-t MLE, deviance residuals, and deviance explained", {
   )
   expect_equal( fit0$fit$objective, fit1$opt$objective, tolerance=1e-3 )
   expect_equal( fit0$fit$objective, fit2$opt$objective, tolerance=1e-3 )
+  #expect_equal( residuals(fit0, type = "deviance"), 
+  #              residuals(fit1, type = "deviance"), tolerance=1e-3 )
 
   # Compare with sdmTMB when fixing DF
   mesh <- sdmTMB::make_mesh(dat, xy_cols = c("X", "Y"), cutoff = 0.1)
