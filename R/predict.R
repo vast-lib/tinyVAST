@@ -86,7 +86,7 @@ function( object,
     newsd = sdreport( obj = newobj,
                       par.fixed = object$opt$par,
                       hessian.fixed = object$internal$Hess_fixed,
-                      bias.correct = FALSE,
+                      bias.correct = bias.correct,
                       getReportCovariance = FALSE )
     SD = as.list( newsd, what="Std. Error", report=TRUE )
     out = list( fit = out,
