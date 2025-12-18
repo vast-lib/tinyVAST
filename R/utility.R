@@ -136,14 +136,8 @@ function( x,
 #' Sample from predictive distribution of a variable
 #'
 #' @description
-#' \code{sample_variable} samples from the joint distribution of random and fixed effects to approximate the predictive distribution for a variable
-#'
-#' Using \code{sample_fixed=TRUE} (the default) in \code{\link{sample_variable}} propagates variance in both fixed and random effects, while
-#'       using \code{sample_fixed=FALSE} does not.
-#'       Sampling fixed effects will sometimes cause numerical under- or overflow (i.e., output values of \code{NA}) in cases when
-#'       variance parameters are estimated imprecisely.  In these cases, the multivariate normal approximation being used is a poor
-#'       representation of the tail probabilities, and results in some samples with implausibly high (or negative) variances,
-#'       such that the associated random effects then have implausibly high magnitude.
+#' \code{sample_variable} samples from the joint distribution of random (and optionally fixed) effects 
+#'   to approximate the predictive distribution for a variable.
 #'
 #' @param object output from `\code{tinyVAST()}`
 #' @param newdata data frame of new data, used to sample model components for predictions e.g., \code{mu_g}
@@ -151,6 +145,14 @@ function( x,
 #' @param n_samples number of samples from the joint predictive distribution for fixed and random effects.  Default is 100, which is slow.
 #' @param seed integer used to set random-number seed when sampling variables, as passed to \code{set.seed(.)}
 #' @param sample_fixed whether to sample fixed and random effects, \code{sample_fixed=TRUE} as by default, or just sample random effects, \code{sample_fixed=FALSE}
+#'
+#' @details
+#' Using \code{sample_fixed=TRUE} (the default) in \code{\link{sample_variable}} propagates variance in both fixed and random effects, while
+#'       using \code{sample_fixed=FALSE} does not.
+#'       Sampling fixed effects will sometimes cause numerical under- or overflow (i.e., output values of \code{NA}) in cases when
+#'       variance parameters are estimated imprecisely.  In these cases, the multivariate normal approximation being used is a poor
+#'       representation of the tail probabilities, and results in some samples with implausibly high (or negative) variances,
+#'       such that the associated random effects then have implausibly high magnitude.
 #'
 #' @return
 #' A matrix with a row for each \code{data} supplied during fitting, and
