@@ -85,3 +85,16 @@ mytv2 = tinyVAST(
   formula = y ~ 0 + species_year + level,
   family = tweedie("log")
 )
+
+##################
+# repeat in sdmTMB
+##################
+
+mysdmTMB2 = sdmTMB(
+  data = cbind( df, y = Y_i ),
+  formula = y ~ 0 + species_year + level,
+  family = tweedie("log"),
+  mesh = mesh,
+  spatial = "off"
+)
+
