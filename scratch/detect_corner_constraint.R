@@ -1,5 +1,4 @@
 
-library(tweedie)
 library(sdmTMB)
 library(tinyVAST)
 set.seed(123)
@@ -25,11 +24,12 @@ b_st = rnorm( length(species_set) * length(year_set) )
 b_jt = rnorm( n_j * length(year_set) )
 
 p_i = b_s[df$species] + b_st[df$species_year] + b_jt[df$year_sample]
-Y_i = rtweedie( 
+
+# Normal errors
+Y_i = rnorm( 
   n = nrow(df),
-  mu = exp(p_i),
-  phi = 1,
-  power = 1.5
+  mean = p_i,
+  sd = 1
 )
 
 ##################
@@ -37,11 +37,15 @@ Y_i = rtweedie(
 # Does not propertly detect corner constraint
 ##################
 
-
 mytv = tinyVAST(
   data = cbind( df, y = Y_i ),
-  formula = y ~ 0 + species_year + year_sample,
-  family = tweedie("log")
+  formula = y ~ 0 + species_year + year_sample
+)
+
+# Also doesn't detect using nested notation
+mytv = tinyVAST(
+  data = cbind( df, y = Y_i ),
+  formula = y ~ 0 + year / species + factor(year) / factor(sample)
 )
 
 ##################
@@ -58,11 +62,20 @@ mesh = make_mesh(
 mysdmTMB = sdmTMB(
   data = cbind( df, y = Y_i ),
   formula = y ~ 0 + species_year + year_sample,
-  family = tweedie("log"),
   mesh = mesh,
   spatial = "off"
 )
 
+
+##################
+# Duplicate in lm ...
+# same issue
+##################
+
+mylm = lm(
+  data = cbind( df, y = Y_i ),
+  formula = y ~ 0 + species_year + year_sample
+)
 
 ##################
 # WORKS
@@ -82,8 +95,7 @@ df$level = relevel( df$level, "base" )
 # Run
 mytv2 = tinyVAST(
   data = cbind( df, y = Y_i ),
-  formula = y ~ 0 + species_year + level,
-  family = tweedie("log")
+  formula = y ~ 0 + species_year + level
 )
 
 ##################
@@ -93,8 +105,28 @@ mytv2 = tinyVAST(
 mysdmTMB2 = sdmTMB(
   data = cbind( df, y = Y_i ),
   formula = y ~ 0 + species_year + level,
-  family = tweedie("log"),
   mesh = mesh,
   spatial = "off"
+)
+
+#################
+# repeat in lm
+#################
+
+mylm2 = lm(
+  data = cbind( df, y = Y_i ),
+  formula = y ~ 0 + species_year + level
+)
+ 
+##################
+# Try new package
+##################
+
+library(fullRankMatrix)
+X <- model.matrix( ~ 0 + species_year + year_sample, df )
+X_full <- make_full_rank_matrix(X)$matrix
+
+mylm3 = lm(
+  formula = Y_i ~ 0 + X_full
 )
 
