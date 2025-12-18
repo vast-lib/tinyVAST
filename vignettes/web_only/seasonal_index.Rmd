@@ -1,0 +1,130 @@
+---
+title: "Seasonal index standardization"
+author: "James T. Thorson"
+output: rmarkdown::html_vignette
+#output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Seasonal index standardization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{sf}
+---
+
+```{r, include = FALSE}
+has_lattice = requireNamespace("lattice", quietly = TRUE)
+has_pdp = requireNamespace("pdp", quietly = TRUE)
+EVAL <- has_lattice && has_pdp
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = EVAL,
+  purl = EVAL
+)
+start_time = Sys.time()
+# Install locally
+#  devtools::install_local( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)', force=TRUE )
+# Build
+#  setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)'); devtools::build_rmd("vignettes/multiple_data.Rmd"); rmarkdown::render( "vignettes/multiple_data.Rmd", rmarkdown::pdf_document())
+```
+
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
+library(tinyVAST)
+library(sf)
+library(fmesher)
+library(ggplot2)
+```
+
+`tinyVAST` can estimate seasonal spatio-temporal models using spatially varying coefficients [@thorson_spatially_2023] to incorporate additional spatial variation by season and then including an autoregressive spatio-temporal process across season-within-year indices.  This was originally demonstrated using package VAST [@thorson_seasonal_2020], and we here show code analyzing spring and fall bottom-trawl surveys for yellowtail flounder in the Northwest Atlantic conducted by the NEFSC, as well as a early-spring bottom trawl survey by DFO Canada.
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Load data
+data( atlantic_yellowtail ) 
+
+# Plot data extent
+ggplot( atlantic_yellowtail ) + 
+  geom_point( aes(x=longitude, y = latitude, col = season) ) +
+  facet_wrap( vars(year) )
+```
+
+We then define a new year_season variable
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Define levels
+atlantic_yellowtail$season = 
+  factor(atlantic_yellowtail$season, levels = c("DFO", "SPRING", "FALL"))
+atlantic_yellowtail$year_factor = 
+  factor(atlantic_yellowtail$year, levels = sort(unique(atlantic_yellowtail$year)))
+
+# Make season-year
+atlantic_yellowtail$season_year = interaction(
+  atlantic_yellowtail$season,
+  atlantic_yellowtail$year_factor
+)
+
+# convert to an integer
+atlantic_yellowtail$season_year_integer = match(
+  atlantic_yellowtail$season_year,
+  levels(atlantic_yellowtail$season_year)
+)
+
+# log-scale area swept
+atlantic_yellowtail$log_swept = log(atlantic_yellowtail$swept)
+
+# Add variable column
+atlantic_yellowtail$var = "density"
+```
+
+We then define argument `spatial_varying` as a formula containing the space-season effect, and in this instance it replaces the `space_term`:
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+# Define mesh
+mesh = fm_mesh_2d( 
+  atlantic_yellowtail[,c('longitude','latitude')], 
+  cutoff = 0.2 
+)
+
+# define formula with a catchability covariate for gear
+formula = weight ~ season_year + offset(log_swept)
+
+# Define SVC by season
+spatial_varying = ~ season
+
+spacetime_term = "
+  density -> density, 1, ar_season
+  density -> density, 3, ar_year
+  density <-> density, 0, sd_spacetime
+"
+
+# fit using tinyVAST
+fit = tinyVAST( 
+  data = droplevels(atlantic_yellowtail), 
+  # Specification
+  formula = formula,
+  spatial_varying = spatial_varying, 
+  spacetime_term = spacetime_term,
+  spatial_domain = mesh,
+  family = tweedie("log"),
+  # Indexing
+  space_columns = c("longitude",'latitude'),
+  time_column = "season_year_integer",
+  times = unique(atlantic_yellowtail$season_year_integer),
+  variable_column = "var",
+  # Settings
+  control = tinyVASTcontrol(
+    trace = 1,
+    profile = "alpha_j"
+  )
+)
+```
+
+We can inspect output, and see that both season-within-year (lag-1) and season-across-year (lag-3) terms are significant:
+
+```{r}
+summary(fit, "spacetime_term")
+```
+
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`

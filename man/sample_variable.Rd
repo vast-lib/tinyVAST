@@ -32,8 +32,10 @@ A matrix with a row for each \code{data} supplied during fitting, and
 for a requested quantity given sampled uncertainty in fixed and/or random effects
 }
 \description{
-\code{sample_variable} samples from the joint distribution of random and fixed effects to approximate the predictive distribution for a variable
-
+\code{sample_variable} samples from the joint distribution of random (and optionally fixed) effects
+to approximate the predictive distribution for a variable.
+}
+\details{
 Using \code{sample_fixed=TRUE} (the default) in \code{\link{sample_variable}} propagates variance in both fixed and random effects, while
 using \code{sample_fixed=FALSE} does not.
 Sampling fixed effects will sometimes cause numerical under- or overflow (i.e., output values of \code{NA}) in cases when

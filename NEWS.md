@@ -5,6 +5,7 @@
 * Changing `deviance_explained` to map off overdispersion for negbin1 and negbin2
 * Changing `deviance_explained` to map of power parameter for tweedie distribution
 * add testthat checks comparing tweedie and negbin2 deviance-explained for tinyVAST with mgcv package
+* Add vignette for seasonal spatio-temporal index standardization, using Yellowtail flounder data from VAST demo
 
 # tinyVAST 1.3.0
 
