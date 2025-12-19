@@ -8,3 +8,4 @@ inst/doc
 docs
 *.pdf
 *.Rhistory
+vignettes\.Rhistory
