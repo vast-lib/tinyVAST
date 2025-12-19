@@ -372,7 +372,7 @@ fitted.tinyVAST <- function(object, ...) {
 #' @export
 #' @return a matrix of data from model
 #' @noRd
-model.frame.tinyVAST <- function(object, ...) {
+model.frame.tinyVAST <- function(formula, ...) {
   object$data
 }
 
