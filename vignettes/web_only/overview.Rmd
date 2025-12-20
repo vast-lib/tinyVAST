@@ -36,10 +36,16 @@ knitr::opts_chunk$set(
 * *Simulatenous autoregressive process*:  Shows how to to use an areal spatial domain (a simultaneous autoregressive SAR process) instead of the two-dimensional smoother;
 * *Stream network models*:  Shows how to use a stream network spatial domain (i.e., an Ornstein-Uhlenbeck process on flow-unconnected sites in an acyclic graph);
 
+### Advanced univariate models
+* *Probabilistic forecasts*:  Shows how to bridge between short-term (annual) to long-term (multi-decadal) forecasting, including partitioning variance among components;
+* *Seasonal index standardization*:  Shows how to fit an index-standardization model with both seasonal and interannual variation, including forecasting;
+
 ### Multivariate spatio-temporal models
+* *Spatial structural model*:  Shows how to fit a multivariate spatial model that is intended to represent structural linkages, where parameters can be interpreted ecologically;
 * *Age composition expansion*:  Shows how to fit a multivariate spatio-temporal model to standardize age composition data;
 * *Condition and density*:  Shows how to jointly analyze different types of data which are then combined in a single estimator.  In this case, we use a joint analysis of numerical density and animal condition to calculate per-capita average condition
 * *Empirical orthogonal functions*:  Shows how to fit an empirical orthogonal function (EOF) analysis, i.e., a model where spatio-temporal variation is the product of one or more time-series, each associated with a spatial response map
  additive penalty in a generalized additive model with the log-determinant of the Hessian for the approximated marginal likelihood)
 * *Spatial factor analysis*:  Shows how to specify spatial factors to represent the covariance among multiple variables, including the identifiability requirement and the post-hoc rotation of estimated loadings;
 * *Vector autoregressive spatio-temporal*:  Shows how to fit a simple (two-variable) spatial version of a vector autoregressive model.
+* *Predator-expanded diet*:  Shows how to fit joint models to predator biomass and stomach contents to estimate predator-expanded diet

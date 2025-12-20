@@ -366,14 +366,14 @@ fitted.tinyVAST <- function(object, ...) {
 
 #' Get data from tinyVAST model
 #'
-#' @param object The fitted tinyVAST model object
+#' @param formula The fitted tinyVAST model object
 #' @param ... Not used
 #' @importFrom stats model.frame
 #' @export
 #' @return a matrix of data from model
 #' @noRd
 model.frame.tinyVAST <- function(formula, ...) {
-  object$data
+  formula$data
 }
 
 #' Extract Variance-Covariance Matrix

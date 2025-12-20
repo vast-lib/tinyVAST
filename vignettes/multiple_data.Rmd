@@ -3,6 +3,7 @@ title: "Multiple data types"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
+bibliography: 'tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Multiple data types}
   %\VignetteEngine{knitr::rmarkdown}
@@ -52,7 +53,7 @@ legend( "bottomleft", bty="n",
         fill = rainbow(3) )
 ```
 
-To fit these data, we first define the `family` for each datum.  Critically, we define the cloglog link for the Presence/Absence data, so that the linear predictor is proportional to numerical density for each data type.  See [Gruss and Thorson (2019)](https://doi.org/10.1093/icesjms/fsz075) or [Thorson and Kristensen (2024) Chap-7](https://doi.org/10.1201/9781003410294) for more details
+To fit these data, we first define the `family` for each datum.  Critically, we define the cloglog link for the Presence/Absence data, so that the linear predictor is proportional to numerical density for each data type.  See [@gruss_developing_2019] or [@thorson_spatio-temporal_2024] Chap-7 for more details
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Define link and distribution for each data type
@@ -156,3 +157,5 @@ ggplot( data.frame("Year"=colnames(index),"Est"=index[1,],"SE"=index[2,]) ) +
 run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+# Works cited

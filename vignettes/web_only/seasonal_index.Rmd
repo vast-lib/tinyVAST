@@ -3,6 +3,7 @@ title: "Seasonal index standardization"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
+bibliography: 'tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Seasonal index standardization}
   %\VignetteEngine{knitr::rmarkdown}
@@ -282,3 +283,6 @@ ggplot(projdata) +
 run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+# Works cited
+

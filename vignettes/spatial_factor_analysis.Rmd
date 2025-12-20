@@ -3,6 +3,7 @@ title: "Spatial factor analysis"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
+bibliography: 'tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Spatial factor analysis}
   %\VignetteEngine{knitr::rmarkdown}
@@ -34,7 +35,7 @@ options("tinyVAST.verbose" = FALSE)
 
 `tinyVAST` is an R package for fitting vector autoregressive spatio-temporal (VAST) models.
 We here explore the capacity to specify a spatial factor analysis, where the spatial pattern for multiple variables is described via
-their estimated association with a small number of spatial latent variables.
+their estimated association with a small number of spatial latent variables [@thorson_spatial_2015].
 
 # Spatial factor analysis
 We first explore the ability to specify two latent variables for five manifest variables.  To start we simulate two spatial latent variables,
@@ -200,3 +201,5 @@ knitr::kable( Lhat_cf,
 run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+# Works cited
