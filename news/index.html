@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,14 +26,15 @@
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/seasonal_index.html">Seasonal index standardization</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -50,6 +51,15 @@
       <small>Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.4.0" id="tinyvast-140">tinyVAST 1.4.0<a class="anchor" aria-label="anchor" href="#tinyvast-140"></a></h2><p class="text-muted">CRAN release: 2025-12-20</p>
+<ul><li>Adding <code>student</code> distribution, borrowing/importing code from sdmTMB</li>
+<li>Changing <code>deviance_explained</code> to map off student DF at MLE to avoid negative values, in way that can be easily generalized.</li>
+<li>Changing <code>deviance_explained</code> to map off overdispersion for negbin1 and negbin2</li>
+<li>Changing <code>deviance_explained</code> to map of power parameter for tweedie distribution</li>
+<li>add testthat checks comparing tweedie and negbin2 deviance-explained for tinyVAST with mgcv package</li>
+<li>Add vignette for seasonal spatio-temporal index standardization, using Yellowtail flounder data from VAST demo</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.3.0" id="tinyvast-130">tinyVAST 1.3.0<a class="anchor" aria-label="anchor" href="#tinyvast-130"></a></h2><p class="text-muted">CRAN release: 2025-09-13</p>
 <ul><li>Adding <code>add_vertex_covariates</code> to associate mesh vertices with covariates (hean Anderson)</li>
@@ -165,7 +175,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

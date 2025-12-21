@@ -7,7 +7,12 @@ and the empirical Bayes ("plug-in") prediction of random effects.  It can
 be described as "conditional deviance explained". A state-space model that
 estimates measurement error variance approaching zero (i.e., collapses to
 a process-error-only model) will have a conditional deviance explained
-that approaches 1.0'><meta property="og:description" content='deviance_explained fits a null model, calculates the deviance relative to
+that approaches 1.0
+For several families (tweedie, negbin1, negbin2, and student), the null model is
+fitted using the MLE for an overdispersion parameter from the full model.
+This is done because, e.g., the negbin1 and negbin2 only belong to the
+exponential family when the overdispersion parameter is fixed, and the
+deviance relative to a saturated model is only defined for the exponential family.'><meta property="og:description" content='deviance_explained fits a null model, calculates the deviance relative to
 a saturated model for both the original and the null model, and uses these
 to calculate the proportion of deviance explained.
 This implementation conditions upon the maximum likelihood estimate of fixed effects
@@ -15,7 +20,12 @@ and the empirical Bayes ("plug-in") prediction of random effects.  It can
 be described as "conditional deviance explained". A state-space model that
 estimates measurement error variance approaching zero (i.e., collapses to
 a process-error-only model) will have a conditional deviance explained
-that approaches 1.0'><meta property="og:image" content="https://vast-lib.github.io/tinyVAST/logo.png"></head><body>
+that approaches 1.0
+For several families (tweedie, negbin1, negbin2, and student), the null model is
+fitted using the MLE for an overdispersion parameter from the full model.
+This is done because, e.g., the negbin1 and negbin2 only belong to the
+exponential family when the overdispersion parameter is fixed, and the
+deviance relative to a saturated model is only defined for the exponential family.'><meta property="og:image" content="https://vast-lib.github.io/tinyVAST/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -23,7 +33,7 @@ that approaches 1.0'><meta property="og:image" content="https://vast-lib.github.
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,14 +52,15 @@ that approaches 1.0'><meta property="og:image" content="https://vast-lib.github.
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/seasonal_index.html">Seasonal index standardization</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -77,6 +88,11 @@ be described as "conditional deviance explained". A state-space model that
 estimates measurement error variance approaching zero (i.e., collapses to
 a process-error-only model) will have a conditional deviance explained
 that approaches 1.0</p>
+<p>For several families (tweedie, negbin1, negbin2, and student), the null model is
+fitted using the MLE for an overdispersion parameter from the full model.
+This is done because, e.g., the negbin1 and negbin2 only belong to the
+exponential family when the overdispersion parameter is fixed, and the
+deviance relative to a saturated model is only defined for the exponential family.</p>
     </div>
 
     <div class="section level2">
@@ -119,7 +135,7 @@ might make sense to use <code>null_delta_formula = response ~ category</code></p
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

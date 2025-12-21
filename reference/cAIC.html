@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,14 +26,15 @@
     <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/seasonal_index.html">Seasonal index standardization</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
-    <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -116,7 +117,7 @@ nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
 <span class="r-in"><span>                space_term <span class="op">=</span> <span class="st">"logdens &lt;-&gt; logdens, sd_space"</span>,</span></span>
 <span class="r-in"><span>                space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lon"</span>,<span class="st">'Lat'</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span></span>
-<span class="r-in"><span>                family <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span>link<span class="op">=</span><span class="st">"log"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span>link<span class="op">=</span><span class="st">"log"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                variable_column <span class="op">=</span> <span class="st">"var"</span>,</span></span>
 <span class="r-in"><span>                control <span class="op">=</span> <span class="fu"><a href="tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> getsd <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                                           profile <span class="op">=</span> <span class="st">"alpha_j"</span> <span class="op">)</span> <span class="op">)</span></span></span>
@@ -137,7 +138,7 @@ nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

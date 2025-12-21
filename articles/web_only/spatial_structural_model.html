@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,14 +46,15 @@
     <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/seasonal_index.html">Seasonal index standardization</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
-    <li><a class="dropdown-item" href="../../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
-    <li><a class="dropdown-item" href="../../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../../news/index.html">Changelog</a></li>
@@ -149,12 +150,12 @@ six variables</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify distribution for each variable</span></span>
 <span><span class="va">Family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Coral <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Sponge <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Rock <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Flat <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Rock_trawl <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Flat_trawl <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  Coral <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Sponge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Rock <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Flat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Rock_trawl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Flat_trawl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>We then run the model without standard errors to speed up the
 vignette:</p>
@@ -247,13 +248,13 @@ plotting the estimated structural linkages among variables:</p>
 <span>  edge.label.x<span class="op">=</span><span class="va">df</span><span class="op">$</span><span class="va">x</span>,</span>
 <span>  edge.label.y<span class="op">=</span><span class="va">df</span><span class="op">$</span><span class="va">y</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="spatial_structural_model_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
-<p>Runtime for this vignette: 7.16 mins</p>
+<p><img src="spatial_structural_model_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="576"></p>
+<p>Runtime for this vignette: 8.11 mins</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-thorson_tinyvast_2025" class="csl-entry">
 Thorson, James T., Sean C. Anderson, Pamela Goddard, and Christopher N.
 Rooper. 2025. <span>“<span class="nocase">tinyVAST</span>:
@@ -277,7 +278,7 @@ in <span>Multivariate</span> <span>Spatio</span>-<span>Temporal</span>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

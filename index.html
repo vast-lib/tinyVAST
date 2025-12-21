@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,14 +49,15 @@
     <li><a class="dropdown-item" href="articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="articles/web_only/stream_networks.html">Stream network models</a></li>
+    <li><a class="dropdown-item" href="articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
+    <li><a class="dropdown-item" href="articles/web_only/seasonal_index.html">Seasonal index standardization</a></li>
+    <li><a class="dropdown-item" href="articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
     <li><a class="dropdown-item" href="articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="articles/web_only/condition.html">Condition and density</a></li>
     <li><a class="dropdown-item" href="articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
     <li><a class="dropdown-item" href="articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
-    <li><a class="dropdown-item" href="articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
-    <li><a class="dropdown-item" href="articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -84,8 +85,7 @@
 </blockquote>
 <!-- badges: start -->
 
-<p>tinyVAST is an R package that fits multivariate spatio-temporal models while using Gaussian Markov random fields to represent nonseparable interactions among variables over time. See a preprint:</p>
-<p>Thorson, J. T., Anderson, S. C., Goddard, P., &amp; Rooper, C. N. (2024). tinyVAST: R package with an expressive interface to specify lagged and simultaneous effects in multivariate spatio-temporal models (arXiv:2401.10193). arXiv. <a href="http://arxiv.org/abs/2401.10193" class="external-link uri">http://arxiv.org/abs/2401.10193</a></p>
+<p>tinyVAST is an R package that fits multivariate spatio-temporal models while using Gaussian Markov random fields to represent nonseparable interactions among variables over time.</p>
 <div class="section level2">
 <h2 id="table-of-contents">Table of contents<a class="anchor" aria-label="anchor" href="#table-of-contents"></a>
 </h2>
@@ -117,10 +117,10 @@
 <p>tinyVAST is builds upon many packages. This includes <a href="https://github.com/James-Thorson-NOAA/VAST" class="external-link">VAST</a> R package:</p>
 <p>Thorson, J.T. 2019. Guidance for decisions using the Vector Autoregressive Spatio-Temporal (VAST) package in stock, ecosystem, habitat and climate assessments. Fisheries Research 210: 143–161. <a href="https://doi.org/10.1016/j.fishres.2018.10.013" class="external-link uri">https://doi.org/10.1016/j.fishres.2018.10.013</a>.</p>
 <p>and <a href="https://github.com/pbs-assess/sdmTMB" class="external-link">sdmTMB</a> R package:</p>
-<p>Anderson, S.C., E.J. Ward, P.A. English, L.A.K. Barnett. 2022. sdmTMB: an R package for fast, flexible, and user-friendly generalized linear mixed effects models with spatial and spatiotemporal random fields. bioRxiv 2022.03.24.485545; doi: <a href="https://doi.org/10.1101/2022.03.24.485545" class="external-link uri">https://doi.org/10.1101/2022.03.24.485545</a></p>
+<p>Anderson, S.C., E.J. Ward, P.A. English, L.A.K. Barnett, J.T. Thorson. 2022. sdmTMB: an R package for fast, flexible, and user-friendly generalized linear mixed effects models with spatial and spatiotemporal random fields. bioRxiv 2022.03.24.485545; doi: <a href="https://doi.org/10.1101/2022.03.24.485545" class="external-link uri">https://doi.org/10.1101/2022.03.24.485545</a></p>
 <p>and the <a href="https://github.com/glmmTMB/glmmTMB" class="external-link">glmmTMB</a> R package:</p>
 <p>Brooks, M.E., Kristensen, K., van Benthem, K.J., Magnusson, A., Berg, C.W., Nielsen, A., Skaug, H.J., Maechler, M., and Bolker, B.M. 2017. glmmTMB balances speed and flexibility among packages for zero-inflated generalized linear mixed modeling. The R Journal 9(2): 378–400. <a href="https://doi.org/10.32614/rj-2017-066" class="external-link uri">https://doi.org/10.32614/rj-2017-066</a>.</p>
-<p><a href="https://www.r-inla.org/" class="external-link">INLA</a> and <a href="https://sites.google.com/inlabru.org/inlabru" class="external-link">inlabru</a> can fit many of the same models as sdmTMB (and many more) in an approximate Bayesian inference framework.</p>
+<p><a href="https://www.r-inla.org/" class="external-link">INLA</a> and <a href="https://sites.google.com/inlabru.org/inlabru" class="external-link">inlabru</a> can fit some of the same models as <code>tinyVAST</code> in an approximate Bayesian inference framework.</p>
 <p><a href="https://cran.r-project.org/package=mgcv" class="external-link">mgcv</a> can fit similar SPDE-based Gaussian random field models with code included in <a href="https://doi.org/10.1007/s13253-019-00377-z" class="external-link">Miller et al. (2019)</a>.</p>
 </div>
 </div>
@@ -178,7 +178,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

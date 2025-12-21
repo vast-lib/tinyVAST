@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,14 +46,15 @@
     <li><a class="dropdown-item" href="../../articles/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/stream_networks.html">Stream network models</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/seasonal_index.html">Seasonal index standardization</a></li>
+    <li><a class="dropdown-item" href="../../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/condition.html">Condition and density</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
     <li><a class="dropdown-item" href="../../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
     <li><a class="dropdown-item" href="../../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
-    <li><a class="dropdown-item" href="../../articles/web_only/spatial_structural_model.html">Spatial structural models</a></li>
-    <li><a class="dropdown-item" href="../../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../../news/index.html">Changelog</a></li>
@@ -172,11 +173,11 @@ model using standard syntax:</p>
 <span></span>
 <span><span class="co"># Define the distribution for each category</span></span>
 <span><span class="va">Family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  Red_grouper <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Crabs <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Fish <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Shrimps <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  Other <span class="op">=</span> <span class="fu"><a href="https://pbs-assess.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  Red_grouper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Crabs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Fish <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Shrimps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Other <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Same spatial SD for prey species (given sparsity of data)</span></span>
@@ -278,18 +279,17 @@ standard errors) to save computation time.</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span> <span class="va">proportions</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Year</span>, y <span class="op">=</span> <span class="va">prop</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Category</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="predator_expanded_diet_files/figure-html/unnamed-chunk-5-1.png" width="576"></p>
-<p>Runtime for this vignette: 34.8 secs</p>
+<p><img src="predator_expanded_diet_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" width="576"></p>
+<p>Runtime for this vignette: 44.13 secs</p>
 <div class="section level3 unnumbered">
 <h3 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-gruss_spatio-temporal_2020" class="csl-entry">
-Grüss, Arnaud, James T. Thorson, Gemma Carroll, Elizabeth L. Ng, Kirstin
-K. Holsman, Kerim Aydin, Stan Kotwicki, Hem N. Morzaria-Luna, Cameron H.
-Ainsworth, and Kevin A. Thompson. 2020. <span>“Spatio-Temporal Analyses
-of Marine Predator Diets from Data-Rich and Data-Limited
-Systems.”</span> <em>Fish and Fisheries</em> 21 (4): 718–39. <a href="https://doi.org/10.1111/faf.12457" class="external-link">https://doi.org/10.1111/faf.12457</a>.
+Grüss, Arnaud, James T. Thorson, Gemma Carroll, et al. 2020.
+<span>“Spatio-Temporal Analyses of Marine Predator Diets from Data-Rich
+and Data-Limited Systems.”</span> <em>Fish and Fisheries</em> 21 (4):
+718–39. <a href="https://doi.org/10.1111/faf.12457" class="external-link">https://doi.org/10.1111/faf.12457</a>.
 </div>
 </div>
 </div>
@@ -304,7 +304,7 @@ Systems.”</span> <em>Fish and Fisheries</em> 21 (4): 718–39. <a href="https:
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
