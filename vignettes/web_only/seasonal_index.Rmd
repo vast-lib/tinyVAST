@@ -3,7 +3,7 @@ title: "Seasonal index standardization"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
-bibliography: 'tinyVAST_vignettes.bib'
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Seasonal index standardization}
   %\VignetteEngine{knitr::rmarkdown}
@@ -35,7 +35,7 @@ library(fmesher)
 library(ggplot2)
 ```
 
-`tinyVAST` can estimate seasonal spatio-temporal models using spatially varying coefficients [@thorson_spatially_2023] to incorporate additional spatial variation by season and then including an autoregressive spatio-temporal process across season-within-year indices.  This was originally demonstrated using package VAST [@thorson_seasonal_2020], and we here show code analyzing spring and fall bottom-trawl surveys for yellowtail flounder in the Northwest Atlantic conducted by the NEFSC, as well as a early-spring bottom trawl survey by DFO Canada.
+`tinyVAST` can estimate seasonal spatio-temporal models using spatially varying coefficients [@thorson_spatially_2023] to incorporate additional spatial variation by season and then including an autoregressive spatio-temporal process across season-within-year indices.  This was originally demonstrated using package VAST [@thorson_seasonal_2020], and we here show code analyzing spring and fall bottom-trawl surveys for yellowtail flounder in the Northwest Atlantic conducted by the NEFSC, as well as a early-spring bottom trawl survey by DFO Canada.  Here, we use a spatio-temporal process with three seasons per year, and estimating a lag-1 correlation (representing correlations among seasons within year) and a lag-3 correlation (representing correlations within season among years).
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Load data
