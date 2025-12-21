@@ -27,7 +27,7 @@
 #'        `spacetime_term=NULL` disables the space-variable interaction; see
 #'        [make_dsem_ram()]  or [make_eof_ram()].
 #' @param family A function returning a class \code{family}, including [gaussian()],
-#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], [poisson()],
+#'        [lognormal()], [tweedie()],  [binomial()],  [Gamma()], [student()], [poisson()],
 #'        [nbinom1()], or [nbinom2()].
 #'        Alternatively, can be a named list of
 #'        these functions, with names that match levels of
@@ -654,18 +654,35 @@ function( formula,
     # Construct log_sigma based on family
     pad_length = function(x){if(length(x)==1) c(x,99L) else x}
     remove_last = function(x) x[-length(x)]
-    Nsigma_e = sapply( family, FUN=function(x){
+    #Nsigma_e = sapply( family, FUN=function(x){
+    #                   switch( x$family[length(x$family)],
+    #                     "gaussian" = 1,
+    #                     "tweedie" = 2,
+    #                     "lognormal" = 1,
+    #                     "poisson" = 0,
+    #                     "nbinom2" = 1,
+    #                     "nbinom1" = 1,
+    #                     "binomial" = 0,
+    #                     "bernoulli" = 0,
+    #                     "Gamma" = 1,
+    #                     "student" = 2
+    #                   )} )
+
+    # Fixed values
+    sigma_e = lapply( family, FUN=function(x){
                        switch( x$family[length(x$family)],
-                         "gaussian" = 1,
-                         "tweedie" = 2,
-                         "lognormal" = 1,
-                         "poisson" = 0,
-                         "nbinom2" = 1,
-                         "nbinom1" = 1,
-                         "binomial" = 0,
-                         "bernoulli" = 0,
-                         "Gamma" = 1
+                         "gaussian" = NA,
+                         "tweedie" = c(NA,NA),
+                         "lognormal" = NA,
+                         "poisson" = c(),
+                         "nbinom2" = NA,
+                         "nbinom1" = NA,
+                         "binomial" = c(),
+                         "bernoulli" = c(),
+                         "Gamma" = c(NA),
+                         "student" = c(NA, ifelse(is.null(x$df), NA, log(x$df-1) ) )
                        )} )
+    Nsigma_e = sapply(sigma_e, length)
     Edims_ez = cbind( "start"=remove_last(cumsum(c(0,Nsigma_e))), "length"=Nsigma_e )
 
     #
@@ -678,7 +695,8 @@ function( formula,
                          "bernoulli" = 4,
                          "Gamma" = 5,
                          "nbinom1" = 6,
-                         "nbinom2" = 7)[x$family])
+                         "nbinom2" = 7,
+                         "student" = 8)[x$family])
                        } )))
     link_code = t(rbind(sapply( family, FUN=function(x){
                        pad_length(c("identity" = 0,
@@ -696,7 +714,8 @@ function( formula,
                 "poisson_link_delta" = poisson_link_delta,
                 "e_i" = e_i,
                 "Nsigma_e" = Nsigma_e,
-                "Edims_ez" = Edims_ez )
+                "Edims_ez" = Edims_ez, 
+                "sigma_e" = sigma_e )
     return(out)
   }
   distributions = build_distributions( family )
@@ -747,8 +766,8 @@ function( formula,
     X2_ij = delta_gam_basis$X_ij,
     Z2_ik = delta_gam_basis$Z_ik,
     W2_il = delta_SVC$W_il,
-    t_i = ivector_minus_one(t_i), # -1 to convert to CPP index, and keep as integer-vector
-    c_i = ivector_minus_one(c_i), # -1 to convert to CPP index, and keep as integer-vector
+    t_i = ivector_minus_one(t_i, "t_i"), # -1 to convert to CPP index, and keep as integer-vector
+    c_i = ivector_minus_one(c_i, "c_i"), # -1 to convert to CPP index, and keep as integer-vector
     offset_i = gam_basis$offset_i,
     weights_i = weights_i,
     size_i = size_i,
@@ -756,7 +775,7 @@ function( formula,
     link_ez = distributions$link_code,
     components_e = distributions$components,
     poislink_e = distributions$poisson_link_delta,
-    e_i = ivector_minus_one(distributions$e_i), # -1 to convert to CPP index, and keep as integer-vector
+    e_i = ivector_minus_one(distributions$e_i, "e_i"), # -1 to convert to CPP index, and keep as integer-vector
     Edims_ez = distributions$Edims_ez,
     S_kk = gam_basis$S_kk,
     Sdims = gam_basis$Sdims,
@@ -834,7 +853,8 @@ function( formula,
     log_lambda2 = rep(0,sum(tmb_data$S2block)), #Log spline penalization coefficients
     log_sigmaxi2_l = rep(0,ncol(tmb_data$W2_il)),
 
-    log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
+    #log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
+    log_sigma = ifelse( is.na(unlist(distributions$sigma_e)), 0, unlist(distributions$sigma_e) ),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
     delta_tc = array(0, dim=c(length(times), length(variables))),
@@ -913,6 +933,9 @@ function( formula,
   if( spatial_method_code %in% 6 ){
     tmb_map$triangle_k = factor( c(NA, seq_len(ncol(tmb_data$spatial_list$V_zk)-1)) )
   }
+
+  # Map off fixed log_sigma when unlist(distributions$sigma_e) has a value
+  tmb_map$log_sigma = factor(ifelse( is.na(unlist(distributions$sigma_e)), seq_along(tmb_par$log_sigma), NA )) 
 
   # 
   tmb_random = c("gamma_k","epsilon_stc","omega_sc","delta_tc","xi_sl",
@@ -1056,7 +1079,8 @@ function( formula,
     family = family,                                       # for `add_predictions`
     weights = weights,
     packageVersion = packageVersion("tinyVAST"),
-    development = development
+    development = development,
+    distributions = distributions
   )
   out = list(
     data = data,

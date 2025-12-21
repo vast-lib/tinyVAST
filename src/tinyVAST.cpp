@@ -10,7 +10,8 @@ enum valid_family {
   binomial_family = 4,
   gamma_family = 5,
   nbinom1_family = 6,
-  nbinom2_family = 7
+  nbinom2_family = 7,
+  student_family = 8
 };
 
 enum valid_link {
@@ -651,6 +652,30 @@ Type devresid_tweedie( Type y,
   return devresid;
 }
 
+// Deviance for the student-T
+// from chatGPT (experimental) ... converges on Gaussian as df -> Inf
+template<class Type>
+Type devresid_student( Type y,
+                       Type mu,
+                       Type sigma,
+                       Type df ){
+
+  Type deviance = (df + 1.0) * log( 1.0 + pow(y-mu,2.0) / (df * sigma*sigma) );
+  Type devresid = sign( y - mu ) * pow( deviance, 0.5 );
+  return devresid;
+}
+
+// COPIED from sdmTMB.cpp in sdmTMB package on Nov. 14, 2025
+template <class Type>
+Type dstudent(Type x, Type mean, Type sigma, Type df, int give_log = 0) {
+  // from metRology::dt.scaled()
+  // dt((x - mean)/sd, df, ncp = ncp, log = TRUE) - log(sd)
+  Type logres = dt((x - mean) / sigma, df, true) - log(sigma);
+  if (give_log)
+    return logres;
+  else
+    return exp(logres);
+}
 
 // Deviance for the Negative binomial
 //template<class Type>
@@ -790,6 +815,14 @@ Type one_predictor_likelihood( Type &y,
           y = rnbinom2( mu, mu * (Type(1.0) + mu / exp(log_sigma_segment(0))) );
         }
         break;
+      case student_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
+        // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
+        nll = -1 * dstudent( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
+        devresid = devresid_student( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)) );
+        if(isDouble<Type>::value && of->do_simulate){
+          y = mu + exp(log_sigma_segment(0)) * rt(1.0 + exp(log_sigma_segment(1)));
+        }
+        break;
       default:
         error("Distribution not implemented.");
     }
@@ -886,6 +919,14 @@ Type two_predictor_likelihood( Type y,
           dev += 2 * ( (y-mu2)/mu2 - log(y/mu2) );
           if(isDouble<Type>::value && of->do_simulate){
             y = rgamma( exp(-2.0*log_sigma_segment(0)), mu2*exp(2.0*log_sigma_segment(0)) );
+          }
+          break;
+        case student_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
+          // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
+          nll -= dstudent( y, mu2, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
+          //dev = NAN;
+          if(isDouble<Type>::value && of->do_simulate){
+            y = mu2 + exp(log_sigma_segment(0)) * rt(1.0 + exp(log_sigma_segment(1)));
           }
           break;
         default:

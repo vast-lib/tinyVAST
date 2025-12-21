@@ -73,8 +73,8 @@ generalized linear mixed modeling. The R Journal 9(2): 378–400.
 <https://doi.org/10.32614/rj-2017-066>.
 
 [INLA](https://www.r-inla.org/) and
-[inlabru](https://sites.google.com/inlabru.org/inlabru) can fit many of
-the same models as sdmTMB (and many more) in an approximate Bayesian
+[inlabru](https://sites.google.com/inlabru.org/inlabru) can fit some of
+the same models as `tinyVAST` in an approximate Bayesian
 inference framework.
 
 [mgcv](https://cran.r-project.org/package=mgcv) can fit similar

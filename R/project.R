@@ -168,7 +168,8 @@ function( object,
 
 
   ##############
-  # Step 1: Generate uncertainty from parm_var and past_var
+  # Step 1: Generate uncertainty from parm_var and past_var,
+  #         and load into parlist
   ##############
 
   if( isFALSE(parm_var) & isFALSE(past_var) ){

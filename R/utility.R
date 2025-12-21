@@ -136,14 +136,8 @@ function( x,
 #' Sample from predictive distribution of a variable
 #'
 #' @description
-#' \code{sample_variable} samples from the joint distribution of random and fixed effects to approximate the predictive distribution for a variable
-#'
-#' Using \code{sample_fixed=TRUE} (the default) in \code{\link{sample_variable}} propagates variance in both fixed and random effects, while
-#'       using \code{sample_fixed=FALSE} does not.
-#'       Sampling fixed effects will sometimes cause numerical under- or overflow (i.e., output values of \code{NA}) in cases when
-#'       variance parameters are estimated imprecisely.  In these cases, the multivariate normal approximation being used is a poor
-#'       representation of the tail probabilities, and results in some samples with implausibly high (or negative) variances,
-#'       such that the associated random effects then have implausibly high magnitude.
+#' \code{sample_variable} samples from the joint distribution of random (and optionally fixed) effects 
+#'   to approximate the predictive distribution for a variable.
 #'
 #' @param object output from `\code{tinyVAST()}`
 #' @param newdata data frame of new data, used to sample model components for predictions e.g., \code{mu_g}
@@ -151,6 +145,14 @@ function( x,
 #' @param n_samples number of samples from the joint predictive distribution for fixed and random effects.  Default is 100, which is slow.
 #' @param seed integer used to set random-number seed when sampling variables, as passed to \code{set.seed(.)}
 #' @param sample_fixed whether to sample fixed and random effects, \code{sample_fixed=TRUE} as by default, or just sample random effects, \code{sample_fixed=FALSE}
+#'
+#' @details
+#' Using \code{sample_fixed=TRUE} (the default) in \code{\link{sample_variable}} propagates variance in both fixed and random effects, while
+#'       using \code{sample_fixed=FALSE} does not.
+#'       Sampling fixed effects will sometimes cause numerical under- or overflow (i.e., output values of \code{NA}) in cases when
+#'       variance parameters are estimated imprecisely.  In these cases, the multivariate normal approximation being used is a poor
+#'       representation of the tail probabilities, and results in some samples with implausibly high (or negative) variances,
+#'       such that the associated random effects then have implausibly high magnitude.
 #'
 #' @return
 #' A matrix with a row for each \code{data} supplied during fitting, and
@@ -268,6 +270,12 @@ function( object,
 #'      a process-error-only model) will have a conditional deviance explained
 #'      that approaches 1.0
 #'
+#' For several families (tweedie, negbin1, negbin2, and student), the null model is
+#'     fitted using the MLE for an overdispersion parameter from the full model.
+#'     This is done because, e.g., the negbin1 and negbin2 only belong to the
+#'     exponential family when the overdispersion parameter is fixed, and the
+#'     deviance relative to a saturated model is only defined for the exponential family.
+#'
 #' @param x output from `\code{tinyVAST()}`
 #' @param null_formula formula for the null model.  If missing, it uses
 #'        \code{null_formula = response ~ 1}. For multivariate models, it 
@@ -301,17 +309,20 @@ function( x,
     control$calculate_deviance_explained = FALSE
     control$tmb_par = NULL
     control$tmb_map = NULL
+    control$suppress_user_warnings = TRUE
 
   # 
   control_initial = control
     control_initial$nlminb_loops = 0
     control_initial$newton_loops = 0
-  
-  # Run null model to check that some parameters remain
-  null_fit = tinyVAST( data = x$data,
+    control_initial$run_model = FALSE
+
+  # Build null model to check that some parameters remain
+  null_family = x$internal$family
+  null_inputs = tinyVAST( data = x$data,
                        formula = null_formula, 
                        control = control_initial,
-                       family = x$internal$family,
+                       family = null_family,
                        space_columns = x$internal$space_columns,
                        time_column = x$internal$time_column,
                        variable_column = x$internal$variable_column,
@@ -320,6 +331,49 @@ function( x,
                        variables = x$internal$variables,
                        delta_options = list( formula = null_delta_formula ),
                        distribution_column = x$internal$distribution_column) 
+
+  # Fix extra dispersion for some families
+  #null_family = x$internal$family
+  #log_sigma = x$internal$parlist$log_sigma
+  #for( i in seq_along(null_family) ){
+  #  if( null_family[[i]]$family[length(null_family[[i]]$family)] == "student" ){
+  #    null_family[[i]]$df = 1 + exp(log_sigma[sum(x$internal$distributions$Nsigma_e[seq_len(i-1)])+2])
+  #  }
+  #}
+
+  # Modify map as needed
+  log_sigma = x$internal$parlist$log_sigma
+  control_initial$tmb_map = null_inputs$tmb_map
+  control_initial$tmb_par = null_inputs$tmb_par
+  # Updates
+  for( i in seq_along(null_family) ){
+    if( null_family[[i]]$family[length(null_family[[i]]$family)] %in% c("student","tweedie") ){
+      parnum = sum(x$internal$distributions$Nsigma_e[seq_len(i-1)]) + 2
+      control_initial$tmb_par$log_sigma[parnum] = log_sigma[parnum]
+      control_initial$tmb_map$log_sigma[parnum] = NA
+    }
+    if( null_family[[i]]$family[length(null_family[[i]]$family)] %in% c("nbinom1","nbinom2") ){
+      parnum = sum(x$internal$distributions$Nsigma_e[seq_len(i-1)]) + 1
+      control_initial$tmb_par$log_sigma[parnum] = log_sigma[parnum]
+      control_initial$tmb_map$log_sigma[parnum] = NA
+    }
+  }
+  control_initial$tmb_map$log_sigma = droplevels(control_initial$tmb_map$log_sigma)
+
+  # Build null model to check that some parameters remain
+  control_initial$run_model = TRUE
+  null_fit = tinyVAST( data = x$data,
+                       formula = null_formula,
+                       control = control_initial,
+                       family = null_family,
+                       space_columns = x$internal$space_columns,
+                       time_column = x$internal$time_column,
+                       variable_column = x$internal$variable_column,
+                       times = x$internal$times,
+                       weights = x$internal$weights,
+                       variables = x$internal$variables,
+                       delta_options = list( formula = null_delta_formula ),
+                       distribution_column = x$internal$distribution_column)
   null_obj = null_fit$obj
 
   # Run if some parameters remain

@@ -1,8 +1,10 @@
 .onAttach <- function(libname, pkgname) {
 }
 
-ivector_minus_one <- function( ivector ){
-  if( any(is.na(ivector)) ) stop("Check ivector for NAs")
+ivector_minus_one <- function( ivector, varname = "" ){
+  if( any(is.na(ivector)) ){
+    stop("Check ivector for NAs: ", varname )
+  }
   if( length(ivector) > 0 ){
     ivector = as.integer( ivector - 1 )
   }

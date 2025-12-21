@@ -52,6 +52,30 @@ test_that("Basic splines work", {
   expect_gt(cor(p_s, p_v), 0.999)
 })
 
+if( FALSE ){
+  X = rnorm(100)
+  mu = exp( 1 + 1 * X - 0.5 * X^2 )
+  Y = rpois( n = length(X), lambda = mu )
+
+  #
+  gam1 = mgcv::gam( 
+    Y ~ 1 + s(X), 
+    data = data.frame(X=X, Y=Y), 
+    family = poisson(),
+    select = FALSE 
+  )
+  tv1 = tinyVAST::tinyVAST( 
+    Y ~ 1 + s(X), 
+    data = data.frame(X=X, Y=Y), 
+    family = poisson(),
+    control = tinyVASTcontrol(
+      getsd = TRUE,
+      newton_loops = 0
+    ) 
+  )
+}
+
+
 test_that("Specify spline-order in s() works", {
   #skip_on_cran()
   #skip_on_ci()

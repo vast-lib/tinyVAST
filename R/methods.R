@@ -364,6 +364,18 @@ fitted.tinyVAST <- function(object, ...) {
   predict( object, what="mu_g" )
 }
 
+#' Get data from tinyVAST model
+#'
+#' @param formula The fitted tinyVAST model object
+#' @param ... Not used
+#' @importFrom stats model.frame
+#' @export
+#' @return a matrix of data from model
+#' @noRd
+model.frame.tinyVAST <- function(formula, ...) {
+  formula$data
+}
+
 #' Extract Variance-Covariance Matrix
 #'
 #' extract the covariance of fixed effects, or both fixed and random effects.

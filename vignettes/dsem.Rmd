@@ -3,6 +3,7 @@ title: "Dynamic structural equation models"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
+bibliography: 'tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Dynamic structural equation models}
   %\VignetteEngine{knitr::rmarkdown}
@@ -32,7 +33,7 @@ set.seed(101)
 options("tinyVAST.verbose" = FALSE)
 ```
 
-`tinyVAST` includes features to fit a dynamic structural equation model.  We here show this using a bivariate vector autoregressive model for wolf and moose abundance on Isle Royale.
+`tinyVAST` includes features to fit a dynamic structural equation model [@thorson_dynamic_2024].  We here show this using a bivariate vector autoregressive model for wolf and moose abundance on Isle Royale.
 
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6, warning=FALSE}
 data(isle_royale, package="dsem")
@@ -111,3 +112,5 @@ knitr::kable( B, digits=3)
 run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
+
+# Works cited

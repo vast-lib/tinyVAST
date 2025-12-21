@@ -139,3 +139,16 @@ NULL
 #' @keywords data
 NULL
 
+#' Northwest Atlantic yellowtail
+#'
+#' Data used to demonstrate and test seasonal spatio-temporal 
+#' index standardization.  
+#' Data are from \doi{10.1093/icesjms/fsaa074}
+#'
+#' @name atlantic_yellowtail
+#' @docType data
+#' @usage data(atlantic_yellowtail)
+#' @keywords data
+NULL
+
+
