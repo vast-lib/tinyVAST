@@ -489,7 +489,7 @@ function( formula,
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     n_Hpars = 2
     estimate_kappa = TRUE
-    kappa_startvalue = sqrt(8) / mean(apply( mesh$loc[,1:2], MARGIN = 2, FUN = sd) )      # range = sqrt(8) / kappa
+    kappa_startvalue = sqrt(8) / mean(apply( data[,space_columns], MARGIN = 2, FUN = sd) )      # range = sqrt(8) / kappa
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"igraph") ) {
     # SAR
