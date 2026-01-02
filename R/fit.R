@@ -140,7 +140,7 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula binomial poisson predict as.formula na.pass
+#'   update.formula binomial poisson predict as.formula na.pass sd
 #' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
