@@ -479,6 +479,7 @@ function( formula,
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     n_Hpars = ncol( spatial_list$E0 )
     estimate_kappa = TRUE
+    kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"fm_mesh_2d") ){
     # SPDE
@@ -488,6 +489,7 @@ function( formula,
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     n_Hpars = 2
     estimate_kappa = TRUE
+    kappa_startvalue = sqrt(8) / mean(apply( mesh$loc[,1:2], MARGIN = 2, FUN = sd) )      # range = sqrt(8) / kappa
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"igraph") ) {
     # SAR
@@ -499,6 +501,7 @@ function( formula,
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
     estimate_kappa = ifelse( ecount(spatial_domain)>0, TRUE, FALSE )
+    kappa_startvalue = 1
     estimate_anisotropy = FALSE
   }else if( is(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
     # stream network
@@ -508,6 +511,7 @@ function( formula,
     A_is = sfnetwork_evaluator( stream = spatial_domain$stream,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
+    kappa_startvalue = 1
     estimate_anisotropy = FALSE
   }else if( is(spatial_domain, "sfc_GEOMETRY") ){
     # SAR with geometric anisotropy
@@ -536,6 +540,7 @@ function( formula,
                          x = 1,
                          dims = c(length(s_i),length(spatial_domain)) )
     estimate_kappa = TRUE
+    kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is.null(spatial_domain) ) {
     # Single-site
@@ -547,6 +552,7 @@ function( formula,
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
     estimate_kappa = FALSE
+    kappa_startvalue = 1
     estimate_anisotropy = FALSE
   }else{
     stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
@@ -866,7 +872,7 @@ function( formula,
     xi2_sl = array(0, dim=c(n_s, ncol(tmb_data$W2_il))),
 
     eps = numeric(0),
-    log_kappa = log(1),
+    log_kappa = log(kappa_startvalue),
     ln_H_input = rep(0, n_Hpars)
   )
 
