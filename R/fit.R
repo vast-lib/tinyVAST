@@ -842,25 +842,26 @@ function( formula,
 
 
   # make params
+  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
   tmb_par = list(
-    alpha_j = rep(0,ncol(tmb_data$X_ij)),  # Spline coefficients
-    gamma_k = rep(0,sum(tmb_data$Sdims)),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
+    alpha_j = as.numeric(rep(0,ncol(tmb_data$X_ij))),  # Spline coefficients
+    gamma_k = as.numeric(rep(0,sum(tmb_data$Sdims))),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
     beta_z = as.numeric(ifelse(spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta_z = as.numeric(ifelse(space_term_ram$param_type==1, 0.01, 1)),
     nu_z = as.numeric(ifelse(time_term_ram$param_type==1, 0.01, 1)),
-    log_lambda = rep(0,sum(tmb_data$Sblock)), #Log spline penalization coefficients
-    log_sigmaxi_l = rep(0,ncol(tmb_data$W_il)),
+    log_lambda = as.numeric(rep(0,sum(tmb_data$Sblock))), #Log spline penalization coefficients
+    log_sigmaxi_l = as.numeric(rep(0,ncol(tmb_data$W_il))),
 
-    alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
-    gamma2_k = rep(0,sum(tmb_data$S2dims)),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
-    beta2_z = as.numeric(ifelse(delta_spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    alpha2_j = as.numeric(rep(0,ncol(tmb_data$X2_ij))),  # Spline coefficients
+    gamma2_k = as.numeric(rep(0,sum(tmb_data$S2dims))),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
+    beta2_z = as.numeric(ifelse(delta_spacetime_term_ram$param_type==1, 0.01, 1)),  
     theta2_z = as.numeric(ifelse(delta_space_term_ram$param_type==1, 0.01, 1)),
     nu2_z = as.numeric(ifelse(delta_time_term_ram$param_type==1, 0.01, 1)),
-    log_lambda2 = rep(0,sum(tmb_data$S2block)), #Log spline penalization coefficients
-    log_sigmaxi2_l = rep(0,ncol(tmb_data$W2_il)),
+    log_lambda2 = as.numeric(rep(0,sum(tmb_data$S2block))), #Log spline penalization coefficients
+    log_sigmaxi2_l = as.numeric(rep(0,ncol(tmb_data$W2_il))),
 
     #log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
-    log_sigma = ifelse( is.na(unlist(distributions$sigma_e)), 0, unlist(distributions$sigma_e) ),
+    log_sigma = as.numeric(ifelse( is.na(unlist(distributions$sigma_e)), 0, unlist(distributions$sigma_e) )),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
     delta_tc = array(0, dim=c(length(times), length(variables))),
@@ -873,7 +874,7 @@ function( formula,
 
     eps = numeric(0),
     log_kappa = log(kappa_startvalue),
-    ln_H_input = rep(0, n_Hpars)
+    ln_H_input = as.numeric(rep(0, n_Hpars))
   )
 
   # Telescoping

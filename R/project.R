@@ -441,6 +441,19 @@ function( object,
     development = object$internal$development
   )
 
+  # CHECK SIZES ... if throwing error
+  if( FALSE ){
+    # Check length
+    range( 
+      # NEW
+      sapply( newobj$tmb_inputs$tmb_par, length ) -
+      # OLD
+      sapply( new_parlist, length )
+    )
+    #
+    isTRUE(all.equal(new_parlist, newobj$tmb_inputs$tmb_par, tolerance=Inf))
+  }
+
   ##############
   # Step 6: simulate samples
   ##############
