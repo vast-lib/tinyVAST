@@ -37,13 +37,15 @@ function( inla_mesh,
   E2 <- replace_NA(V1 - V0)
 
   # Get triangle areas
-  TmpFn <- function(Vec1, Vec2) abs(det(rbind(Vec1, Vec2)))
-  Tri_Area <- rep(NA, nrow(E0))
-  for (i in seq_len(length(Tri_Area))){
-    Tri_Area[i] <- TmpFn( E0[i,1:2], E1[i,1:2] ) / 2
-  }
-
+  #TmpFn <- function(Vec1, Vec2) abs(det(rbind(Vec1, Vec2)))
+  #Tri_Area <- rep(NA, nrow(E0))
+  #for (i in seq_len(length(Tri_Area))){
+  #  Tri_Area[i] <- TmpFn( E0[i,1:2], E1[i,1:2] ) / 2
+  #}
+  Tri_Area <- abs(E0[,1] * E1[,2] - E0[,2] * E1[,1]) / 2
+  
   # Return it all
+  G0_inv = as(Matrix::Diagonal(n = inla_mesh$n, x = 1/Matrix::diag(spde$c0)),"TsparseMatrix")
   ret <- list( n_s = inla_mesh$n,
                n_tri = nrow(TV),
                Tri_Area = Tri_Area,
@@ -52,7 +54,7 @@ function( inla_mesh,
                E2 = E2,
                TV = TV - 1,
                G0 = spde$c0,
-               G0_inv = as(Matrix::diag(1/Matrix::diag(spde$c0)),"TsparseMatrix") )
+               G0_inv = G0_inv )
   return(ret)
 }
 

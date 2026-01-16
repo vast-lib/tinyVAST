@@ -142,9 +142,9 @@
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
 #'   update.formula binomial poisson predict as.formula na.pass sd
 #' @importFrom utils packageVersion capture.output
-#' @importFrom TMB MakeADFun sdreport
+#' @importFrom TMB MakeADFun sdreport runSymbolicAnalysis config
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
-#' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet
+#' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet Diagonal
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv
@@ -995,6 +995,14 @@ function( formula,
     #load.image( "debugging.RData" )
   }
 
+  # Optional compression
+  if( !is.null(development$tmbad.sparse_hessian_compress) ){
+    config( 
+      tmbad.sparse_hessian_compress = development$tmbad.sparse_hessian_compress, 
+      DLL = "tinyVAST" 
+    )
+  }
+  
   if( FALSE ){
     setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
     dyn.unload(dynlib("tinyVAST"))
@@ -1012,6 +1020,18 @@ function( formula,
   #openmp( ... , DLL="tinyVAST" )
   #obj$env$beSilent()
   # L = rep$IminusRho_hh %*% rep$Gamma_hh
+
+  # 
+  if( "method" %in% names(formals(runSymbolicAnalysis)) ){
+    runSymbolicAnalysis(
+      obj,
+      abstol = ifelse( is.null(development$abstol), 1e-10, development$abstol ),
+      tol = ifelse( is.null(development$tol), 1e-04, development$tol ),
+      maxit = ifelse( is.null(development$maxit), 50, development$maxit ), 
+      trace = ifelse( is.null(development$trace), FALSE, development$trace ),
+      method = ifelse( is.null(development$method), "CHOLMOD", development$method )
+    )
+  }
 
   # Optimize
   #start_time = Sys.time()
