@@ -1022,17 +1022,21 @@ function( formula,
   # L = rep$IminusRho_hh %*% rep$Gamma_hh
 
   # 
-  if( "method" %in% names(formals(runSymbolicAnalysis)) ){
-    runSymbolicAnalysis(
-      obj,
-      abstol = ifelse( is.null(development$abstol), 1e-10, development$abstol ),
-      tol = ifelse( is.null(development$tol), 1e-04, development$tol ),
-      maxit = ifelse( is.null(development$maxit), 50, development$maxit ), 
-      trace = ifelse( is.null(development$trace), FALSE, development$trace ),
-      method = ifelse( is.null(development$method), "CHOLMOD", development$method )
-    )
+  if( !is.null(development$method) ){
+    # if `tol = 0`, it can run for a very long time!]
+    # if `tol = 1e-4` (the default), it might return NAs and fail optimizer
+    if( "method" %in% names(formals(runSymbolicAnalysis)) ){
+      runSymbolicAnalysis(
+        obj,
+        abstol = ifelse( is.null(development$abstol), 1e-10, development$abstol ),
+        tol = ifelse( is.null(development$tol), 1e-04, development$tol ),
+        maxit = ifelse( is.null(development$maxit), 50, development$maxit ), 
+        trace = ifelse( is.null(development$trace), FALSE, development$trace ),
+        method = development$method
+      )
+    }
   }
-
+  
   # Optimize
   #start_time = Sys.time()
   if( isTRUE(control$suppress_nlminb_warnings) ){
