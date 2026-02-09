@@ -692,3 +692,33 @@ function( Q,
   return(cor_g)
 }
 
+# Copied from sdmTMB
+get_convergence_diagnostics <- 
+function( sd_report, 
+          obj ) {
+
+  bad_eig <- FALSE
+  if (!is.null(sd_report$pdHess)) {
+    final_grads <- sd_report$gradient.fixed
+    if (!sd_report$pdHess) {
+      warning("The model may not have converged: ",
+        "non-positive-definite Hessian matrix.", call. = FALSE)
+    } else {
+      eigval <- try(1 / eigen(sd_report$cov.fixed)$values, silent = TRUE)
+      if (is(eigval, "try-error") || (min(eigval) < .Machine$double.eps * 10)) {
+        warning("The model may not have converged: ",
+          "extreme or very small eigen values detected.", call. = FALSE)
+        bad_eig <- TRUE
+      }
+      if (any(final_grads > 0.01))
+        warning("The model may not have converged. ",
+          "Maximum final gradient: ", max(final_grads), ".", call. = FALSE)
+    }
+  }else{
+    final_grads = obj$gr( obj$env$last.par[obj$env$lfixed()] )
+  }
+  pdHess <- isTRUE(sd_report$pdHess)
+  
+  out = mget(c("final_grads", "bad_eig", "pdHess"))
+  return(invisible(out))
+}

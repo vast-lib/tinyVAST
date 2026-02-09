@@ -3,6 +3,7 @@
 * Add starting value log_kappa when using SPDE method, using SD of X and Y coordinates and converting to equivalent kappa
 * Fix bug in `project` for logical class in empty vectors
 * Add `development` options to explore hess-compress and incomplete-Cholesky options
+* Add `sanity` function to check for evidence of non-convergence
 
 # tinyVAST 1.4.0
 
