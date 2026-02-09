@@ -96,7 +96,7 @@ function( object,
   for (i in seq_along(ple)) {
     if (any(is.na(ple[i]))) {
       if (!silent) cli::cli_alert_danger(c("`", np[i], paste0("` standard error is NA")))
-      par_message(np[i])
+      #par_message(np[i])
       if (!silent) {
         cli::cli_alert_info(simplify_msg)
         cat("\n")
