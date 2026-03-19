@@ -40,6 +40,9 @@ plot(graph_both)
 gh <- netUtils::graph_direct( time, space )    # tensor/direct product
 plot(gh)
 
+# 
+graph_both2 = igraph:::product_impl( space, time, type = "tensor" )
+
 
 ############
 # Bespoke cartesian product
@@ -68,6 +71,9 @@ plot(graph_both)
 gh = netUtils::graph_cartesian(time, space)
 plot(gh)
 
+# 
+graph_both2 = igraph:::product_impl( space, time, type = "cartesian" )
+
 
 ############
 # Superposition of cartesian products
@@ -82,6 +88,9 @@ function( g1, g2 ){
 
 G1 = cartesian_product( space, empty_time )
 G2 = cartesian_product( empty_space, time )
-
 G = superposition( G1, G2 )
 
+# 
+iG1 = igraph:::product_impl( space, empty_time, type = "cartesian" )
+iG2 = igraph:::product_impl( empty_space, time, type = "cartesian" )
+iG = union( iG1, iG2 )

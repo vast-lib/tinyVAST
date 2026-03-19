@@ -493,7 +493,7 @@ function( formula,
     kappa_startvalue = sqrt(8) / mean(apply( data[,space_columns], MARGIN = 2, FUN = sd) )      # range = sqrt(8) / kappa
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"igraph") ) {
-    # SAR
+    # SAR ... not doing row-standardized, so currently can result in nonsense Q
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_domain, sparse=TRUE )
     n_s = nrow(Adj)
