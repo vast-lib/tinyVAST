@@ -149,6 +149,7 @@
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv
 #' @importFrom sf st_relate st_coordinates st_centroid st_within st_crs
+#'   st_geometry_type st_geometry
 #' @importFrom cli cli_abort cli_warn cli_inform cli_alert_success cli_alert_danger cli_alert_info
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
@@ -514,7 +515,7 @@ function( formula,
     estimate_kappa = TRUE
     kappa_startvalue = 1
     estimate_anisotropy = FALSE
-  }else if( is(spatial_domain, "sfc_GEOMETRY") ){
+  }else if( is_areal_sf(spatial_domain) ){
     # SAR with geometric anisotropy
     spatial_method_code = 5
     n_s = length(spatial_domain)

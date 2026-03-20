@@ -232,3 +232,15 @@ function( mesh ){
   
   return(edge_lengths)
 }
+
+#
+is_areal_sf <- function(x) {
+  if (inherits(x, "sf")) {
+    geom <- st_geometry(x)
+  } else if (inherits(x, "sfc")) {
+    geom <- x
+  } else {
+    return(FALSE)
+  }
+  all(st_geometry_type(geom) %in% c("POLYGON", "MULTIPOLYGON"))
+}
