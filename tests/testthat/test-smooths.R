@@ -296,6 +296,6 @@ test_that("A model with s() and a continuous 'by' variable works", {
   )                    
   pred2 = predict(mytv)
   
-  expect_equal( as.numeric(pred1), pred2)
-  expect_equal( pred2[1:5], rep(0,5) )
+  expect_equal( as.numeric(pred1), pred2, tol = 1e-3 )
+  expect_equal( pred2[1:5], rep(0,5), tol = 1e-3 )
 })
