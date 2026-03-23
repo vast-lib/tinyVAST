@@ -47,12 +47,13 @@
 #'        [igraph::make_empty_graph()] for independent time-series,
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
 #'        process to a user-supplied graph, [sfnetwork_mesh()] for stream networks,
-#'        or class \code{sfc_GEOMETRY} e.g constructed using [sf::st_make_grid]
+#'        or class \code{sf} or \code{sfc} containing polygons
+#'        e.g constructed using [sf::st_make_grid]
 #'        to apply a SAR to an areal model with adjacency
 #'        based on the geometry of the object,
 #'        or `NULL` to specify a single site.  If using `igraph` then the
 #'        graph must have vertex names \code{V(graph)$name} that match
-#'        levels of \code{data[,'space_columns']}
+#'        levels of \code{data[,'space_columns']}.
 #' @param time_column A character string indicating the column of `data`
 #'        listing the time-interval for each sample, from the set of times
 #'        in argument `times`.

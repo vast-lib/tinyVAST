@@ -2,7 +2,7 @@ Type: Package
 Package: tinyVAST
 Title: Multivariate Spatio-Temporal Models using Structural Equations
 Version: 1.5.0
-Date: 2026-02-09
+Date: 2026-03-23
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
 	   role = c("aut", "cre"),
