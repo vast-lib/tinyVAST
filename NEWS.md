@@ -1,3 +1,11 @@
+# tinyVAST 1.5.0
+
+* Add starting value log_kappa when using SPDE method, using SD of X and Y coordinates and converting to equivalent kappa
+* Fix bug in `project` for logical class in empty vectors
+* Add `development` options to explore hess-compress option (and commenting out incomplete Cholesky for now)
+* Add `sanity` function to check for evidence of non-convergence
+* Improve detection of sf class for areal models
+
 # tinyVAST 1.4.0
 
 * Adding `student` distribution, borrowing/importing code from sdmTMB

@@ -47,12 +47,13 @@
 #'        [igraph::make_empty_graph()] for independent time-series,
 #'        [igraph::make_graph()] to apply a simultaneous autoregressive (SAR)
 #'        process to a user-supplied graph, [sfnetwork_mesh()] for stream networks,
-#'        or class \code{sfc_GEOMETRY} e.g constructed using [sf::st_make_grid]
+#'        or class \code{sf} or \code{sfc} containing polygons
+#'        e.g constructed using [sf::st_make_grid]
 #'        to apply a SAR to an areal model with adjacency
 #'        based on the geometry of the object,
 #'        or `NULL` to specify a single site.  If using `igraph` then the
 #'        graph must have vertex names \code{V(graph)$name} that match
-#'        levels of \code{data[,'space_columns']}
+#'        levels of \code{data[,'space_columns']}.
 #' @param time_column A character string indicating the column of `data`
 #'        listing the time-interval for each sample, from the set of times
 #'        in argument `times`.
@@ -140,15 +141,17 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula binomial poisson predict as.formula na.pass
+#'   update.formula binomial poisson predict as.formula na.pass sd
 #' @importFrom utils packageVersion capture.output
-#' @importFrom TMB MakeADFun sdreport
+#' @importFrom TMB MakeADFun sdreport runSymbolicAnalysis config
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
-#' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet
+#' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet Diagonal
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv
 #' @importFrom sf st_relate st_coordinates st_centroid st_within st_crs
+#'   st_geometry_type st_geometry
+#' @importFrom cli cli_abort cli_warn cli_inform cli_alert_success cli_alert_danger cli_alert_info
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
@@ -479,6 +482,7 @@ function( formula,
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     n_Hpars = ncol( spatial_list$E0 )
     estimate_kappa = TRUE
+    kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"fm_mesh_2d") ){
     # SPDE
@@ -488,9 +492,10 @@ function( formula,
     A_is = fm_evaluator( spatial_domain, loc=as.matrix(data[,space_columns]) )$proj$A
     n_Hpars = 2
     estimate_kappa = TRUE
+    kappa_startvalue = sqrt(8) / mean(apply( data[,space_columns], MARGIN = 2, FUN = sd) )      # range = sqrt(8) / kappa
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"igraph") ) {
-    # SAR
+    # SAR ... not doing row-standardized, so currently can result in nonsense Q
     spatial_method_code = 2
     Adj = as_adjacency_matrix( spatial_domain, sparse=TRUE )
     n_s = nrow(Adj)
@@ -499,6 +504,7 @@ function( formula,
     A_is = sparseMatrix( i=1:nrow(data), j=Match, x=rep(1,nrow(data)) )
     # Turn off log_kappa if no edges (i.e., unconnected graph)
     estimate_kappa = ifelse( ecount(spatial_domain)>0, TRUE, FALSE )
+    kappa_startvalue = 1
     estimate_anisotropy = FALSE
   }else if( is(spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(space_term) )
     # stream network
@@ -508,8 +514,9 @@ function( formula,
     A_is = sfnetwork_evaluator( stream = spatial_domain$stream,
                                 loc = as.matrix(data[,space_columns]) )
     estimate_kappa = TRUE
+    kappa_startvalue = 1
     estimate_anisotropy = FALSE
-  }else if( is(spatial_domain, "sfc_GEOMETRY") ){
+  }else if( is_areal_sf(spatial_domain) ){
     # SAR with geometric anisotropy
     spatial_method_code = 5
     n_s = length(spatial_domain)
@@ -536,6 +543,7 @@ function( formula,
                          x = 1,
                          dims = c(length(s_i),length(spatial_domain)) )
     estimate_kappa = TRUE
+    kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is.null(spatial_domain) ) {
     # Single-site
@@ -547,6 +555,7 @@ function( formula,
                          "M1" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix"),
                          "M2" = as(Matrix(0,nrow=1,ncol=1),"CsparseMatrix") )
     estimate_kappa = FALSE
+    kappa_startvalue = 1
     estimate_anisotropy = FALSE
   }else{
     stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
@@ -836,25 +845,26 @@ function( formula,
 
 
   # make params
+  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
   tmb_par = list(
-    alpha_j = rep(0,ncol(tmb_data$X_ij)),  # Spline coefficients
-    gamma_k = rep(0,sum(tmb_data$Sdims)),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
+    alpha_j = as.numeric(rep(0,ncol(tmb_data$X_ij))),  # Spline coefficients
+    gamma_k = as.numeric(rep(0,sum(tmb_data$Sdims))),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
     beta_z = as.numeric(ifelse(spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
     theta_z = as.numeric(ifelse(space_term_ram$param_type==1, 0.01, 1)),
     nu_z = as.numeric(ifelse(time_term_ram$param_type==1, 0.01, 1)),
-    log_lambda = rep(0,sum(tmb_data$Sblock)), #Log spline penalization coefficients
-    log_sigmaxi_l = rep(0,ncol(tmb_data$W_il)),
+    log_lambda = as.numeric(rep(0,sum(tmb_data$Sblock))), #Log spline penalization coefficients
+    log_sigmaxi_l = as.numeric(rep(0,ncol(tmb_data$W_il))),
 
-    alpha2_j = rep(0,ncol(tmb_data$X2_ij)),  # Spline coefficients
-    gamma2_k = rep(0,sum(tmb_data$S2dims)),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
-    beta2_z = as.numeric(ifelse(delta_spacetime_term_ram$param_type==1, 0.01, 1)),  # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
+    alpha2_j = as.numeric(rep(0,ncol(tmb_data$X2_ij))),  # Spline coefficients
+    gamma2_k = as.numeric(rep(0,sum(tmb_data$S2dims))),  # Spline coefficients ... length is sum() <= ncol(tmb_data$Z_ik) ... not equal when using te/ti/t2
+    beta2_z = as.numeric(ifelse(delta_spacetime_term_ram$param_type==1, 0.01, 1)),  
     theta2_z = as.numeric(ifelse(delta_space_term_ram$param_type==1, 0.01, 1)),
     nu2_z = as.numeric(ifelse(delta_time_term_ram$param_type==1, 0.01, 1)),
-    log_lambda2 = rep(0,sum(tmb_data$S2block)), #Log spline penalization coefficients
-    log_sigmaxi2_l = rep(0,ncol(tmb_data$W2_il)),
+    log_lambda2 = as.numeric(rep(0,sum(tmb_data$S2block))), #Log spline penalization coefficients
+    log_sigmaxi2_l = as.numeric(rep(0,ncol(tmb_data$W2_il))),
 
     #log_sigma = rep( 0, sum(distributions$Nsigma_e) ),
-    log_sigma = ifelse( is.na(unlist(distributions$sigma_e)), 0, unlist(distributions$sigma_e) ),
+    log_sigma = as.numeric(ifelse( is.na(unlist(distributions$sigma_e)), 0, unlist(distributions$sigma_e) )),
     epsilon_stc = array(0, dim=c(n_s, length(times), length(variables))),
     omega_sc = array(0, dim=c(n_s, length(variables))),
     delta_tc = array(0, dim=c(length(times), length(variables))),
@@ -866,8 +876,8 @@ function( formula,
     xi2_sl = array(0, dim=c(n_s, ncol(tmb_data$W2_il))),
 
     eps = numeric(0),
-    log_kappa = log(1),
-    ln_H_input = rep(0, n_Hpars)
+    log_kappa = log(kappa_startvalue),
+    ln_H_input = as.numeric(rep(0, n_Hpars))
   )
 
   # Telescoping
@@ -988,6 +998,14 @@ function( formula,
     #load.image( "debugging.RData" )
   }
 
+  # Optional compression
+  if( !is.null(development$tmbad.sparse_hessian_compress) ){
+    config( 
+      tmbad.sparse_hessian_compress = development$tmbad.sparse_hessian_compress, 
+      DLL = "tinyVAST" 
+    )
+  }
+  
   if( FALSE ){
     setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST\src)')
     dyn.unload(dynlib("tinyVAST"))
@@ -1006,6 +1024,22 @@ function( formula,
   #obj$env$beSilent()
   # L = rep$IminusRho_hh %*% rep$Gamma_hh
 
+  # 
+  #if( !is.null(development$method) ){
+  #  # if `tol = 0`, it can run for a very long time!]
+  #  # if `tol = 1e-4` (the default), it might return NAs and fail optimizer
+  #  if( "method" %in% names(formals(runSymbolicAnalysis)) ){
+  #    runSymbolicAnalysis(
+  #      obj,
+  #      abstol = ifelse( is.null(development$abstol), 1e-10, development$abstol ),
+  #      tol = ifelse( is.null(development$tol), 1e-04, development$tol ),
+  #      maxit = ifelse( is.null(development$maxit), 50, development$maxit ),
+  #      trace = ifelse( is.null(development$trace), FALSE, development$trace ),
+  #      method = development$method
+  #    )
+  #  }
+  #}
+  
   # Optimize
   #start_time = Sys.time()
   if( isTRUE(control$suppress_nlminb_warnings) ){
@@ -1080,7 +1114,8 @@ function( formula,
     weights = weights,
     packageVersion = packageVersion("tinyVAST"),
     development = development,
-    distributions = distributions
+    distributions = distributions,
+    convergence_diagnostics = get_convergence_diagnostics(sdrep, obj)
   )
   out = list(
     data = data,

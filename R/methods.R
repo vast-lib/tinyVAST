@@ -63,6 +63,14 @@ function( x,
     print(out$fixed)
     cat( "\n")
   }
+
+  cat( "Sanity check: \n")
+  (s <- sanity(x))
+  if (!all(unlist(s))) {
+    cat("\n**Possible issues detected! Check output of sanity().**\n")
+  }
+  cat( "\n")
+
   return(invisible(out))
 }
 

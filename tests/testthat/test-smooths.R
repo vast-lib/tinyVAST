@@ -122,7 +122,11 @@ test_that("ti and te splines work", {
 
   form = y ~ s(x1) + s(x2) + ti(x1, x2)
   m_m <- mgcv::gam( form, data = dat, method="ML")
-  m_v <- tinyVAST( form, data = dat)
+  m_v <- tinyVAST(
+    form,
+    data = dat,
+    control = tinyVASTcontrol( getsd = FALSE )
+  )
   p_m <- predict(m_m)
   p_v <- predict(m_v)
   expect_gt(cor(p_v, p_m), 0.98)
@@ -131,7 +135,11 @@ test_that("ti and te splines work", {
   #
   form = y ~ te(x1, x2)
   m_m <- mgcv::gam( form, data = dat, method="ML")
-  m_v <- tinyVAST( form, data = dat)
+  m_v <- tinyVAST(
+    form,
+    data = dat,
+    control = tinyVASTcontrol( getsd = FALSE )
+  )
   p_m <- predict(m_m)
   p_v <- predict(m_v)
   expect_gt(cor(p_v, p_m), 0.98)
@@ -274,4 +282,28 @@ test_that("A model with s() by variables works", {
 
   plot(p_m, p_v);abline(a = 0, b = 1)
   expect_gt(cor(p_v, p_m), 0.99)
+})
+
+test_that("A model with s() and a continuous 'by' variable works", {
+  g_i = factor(rep(letters[1:10], each = 5))
+  mu_g = rnorm( length(unique(g_i)) )
+  y_i = mu_g[g_i] + rnorm(length(g_i))
+
+  data = data.frame( y = y_i, g = g_i )
+  data$idx_re = ifelse( data$g != "a", 1, 0 )
+  mygam = mgcv::gam(
+    y ~ 0 + s(g, bs = "re", by = idx_re),
+    data = data
+  )
+  pred1 = predict(mygam)
+  
+  # Or in tinyVAST
+  mytv = tinyVAST(
+    y ~ 0 + s(g, bs = "re", by = idx_re),
+    data = data
+  )                    
+  pred2 = predict(mytv)
+  
+  expect_equal( as.numeric(pred1), pred2, tol = 1e-3 )
+  expect_equal( pred2[1:5], rep(0,5), tol = 1e-3 )
 })

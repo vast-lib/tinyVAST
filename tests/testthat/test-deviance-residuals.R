@@ -407,6 +407,7 @@ test_that("student-t MLE, deviance residuals, and deviance explained", {
   dat$response = dat$a + dat$b + rt(n, df = 6)
 
   # Compare with glmmTMB when estimating DF
+  # ... turn off percent deviance explained for this comparison
   fit0 = glmmTMB::glmmTMB(
     response ~ 0 + a + factor(year),
     data = dat,
@@ -415,12 +416,14 @@ test_that("student-t MLE, deviance residuals, and deviance explained", {
   fit1 = tinyVAST(
     response ~ 0 + a + factor(year),
     data = dat,
-    family = student( df = NULL )
+    family = student( df = NULL ),
+    control = tinyVASTcontrol( calculate_deviance_explaine = FALSE )
   ) # 1 + exp(fit1$internal$parlist$log_sigma[2])
   fit2 = tinyVAST(
     response ~ 0 + a + factor(year),
     data = dat,
-    family = student( df = exp(fit0$fit$par["psi"]) )
+    family = student( df = exp(fit0$fit$par["psi"]) ),
+    control = tinyVASTcontrol( calculate_deviance_explaine = FALSE )
   )
   expect_equal( fit0$fit$objective, fit1$opt$objective, tolerance=1e-3 )
   expect_equal( fit0$fit$objective, fit2$opt$objective, tolerance=1e-3 )
