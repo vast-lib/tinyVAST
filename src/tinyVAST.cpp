@@ -230,7 +230,103 @@ Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
   return Q;
 }
 
-//
+// Functions to evaluate density for nearest-neighbors Gaussian process
+template<class Type>
+Type cov_fun(Type d, Type sigma2, Type range) {
+  return sigma2 * exp(-d / range);
+}
+template<class Type>
+vector<Type> cov_fun(vector<Type> d, Type sigma2, Type range) {
+  int n = d.size();
+  vector<Type> out(n);
+  for (int i = 0; i < n; i++) {
+    out(i) = cov_fun(d(i), sigma2, range);
+  }
+  return out;
+}
+template<class Type>
+matrix<Type> cov_fun(matrix<Type> d, Type sigma2, Type range) {
+  int nr = d.rows();
+  int nc = d.cols();
+  matrix<Type> out(nr, nc);
+
+  for (int r = 0; r < nr; r++) {
+    for (int c = 0; c < nc; c++) {
+      out(r, c) = cov_fun(d(r, c), sigma2, range);
+    }
+  }
+  return out;
+}
+template<class Type>
+Type dnngp( Type sigma2,
+            Type range,
+            vector<Type> field_s,
+            // Data
+            vector<int> nn_index_flat,
+            vector<int> nn_start,
+            vector<int> nn_len,
+            vector<Type> dist_to_nn_flat,
+            vector<Type> dist_within_nn_flat,
+            vector<int> gp_order ){
+  // Using original order and ordered_structure, by calling gp_order(i) and gp_order(nn_ids), because:
+  // 1.  using original version in new order is very slow! presumably the order is terrible for the inner Hessian
+  // 2.  using order-ordered version of field is confusing for users
+  Type nll = 0.0;
+  int n = field_s.size();
+
+  for( int i = 0; i < n; i++ ){
+
+    int start = nn_start(i);
+    int k = nn_len(i);
+
+    // No neighbors
+    if(k == 0){
+      nll -= dnorm( field_s(gp_order(i)), Type(0.0), sqrt(sigma2), true );
+    }else{
+      // Extract neighbor indices
+      vector<int> nn_ids(k);
+      for (int j = 0; j < k; j++) {
+        nn_ids(j) = nn_index_flat(start + j);
+      }
+
+      // Extract distance to neighbors
+      vector<Type> dist_iN(k);
+      for (int j = 0; j < k; j++) {
+        dist_iN(j) = dist_to_nn_flat(start + j);
+      }
+
+      // Extract within-neighbor distance matrix (k x k)
+      matrix<Type> dist_NN(k, k);
+      for (int r = 0; r < k; r++) {
+        for (int c = 0; c < k; c++) {
+          dist_NN(r, c) = dist_within_nn_flat(start * k + r * k + c);
+        }
+      }
+
+      // Covariances
+      matrix<Type> Sigma_NN = cov_fun(dist_NN, sigma2, range);
+      vector<Type> Sigma_iN = cov_fun(dist_iN, sigma2, range);
+
+      // Solve
+      vector<Type> a_i = solve(Sigma_NN, Sigma_iN);
+
+      // Residual variance
+      Type resid_var = sigma2 - (a_i * Sigma_iN).sum(); // + 1e-12;
+      //resid_var = CppAD::CondExpGt(resid_var, Type(1e-12), resid_var, Type(1e-12));
+
+      // Conditional mean
+      Type cond_mean = 0.0;
+      for (int j = 0; j < k; j++) {
+        cond_mean += a_i(j) * field_s(gp_order(nn_ids(j)));
+      }
+
+      // Likelihood
+      nll -= dnorm( field_s(gp_order(i)), cond_mean, sqrt(resid_var), true );
+    }
+  }
+  return nll;
+}
+
 // Function to calculate RAM matrices
 template<class Type>
 Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
@@ -1154,6 +1250,16 @@ Type objective_function<Type>::operator() (){
     Q_ss = exp(4.0*log_kappa)*spatial_list.G0 + Type(2.0)*exp(2.0*log_kappa)*G1 + G1*spatial_list.G0_inv*G1;
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
     REPORT( Q_ss );
+  }
+  // Using NNGP
+  if( model_options(0)==7 ){
+    // DATA_INTEGER(n);      == n_s
+    DATA_IVECTOR(nn_index_flat);
+    DATA_IVECTOR(nn_start);
+    DATA_IVECTOR(nn_len);
+    DATA_VECTOR(dist_to_nn_flat);
+    DATA_VECTOR(dist_within_nn_flat);
+    DATA_IVECTOR(gp_order);
   }
   REPORT( log_tau );
 

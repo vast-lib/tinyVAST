@@ -1,3 +1,7 @@
+# tinyVAST 1.6.0
+
+* Adding nearest-neighbors Gaussian Process option 
+
 # tinyVAST 1.5.0
 
 * Add starting value log_kappa when using SPDE method, using SD of X and Y coordinates and converting to equivalent kappa
