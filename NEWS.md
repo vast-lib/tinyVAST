@@ -1,6 +1,7 @@
 # tinyVAST 1.6.0
 
 * Adding nearest-neighbors Gaussian Process option 
+* Add tinyVASTcontrol(tmb_random) argument to allow exploration of penalized likelihood
 
 # tinyVAST 1.5.0
 

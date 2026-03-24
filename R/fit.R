@@ -954,6 +954,9 @@ function( formula,
   if( isTRUE(control$reml) ){
     tmb_random = union( tmb_random, c("alpha_j","alpha2_j") )
   }
+  if( !is.null(control$tmb_random) ){
+    tmb_random = control$tmb_random
+  }
 
   # User-specified tmb_par
   if( !is.null(control$tmb_par) ){
@@ -1154,6 +1157,11 @@ function( formula,
 #' @param tmb_map input passed to [TMB::MakeADFun] as argument `map`, over-writing
 #'   the version `tinyVAST(...)$tmb_inputs$tmb_map` and allowing detailed control
 #'   over estimated parameters (advanced feature)
+#' @param tmb_random input passed to [TMB::MakeADFun] as argument `random`, over-writing
+#'   the version `tinyVAST(...)$tmb_inputs$tmb_random` and allowing detailed control
+#'   over parameters treated as random effects.  `tmb_random = NULL` uses
+#'   the default (internal) construction, and use `tmb_random = c()` to use
+#'   penalized likelihood (presumably while also modifying `tmb_map` and `tmb_par`)
 #' @param eval.max Maximum number of evaluations of the objective function
 #'   allowed. Passed to `control` in [stats::nlminb()].
 #' @param iter.max Maximum number of iterations allowed. Passed to `control` in
@@ -1224,6 +1232,7 @@ function( nlminb_loops = 1,
           profile = c(),
           tmb_par = NULL,
           tmb_map = NULL,
+          tmb_random = NULL,
           gmrf_parameterization = c("separable","projection"),
           #estimate_delta0 = FALSE,
           reml = FALSE,
@@ -1253,6 +1262,7 @@ function( nlminb_loops = 1,
     profile = profile,
     tmb_par = tmb_par,
     tmb_map = tmb_map,
+    tmb_random = tmb_random,
     gmrf_parameterization = gmrf_parameterization,
     #estimate_delta0 = FALSE,
     reml = reml,

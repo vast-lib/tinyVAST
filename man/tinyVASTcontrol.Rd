@@ -16,6 +16,7 @@ tinyVASTcontrol(
   profile = c(),
   tmb_par = NULL,
   tmb_map = NULL,
+  tmb_random = NULL,
   gmrf_parameterization = c("separable", "projection"),
   reml = FALSE,
   getJointPrecision = FALSE,
@@ -65,6 +66,12 @@ to \code{tinyVAST(...)$internal$parlist}}
 \item{tmb_map}{input passed to \link[TMB:MakeADFun]{TMB::MakeADFun} as argument \code{map}, over-writing
 the version \code{tinyVAST(...)$tmb_inputs$tmb_map} and allowing detailed control
 over estimated parameters (advanced feature)}
+
+\item{tmb_random}{input passed to \link[TMB:MakeADFun]{TMB::MakeADFun} as argument \code{random}, over-writing
+the version \code{tinyVAST(...)$tmb_inputs$tmb_random} and allowing detailed control
+over parameters treated as random effects.  \code{tmb_random = NULL} uses
+the default (internal) construction, and use \code{tmb_random = c()} to use
+penalized likelihood (presumably while also modifying \code{tmb_map} and \code{tmb_par})}
 
 \item{gmrf_parameterization}{Parameterization to use for the Gaussian Markov
 random field, where the default \code{separable} constructs a full-rank and
