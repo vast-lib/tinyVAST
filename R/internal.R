@@ -246,7 +246,7 @@ is_areal_sf <- function(x) {
 }
 
 # Make list of data containing SCALAR or VECTOR elements representing a NNGP
-make_nngp_data <-
+make_nngp_data =
 function( coords, nn, what = c("full","empty") ){
   what = match.arg(what)
   if( what == "empty" ){
@@ -262,27 +262,26 @@ function( coords, nn, what = c("full","empty") ){
     ))
   }
 
-  precompute_nngp_structure <- function(coords, nn) {
-    n <- nrow(coords)
-    nn_index <- vector("list", n)
-    dist_to_nn <- vector("list", n)
-    dist_within_nn <- vector("list", n)
+  precompute_nngp_structure = function(coords, nn) {
+    n = nrow(coords)
+    nn_index = vector("list", n)
+    dist_to_nn = vector("list", n)
+    dist_within_nn = vector("list", n)
 
     for (i in seq_len(n)) {
-      nn_ids <- nn[i, -1]
-      nn_ids <- nn_ids[!is.na(nn_ids)]
+      nn_ids = nn[i, -1]
+      nn_ids = nn_ids[!is.na(nn_ids)]
 
       if (length(nn_ids) == 0L) {
-        nn_index[[i]] <- integer(0)
-        dist_to_nn[[i]] <- numeric(0)
-        dist_within_nn[[i]] <- matrix(0, 0, 0)
+        nn_index[[i]] = integer(0)
+        dist_to_nn[[i]] = numeric(0)
+        dist_within_nn[[i]] = matrix(0, 0, 0)
         next
       }
 
-      nn_index[[i]] <- nn_ids
-      dist_to_nn[[i]] <- sqrt(rowSums((coords[nn_ids, , drop = FALSE] -
-        coords[rep(i, length(nn_ids)), , drop = FALSE])^2))
-      dist_within_nn[[i]] <- as.matrix(dist(coords[nn_ids, , drop = FALSE]))
+      nn_index[[i]] = nn_ids
+      dist_to_nn[[i]] = sqrt(rowSums((coords[nn_ids, , drop = FALSE] - coords[rep(i, length(nn_ids)), , drop = FALSE])^2))
+      dist_within_nn[[i]] = as.matrix(dist(coords[nn_ids, , drop = FALSE]))
     }
 
     list(
@@ -294,60 +293,66 @@ function( coords, nn, what = c("full","empty") ){
   }
 
   # Re-order
-  gp_order <- order_maxmin(coords)
-  ordered_nn <- find_ordered_nn( coords[gp_order,], m = 4L)
-  ordered_structure <- precompute_nngp_structure( coords[gp_order,], nn = ordered_nn)
+  gp_order = order_maxmin(coords)
+  ordered_nn = find_ordered_nn( coords[gp_order,], m = 4L)
+  ordered_structure = precompute_nngp_structure( coords[gp_order,], nn = ordered_nn)
 
   ##############
   # Flatten
   ##############
 
-  n <- length(ordered_structure$nn_index)
+  #n = length(ordered_structure$nn_index)
 
-  nn_index_flat <- integer(0)
-  dist_to_nn_flat <- numeric(0)
-  dist_within_nn_flat <- numeric(0)
+  #nn_index_flat = integer(0)
+  #dist_to_nn_flat = numeric(0)
+  #dist_within_nn_flat = numeric(0)
 
-  nn_start <- integer(n)
-  nn_len   <- integer(n)
-  nn_mat_start <- integer(n)
+  #nn_start = integer(n)
+  #nn_len   = integer(n)
+  #nn_mat_start = integer(n)
 
-  pos_vec <- 0   # position for vector data (nn_index, dist_to_nn)
-  pos_mat <- 0   # position for matrix data (dist_within_nn)
+  #pos_vec = 0   # position for vector data (nn_index, dist_to_nn)
+  #pos_mat = 0   # position for matrix data (dist_within_nn)
 
-  for (i in seq_len(n)) {
-    nn_ids <- ordered_structure$nn_index[[i]]
-    k <- length(nn_ids)
+  #for (i in seq_len(n)) {
+  #  nn_ids = ordered_structure$nn_index[[i]]
+  #  k = length(nn_ids)
+  #
+  #  # Record starts and lengths
+  #  #nn_start[i] = pos_vec
+  #  nn_len[i] = k
+  #  #nn_mat_start[i] = pos_mat
+  #
+  #  if (k > 0) {
+  #    # Flatten neighbor indices (convert to 0-based for TMB)
+  #    nn_index_flat = c(nn_index_flat, nn_ids - 1L)
+  #
+  #    # Distances to neighbors
+  #    dist_to_nn_flat = c(
+  #      dist_to_nn_flat,
+  #      ordered_structure$dist_to_nn[[i]]
+  #    )
+  #
+  #    # Flatten k x k matrix (column-major, consistent with R)
+  #    dist_within_nn_flat = c(
+  #      dist_within_nn_flat,
+  #      as.vector(ordered_structure$dist_within_nn[[i]])
+  #    )
+  #
+  #    # Advance positions
+  #    #pos_vec = pos_vec + k
+  #    #pos_mat = pos_mat + k * k
+  #  }
+  #}
 
-    # Record starts and lengths
-    nn_start[i]     <- pos_vec
-    nn_len[i]       <- k
-    nn_mat_start[i] <- pos_mat
+  # Equivalent
+  nn_len = sapply( ordered_structure$nn_index, FUN = length )
+  nn_index_flat = unlist(ordered_structure$nn_index) - 1
+  dist_to_nn_flat = unlist(ordered_structure$dist_to_nn)
+  dist_within_nn_flat = unlist(lapply(ordered_structure$dist_within_nn, FUN=as.vector))
 
-    if (k > 0) {
-      # Flatten neighbor indices (convert to 0-based for TMB)
-      nn_index_flat <- c(nn_index_flat, nn_ids - 1L)
-
-      # Distances to neighbors
-      dist_to_nn_flat <- c(
-        dist_to_nn_flat,
-        ordered_structure$dist_to_nn[[i]]
-      )
-
-      # Flatten k x k matrix (column-major, consistent with R)
-      dist_within_nn_flat <- c(
-        dist_within_nn_flat,
-        as.vector(ordered_structure$dist_within_nn[[i]])
-      )
-
-      # Advance positions
-      pos_vec <- pos_vec + k
-      pos_mat <- pos_mat + k * k
-    }
-  }
-
-  # Pass
-  data <- list(
+  # Return
+  data = list(
     #n = n,
     nn_index_flat = nn_index_flat,
     #nn_start = nn_start,
