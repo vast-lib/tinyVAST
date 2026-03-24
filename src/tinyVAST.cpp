@@ -281,17 +281,15 @@ struct nngp_data_t{
 };
 // Density function .. sigma2 fixed at 1.0
 template<class Type>
-Type NNGP( //Type sigma2,
-            Type range,
-            vector<Type> field_s,
-            // Data
-            nngp_data_t<Type> nngp_data
-            ){
+Type NNGP( Type sigma2,
+           Type range,
+           vector<Type> field_s,
+           // Data
+           nngp_data_t<Type> nngp_data ){
   // Using original order and ordered_structure, by calling gp_order(i) and gp_order(nn_ids), because:
   // 1.  using original version in new order is very slow! presumably the order is terrible for the inner Hessian
   // 2.  using order-ordered version of field is confusing for users
   Type nll = 0.0;
-  Type sigma2 = 1.0;
   vector<int> nn_index_flat = nngp_data.nn_index_flat;
   //vector<int> nn_start = nngp_data.nn_start;
   vector<int> nn_len = nngp_data.nn_len;
@@ -489,7 +487,7 @@ array<Type> omega_distribution( array<Type> omega_sc,
           vector<Type> omega_s( omega_sc.rows() );
           for( int ci = 0; ci < omega_sc.cols(); ci++ ){
             omega_s = omega_sc.col(ci);
-            nll += NNGP( range, omega_s, nngp_data );
+            nll += NNGP( Type(1.0), range, omega_s, nngp_data );
           }
         }else{
           nll += SEPARABLE( GMRF(I_cc), GMRF(Q_ss) )( omega_sc );
@@ -511,18 +509,29 @@ array<Type> omega_distribution( array<Type> omega_sc,
   return omega_sc;
 }
 
-// distribution/projection for omega
+// distribution/projection for xi
 template<class Type>
-Type xi_distribution( array<Type> xi_sl,
+Type xi_distribution( vector<int> model_options,
+                      array<Type> xi_sl,
                       vector<Type> log_sigmaxi_l,
-                      Eigen::SparseMatrix<Type> Q_ss ){
+                      Eigen::SparseMatrix<Type> Q_ss,
+                      Type range,
+                      nngp_data_t<Type> nngp_data ){
 
   Type nll = 0;
   if( xi_sl.size() > 0 ){
-    int n_l = xi_sl.dim(1);
+    int n_l = xi_sl.cols();
     using namespace density;
-    for( int l=0; l<n_l; l++ ){
-      nll += SCALE( GMRF(Q_ss), exp(log_sigmaxi_l(l)) )( xi_sl.col(l) );
+    if( model_options(0) == 7 ){
+      vector<Type> xi_s( xi_sl.rows() );
+      for( int l=0; l<n_l; l++ ){
+        xi_s = xi_sl.col(l);
+        NNGP( exp(2.0*log_sigmaxi_l(l)), range, xi_s, nngp_data );
+      }
+    }else{
+      for( int l=0; l<n_l; l++ ){
+        nll += SCALE( GMRF(Q_ss), exp(log_sigmaxi_l(l)) )( xi_sl.col(l) );
+      }
     }
   }
 
@@ -537,6 +546,8 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
                                   Eigen::SparseMatrix<Type> Gammainv_hh,
                                   Eigen::SparseMatrix<Type> Q_ss,
+                                  Type range,
+                                  nngp_data_t<Type> nngp_data,
                                   Type &nll ){
 
   if( epsilon_stc.size() > 0 ){
@@ -576,7 +587,15 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
       nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
     }else{
       // Rank-deficient (projection) method
-      nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
+      if( model_options(0) == 7 ){
+        vector<Type> epsilon_s( epsilon_hs.cols() );
+        for( int hi = 0; hi < epsilon_hs.rows(); hi++ ){
+          epsilon_s = epsilon_hs.matrix().row(hi);
+          nll += NNGP( Type(1.0), range, epsilon_s, nngp_data );
+        }
+      }else{
+        nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
+      }
 
       // Sparse inverse-product
       //Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
@@ -1346,9 +1365,11 @@ Type objective_function<Type>::operator() (){
 
   // spacetime_term
   epsilon_stc = epsilon_distribution( epsilon_stc, model_options, Rho_hh,
-                                     Gamma_hh, Gammainv_hh, Q_ss, nll );
+                                     Gamma_hh, Gammainv_hh, Q_ss,
+                                     exp(log_kappa), nngp_data, nll );
   epsilon2_stc = epsilon_distribution( epsilon2_stc, model_options, Rho2_hh,
-                                       Gamma2_hh, Gammainv2_hh, Q_ss, nll );
+                                       Gamma2_hh, Gammainv2_hh, Q_ss,
+                                       exp(log_kappa), nngp_data, nll );
 
   // time_term
   delta_tc = delta_distribution( delta_tc, model_options, Rho_time_hh,
@@ -1362,8 +1383,10 @@ Type objective_function<Type>::operator() (){
   nll += gamma_distribution( gamma2_k, S2dims, S2block, S2_kk, log_lambda2 );
 
   // Distribution for SVC components
-  nll += xi_distribution( xi_sl, log_sigmaxi_l, Q_ss );
-  nll += xi_distribution( xi2_sl, log_sigmaxi2_l, Q_ss );
+  nll += xi_distribution( model_options, xi_sl, log_sigmaxi_l,
+                          Q_ss, exp(log_kappa), nngp_data );
+  nll += xi_distribution( model_options, xi2_sl, log_sigmaxi2_l,
+                          Q_ss, exp(log_kappa), nngp_data );
 
   // Linear predictor .. keep partial effects for RSR adjustment below
   vector<Type> p_i( n_i );

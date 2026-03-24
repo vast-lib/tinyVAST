@@ -28,6 +28,7 @@ tinyVASTcontrol(
   extra_reporting = FALSE,
   use_anisotropy = FALSE,
   sar_adjacency = "queen",
+  nearest_neighbors = NULL,
   barrier_stiffness = 0.01
 )
 }
@@ -112,6 +113,10 @@ geometric anisotropy}
 \item{sar_adjacency}{Whether to use queen or rook adjacency when defining
 a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 (default is queen)}
+
+\item{nearest_neighbors}{Number of nearest neighbors to use for nearest-neighbors
+Gaussian process.  Only used if \code{spatial_domain} is an areal model, and
+\code{nearest_neighbors = NULL} reverts to using a SAR model}
 
 \item{barrier_stiffness}{The ratio of local stiffness (the scale of diffusion
 rate and resulting decorrelation distance) for barriers relative to normal areas
