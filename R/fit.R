@@ -268,6 +268,9 @@ function( formula,
       stop("specifying `triangle_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
   }
+  if( !is.null(control$nearest_neighbors) & (control$gmrf_parameterization != "projection") ){
+    stop("`nearest neighbors` only works with `projection` gmrf_parameterization")
+  }
 
   # Haven't tested for extra levels
   tmpdata = droplevels(data)
@@ -447,6 +450,9 @@ function( formula,
   # n_Hpars is the number of params in H AND the dim of H
   n_Hpars = 2
 
+  # Empty default
+  nngp_data = make_nngp_data( what = "empty" )
+
   # Parse each `spatial_domain`
   if( is(spatial_domain,"vertex_coords") ){
     updated_vertex_formula = update.formula( old = vertex_formula, new = "~ . + 0" )
@@ -517,7 +523,7 @@ function( formula,
     estimate_kappa = TRUE
     kappa_startvalue = 1
     estimate_anisotropy = FALSE
-  }else if( is_areal_sf(spatial_domain) ){
+  }else if( is_areal_sf(spatial_domain) & is.null(control$nearest_neighbors) ){
     # SAR with geometric anisotropy
     spatial_method_code = 5
     n_s = length(spatial_domain)
@@ -546,6 +552,24 @@ function( formula,
     estimate_kappa = TRUE
     kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+  }else if( is_areal_sf(spatial_domain) & !is.null(control$nearest_neighbors) ){
+    spatial_method_code = 7
+    n_s = length(spatial_domain)
+    nngp_data = make_nngp_data(
+      coords = st_coordinates(st_centroid(spatial_domain)),
+      nn = control$nearest_neighbors
+    )
+    sf_coords = st_as_sf( data,
+                          coords = space_columns,
+                          crs = st_crs(spatial_domain) )
+    s_i = as.integer(st_within( sf_coords, spatial_domain ))
+    A_is = sparseMatrix( i = seq_along(s_i),
+                         j = s_i,
+                         x = 1,
+                         dims = c(length(s_i),length(spatial_domain)) )
+    estimate_kappa = TRUE
+    kappa_startvalue = 1
+    estimate_anisotropy = FALSE
   }else if( is.null(spatial_domain) ) {
     # Single-site
     spatial_method_code = 3
@@ -798,6 +822,7 @@ function( formula,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
     Aomega_z = Aomega_z,
     A_is = A_is,
+    nngp_data = nngp_data,
     ram_space_term = as.matrix(na.omit(space_term_ram$output$ram[,1:4])),
     ram_space_term_start = as.numeric(space_term_ram$output$ram[,5]),
     ram_time_term = as.matrix(na.omit(time_term_ram$output$ram[,1:4])),
@@ -833,6 +858,9 @@ function( formula,
   }else if( spatial_method_code %in% 6 ){
     tmb_data$spatial_list = spatial_list
     #tmb_data$V_zk = V_zk
+  }else if( spatial_method_code %in% 7 ){
+    tmb_data$nngp_data = nngp_data
+    #tmb_data$V_zk = V_zk
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
   }else if( spatial_method_code %in% 4 ){
@@ -843,7 +871,6 @@ function( formula,
     tmb_data$j_z = spatial_list$j_z - 1
     tmb_data$delta_z2 = spatial_list$delta_z2
   }
-
 
   # make params
   # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
@@ -1206,6 +1233,9 @@ function( formula,
 #' @param sar_adjacency Whether to use queen or rook adjacency when defining
 #'        a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 #'        (default is queen)
+#' @param nearest_neighbors Number of nearest neighbors to use for nearest-neighbors
+#'        Gaussian process.  Only used if `spatial_domain` is an areal model, and
+#'        `nearest_neighbors = NULL` reverts to using a SAR model
 #' @param barrier_stiffness The ratio of local stiffness (the scale of diffusion
 #'        rate and resulting decorrelation distance) for barriers relative to normal areas
 #'        in the SPDE method when using \code{add_mesh_covariates}.  The
@@ -1245,6 +1275,7 @@ function( nlminb_loops = 1,
           extra_reporting = FALSE,
           use_anisotropy = FALSE,
           sar_adjacency = "queen",
+          nearest_neighbors = NULL,
           barrier_stiffness = 0.01 ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
@@ -1275,6 +1306,7 @@ function( nlminb_loops = 1,
     extra_reporting = extra_reporting,
     use_anisotropy = use_anisotropy,
     sar_adjacency = sar_adjacency,
+    nearest_neighbors = nearest_neighbors,
     barrier_stiffness = barrier_stiffness
   ), class = "tinyVASTcontrol" )
 }

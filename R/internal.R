@@ -247,7 +247,21 @@ is_areal_sf <- function(x) {
 
 # Make list of data containing SCALAR or VECTOR elements representing a NNGP
 make_nngp_data <-
-function( coords, nn ){
+function( coords, nn, what = c("full","empty") ){
+  what = match.arg(what)
+  if( what == "empty" ){
+    return(list(
+      #n = integer(0),
+      nn_index_flat = integer(0),
+      #nn_start = integer(0),
+      nn_len = integer(0),
+      #nn_mat_start = integer(0),
+      dist_to_nn_flat = numeric(0),
+      dist_within_nn_flat = numeric(0),
+      gp_order = integer(0)
+    ))
+  }
+
   precompute_nngp_structure <- function(coords, nn) {
     n <- nrow(coords)
     nn_index <- vector("list", n)
@@ -334,11 +348,11 @@ function( coords, nn ){
 
   # Pass
   data <- list(
-    n = n,
+    #n = n,
     nn_index_flat = nn_index_flat,
-    nn_start = nn_start,
+    #nn_start = nn_start,
     nn_len = nn_len,
-    nn_mat_start = nn_mat_start,
+    #nn_mat_start = nn_mat_start,
     dist_to_nn_flat = dist_to_nn_flat,
     dist_within_nn_flat = dist_within_nn_flat,
     gp_order = gp_order - 1L
