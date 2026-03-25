@@ -232,37 +232,17 @@ Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
 
 // Functions to evaluate density for nearest-neighbors Gaussian process
 template<class Type>
-Type cov_fun(Type d, Type sigma2, Type range) {
-  return sigma2 * exp(-d / range);
+vector<Type> covariance_function(vector<Type> d, Type sigma2, Type inv_range) {
+  return ((-d.array() * inv_range).exp() * sigma2).matrix();
 }
 template<class Type>
-vector<Type> cov_fun(vector<Type> d, Type sigma2, Type range) {
-  int n = d.size();
-  vector<Type> out(n);
-  for (int i = 0; i < n; i++) {
-    out(i) = cov_fun(d(i), sigma2, range);
-  }
-  return out;
-}
-template<class Type>
-matrix<Type> cov_fun(matrix<Type> d, Type sigma2, Type range) {
-  int nr = d.rows();
-  int nc = d.cols();
-  matrix<Type> out(nr, nc);
-
-  for (int r = 0; r < nr; r++) {
-    for (int c = 0; c < nc; c++) {
-      out(r, c) = cov_fun(d(r, c), sigma2, range);
-    }
-  }
-  return out;
+matrix<Type> covariance_function(matrix<Type> d, Type sigma2, Type inv_range) {
+  return ((-d.array() * inv_range).exp() * sigma2).matrix();
 }
 /** \brief Object containing all data elements of an NNGP */
 template<class Type>
 struct nngp_data_t{
-  //int n_s;
   vector<int> nn_index_flat;
-  //vector<int> nn_start;
   vector<int> nn_len;
   vector<Type> dist_to_nn_flat;
   vector<Type> dist_within_nn_flat;
@@ -270,9 +250,7 @@ struct nngp_data_t{
 
   // Define output
   nngp_data_t(SEXP x){  /* x = List passed from R */
-    //n_s = CppAD::Integer(asVector<Type>(getListElement(x,"n_s"))[0]);
     nn_index_flat = asVector<int>(getListElement(x,"nn_index_flat"));
-    //nn_start = asVector<int>(getListElement(x,"nn_start"));
     nn_len = asVector<int>(getListElement(x,"nn_len"));
     dist_to_nn_flat = asVector<Type>(getListElement(x,"dist_to_nn_flat"));
     dist_within_nn_flat = asVector<Type>(getListElement(x,"dist_within_nn_flat"));
@@ -286,10 +264,12 @@ Type NNGP( Type sigma2,
            vector<Type> field_s,
            // Data
            nngp_data_t<Type> nngp_data ){
+
   // Using original order and ordered_structure, by calling gp_order(i) and gp_order(nn_ids), because:
   // 1.  using original version in new order is very slow! presumably the order is terrible for the inner Hessian
   // 2.  using order-ordered version of field is confusing for users
   Type nll = 0.0;
+  Type inv_range = 1.0 / range; // Multiplication is faster than division
   vector<int> nn_index_flat = nngp_data.nn_index_flat;
   //vector<int> nn_start = nngp_data.nn_start;
   vector<int> nn_len = nngp_data.nn_len;
@@ -301,8 +281,6 @@ Type NNGP( Type sigma2,
   int pos_mat = 0;
   int pos_vec = 0;
   for( int i = 0; i < n; i++ ){
-
-    //int start = nn_start(i);
     int k = nn_len(i);
 
     // No neighbors
@@ -328,18 +306,20 @@ Type NNGP( Type sigma2,
       }
 
       // Covariances
-      matrix<Type> Sigma_NN = cov_fun(dist_NN, sigma2, range);
-      vector<Type> Sigma_iN = cov_fun(dist_iN, sigma2, range);
+      matrix<Type> Sigma_NN = covariance_function(dist_NN, sigma2, inv_range);
+      vector<Type> Sigma_iN = covariance_function(dist_iN, sigma2, inv_range);
 
       // Solve
       //vector<Type> a_i = solve(Sigma_NN, Sigma_iN);
       //vector<Type> a_i = Sigma_NN.ldlt().solve( Sigma_iN.matrix() );
+      //Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > invSigma_NN;
+      //invSigma_NN.compute(Sigma_NN);
+      //vector<Type> a_i = invSigma_NN.solve(Sigma_iN);
       matrix<Type> Sigma_NN_inv = atomic::matinv(Sigma_NN);
       vector<Type> a_i = Sigma_NN_inv * Sigma_iN;
 
       // Residual variance
       Type resid_var = sigma2 - (a_i * Sigma_iN).sum(); // + 1e-12;
-      //resid_var = CppAD::CondExpGt(resid_var, Type(1e-12), resid_var, Type(1e-12));
 
       // Conditional mean
       Type cond_mean = 0.0;
