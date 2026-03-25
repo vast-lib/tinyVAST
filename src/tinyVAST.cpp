@@ -267,7 +267,7 @@ Type NNGP( Type sigma2,
 
   // Using original order and ordered_structure, by calling gp_order(i) and gp_order(nn_ids), because:
   // 1.  using original version in new order is very slow! presumably the order is terrible for the inner Hessian
-  // 2.  using order-ordered version of field is confusing for users
+  // 2.  using re-ordered version of field is confusing for users
   Type nll = 0.0;
   Type inv_range = 1.0 / range; // Multiplication is faster than division
   vector<int> nn_index_flat = nngp_data.nn_index_flat;

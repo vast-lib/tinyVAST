@@ -987,14 +987,17 @@ function( formula,
 
   # User-specified tmb_par
   if( !is.null(control$tmb_par) ){
+    # which match
+    which_match = intersect( names(control$tmb_par), names(tmb_par) )
+
     # Check shape but not numeric values, and give informative error
-    attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
+    attr(tmb_par[which_match],"check.passed") = attr(control$tmb_par[which_match],"check.passed")
     # Compare dimensions by multiplying both by zero
     if( isFALSE(control$suppress_user_warnings) ){
       warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
     }
-    if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
-      tmb_par = control$tmb_par
+    if( isTRUE(all.equal(control$tmb_par[which_match], tmb_par[which_match], tolerance=Inf)) ){
+      tmb_par[which_match] = control$tmb_par[which_match]
     }else{
       stop("Not using `control$tmb_par` because it has some difference from `tmb_par` built internally")
     }
@@ -1177,27 +1180,29 @@ function( formula,
 #'
 #' @param nlminb_loops Integer number of times to call [stats::nlminb()].
 #' @param newton_loops Integer number of Newton steps to do after running
-#'   [stats::nlminb()].
+#'        [stats::nlminb()].
 #' @param getsd Boolean indicating whether to call [TMB::sdreport()]
-#' @param tmb_par list of parameters for starting values, with shape identical
-#'   to `tinyVAST(...)$internal$parlist`
+#' @param tmb_par named list of parameters used as starting values.  Elements that
+#'        have names that match those constructed internally then replace the
+#'        internally constructed starting values.  Those that match must have identical
+#'        shape to `tinyVAST(...)$internal$parlist`
 #' @param tmb_map input passed to [TMB::MakeADFun] as argument `map`, over-writing
-#'   the version `tinyVAST(...)$tmb_inputs$tmb_map` and allowing detailed control
-#'   over estimated parameters (advanced feature)
+#'        the version `tinyVAST(...)$tmb_inputs$tmb_map` and allowing detailed control
+#'        over estimated parameters (advanced feature)
 #' @param tmb_random input passed to [TMB::MakeADFun] as argument `random`, over-writing
-#'   the version `tinyVAST(...)$tmb_inputs$tmb_random` and allowing detailed control
-#'   over parameters treated as random effects.  `tmb_random = NULL` uses
-#'   the default (internal) construction, and use `tmb_random = c()` to use
-#'   penalized likelihood (presumably while also modifying `tmb_map` and `tmb_par`)
+#'        the version `tinyVAST(...)$tmb_inputs$tmb_random` and allowing detailed control
+#'        over parameters treated as random effects.  `tmb_random = NULL` uses
+#'        the default (internal) construction, and use `tmb_random = c()` to use
+#'        penalized likelihood (presumably while also modifying `tmb_map` and `tmb_par`)
 #' @param eval.max Maximum number of evaluations of the objective function
-#'   allowed. Passed to `control` in [stats::nlminb()].
+#'        allowed. Passed to `control` in [stats::nlminb()].
 #' @param iter.max Maximum number of iterations allowed. Passed to `control` in
-#'   [stats::nlminb()].
+#'        [stats::nlminb()].
 #' @param verbose Output additional messages about model steps during fitting?
 #' @param silent Disable terminal output for inner optimizer?
 #' @param trace Parameter values are printed every `trace` iteration
-#'   for the outer optimizer. Passed to
-#'   `control` in [stats::nlminb()].
+#'        for the outer optimizer. Passed to
+#'        `control` in [stats::nlminb()].
 #' @param profile Character-vector passed to [TMB::MakeADFun] and see description
 #'        there.  Fixed effects that are highly correlated with random effects
 #'        can often be estimated faster (i.e., with fewer iterations) by adding

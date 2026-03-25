@@ -2,6 +2,7 @@
 
 * Adding nearest-neighbors Gaussian Process option 
 * Add tinyVASTcontrol(tmb_random) argument to allow exploration of penalized likelihood
+* Modifying tinyVASTcontrol(tmb_par) to allow users to supply a partial list of starting values, e.g., to provide values for semi-variance parameters when changing model resolution.
 
 # tinyVAST 1.5.0
 

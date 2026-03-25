@@ -61,8 +61,10 @@ them to \code{profile}. The most common use-case is
 \code{profile = c("alpha_j","alpha2_j")}.  However, doing so will have
 a small impact on model estimates and predictions.}
 
-\item{tmb_par}{list of parameters for starting values, with shape identical
-to \code{tinyVAST(...)$internal$parlist}}
+\item{tmb_par}{named list of parameters used as starting values.  Elements that
+have names that match those constructed internally then replace the
+internally constructed starting values.  Those that match must have identical
+shape to \code{tinyVAST(...)$internal$parlist}}
 
 \item{tmb_map}{input passed to \link[TMB:MakeADFun]{TMB::MakeADFun} as argument \code{map}, over-writing
 the version \code{tinyVAST(...)$tmb_inputs$tmb_map} and allowing detailed control
