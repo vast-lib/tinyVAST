@@ -982,7 +982,7 @@ function( formula,
     tmb_random = union( tmb_random, c("alpha_j","alpha2_j") )
   }
   if( !is.null(control$tmb_random) ){
-    tmb_random = control$tmb_random
+    tmb_random = intersect( control$tmb_random, names(tmb_par) )
   }
 
   # User-specified tmb_par
@@ -1076,20 +1076,43 @@ function( formula,
   
   # Optimize
   #start_time = Sys.time()
-  if( isTRUE(control$suppress_nlminb_warnings) ){
-    do_nlminb = function( ... ) suppressWarnings(nlminb( ... ))
-  }else{
-    do_nlminb = function( ... ) nlminb( ... )
+  #if( isTRUE(control$suppress_optimizer_warnings) ){
+  #  wrapper = \(x) suppressWarnings(x)
+  #}else{
+  #  wrapper = \(x) x
+  #}
+  run_optimizer = function( obj, control ){
+    if( control$optimizer == "nlminb" ){
+      out = suppressWarnings(nlminb(
+        start = opt$par,
+        objective = obj$fn,
+        gradient = obj$gr,
+        control = list(
+          eval.max = control$eval.max,
+          iter.max = control$iter.max,
+          trace = control$trace
+        )
+      ))
+    }else{
+      out = suppressWarnings(optim(
+        par = opt$par,
+        fn = obj$fn,
+        gr = obj$gr,
+        method = control$optimize,
+        control = list(
+          maxit = control$iter.max,
+          trace = control$trace,
+          factr = 0.0001
+        )
+      ))
+    }
+    return(out)
   }
   opt = list( "par"=obj$par )
-  for( i in seq_len(max(0,control$nlminb_loops)) ){
-    if( isTRUE(control$verbose) ) message("Running nlminb_loop #", i)
-    opt = do_nlminb( start = opt$par,
-                  objective = obj$fn,
-                  gradient = obj$gr,
-                  control = list( eval.max = control$eval.max,
-                                  iter.max = control$iter.max,
-                                  trace = control$trace ) )
+  #browser()
+  for( i in seq_len(max(0,control$opt_loops)) ){
+    if( isTRUE(control$verbose) ) message("Running optimizer_loop #", i)
+    opt = run_optimizer( obj, control )
   }
   #Sys.time() - start_time
   #opt
@@ -1100,7 +1123,8 @@ function( formula,
     g = as.numeric( obj$gr(opt$par) )
     h = optimHess(opt$par, fn=obj$fn, gr=obj$gr)
     opt$par = opt$par - solve(h, g)
-    opt$objective = obj$fn(opt$par)
+    if("objective" %in% names(opt)) opt$objective = obj$fn(opt$par)
+    if("value" %in% names(opt)) opt$value = obj$fn(opt$par)
   }
 
   # Run sdreport
@@ -1178,7 +1202,7 @@ function( formula,
 
 #' @title Control parameters for tinyVAST
 #'
-#' @param nlminb_loops Integer number of times to call [stats::nlminb()].
+#' @param opt_loops Integer number of times to call nonlinear optimizer.
 #' @param newton_loops Integer number of Newton steps to do after running
 #'        [stats::nlminb()].
 #' @param getsd Boolean indicating whether to call [TMB::sdreport()]
@@ -1192,7 +1216,8 @@ function( formula,
 #' @param tmb_random input passed to [TMB::MakeADFun] as argument `random`, over-writing
 #'        the version `tinyVAST(...)$tmb_inputs$tmb_random` and allowing detailed control
 #'        over parameters treated as random effects.  `tmb_random = NULL` uses
-#'        the default (internal) construction, and use `tmb_random = c()` to use
+#'        the default (internal) construction, and use `tmb_random = c("empty")`
+#'        (or some other name that doesn't match actual parameters) to use
 #'        penalized likelihood (presumably while also modifying `tmb_map` and `tmb_par`)
 #' @param eval.max Maximum number of evaluations of the objective function
 #'        allowed. Passed to `control` in [stats::nlminb()].
@@ -1224,9 +1249,9 @@ function( formula,
 #'        explained.  See [deviance_explained()]
 #' @param run_model whether to run the model of export TMB objects prior to compilation
 #'        (useful for debugging)
-#' @param suppress_nlminb_warnings whether to suppress uniformative warnings
-#'        from \code{nlminb} arising when a function evaluation is NA, which
-#'        are then replaced with Inf and avoided during estimation
+#' @param optimizer which gradient-based optimizer to use.
+#'        "L-BFGS-B" is necessary for penalized likelihood involving >40,000
+#'        coefficients.
 #' @param suppress_user_warnings whether to suppress warnings from
 #'        package author regarding dangerous or non-standard options
 #' @param get_rsr Experimental option, whether to report restricted spatial
@@ -1256,10 +1281,10 @@ function( formula,
 #'
 #' @export
 tinyVASTcontrol <-
-function( nlminb_loops = 1,
+function( opt_loops = 1,
           newton_loops = 0,
-          eval.max = 1000,
-          iter.max = 1000,
+          eval.max = 10000,
+          iter.max = 10000,
           getsd = TRUE,
           silent = getOption("tinyVAST.silent", TRUE),
           trace = getOption("tinyVAST.trace", 0),
@@ -1274,7 +1299,8 @@ function( nlminb_loops = 1,
           getJointPrecision = FALSE,
           calculate_deviance_explained = TRUE,
           run_model = TRUE,
-          suppress_nlminb_warnings = TRUE,
+          optimizer = c("nlminb", "L-BFGS-B"),
+          #suppress_optimizer_warnings = TRUE,
           suppress_user_warnings = FALSE,
           get_rsr = FALSE,
           extra_reporting = FALSE,
@@ -1284,10 +1310,14 @@ function( nlminb_loops = 1,
           barrier_stiffness = 0.01 ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
+  optimizer = match.arg(optimizer)
+  # @param suppress_optimizer_warnings whether to suppress uniformative warnings
+  #        from \code{nlminb} arising when a function evaluation is NA, which
+  #        are then replaced with Inf and avoided during estimation
 
   # Return
   structure( list(
-    nlminb_loops = nlminb_loops,
+    opt_loops = opt_loops,
     newton_loops = newton_loops,
     eval.max = eval.max,
     iter.max = iter.max,
@@ -1305,7 +1335,8 @@ function( nlminb_loops = 1,
     getJointPrecision = getJointPrecision,
     calculate_deviance_explained = calculate_deviance_explained,
     run_model = run_model,
-    suppress_nlminb_warnings = suppress_nlminb_warnings,
+    optimizer = optimizer,
+    #suppress_optimizer_warnings = suppress_optimizer_warnings,
     suppress_user_warnings = suppress_user_warnings,
     get_rsr = get_rsr,
     extra_reporting = extra_reporting,

@@ -5,10 +5,10 @@
 \title{Control parameters for tinyVAST}
 \usage{
 tinyVASTcontrol(
-  nlminb_loops = 1,
+  opt_loops = 1,
   newton_loops = 0,
-  eval.max = 1000,
-  iter.max = 1000,
+  eval.max = 10000,
+  iter.max = 10000,
   getsd = TRUE,
   silent = getOption("tinyVAST.silent", TRUE),
   trace = getOption("tinyVAST.trace", 0),
@@ -22,7 +22,7 @@ tinyVASTcontrol(
   getJointPrecision = FALSE,
   calculate_deviance_explained = TRUE,
   run_model = TRUE,
-  suppress_nlminb_warnings = TRUE,
+  optimizer = c("nlminb", "L-BFGS-B"),
   suppress_user_warnings = FALSE,
   get_rsr = FALSE,
   extra_reporting = FALSE,
@@ -33,7 +33,7 @@ tinyVASTcontrol(
 )
 }
 \arguments{
-\item{nlminb_loops}{Integer number of times to call \code{\link[stats:nlminb]{stats::nlminb()}}.}
+\item{opt_loops}{Integer number of times to call nonlinear optimizer.}
 
 \item{newton_loops}{Integer number of Newton steps to do after running
 \code{\link[stats:nlminb]{stats::nlminb()}}.}
@@ -73,7 +73,8 @@ over estimated parameters (advanced feature)}
 \item{tmb_random}{input passed to \link[TMB:MakeADFun]{TMB::MakeADFun} as argument \code{random}, over-writing
 the version \code{tinyVAST(...)$tmb_inputs$tmb_random} and allowing detailed control
 over parameters treated as random effects.  \code{tmb_random = NULL} uses
-the default (internal) construction, and use \code{tmb_random = c()} to use
+the default (internal) construction, and use \code{tmb_random = c("empty")}
+(or some other name that doesn't match actual parameters) to use
 penalized likelihood (presumably while also modifying \code{tmb_map} and \code{tmb_par})}
 
 \item{gmrf_parameterization}{Parameterization to use for the Gaussian Markov
@@ -96,9 +97,9 @@ explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 \item{run_model}{whether to run the model of export TMB objects prior to compilation
 (useful for debugging)}
 
-\item{suppress_nlminb_warnings}{whether to suppress uniformative warnings
-from \code{nlminb} arising when a function evaluation is NA, which
-are then replaced with Inf and avoided during estimation}
+\item{optimizer}{which gradient-based optimizer to use.
+"L-BFGS-B" is necessary for penalized likelihood involving >40,000
+coefficients.}
 
 \item{suppress_user_warnings}{whether to suppress warnings from
 package author regarding dangerous or non-standard options}

@@ -349,7 +349,8 @@ function( object,
 #' @importFrom stats logLik
 #' @export
 logLik.tinyVAST <- function(object, ...) {
-  val = -1 * object$opt$objective
+  if("objective" %in% names(object$opt)) val = -1 * object$opt$objective
+  if("value" %in% names(object$opt)) val = -1 * object$opt$value
   # Get df including profiled parameters
   df = length( object$opt$par ) +
        sum(names(object$obj$env$last.par) %in% object$internal$control$profile)

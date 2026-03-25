@@ -3,6 +3,7 @@
 * Adding nearest-neighbors Gaussian Process option 
 * Add tinyVASTcontrol(tmb_random) argument to allow exploration of penalized likelihood
 * Modifying tinyVASTcontrol(tmb_par) to allow users to supply a partial list of starting values, e.g., to provide values for semi-variance parameters when changing model resolution.
+* Add tinyVASTcontrol option for using optim(method="L-BFGS-B"), which is necessary when using penalized likelihood with >40,000 random effects.  And removing tinyVASTcontrol option for supress_optim_warnings (making it always TRUE)  
 
 # tinyVAST 1.5.0
 
