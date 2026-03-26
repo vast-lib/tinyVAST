@@ -65,7 +65,7 @@ function( x,
   }
 
   cat( "Sanity check: \n")
-  (s <- sanity(x))
+  (s <- sanity(x, silent = ifelse(length(x$obj$par)>1000,FALSE,TRUE)) )
   if (!all(unlist(s))) {
     cat("\n**Possible issues detected! Check output of sanity().**\n")
   }

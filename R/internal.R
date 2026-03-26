@@ -293,8 +293,12 @@ function( coords, nn, what = c("full","empty") ){
   }
 
   # Re-order
-  gp_order = order_maxmin(coords)
+  # GpGp::order_maxmin fails for large models (e.g., 2 million coords)
+  # while GPvecchia::order_maxmin_exact works for large models and claims to scale linearly with size
+  gp_order = order_maxmin_exact(coords)
   ordered_nn = find_ordered_nn( coords[gp_order,], m = 4L)
+  # GPvecchia::vecchia_specify seems slower than GpGp::find_ordered_nn
+  #ordered_nn2 = GPvecchia::vecchia_specify(locs, m, ordering = "maxmin")
   ordered_structure = precompute_nngp_structure( coords[gp_order,], nn = ordered_nn)
 
   ##############

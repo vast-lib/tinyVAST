@@ -45,7 +45,8 @@ Imports:
     sparseinv,
     gstat,
     cli,
-    GpGp
+    GpGp,
+    GPvecchia
 Suggests:
     ggplot2,
     knitr,

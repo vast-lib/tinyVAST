@@ -152,7 +152,8 @@
 #' @importFrom sf st_relate st_coordinates st_centroid st_within st_crs
 #'   st_geometry_type st_geometry
 #' @importFrom cli cli_abort cli_warn cli_inform cli_alert_success cli_alert_danger cli_alert_info
-#' @importFrom GpGp order_maxmin find_ordered_nn
+#' @importFrom GpGp find_ordered_nn
+#' @importFrom GPvecchia order_maxmin_exact
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
@@ -1058,7 +1059,21 @@ function( formula,
   #obj$env$beSilent()
   # L = rep$IminusRho_hh %*% rep$Gamma_hh
 
-  # 
+  if( length(obj$par) > 10^4 ){
+    if( control$optimizer == "nlminb" ){
+      warning("Consider switching to optimizer = 'L-BFGS-B'")
+    }
+    if( control$trace > 0 ){
+      stop("Set `trace = 0` given many parameters")
+    }
+    if( isTRUE(control$getsd) ){
+      stop("Set `getsd = FALSE` given many parameters")
+    }
+    if( isTRUE(control$newton_loops > 0) ){
+      stop("Set `newton_loops = 0` given many parameters")
+    }
+  }
+  #
   #if( !is.null(development$method) ){
   #  # if `tol = 0`, it can run for a very long time!]
   #  # if `tol = 1e-4` (the default), it might return NAs and fail optimizer
@@ -1082,7 +1097,12 @@ function( formula,
   #  wrapper = \(x) x
   #}
   run_optimizer = function( obj, control ){
-    if( control$optimizer == "nlminb" ){
+    if( length(obj$par) ==0 ){
+      out = list(
+        par = obj$par,
+        value = obj$fn()
+      )
+    }else if( control$optimizer == "nlminb" ){
       out = suppressWarnings(nlminb(
         start = opt$par,
         objective = obj$fn,
@@ -1131,9 +1151,11 @@ function( formula,
   if( isTRUE(control$getsd) ){
     if( isTRUE(control$verbose) ) message("Running sdreport")
     Hess_fixed = optimHess( par=opt$par, fn=obj$fn, gr=obj$gr )
-    sdrep = sdreport( obj,
-                      hessian.fixed = Hess_fixed,
-                      getJointPrecision = control$getJointPrecision )
+    sdrep = sdreport(
+      obj,
+      hessian.fixed = Hess_fixed,
+      getJointPrecision = control$getJointPrecision
+    )
   }else{
     Hess_fixed = sdrep = NULL
   }
