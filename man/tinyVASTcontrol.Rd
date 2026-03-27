@@ -22,7 +22,6 @@ tinyVASTcontrol(
   getJointPrecision = FALSE,
   calculate_deviance_explained = TRUE,
   run_model = TRUE,
-  optimizer = c("nlminb", "L-BFGS-B"),
   suppress_user_warnings = FALSE,
   get_rsr = FALSE,
   extra_reporting = FALSE,
@@ -96,10 +95,6 @@ explained.  See \code{\link[=deviance_explained]{deviance_explained()}}}
 
 \item{run_model}{whether to run the model of export TMB objects prior to compilation
 (useful for debugging)}
-
-\item{optimizer}{which gradient-based optimizer to use.
-"L-BFGS-B" is necessary for penalized likelihood involving >40,000
-coefficients.}
 
 \item{suppress_user_warnings}{whether to suppress warnings from
 package author regarding dangerous or non-standard options}

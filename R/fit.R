@@ -240,17 +240,19 @@ function( formula,
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   # Add `development` stuff
-  if( !is.null(development$vertex_formula) ){
-    vertex_formula = development$vertex_formula
-  }else{
-    vertex_formula = ~ 0
+  if( is.null(development$vertex_formula) ){
+    development$vertex_formula = ~ 0
   }
-  if( !is.null(development$triangle_formula) ){
-    triangle_formula = development$triangle_formula
-  }else{
-    triangle_formula = ~ 0
+  if( is.null(development$triangle_formula) ){
+    development$triangle_formula = ~ 0
   }
-  
+  if( is.null(development$intern) ){
+    development$intern = FALSE
+  }
+  if( is.null(development$optimizer) ){
+    development$optimizer = "nlminb"
+  }
+
   # Avoid name conflict
   if( "fake" %in% colnames(spatial_domain$triangle_covariates) ){
     stop("change colnames in `triangle_covariates` to avoid `fake`")
@@ -262,10 +264,10 @@ function( formula,
     stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name", call. = FALSE)
   }
   if( !is(spatial_domain,"vertex_coords") ){
-    if( vertex_formula != as.formula("~0") ){
+    if( development$vertex_formula != as.formula("~0") ){
       stop("specifying `vertex_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
-    if( triangle_formula != as.formula("~0") ){
+    if( development$triangle_formula != as.formula("~0") ){
       stop("specifying `triangle_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
   }
@@ -456,7 +458,7 @@ function( formula,
 
   # Parse each `spatial_domain`
   if( is(spatial_domain,"vertex_coords") ){
-    updated_vertex_formula = update.formula( old = vertex_formula, new = "~ . + 0" )
+    updated_vertex_formula = update.formula( old = development$vertex_formula, new = "~ . + 0" )
     Terms <- terms(updated_vertex_formula, data = spatial_domain$vertex_covariates)
     mf <- model.frame(
       updated_vertex_formula,
@@ -474,8 +476,8 @@ function( formula,
     #  update.formula( old = ~ AK + GOA + BS, new = "~ . + 0" ),
     #  spatial_domain$triangle_covariates
     #)
-    if( triangle_formula != as.formula("~0") ){
-      gam_setup = mgcv::gam( update.formula( old = triangle_formula, new = "fake ~ . + 0" ), 
+    if( development$triangle_formula != as.formula("~0") ){
+      gam_setup = mgcv::gam( update.formula( old = development$triangle_formula, new = "fake ~ . + 0" ),
                              data = cbind( "fake" = 0, spatial_domain$triangle_covariates ), 
                              fit = FALSE )
       V_zk = cbind( offset = gam_setup$offset, gam_setup$X ) # First is always the offset
@@ -1048,19 +1050,23 @@ function( formula,
     dyn.load(dynlib("tinyVAST"))
   }
   #browser()
-  obj = MakeADFun( data = tmb_data,
-                   parameters = tmb_par,
-                   map = tmb_map,
-                   random = tmb_random,
-                   DLL = "tinyVAST",
-                   profile = control$profile,
-                   silent = control$silent )  #
+  obj = MakeADFun(
+    data = tmb_data,
+    parameters = tmb_par,
+    map = tmb_map,
+    random = tmb_random,
+    DLL = "tinyVAST",
+    profile = control$profile,
+    silent = control$silent,
+    intern = development$intern,
+    inner.control = list(sparse=TRUE, lowrank=FALSE, trace=FALSE)   # Controls defaults for newton
+  )  #
   #openmp( ... , DLL="tinyVAST" )
   #obj$env$beSilent()
   # L = rep$IminusRho_hh %*% rep$Gamma_hh
 
   if( length(obj$par) > 10^4 ){
-    if( control$optimizer == "nlminb" ){
+    if( development$optimizer == "nlminb" ){
       warning("Consider switching to optimizer = 'L-BFGS-B'")
     }
     if( control$trace > 0 ){
@@ -1097,12 +1103,15 @@ function( formula,
   #  wrapper = \(x) x
   #}
   run_optimizer = function( obj, control ){
-    if( length(obj$par) ==0 ){
+    if( development$optimizer == "newton" ){
+      if( length(obj$par)>=0 ){
+        stop("newton only works using penalized likelihood with all parameters profiled")
+      }
       out = list(
         par = obj$par,
         value = obj$fn()
       )
-    }else if( control$optimizer == "nlminb" ){
+    }else if( development$optimizer == "nlminb" ){
       out = suppressWarnings(nlminb(
         start = opt$par,
         objective = obj$fn,
@@ -1113,7 +1122,7 @@ function( formula,
           trace = control$trace
         )
       ))
-    }else{
+    }else if(development$optimizer == "L-BFGS-B"){
       out = suppressWarnings(optim(
         par = opt$par,
         fn = obj$fn,
@@ -1125,6 +1134,8 @@ function( formula,
           factr = 0.0001
         )
       ))
+    }else{
+      stop("optimizer not recognized")
     }
     return(out)
   }
@@ -1271,9 +1282,6 @@ function( formula,
 #'        explained.  See [deviance_explained()]
 #' @param run_model whether to run the model of export TMB objects prior to compilation
 #'        (useful for debugging)
-#' @param optimizer which gradient-based optimizer to use.
-#'        "L-BFGS-B" is necessary for penalized likelihood involving >40,000
-#'        coefficients.
 #' @param suppress_user_warnings whether to suppress warnings from
 #'        package author regarding dangerous or non-standard options
 #' @param get_rsr Experimental option, whether to report restricted spatial
@@ -1321,7 +1329,8 @@ function( opt_loops = 1,
           getJointPrecision = FALSE,
           calculate_deviance_explained = TRUE,
           run_model = TRUE,
-          optimizer = c("nlminb", "L-BFGS-B"),
+          #optimizer = c("nlminb", "L-BFGS-B", "newton"),
+          #intern = FALSE,
           #suppress_optimizer_warnings = TRUE,
           suppress_user_warnings = FALSE,
           get_rsr = FALSE,
@@ -1332,10 +1341,14 @@ function( opt_loops = 1,
           barrier_stiffness = 0.01 ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
-  optimizer = match.arg(optimizer)
+  #optimizer = match.arg(optimizer)
   # @param suppress_optimizer_warnings whether to suppress uniformative warnings
   #        from \code{nlminb} arising when a function evaluation is NA, which
   #        are then replaced with Inf and avoided during estimation
+  # @param optimizer which gradient-based optimizer to use.
+  #        "L-BFGS-B" is necessary for penalized likelihood involving >40,000
+  #        coefficients.
+  # @param intern Do Laplace approximation on C++ side? (passed to [TMB::MakeADFun()])
 
   # Return
   structure( list(
@@ -1357,7 +1370,8 @@ function( opt_loops = 1,
     getJointPrecision = getJointPrecision,
     calculate_deviance_explained = calculate_deviance_explained,
     run_model = run_model,
-    optimizer = optimizer,
+    #optimizer = optimizer,
+    #intern = intern,
     #suppress_optimizer_warnings = suppress_optimizer_warnings,
     suppress_user_warnings = suppress_user_warnings,
     get_rsr = get_rsr,
