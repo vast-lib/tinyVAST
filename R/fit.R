@@ -74,7 +74,8 @@
 #'        if `variables=NULL`, then it is filled in as the unique values
 #'        from `data$variables`.
 #' @param delta_options a named list with slots for \code{formula},
-#'        \code{space_term}, and \code{spacetime_term}. These specify options for the
+#'        \code{space_term}, \code{spacetime_term}, \code{time_term}, and
+#'        \code{spatial_varying}. These specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_varying a formula specifying spatially varying coefficients (SVC). Note that
