@@ -247,7 +247,10 @@ is_areal_sf <- function(x) {
 
 # Make list of data containing SCALAR or VECTOR elements representing a NNGP
 make_nngp_data =
-function( coords, nn, what = c("full","empty") ){
+function( coords,
+          nn,
+          what = c("full","empty") ){
+
   what = match.arg(what)
   if( what == "empty" ){
     return(list(

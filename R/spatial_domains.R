@@ -197,3 +197,55 @@ function( sfnetwork_mesh,
   if(what=="Q") out = Q
   return(out)
 }
+
+#' @title Make spatial object for NNGP
+#'
+#' @description
+#' Convert an sf areal model object to a class `"nngp_domain"` that is recognized
+#'   by tinyVAST for nearest neighbors Gaussian process models
+#'
+#' @param sf_areal an sf or sfc object containing "POLYGON" and "MULTIPOLYGON" types
+#' @param nn Number of nearest neighbors
+#'
+#' @return a list of NNGP data objects created by tinyVAST:::make_nngp_data,
+#'    as well as the provided sf object
+#'
+#' @export
+make_nngp_domain <-
+function( sf_areal,
+          nn  ){
+
+  if( isFALSE(is_areal_sf(sf_areal)) ){
+    stop("`sf_areal` must represent an areal model")
+  }
+
+  #
+  nngp_data = make_nngp_data(
+    coords = st_coordinates(st_centroid(sf_areal)),
+    nn = nn
+  )
+
+  #
+  out = structure( list(
+    nngp_data = nngp_data,
+    sf_areal = sf_areal,
+    nn = nn
+  ), class="nngp_domain" )
+  return(out)
+}
+
+#' @title Plot nngp_domain
+#' @param x output from \code{make_nngp_domain}
+#' @param y not used
+#' @param ... not used
+#' @method plot nngp_domain
+#' @import methods
+#' @export
+plot.nngp_domain <-
+function( x,
+          y,
+          ... ){
+
+  plot( x$sf_areal )
+}
+

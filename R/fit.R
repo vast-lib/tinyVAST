@@ -527,7 +527,7 @@ function( formula,
     estimate_kappa = TRUE
     kappa_startvalue = 1
     estimate_anisotropy = FALSE
-  }else if( is_areal_sf(spatial_domain) & is.null(control$nearest_neighbors) ){
+  }else if( is_areal_sf(spatial_domain) ){
     # SAR with geometric anisotropy
     spatial_method_code = 5
     n_s = length(spatial_domain)
@@ -556,21 +556,22 @@ function( formula,
     estimate_kappa = TRUE
     kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
-  }else if( is_areal_sf(spatial_domain) & !is.null(control$nearest_neighbors) ){
+  }else if( is(spatial_domain,"nngp_domain") ){
     spatial_method_code = 7
-    n_s = length(spatial_domain)
-    nngp_data = make_nngp_data(
-      coords = st_coordinates(st_centroid(spatial_domain)),
-      nn = control$nearest_neighbors
-    )
+    n_s = length(spatial_domain$sf_areal)
+    #nngp_data = make_nngp_data(
+    #  coords = st_coordinates(st_centroid(spatial_domain)),
+    #  nn = control$nearest_neighbors
+    #)
+    nngp_data = spatial_domain$nngp_data
     sf_coords = st_as_sf( data,
                           coords = space_columns,
-                          crs = st_crs(spatial_domain) )
-    s_i = as.integer(st_within( sf_coords, spatial_domain ))
+                          crs = st_crs(spatial_domain$sf_areal) )
+    s_i = as.integer(st_within( sf_coords, spatial_domain$sf_areal ))
     A_is = sparseMatrix( i = seq_along(s_i),
                          j = s_i,
                          x = 1,
-                         dims = c(length(s_i),length(spatial_domain)) )
+                         dims = c(length(s_i),n_s) )
     estimate_kappa = TRUE
     kappa_startvalue = 1
     estimate_anisotropy = FALSE
@@ -1294,9 +1295,6 @@ function( formula,
 #' @param sar_adjacency Whether to use queen or rook adjacency when defining
 #'        a Simultaneous Autoregressive spatial precision from a sfc_GEOMETRY
 #'        (default is queen)
-#' @param nearest_neighbors Number of nearest neighbors to use for nearest-neighbors
-#'        Gaussian process.  Only used if `spatial_domain` is an areal model, and
-#'        `nearest_neighbors = NULL` reverts to using a SAR model
 #' @param barrier_stiffness The ratio of local stiffness (the scale of diffusion
 #'        rate and resulting decorrelation distance) for barriers relative to normal areas
 #'        in the SPDE method when using \code{add_mesh_covariates}.  The
@@ -1338,7 +1336,6 @@ function( opt_loops = 1,
           extra_reporting = FALSE,
           use_anisotropy = FALSE,
           sar_adjacency = "queen",
-          nearest_neighbors = NULL,
           barrier_stiffness = 0.01 ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
@@ -1379,7 +1376,6 @@ function( opt_loops = 1,
     extra_reporting = extra_reporting,
     use_anisotropy = use_anisotropy,
     sar_adjacency = sar_adjacency,
-    nearest_neighbors = nearest_neighbors,
     barrier_stiffness = barrier_stiffness
   ), class = "tinyVASTcontrol" )
 }
