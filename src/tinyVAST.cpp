@@ -1007,12 +1007,12 @@ Type two_predictor_likelihood( Type &y,
   }
   if( !R_IsNA(asDouble(y)) ){
     // Distribution
+    if(isDouble<Type>::value && of->do_simulate){
+      y = rbinom( Type(1), mu1 );
+    }
     if( y == 0 ){
       nll = -1 * log_one_minus_mu1;
       dev = -2 * log_one_minus_mu1;
-      if(isDouble<Type>::value && of->do_simulate){
-        y = rbinom( Type(1), mu1 );
-      }
     }
     if( y>0 ){  // Not if-else so y>0 triggered when simulating y>0
       nll = -1 * logmu1;

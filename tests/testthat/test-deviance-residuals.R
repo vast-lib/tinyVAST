@@ -234,7 +234,7 @@ test_that("deviance residuals for Bernoulli works", {
   mu = plogis(1 + 0.5*x)
   y = rbinom( n=100, prob=mu, size=1 )
 
-  # delta-gamma in tinyVAST
+  # binomial in tinyVAST
   mytiny = tinyVAST( y ~ 1 + x,
                      data = data.frame(x=x, y=y),
                      family = binomial("logit") )
@@ -321,12 +321,15 @@ test_that("delta-gamma works", {
       rbinom( n=100, size=1, prob=0.5 )
 
   # delta-gamma in tinyVAST
-  mytiny = tinyVAST( y ~ 1 + x,
+  mytiny = tinyVAST( y ~ 1,
                      data = data.frame(x=x, y=y),
                      family = delta_gamma(),
                      delta_options = list(
-                       formula = ~ 1 + x
+                       formula = ~ 1
                      ) )
+
+  # conditional simulation
+  y_ir = simulate( mytiny, nsim = 20 )
 
   # separate GLMs
   myglm1 = glm( present ~ 1 + x,
