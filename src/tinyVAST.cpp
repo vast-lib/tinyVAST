@@ -833,7 +833,7 @@ Type one_predictor_likelihood( Type &y,
 
 // distribution/projection for epsilon
 template<class Type>
-Type two_predictor_likelihood( Type y,
+Type two_predictor_likelihood( Type &y,
                                Type p1,
                                Type p2,
                                Type size,
