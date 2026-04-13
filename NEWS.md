@@ -1,3 +1,8 @@
+
+# tinyVAST 1.5.1
+
+* Fix bug, where previous versions where not simulating measurement errors for delta-models using obj$simulate().  h\t github ilar-cloud for reporting on issue-402
+
 # tinyVAST 1.5.0
 
 * Add starting value log_kappa when using SPDE method, using SD of X and Y coordinates and converting to equivalent kappa
