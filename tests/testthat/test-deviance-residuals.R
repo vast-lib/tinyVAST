@@ -321,11 +321,11 @@ test_that("delta-gamma works", {
       rbinom( n=100, size=1, prob=0.5 )
 
   # delta-gamma in tinyVAST
-  mytiny = tinyVAST( y ~ 1,
+  mytiny = tinyVAST( y ~ 1 + x,
                      data = data.frame(x=x, y=y),
                      family = delta_gamma(),
                      delta_options = list(
-                       formula = ~ 1
+                       formula = ~ 1 + x
                      ) )
 
   # conditional simulation
