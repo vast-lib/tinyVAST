@@ -26,7 +26,13 @@ tinyVAST is an R package that fits multivariate spatio-temporal models while usi
 
 ## Installation
 
-tinyVAST can be installed from GitHub:
+tinyVAST can be installed from CRAN:
+
+``` r
+install.packages("tinyVAST")
+```
+
+or the `dev` branch (subject to ongoing changes) can be installed from GitHub:
 
 ``` r
 library(devtools)
