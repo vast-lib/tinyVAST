@@ -65,7 +65,8 @@ families by row of data. Delta model families are possible, and see
 For binomial family options, see 'Binomial families' in the Details section below.}
 
 \item{delta_options}{a named list with slots for \code{formula},
-\code{space_term}, and \code{spacetime_term}. These specify options for the
+\code{space_term}, \code{spacetime_term}, \code{time_term}, and
+\code{spatial_varying}. These specify options for the
 second linear predictor of a delta model, and are only used (or estimable)
 when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.}
 

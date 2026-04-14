@@ -1,3 +1,10 @@
+# tinyVAST 1.6.0
+
+* Adding nearest-neighbors Gaussian Process option 
+* Add tinyVASTcontrol(tmb_random) argument to allow exploration of penalized likelihood
+* Modifying tinyVASTcontrol(tmb_par) to allow users to supply a partial list of starting values, e.g., to provide values for semi-variance parameters when changing model resolution.
+* Add `development$optimizer` argument for using optim(method="L-BFGS-B") or `TMB::newton`, which is necessary when using penalized likelihood with >40,000 random effects.  And removing tinyVASTcontrol option for suppress_optim_warnings (making it always TRUE)  
+* Adding Makevar -DTMBAD_INDEX_TYPE=uint64_t to allow GetTape for RTMB manipulation
 
 # tinyVAST 1.5.1
 

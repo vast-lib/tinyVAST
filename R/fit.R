@@ -74,7 +74,8 @@
 #'        if `variables=NULL`, then it is filled in as the unique values
 #'        from `data$variables`.
 #' @param delta_options a named list with slots for \code{formula},
-#'        \code{space_term}, and \code{spacetime_term}. These specify options for the
+#'        \code{space_term}, \code{spacetime_term}, \code{time_term}, and
+#'        \code{spatial_varying}. These specify options for the
 #'        second linear predictor of a delta model, and are only used (or estimable)
 #'        when a \code{\link[tinyVAST:families]{delta family}} is used for some samples.
 #' @param spatial_varying a formula specifying spatially varying coefficients (SVC). Note that
@@ -141,7 +142,7 @@
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
 #'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula binomial poisson predict as.formula na.pass sd
+#'   update.formula binomial poisson predict as.formula na.pass sd dist optim
 #' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport runSymbolicAnalysis config
 #' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
@@ -152,6 +153,8 @@
 #' @importFrom sf st_relate st_coordinates st_centroid st_within st_crs
 #'   st_geometry_type st_geometry
 #' @importFrom cli cli_abort cli_warn cli_inform cli_alert_success cli_alert_danger cli_alert_info
+#' @importFrom GpGp find_ordered_nn
+#' @importFrom GPvecchia order_maxmin_exact
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
@@ -238,17 +241,19 @@ function( formula,
   if(inherits(data,"tbl")) stop("`data` must be a data.frame and cannot be a tibble")
 
   # Add `development` stuff
-  if( !is.null(development$vertex_formula) ){
-    vertex_formula = development$vertex_formula
-  }else{
-    vertex_formula = ~ 0
+  if( is.null(development$vertex_formula) ){
+    development$vertex_formula = ~ 0
   }
-  if( !is.null(development$triangle_formula) ){
-    triangle_formula = development$triangle_formula
-  }else{
-    triangle_formula = ~ 0
+  if( is.null(development$triangle_formula) ){
+    development$triangle_formula = ~ 0
   }
-  
+  if( is.null(development$intern) ){
+    development$intern = FALSE
+  }
+  if( is.null(development$optimizer) ){
+    development$optimizer = "nlminb"
+  }
+
   # Avoid name conflict
   if( "fake" %in% colnames(spatial_domain$triangle_covariates) ){
     stop("change colnames in `triangle_covariates` to avoid `fake`")
@@ -260,12 +265,15 @@ function( formula,
     stop("Naming argument `family` as `family` conflicts with function `cv::cv`, please use `family = Family` or other name", call. = FALSE)
   }
   if( !is(spatial_domain,"vertex_coords") ){
-    if( vertex_formula != as.formula("~0") ){
+    if( development$vertex_formula != as.formula("~0") ){
       stop("specifying `vertex_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
-    if( triangle_formula != as.formula("~0") ){
+    if( development$triangle_formula != as.formula("~0") ){
       stop("specifying `triangle_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
+  }
+  if( !is.null(control$nearest_neighbors) & (control$gmrf_parameterization != "projection") ){
+    stop("`nearest neighbors` only works with `projection` gmrf_parameterization")
   }
 
   # Haven't tested for extra levels
@@ -446,9 +454,12 @@ function( formula,
   # n_Hpars is the number of params in H AND the dim of H
   n_Hpars = 2
 
+  # Empty default
+  nngp_data = make_nngp_data( what = "empty" )
+
   # Parse each `spatial_domain`
   if( is(spatial_domain,"vertex_coords") ){
-    updated_vertex_formula = update.formula( old = vertex_formula, new = "~ . + 0" )
+    updated_vertex_formula = update.formula( old = development$vertex_formula, new = "~ . + 0" )
     Terms <- terms(updated_vertex_formula, data = spatial_domain$vertex_covariates)
     mf <- model.frame(
       updated_vertex_formula,
@@ -466,8 +477,8 @@ function( formula,
     #  update.formula( old = ~ AK + GOA + BS, new = "~ . + 0" ),
     #  spatial_domain$triangle_covariates
     #)
-    if( triangle_formula != as.formula("~0") ){
-      gam_setup = mgcv::gam( update.formula( old = triangle_formula, new = "fake ~ . + 0" ), 
+    if( development$triangle_formula != as.formula("~0") ){
+      gam_setup = mgcv::gam( update.formula( old = development$triangle_formula, new = "fake ~ . + 0" ),
                              data = cbind( "fake" = 0, spatial_domain$triangle_covariates ), 
                              fit = FALSE )
       V_zk = cbind( offset = gam_setup$offset, gam_setup$X ) # First is always the offset
@@ -545,6 +556,25 @@ function( formula,
     estimate_kappa = TRUE
     kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
+  }else if( is(spatial_domain,"nngp_domain") ){
+    spatial_method_code = 7
+    n_s = length(spatial_domain$sf_areal)
+    #nngp_data = make_nngp_data(
+    #  coords = st_coordinates(st_centroid(spatial_domain)),
+    #  nn = control$nearest_neighbors
+    #)
+    nngp_data = spatial_domain$nngp_data
+    sf_coords = st_as_sf( data,
+                          coords = space_columns,
+                          crs = st_crs(spatial_domain$sf_areal) )
+    s_i = as.integer(st_within( sf_coords, spatial_domain$sf_areal ))
+    A_is = sparseMatrix( i = seq_along(s_i),
+                         j = s_i,
+                         x = 1,
+                         dims = c(length(s_i),n_s) )
+    estimate_kappa = TRUE
+    kappa_startvalue = 1
+    estimate_anisotropy = FALSE
   }else if( is.null(spatial_domain) ) {
     # Single-site
     spatial_method_code = 3
@@ -797,6 +827,7 @@ function( formula,
     Aomega_zz = Aomega_zz - 1,     # Index form, i, s, t
     Aomega_z = Aomega_z,
     A_is = A_is,
+    nngp_data = nngp_data,
     ram_space_term = as.matrix(na.omit(space_term_ram$output$ram[,1:4])),
     ram_space_term_start = as.numeric(space_term_ram$output$ram[,5]),
     ram_time_term = as.matrix(na.omit(time_term_ram$output$ram[,1:4])),
@@ -832,6 +863,9 @@ function( formula,
   }else if( spatial_method_code %in% 6 ){
     tmb_data$spatial_list = spatial_list
     #tmb_data$V_zk = V_zk
+  }else if( spatial_method_code %in% 7 ){
+    tmb_data$nngp_data = nngp_data
+    #tmb_data$V_zk = V_zk
   }else if( spatial_method_code %in% 2 ){
     tmb_data$Adj = Adj
   }else if( spatial_method_code %in% 4 ){
@@ -842,7 +876,6 @@ function( formula,
     tmb_data$j_z = spatial_list$j_z - 1
     tmb_data$delta_z2 = spatial_list$delta_z2
   }
-
 
   # make params
   # as.numeric(.) ensures class-numeric even for length=0 (when it would be class-logical), so matches output from obj$env$parList()
@@ -953,17 +986,23 @@ function( formula,
   if( isTRUE(control$reml) ){
     tmb_random = union( tmb_random, c("alpha_j","alpha2_j") )
   }
+  if( !is.null(control$tmb_random) ){
+    tmb_random = intersect( control$tmb_random, names(tmb_par) )
+  }
 
   # User-specified tmb_par
   if( !is.null(control$tmb_par) ){
+    # which match
+    which_match = intersect( names(control$tmb_par), names(tmb_par) )
+
     # Check shape but not numeric values, and give informative error
-    attr(tmb_par,"check.passed") = attr(control$tmb_par,"check.passed")
+    attr(tmb_par[which_match],"check.passed") = attr(control$tmb_par[which_match],"check.passed")
     # Compare dimensions by multiplying both by zero
     if( isFALSE(control$suppress_user_warnings) ){
       warning("Supplying `control$tmb_par`:  use carefully as it may crash your terminal")
     }
-    if( isTRUE(all.equal(control$tmb_par, tmb_par, tolerance=Inf)) ){
-      tmb_par = control$tmb_par
+    if( isTRUE(all.equal(control$tmb_par[which_match], tmb_par[which_match], tolerance=Inf)) ){
+      tmb_par[which_match] = control$tmb_par[which_match]
     }else{
       stop("Not using `control$tmb_par` because it has some difference from `tmb_par` built internally")
     }
@@ -1013,18 +1052,36 @@ function( formula,
     dyn.load(dynlib("tinyVAST"))
   }
   #browser()
-  obj = MakeADFun( data = tmb_data,
-                   parameters = tmb_par,
-                   map = tmb_map,
-                   random = tmb_random,
-                   DLL = "tinyVAST",
-                   profile = control$profile,
-                   silent = control$silent )  #
+  obj = MakeADFun(
+    data = tmb_data,
+    parameters = tmb_par,
+    map = tmb_map,
+    random = tmb_random,
+    DLL = "tinyVAST",
+    profile = control$profile,
+    silent = control$silent,
+    intern = development$intern,
+    inner.control = list(sparse=TRUE, lowrank=FALSE, trace=FALSE)   # Controls defaults for newton
+  )  #
   #openmp( ... , DLL="tinyVAST" )
   #obj$env$beSilent()
   # L = rep$IminusRho_hh %*% rep$Gamma_hh
 
-  # 
+  if( length(obj$par) > 10^4 ){
+    if( development$optimizer == "nlminb" ){
+      warning("Consider switching to optimizer = 'L-BFGS-B'")
+    }
+    if( control$trace > 0 ){
+      stop("Set `trace = 0` given many parameters")
+    }
+    if( isTRUE(control$getsd) ){
+      stop("Set `getsd = FALSE` given many parameters")
+    }
+    if( isTRUE(control$newton_loops > 0) ){
+      stop("Set `newton_loops = 0` given many parameters")
+    }
+  }
+  #
   #if( !is.null(development$method) ){
   #  # if `tol = 0`, it can run for a very long time!]
   #  # if `tol = 1e-4` (the default), it might return NAs and fail optimizer
@@ -1042,20 +1099,53 @@ function( formula,
   
   # Optimize
   #start_time = Sys.time()
-  if( isTRUE(control$suppress_nlminb_warnings) ){
-    do_nlminb = function( ... ) suppressWarnings(nlminb( ... ))
-  }else{
-    do_nlminb = function( ... ) nlminb( ... )
+  #if( isTRUE(control$suppress_optimizer_warnings) ){
+  #  wrapper = \(x) suppressWarnings(x)
+  #}else{
+  #  wrapper = \(x) x
+  #}
+  run_optimizer = function( obj, control ){
+    if( development$optimizer == "newton" ){
+      if( length(obj$par)>=0 ){
+        stop("newton only works using penalized likelihood with all parameters profiled")
+      }
+      out = list(
+        par = obj$par,
+        value = obj$fn()
+      )
+    }else if( development$optimizer == "nlminb" ){
+      out = suppressWarnings(nlminb(
+        start = opt$par,
+        objective = obj$fn,
+        gradient = obj$gr,
+        control = list(
+          eval.max = control$eval.max,
+          iter.max = control$iter.max,
+          trace = control$trace
+        )
+      ))
+    }else if(development$optimizer == "L-BFGS-B"){
+      out = suppressWarnings(optim(
+        par = opt$par,
+        fn = obj$fn,
+        gr = obj$gr,
+        method = control$optimize,
+        control = list(
+          maxit = control$iter.max,
+          trace = control$trace,
+          factr = 0.0001
+        )
+      ))
+    }else{
+      stop("optimizer not recognized")
+    }
+    return(out)
   }
   opt = list( "par"=obj$par )
-  for( i in seq_len(max(0,control$nlminb_loops)) ){
-    if( isTRUE(control$verbose) ) message("Running nlminb_loop #", i)
-    opt = do_nlminb( start = opt$par,
-                  objective = obj$fn,
-                  gradient = obj$gr,
-                  control = list( eval.max = control$eval.max,
-                                  iter.max = control$iter.max,
-                                  trace = control$trace ) )
+  #browser()
+  for( i in seq_len(max(0,control$opt_loops)) ){
+    if( isTRUE(control$verbose) ) message("Running optimizer_loop #", i)
+    opt = run_optimizer( obj, control )
   }
   #Sys.time() - start_time
   #opt
@@ -1066,16 +1156,19 @@ function( formula,
     g = as.numeric( obj$gr(opt$par) )
     h = optimHess(opt$par, fn=obj$fn, gr=obj$gr)
     opt$par = opt$par - solve(h, g)
-    opt$objective = obj$fn(opt$par)
+    if("objective" %in% names(opt)) opt$objective = obj$fn(opt$par)
+    if("value" %in% names(opt)) opt$value = obj$fn(opt$par)
   }
 
   # Run sdreport
   if( isTRUE(control$getsd) ){
     if( isTRUE(control$verbose) ) message("Running sdreport")
     Hess_fixed = optimHess( par=opt$par, fn=obj$fn, gr=obj$gr )
-    sdrep = sdreport( obj,
-                      hessian.fixed = Hess_fixed,
-                      getJointPrecision = control$getJointPrecision )
+    sdrep = sdreport(
+      obj,
+      hessian.fixed = Hess_fixed,
+      getJointPrecision = control$getJointPrecision
+    )
   }else{
     Hess_fixed = sdrep = NULL
   }
@@ -1144,24 +1237,32 @@ function( formula,
 
 #' @title Control parameters for tinyVAST
 #'
-#' @param nlminb_loops Integer number of times to call [stats::nlminb()].
+#' @param opt_loops Integer number of times to call nonlinear optimizer.
 #' @param newton_loops Integer number of Newton steps to do after running
-#'   [stats::nlminb()].
+#'        [stats::nlminb()].
 #' @param getsd Boolean indicating whether to call [TMB::sdreport()]
-#' @param tmb_par list of parameters for starting values, with shape identical
-#'   to `tinyVAST(...)$internal$parlist`
+#' @param tmb_par named list of parameters used as starting values.  Elements that
+#'        have names that match those constructed internally then replace the
+#'        internally constructed starting values.  Those that match must have identical
+#'        shape to `tinyVAST(...)$internal$parlist`
 #' @param tmb_map input passed to [TMB::MakeADFun] as argument `map`, over-writing
-#'   the version `tinyVAST(...)$tmb_inputs$tmb_map` and allowing detailed control
-#'   over estimated parameters (advanced feature)
+#'        the version `tinyVAST(...)$tmb_inputs$tmb_map` and allowing detailed control
+#'        over estimated parameters (advanced feature)
+#' @param tmb_random input passed to [TMB::MakeADFun] as argument `random`, over-writing
+#'        the version `tinyVAST(...)$tmb_inputs$tmb_random` and allowing detailed control
+#'        over parameters treated as random effects.  `tmb_random = NULL` uses
+#'        the default (internal) construction, and use `tmb_random = c("empty")`
+#'        (or some other name that doesn't match actual parameters) to use
+#'        penalized likelihood (presumably while also modifying `tmb_map` and `tmb_par`)
 #' @param eval.max Maximum number of evaluations of the objective function
-#'   allowed. Passed to `control` in [stats::nlminb()].
+#'        allowed. Passed to `control` in [stats::nlminb()].
 #' @param iter.max Maximum number of iterations allowed. Passed to `control` in
-#'   [stats::nlminb()].
+#'        [stats::nlminb()].
 #' @param verbose Output additional messages about model steps during fitting?
 #' @param silent Disable terminal output for inner optimizer?
 #' @param trace Parameter values are printed every `trace` iteration
-#'   for the outer optimizer. Passed to
-#'   `control` in [stats::nlminb()].
+#'        for the outer optimizer. Passed to
+#'        `control` in [stats::nlminb()].
 #' @param profile Character-vector passed to [TMB::MakeADFun] and see description
 #'        there.  Fixed effects that are highly correlated with random effects
 #'        can often be estimated faster (i.e., with fewer iterations) by adding
@@ -1183,9 +1284,6 @@ function( formula,
 #'        explained.  See [deviance_explained()]
 #' @param run_model whether to run the model of export TMB objects prior to compilation
 #'        (useful for debugging)
-#' @param suppress_nlminb_warnings whether to suppress uniformative warnings
-#'        from \code{nlminb} arising when a function evaluation is NA, which
-#'        are then replaced with Inf and avoided during estimation
 #' @param suppress_user_warnings whether to suppress warnings from
 #'        package author regarding dangerous or non-standard options
 #' @param get_rsr Experimental option, whether to report restricted spatial
@@ -1212,10 +1310,10 @@ function( formula,
 #'
 #' @export
 tinyVASTcontrol <-
-function( nlminb_loops = 1,
+function( opt_loops = 1,
           newton_loops = 0,
-          eval.max = 1000,
-          iter.max = 1000,
+          eval.max = 10000,
+          iter.max = 10000,
           getsd = TRUE,
           silent = getOption("tinyVAST.silent", TRUE),
           trace = getOption("tinyVAST.trace", 0),
@@ -1223,13 +1321,16 @@ function( nlminb_loops = 1,
           profile = c(),
           tmb_par = NULL,
           tmb_map = NULL,
+          tmb_random = NULL,
           gmrf_parameterization = c("separable","projection"),
           #estimate_delta0 = FALSE,
           reml = FALSE,
           getJointPrecision = FALSE,
           calculate_deviance_explained = TRUE,
           run_model = TRUE,
-          suppress_nlminb_warnings = TRUE,
+          #optimizer = c("nlminb", "L-BFGS-B", "newton"),
+          #intern = FALSE,
+          #suppress_optimizer_warnings = TRUE,
           suppress_user_warnings = FALSE,
           get_rsr = FALSE,
           extra_reporting = FALSE,
@@ -1238,10 +1339,18 @@ function( nlminb_loops = 1,
           barrier_stiffness = 0.01 ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
+  #optimizer = match.arg(optimizer)
+  # @param suppress_optimizer_warnings whether to suppress uniformative warnings
+  #        from \code{nlminb} arising when a function evaluation is NA, which
+  #        are then replaced with Inf and avoided during estimation
+  # @param optimizer which gradient-based optimizer to use.
+  #        "L-BFGS-B" is necessary for penalized likelihood involving >40,000
+  #        coefficients.
+  # @param intern Do Laplace approximation on C++ side? (passed to [TMB::MakeADFun()])
 
   # Return
   structure( list(
-    nlminb_loops = nlminb_loops,
+    opt_loops = opt_loops,
     newton_loops = newton_loops,
     eval.max = eval.max,
     iter.max = iter.max,
@@ -1252,13 +1361,16 @@ function( nlminb_loops = 1,
     profile = profile,
     tmb_par = tmb_par,
     tmb_map = tmb_map,
+    tmb_random = tmb_random,
     gmrf_parameterization = gmrf_parameterization,
     #estimate_delta0 = FALSE,
     reml = reml,
     getJointPrecision = getJointPrecision,
     calculate_deviance_explained = calculate_deviance_explained,
     run_model = run_model,
-    suppress_nlminb_warnings = suppress_nlminb_warnings,
+    #optimizer = optimizer,
+    #intern = intern,
+    #suppress_optimizer_warnings = suppress_optimizer_warnings,
     suppress_user_warnings = suppress_user_warnings,
     get_rsr = get_rsr,
     extra_reporting = extra_reporting,

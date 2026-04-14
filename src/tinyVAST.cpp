@@ -230,7 +230,110 @@ Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
   return Q;
 }
 
-//
+// Functions to evaluate density for nearest-neighbors Gaussian process
+template<class Type>
+vector<Type> covariance_function(vector<Type> d, Type sigma2, Type inv_range) {
+  return ((-d.array() * inv_range).exp() * sigma2).matrix();
+}
+template<class Type>
+matrix<Type> covariance_function(matrix<Type> d, Type sigma2, Type inv_range) {
+  return ((-d.array() * inv_range).exp() * sigma2).matrix();
+}
+/** \brief Object containing all data elements of an NNGP */
+template<class Type>
+struct nngp_data_t{
+  vector<int> nn_index_flat;
+  vector<int> nn_len;
+  vector<Type> dist_to_nn_flat;
+  vector<Type> dist_within_nn_flat;
+  vector<int> gp_order;
+
+  // Define output
+  nngp_data_t(SEXP x){  /* x = List passed from R */
+    nn_index_flat = asVector<int>(getListElement(x,"nn_index_flat"));
+    nn_len = asVector<int>(getListElement(x,"nn_len"));
+    dist_to_nn_flat = asVector<Type>(getListElement(x,"dist_to_nn_flat"));
+    dist_within_nn_flat = asVector<Type>(getListElement(x,"dist_within_nn_flat"));
+    gp_order = asVector<int>(getListElement(x,"gp_order"));
+  }
+};
+// Density function .. sigma2 fixed at 1.0
+template<class Type>
+Type NNGP( Type sigma2,
+           Type range,
+           vector<Type> field_s,
+           // Data
+           nngp_data_t<Type> nngp_data ){
+
+  // Using original order and ordered_structure, by calling gp_order(i) and gp_order(nn_ids), because:
+  // 1.  using original version in new order is very slow! presumably the order is terrible for the inner Hessian
+  // 2.  using re-ordered version of field is confusing for users
+  Type nll = 0.0;
+  Type inv_range = 1.0 / range; // Multiplication is faster than division
+  vector<int> nn_index_flat = nngp_data.nn_index_flat;
+  //vector<int> nn_start = nngp_data.nn_start;
+  vector<int> nn_len = nngp_data.nn_len;
+  vector<Type> dist_to_nn_flat = nngp_data.dist_to_nn_flat;
+  vector<Type> dist_within_nn_flat = nngp_data.dist_within_nn_flat;
+  vector<int> gp_order = nngp_data.gp_order;
+  int n = field_s.size();
+
+  int pos_mat = 0;
+  int pos_vec = 0;
+  for( int i = 0; i < n; i++ ){
+    int k = nn_len(i);
+
+    // No neighbors
+    if(k == 0){
+      nll -= dnorm( field_s(gp_order(i)), Type(0.0), sqrt(sigma2), true );
+    }else{
+      // Extract neighbor indices and distance to neighbors
+      vector<int> nn_ids(k);
+      vector<Type> dist_iN(k);
+      for (int j = 0; j < k; j++) {
+        nn_ids(j) = nn_index_flat(pos_vec);
+        dist_iN(j) = dist_to_nn_flat(pos_vec);
+        pos_vec++;
+      }
+
+      // Extract within-neighbor distance matrix (k x k) ...
+      matrix<Type> dist_NN(k, k);
+      for (int r = 0; r < k; r++) {
+        for (int c = 0; c < k; c++) {
+          dist_NN(r, c) = dist_within_nn_flat(pos_mat);
+          pos_mat++;
+        }
+      }
+
+      // Covariances
+      matrix<Type> Sigma_NN = covariance_function(dist_NN, sigma2, inv_range);
+      vector<Type> Sigma_iN = covariance_function(dist_iN, sigma2, inv_range);
+
+      // Solve
+      //vector<Type> a_i = solve(Sigma_NN, Sigma_iN);
+      //vector<Type> a_i = Sigma_NN.ldlt().solve( Sigma_iN.matrix() );
+      //Eigen::SparseLU< Eigen::SparseMatrix<Type>, Eigen::COLAMDOrdering<int> > invSigma_NN;
+      //invSigma_NN.compute(Sigma_NN);
+      //vector<Type> a_i = invSigma_NN.solve(Sigma_iN);
+      matrix<Type> Sigma_NN_inv = atomic::matinv(Sigma_NN);
+      vector<Type> a_i = Sigma_NN_inv * Sigma_iN;
+
+      // Residual variance
+      Type resid_var = sigma2 - (a_i * Sigma_iN).sum(); // + 1e-12;
+
+      // Conditional mean
+      Type cond_mean = 0.0;
+      for (int j = 0; j < k; j++) {
+        cond_mean += a_i(j) * field_s(gp_order(nn_ids(j)));
+      }
+
+      // Likelihood
+      nll -= dnorm( field_s(gp_order(i)), cond_mean, sqrt(resid_var), true );
+    }
+  }
+  return nll;
+}
+
 // Function to calculate RAM matrices
 template<class Type>
 Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
@@ -330,6 +433,8 @@ array<Type> omega_distribution( array<Type> omega_sc,
                                  Eigen::SparseMatrix<Type> Gamma_cc,
                                  Eigen::SparseMatrix<Type> Gammainv_cc,
                                  Eigen::SparseMatrix<Type> Q_ss,
+                                 Type range,
+                                 nngp_data_t<Type> nngp_data,
                                  Type &nll ){
 
   if( omega_sc.size() > 0 ){
@@ -358,7 +463,15 @@ array<Type> omega_distribution( array<Type> omega_sc,
         // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
       }else{
         // Rank-deficient (projection) method
-        nll += SEPARABLE( GMRF(I_cc), GMRF(Q_ss) )( omega_sc );
+        if( model_options(0) == 7 ){
+          vector<Type> omega_s( omega_sc.rows() );
+          for( int ci = 0; ci < omega_sc.cols(); ci++ ){
+            omega_s = omega_sc.col(ci);
+            nll += NNGP( Type(1.0), range, omega_s, nngp_data );
+          }
+        }else{
+          nll += SEPARABLE( GMRF(I_cc), GMRF(Q_ss) )( omega_sc );
+        }
 
         // Sparse inverse-product
         //Eigen::SparseMatrix<Type> IminusRho_cc = I_cc - Rho_cc;
@@ -376,18 +489,29 @@ array<Type> omega_distribution( array<Type> omega_sc,
   return omega_sc;
 }
 
-// distribution/projection for omega
+// distribution/projection for xi
 template<class Type>
-Type xi_distribution( array<Type> xi_sl,
+Type xi_distribution( vector<int> model_options,
+                      array<Type> xi_sl,
                       vector<Type> log_sigmaxi_l,
-                      Eigen::SparseMatrix<Type> Q_ss ){
+                      Eigen::SparseMatrix<Type> Q_ss,
+                      Type range,
+                      nngp_data_t<Type> nngp_data ){
 
   Type nll = 0;
   if( xi_sl.size() > 0 ){
-    int n_l = xi_sl.dim(1);
+    int n_l = xi_sl.cols();
     using namespace density;
-    for( int l=0; l<n_l; l++ ){
-      nll += SCALE( GMRF(Q_ss), exp(log_sigmaxi_l(l)) )( xi_sl.col(l) );
+    if( model_options(0) == 7 ){
+      vector<Type> xi_s( xi_sl.rows() );
+      for( int l=0; l<n_l; l++ ){
+        xi_s = xi_sl.col(l);
+        NNGP( exp(2.0*log_sigmaxi_l(l)), range, xi_s, nngp_data );
+      }
+    }else{
+      for( int l=0; l<n_l; l++ ){
+        nll += SCALE( GMRF(Q_ss), exp(log_sigmaxi_l(l)) )( xi_sl.col(l) );
+      }
     }
   }
 
@@ -402,6 +526,8 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
                                   Eigen::SparseMatrix<Type> Gammainv_hh,
                                   Eigen::SparseMatrix<Type> Q_ss,
+                                  Type range,
+                                  nngp_data_t<Type> nngp_data,
                                   Type &nll ){
 
   if( epsilon_stc.size() > 0 ){
@@ -441,7 +567,15 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
       nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
     }else{
       // Rank-deficient (projection) method
-      nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
+      if( model_options(0) == 7 ){
+        vector<Type> epsilon_s( epsilon_hs.cols() );
+        for( int hi = 0; hi < epsilon_hs.rows(); hi++ ){
+          epsilon_s = epsilon_hs.matrix().row(hi);
+          nll += NNGP( Type(1.0), range, epsilon_s, nngp_data );
+        }
+      }else{
+        nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
+      }
 
       // Sparse inverse-product
       //Eigen::SparseMatrix<Type> IminusRho_hh = I_hh - Rho_hh;
@@ -994,6 +1128,7 @@ Type objective_function<Type>::operator() (){
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aomega_z );
   DATA_SPARSE_MATRIX( A_is );    // Used for SVC
+  DATA_STRUCT( nngp_data, nngp_data_t );
 
   // DSEM objects
   DATA_IMATRIX( ram_space_term );
@@ -1092,6 +1227,7 @@ Type objective_function<Type>::operator() (){
   REPORT( H );
   // Spatial settings
   Type log_tau = 0.0;
+  Type range = NAN;
   Eigen::SparseMatrix<Type> Q_ss;
   // Using INLA with geometric anisotropy
   if( model_options(0)==1 ){
@@ -1099,7 +1235,7 @@ Type objective_function<Type>::operator() (){
     // Build precision
     Q_ss = R_inla::Q_spde( spatial_list, exp(log_kappa), H );
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
-    Type range = pow(8.0, 0.5) / exp( log_kappa );
+    range = pow(8.0, 0.5) / exp( log_kappa );
     REPORT( range );
   }
   /// Using SAR
@@ -1155,6 +1291,18 @@ Type objective_function<Type>::operator() (){
     log_tau = log( 1.0 / (exp(log_kappa) * sqrt(4.0*M_PI)) );
     REPORT( Q_ss );
   }
+  // Using NNGP
+  if( model_options(0)==7 ){
+    // DATA_INTEGER(n);      == n_s
+    //DATA_IVECTOR(nn_index_flat);
+    //DATA_IVECTOR(nn_start);
+    //DATA_IVECTOR(nn_len);
+    //DATA_VECTOR(dist_to_nn_flat);
+    //DATA_VECTOR(dist_within_nn_flat);
+    //DATA_IVECTOR(gp_order);
+    //range = exp( log_kappa );
+    //REPORT( range );
+  }
   REPORT( log_tau );
 
   // spacetime_term
@@ -1189,15 +1337,19 @@ Type objective_function<Type>::operator() (){
 
   // space_term
   omega_sc = omega_distribution( omega_sc, model_options, Rho_cc,
-                                   Gamma_cc, Gammainv_cc, Q_ss, nll );
+                                   Gamma_cc, Gammainv_cc, Q_ss,
+                                   exp(log_kappa), nngp_data, nll );          // nngp_data,
   omega2_sc = omega_distribution( omega2_sc, model_options, Rho2_cc,
-                                   Gamma2_cc, Gammainv2_cc, Q_ss, nll );
+                                   Gamma2_cc, Gammainv2_cc, Q_ss,
+                                   exp(log_kappa), nngp_data, nll );           // nngp_data,
 
   // spacetime_term
   epsilon_stc = epsilon_distribution( epsilon_stc, model_options, Rho_hh,
-                                     Gamma_hh, Gammainv_hh, Q_ss, nll );
+                                     Gamma_hh, Gammainv_hh, Q_ss,
+                                     exp(log_kappa), nngp_data, nll );
   epsilon2_stc = epsilon_distribution( epsilon2_stc, model_options, Rho2_hh,
-                                       Gamma2_hh, Gammainv2_hh, Q_ss, nll );
+                                       Gamma2_hh, Gammainv2_hh, Q_ss,
+                                       exp(log_kappa), nngp_data, nll );
 
   // time_term
   delta_tc = delta_distribution( delta_tc, model_options, Rho_time_hh,
@@ -1211,8 +1363,10 @@ Type objective_function<Type>::operator() (){
   nll += gamma_distribution( gamma2_k, S2dims, S2block, S2_kk, log_lambda2 );
 
   // Distribution for SVC components
-  nll += xi_distribution( xi_sl, log_sigmaxi_l, Q_ss );
-  nll += xi_distribution( xi2_sl, log_sigmaxi2_l, Q_ss );
+  nll += xi_distribution( model_options, xi_sl, log_sigmaxi_l,
+                          Q_ss, exp(log_kappa), nngp_data );
+  nll += xi_distribution( model_options, xi2_sl, log_sigmaxi2_l,
+                          Q_ss, exp(log_kappa), nngp_data );
 
   // Linear predictor .. keep partial effects for RSR adjustment below
   vector<Type> p_i( n_i );
