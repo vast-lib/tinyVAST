@@ -6,6 +6,10 @@
 * Add `development$optimizer` argument for using optim(method="L-BFGS-B") or `TMB::newton`, which is necessary when using penalized likelihood with >40,000 random effects.  And removing tinyVASTcontrol option for suppress_optim_warnings (making it always TRUE)  
 * Adding Makevar -DTMBAD_INDEX_TYPE=uint64_t to allow GetTape for RTMB manipulation
 
+# tinyVAST 1.5.1
+
+* Fix bug, where previous versions where not simulating measurement errors for delta-models using obj$simulate().  h\t github ilar-cloud for reporting on issue-402
+
 # tinyVAST 1.5.0
 
 * Add starting value log_kappa when using SPDE method, using SD of X and Y coordinates and converting to equivalent kappa
