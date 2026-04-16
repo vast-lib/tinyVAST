@@ -63,12 +63,15 @@ mesh = fmesher::fm_mesh_2d( Data[,c('x','y')] )
 # Specify factor model with two factors and additional independent variance with shared SD
 sem = "
   # Loadings matrix
-  f1 -> 1, l1
-  f1 -> 2, l2
-  f1 -> 3, l3
+  f1 -> 1, l_1.1
+  f1 -> 2, l_1.2
+  f1 -> 3, l_1.3
+  f2 -> 2, l_2.2
+  f2 -> 3, l_3.2
 
   # Factor variance = 1
   f1 <-> f1, NA, 1
+  f2 <-> f2, NA, 1
 
   # Shared residual variance
   1 <-> 1, sd, 1
@@ -77,12 +80,13 @@ sem = "
 "
 
 # fit model
+vars = c( "f1", "f2", 1:n_c )
 out = tinyVAST(
   space_term = sem,
   data = Data,
   formula = n ~ 0 + factor(species),
   spatial_domain = mesh,
-  variables = c( "f1", 1:n_c ),
+  variables = vars,
   space_columns = c("x","y"),
   variable_column = "species",
   time_column = "time",
