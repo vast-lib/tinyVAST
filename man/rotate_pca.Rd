@@ -86,7 +86,7 @@ out = tinyVAST(
   space_columns = c("x","y"),
   variable_column = "species",
   time_column = "time",
-  distribution_column = "dist"
+  distribution_column = "dist",
   control = tinyVASTcontrol(
     extra_report = TRUE
   )
