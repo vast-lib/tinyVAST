@@ -164,3 +164,97 @@ performance = rbind(
 )
 performance
 
+# Alternatively, we can just explore made up parameter values
+fit_norun = tinyVAST(
+  data = data_i,
+  formula = y_i ~ 1 + poly(d, 2),
+  #formula = y_i ~ 1,
+  spatial_domain = mesh,
+  space_term = "",
+  space_columns = c("X","Y"),
+  development = list(
+    vertex_formula = ~ d
+  ),
+  control = tinyVASTcontrol(
+    trace = 1,
+    use_anisotropy = FALSE,
+    nlminb_loops = 0,
+    getsd = FALSE,
+    calculate = FALSE
+  )
+)
+
+#
+tmb_par = fit_norun$tmb_inputs$tmb_par
+
+#
+tmb_par$ln_H_input[3] = 2
+nofit_2 = tinyVAST(
+  data = data_i,
+  formula = y_i ~ 1 + poly(d, 2),
+  #formula = y_i ~ 1,
+  spatial_domain = mesh,
+  space_term = "",
+  space_columns = c("X","Y"),
+  development = list(
+    vertex_formula = ~ d
+  ),
+  control = tinyVASTcontrol(
+    trace = 1,
+    use_anisotropy = FALSE,
+    nlminb_loops = 0,
+    getsd = FALSE,
+    calculate = FALSE,
+    tmb_par = tmb_par
+  )
+)
+
+#
+tmb_par$ln_H_input[3] = 5
+nofit_5 = tinyVAST(
+  data = data_i,
+  formula = y_i ~ 1 + poly(d, 2),
+  #formula = y_i ~ 1,
+  spatial_domain = mesh,
+  space_term = "",
+  space_columns = c("X","Y"),
+  development = list(
+    vertex_formula = ~ d
+  ),
+  control = tinyVASTcontrol(
+    trace = 1,
+    use_anisotropy = FALSE,
+    nlminb_loops = 0,
+    getsd = FALSE,
+    calculate = FALSE,
+    tmb_par = tmb_par
+  )
+)
+
+#
+tmb_par$ln_H_input[3] = 10
+nofit_10 = tinyVAST(
+  data = data_i,
+  formula = y_i ~ 1 + poly(d, 2),
+  #formula = y_i ~ 1,
+  spatial_domain = mesh,
+  space_term = "",
+  space_columns = c("X","Y"),
+  development = list(
+    vertex_formula = ~ d
+  ),
+  control = tinyVASTcontrol(
+    trace = 1,
+    use_anisotropy = FALSE,
+    nlminb_loops = 0,
+    getsd = FALSE,
+    calculate = FALSE,
+    tmb_par = tmb_par
+  )
+)
+
+cor2 = spatial_cor( nofit_2$rep$Q, mesh, c(0.3,0), pred )
+cor5 = spatial_cor( nofit_5$rep$Q, mesh, c(0.3,0), pred )
+cor10 = spatial_cor( nofit_10$rep$Q, mesh, c(0.3,0), pred )
+sf_plot = st_sf( sf_grid, cor2 = cor2, cor5 = cor5, cor10 = cor10 )
+plot(sf_plot, border = NA)
