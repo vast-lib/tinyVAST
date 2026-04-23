@@ -545,16 +545,21 @@ function( formula,
       j_z = tripA$j,
       delta_z2 = grid_xy[tripA$i,] - grid_xy[tripA$j,]
     )
-    sf_coords = st_as_sf( data,
-                          coords = space_columns,
-                          crs = st_crs(spatial_domain) )
+    sf_coords = st_as_sf(
+      data,
+      coords = space_columns,
+      crs = st_crs(spatial_domain)
+    )
     s_i = as.integer(st_within( sf_coords, spatial_domain ))
-    A_is = sparseMatrix( i = seq_along(s_i),
-                         j = s_i,
-                         x = 1,
-                         dims = c(length(s_i),length(spatial_domain)) )
+    A_is = sparseMatrix(
+      i = seq_along(s_i),
+      j = s_i,
+      x = 1,
+      dims = c(length(s_i),length(spatial_domain))
+    )
     estimate_kappa = TRUE
-    kappa_startvalue = 1
+    kappa_startvalue = -log(0.1) / mean(apply( data[,space_columns], MARGIN = 2, FUN = sd) )      # range \approx -log(0.1) / kappa
+    #kappa_startvalue = 1
     estimate_anisotropy = ifelse( isTRUE(control$use_anisotropy), TRUE, FALSE )
   }else if( is(spatial_domain,"nngp_domain") ){
     spatial_method_code = 7
