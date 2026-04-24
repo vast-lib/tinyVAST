@@ -52,6 +52,9 @@ reference:
   - Families
   - simulate.tinyVAST
   - print.tinyVAST
+  - sanity
+  - make_nngp_domain
+  - plot.nngp_domain
 
 - title: 'SEM and DSEM constructors'
   desc: |
