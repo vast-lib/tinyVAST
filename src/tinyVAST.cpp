@@ -159,39 +159,43 @@ Eigen::SparseMatrix<Type> G_spde_covariates( spde_covariates_t<Type> spde,
 }
 
 // Q_SAR( log_kappa, H, n_s, i_z, j_z, delta_z2 )
-// New matrix-notation precision constructor for tail-down exponential stream network
+// Using a SAR (not standardized) to approximate spatial function
 template<class Type>
-Eigen::SparseMatrix<Type> Q_SAR( Type rho,
-                                     matrix<Type> H,
-                                     int n_s,
-                                     vector<int> i_z,
-                                     vector<int> j_z,
-                                     matrix<Type> delta_z2 ){
+Eigen::SparseMatrix<Type> Q_SAR(
+  //Type rho,
+  Type kappa,
+  matrix<Type> H,
+  int n_s,
+  vector<int> i_z,
+  vector<int> j_z,
+  matrix<Type> delta_z2 ){
+
+  //Type max_dist = delta_z2.cwiseAbs().maxCoeff();
 
   //d_z = sqrt((delta_z2 %*% H)^2 %*% matrix(1,nrow=2,ncol=1))[,1]
-  matrix<Type> deltaprime_z2 = delta_z2 * H;
-  vector<Type> dist2_z( i_z.size() );
+  matrix<Type> deltaprime_z2 = (delta_z2 * H); // / max_dist;
+  vector<Type> dist_z( i_z.size() );
   for( int z = 0; z < i_z.size(); z++ ){
-    dist2_z(z) = pow(deltaprime_z2(z,0),2.0) + pow(deltaprime_z2(z,1),2.0);
+    dist_z(z) = pow( pow(deltaprime_z2(z,0),2.0) + pow(deltaprime_z2(z,1),2.0), 0.5 );
   }
-  vector<Type> weight_z = exp( -1.0 * dist2_z );
+  vector<Type> weight_z = exp( -kappa * dist_z );
 
   // Make weight matrix
-  Eigen::SparseMatrix<Type> W_ss = vectorsToSparseMatrix( i_z,
-                                                          j_z,
-                                                          weight_z,
-                                                          n_s );
+  Eigen::SparseMatrix<Type> W_ss = vectorsToSparseMatrix(
+    i_z, j_z, weight_z, n_s
+  );
 
-  // Row-normalize W_ss
-  for( int row = 0; row < n_s; row ++ ){
-    Type rowsum = W_ss.row(row).sum();
-    W_ss.row(row) /= rowsum;
-  }
+  // Row-standardize W_ss
+  // Does *not* make sense when using anisotropy
+  //for( int row = 0; row < n_s; row ++ ){
+  //  Type rowsum = W_ss.row(row).sum();
+  //  W_ss.row(row) /= rowsum;
+  //}
 
   // Assemble
   Eigen::SparseMatrix<Type> I_ss( n_s, n_s );
   I_ss.setIdentity();
-  Eigen::SparseMatrix<Type> IminusP_ss = I_ss - rho * W_ss;
+  Eigen::SparseMatrix<Type> IminusP_ss = I_ss - W_ss;
   Eigen::SparseMatrix<Type> Q = IminusP_ss.transpose() * IminusP_ss;
   return Q;
 }
@@ -1276,7 +1280,8 @@ Type objective_function<Type>::operator() (){
     // rho = inverse_cloglog( log_theta )
     Type rho = exp(-1.0 * exp(log_kappa));
     REPORT( rho );
-    Q_ss = Q_SAR( rho, H, n_s, i_z, j_z, delta_z2 );
+    //Q_ss = Q_SAR( rho, H, n_s, i_z, j_z, delta_z2 );
+    Q_ss = Q_SAR( exp(log_kappa), H, n_s, i_z, j_z, delta_z2 );
   }
   // Using SPDE with covariate-based anisotropy and geometric anisotropy
   if( model_options(0)==6 ){
