@@ -50,6 +50,7 @@ reference:
   - Families
   - simulate.tinyVAST
   - print.tinyVAST
+  - sanity
 
 - title: 'SEM and DSEM constructors'
   desc: |
