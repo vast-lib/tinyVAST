@@ -181,14 +181,9 @@ for( j in seq_len(nrow(N_jz)) ){
     N_jz[j,'Biomass'] = index1[1] / 1e9
   }
 }
-N_ct = array( 
-  N_jz$Biomass, 
-  dim = c(length(myfit$internal$variables),length(unique(Data$Year))),
-  dimnames = list(myfit$internal$variables,sort(unique(Data$Year))) 
-)
-N_ct = sweep( N_ct, MARGIN = 1, FUN = "/", STATS = colSums(N_ct) )
-#> Warning in sweep(N_ct, MARGIN = 1, FUN = "/", STATS = colSums(N_ct)): STATS
-#> does not recycle exactly across MARGIN
+N_ct = array( N_jz$Biomass, dim=c(length(myfit$internal$variables),length(unique(Data$Year))),
+              dimnames=list(myfit$internal$variables,sort(unique(Data$Year))) )
+N_ct = N_ct / outer( rep(1,nrow(N_ct)), colSums(N_ct) )
 ```
 
 ### Comparison with VAST
@@ -230,7 +225,7 @@ ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
 
 ![](age_composition_expansion_files/figure-html/agecomp-1.png)
 
-Runtime for this vignette: 15.68 mins
+Runtime for this vignette: 15.28 mins
 
 ## Works cited
 

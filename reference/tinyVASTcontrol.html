@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Control parameters for tinyVAST</h1>
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
       <div class="d-none name"><code>tinyVASTcontrol.Rd</code></div>
     </div>
 
@@ -59,10 +59,10 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tinyVASTcontrol</span><span class="op">(</span></span>
-<span>  opt_loops <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  nlminb_loops <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  newton_loops <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  eval.max <span class="op">=</span> <span class="fl">10000</span>,</span>
-<span>  iter.max <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  eval.max <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  iter.max <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  getsd <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  silent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"tinyVAST.silent"</span>, <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>  trace <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"tinyVAST.trace"</span>, <span class="fl">0</span><span class="op">)</span>,</span>
@@ -70,12 +70,12 @@
 <span>  profile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  tmb_par <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tmb_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  tmb_random <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gmrf_parameterization <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"separable"</span>, <span class="st">"projection"</span><span class="op">)</span>,</span>
 <span>  reml <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  getJointPrecision <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  calculate_deviance_explained <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  run_model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  suppress_nlminb_warnings <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  suppress_user_warnings <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  get_rsr <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  extra_reporting <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -89,8 +89,8 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-opt-loops">opt_loops<a class="anchor" aria-label="anchor" href="#arg-opt-loops"></a></dt>
-<dd><p>Integer number of times to call nonlinear optimizer.</p></dd>
+<dl><dt id="arg-nlminb-loops">nlminb_loops<a class="anchor" aria-label="anchor" href="#arg-nlminb-loops"></a></dt>
+<dd><p>Integer number of times to call <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.</p></dd>
 
 
 <dt id="arg-newton-loops">newton_loops<a class="anchor" aria-label="anchor" href="#arg-newton-loops"></a></dt>
@@ -136,25 +136,14 @@ a small impact on model estimates and predictions.</p></dd>
 
 
 <dt id="arg-tmb-par">tmb_par<a class="anchor" aria-label="anchor" href="#arg-tmb-par"></a></dt>
-<dd><p>named list of parameters used as starting values.  Elements that
-have names that match those constructed internally then replace the
-internally constructed starting values.  Those that match must have identical
-shape to <code>tinyVAST(...)$internal$parlist</code></p></dd>
+<dd><p>list of parameters for starting values, with shape identical
+to <code>tinyVAST(...)$internal$parlist</code></p></dd>
 
 
 <dt id="arg-tmb-map">tmb_map<a class="anchor" aria-label="anchor" href="#arg-tmb-map"></a></dt>
 <dd><p>input passed to <a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun</a> as argument <code>map</code>, over-writing
 the version <code>tinyVAST(...)$tmb_inputs$tmb_map</code> and allowing detailed control
 over estimated parameters (advanced feature)</p></dd>
-
-
-<dt id="arg-tmb-random">tmb_random<a class="anchor" aria-label="anchor" href="#arg-tmb-random"></a></dt>
-<dd><p>input passed to <a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun</a> as argument <code>random</code>, over-writing
-the version <code>tinyVAST(...)$tmb_inputs$tmb_random</code> and allowing detailed control
-over parameters treated as random effects.  <code>tmb_random = NULL</code> uses
-the default (internal) construction, and use <code>tmb_random = c("empty")</code>
-(or some other name that doesn't match actual parameters) to use
-penalized likelihood (presumably while also modifying <code>tmb_map</code> and <code>tmb_par</code>)</p></dd>
 
 
 <dt id="arg-gmrf-parameterization">gmrf_parameterization<a class="anchor" aria-label="anchor" href="#arg-gmrf-parameterization"></a></dt>
@@ -185,6 +174,12 @@ explained.  See <code><a href="deviance_explained.html">deviance_explained()</a>
 <dt id="arg-run-model">run_model<a class="anchor" aria-label="anchor" href="#arg-run-model"></a></dt>
 <dd><p>whether to run the model of export TMB objects prior to compilation
 (useful for debugging)</p></dd>
+
+
+<dt id="arg-suppress-nlminb-warnings">suppress_nlminb_warnings<a class="anchor" aria-label="anchor" href="#arg-suppress-nlminb-warnings"></a></dt>
+<dd><p>whether to suppress uniformative warnings
+from <code>nlminb</code> arising when a function evaluation is NA, which
+are then replaced with Inf and avoided during estimation</p></dd>
 
 
 <dt id="arg-suppress-user-warnings">suppress_user_warnings<a class="anchor" aria-label="anchor" href="#arg-suppress-user-warnings"></a></dt>

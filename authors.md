@@ -11,13 +11,13 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/vast-lib/tinyVAST/blob/dev/inst/CITATION)
+[`inst/CITATION`](https://github.com/vast-lib/tinyVAST/blob/main/inst/CITATION)
 
 Thorson JT, Anderson SC, Goddard P, Rooper CN (2025). “tinyVAST: R
 package with an expressive interface to specify lagged and simultaneous
 effects in multivariate spatio-temporal models.” *Global Ecology and
 Biogeography*, **34**(4), e70035.
-[doi:10.1111/geb.70035](https://doi.org/10.1111/geb.70035),
+[doi:10.1111/geb.70035](https://doi.org/10.1111/geb.70035).
 <https://doi.org/10.1111/geb.70035>.
 
     @Article{,

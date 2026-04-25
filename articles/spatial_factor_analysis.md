@@ -114,7 +114,7 @@ out
 #>     variables = c("f1", "f2", 1:n_c), distribution_column = "dist")
 #> 
 #> Run time: 
-#> Time difference of 2.192787 secs
+#> Time difference of 2.113035 secs
 #> 
 #> Family: 
 #> $obs
@@ -176,7 +176,7 @@ out
 #> factor(species)4  0.14727256 0.2705807  0.54428332 0.58624652
 #> factor(species)5 -0.26515247 0.1463893 -1.81128250 0.07009713
 #> 
-#> Sanity check: 
+#> Sanity check:
 #> 
 #> **Possible issues detected! Check output of sanity().**
 ```
@@ -294,7 +294,7 @@ knitr::kable( Lhat_cf,
 
 Rotated estimated loadings with full rank
 
-Runtime for this vignette: 9.28 secs
+Runtime for this vignette: 9.11 secs
 
 ## Works cited
 

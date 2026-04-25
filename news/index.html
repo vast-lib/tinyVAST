@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,18 +48,9 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.5.1.9000" id="tinyvast-1519000">tinyVAST 1.5.1.9000<a class="anchor" aria-label="anchor" href="#tinyvast-1519000"></a></h2>
-<ul><li>Adding nearest-neighbors Gaussian Process option</li>
-<li>Add tinyVASTcontrol(tmb_random) argument to allow exploration of penalized likelihood</li>
-<li>Modifying tinyVASTcontrol(tmb_par) to allow users to supply a partial list of starting values, e.g., to provide values for semi-variance parameters when changing model resolution.</li>
-<li>Add <code>development$optimizer</code> argument for using optim(method=“L-BFGS-B”) or <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">TMB::newton</a></code>, which is necessary when using penalized likelihood with &gt;40,000 random effects. And removing tinyVASTcontrol option for suppress_optim_warnings (making it always TRUE)<br></li>
-<li>Adding Makevar -DTMBAD_INDEX_TYPE=uint64_t to allow GetTape for RTMB manipulation</li>
-<li>Change SAR using areal_model for <code>spatial_domain</code> to (1) eliminate row-standardization (which messed up the areal interpretation), and (2) defining an informative start for kappa to start with a value that avoids numerical under/overflow;</li>
-</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.5.1" id="tinyvast-151">tinyVAST 1.5.1<a class="anchor" aria-label="anchor" href="#tinyvast-151"></a></h2><p class="text-muted">CRAN release: 2026-04-14</p>
 <ul><li>Fix bug, where previous versions where not simulating measurement errors for delta-models using obj$simulate(). hithub ilar-cloud for reporting on issue-402</li>

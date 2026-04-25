@@ -6,10 +6,10 @@ Control parameters for tinyVAST
 
 ``` r
 tinyVASTcontrol(
-  opt_loops = 1,
+  nlminb_loops = 1,
   newton_loops = 0,
-  eval.max = 10000,
-  iter.max = 10000,
+  eval.max = 1000,
+  iter.max = 1000,
   getsd = TRUE,
   silent = getOption("tinyVAST.silent", TRUE),
   trace = getOption("tinyVAST.trace", 0),
@@ -17,12 +17,12 @@ tinyVASTcontrol(
   profile = c(),
   tmb_par = NULL,
   tmb_map = NULL,
-  tmb_random = NULL,
   gmrf_parameterization = c("separable", "projection"),
   reml = FALSE,
   getJointPrecision = FALSE,
   calculate_deviance_explained = TRUE,
   run_model = TRUE,
+  suppress_nlminb_warnings = TRUE,
   suppress_user_warnings = FALSE,
   get_rsr = FALSE,
   extra_reporting = FALSE,
@@ -34,9 +34,10 @@ tinyVASTcontrol(
 
 ## Arguments
 
-- opt_loops:
+- nlminb_loops:
 
-  Integer number of times to call nonlinear optimizer.
+  Integer number of times to call
+  [`stats::nlminb()`](https://rdrr.io/r/stats/nlminb.html).
 
 - newton_loops:
 
@@ -85,10 +86,8 @@ tinyVASTcontrol(
 
 - tmb_par:
 
-  named list of parameters used as starting values. Elements that have
-  names that match those constructed internally then replace the
-  internally constructed starting values. Those that match must have
-  identical shape to `tinyVAST(...)$internal$parlist`
+  list of parameters for starting values, with shape identical to
+  `tinyVAST(...)$internal$parlist`
 
 - tmb_map:
 
@@ -97,18 +96,6 @@ tinyVASTcontrol(
   argument `map`, over-writing the version
   `tinyVAST(...)$tmb_inputs$tmb_map` and allowing detailed control over
   estimated parameters (advanced feature)
-
-- tmb_random:
-
-  input passed to
-  [TMB::MakeADFun](https://rdrr.io/pkg/TMB/man/MakeADFun.html) as
-  argument `random`, over-writing the version
-  `tinyVAST(...)$tmb_inputs$tmb_random` and allowing detailed control
-  over parameters treated as random effects. `tmb_random = NULL` uses
-  the default (internal) construction, and use `tmb_random = c("empty")`
-  (or some other name that doesn't match actual parameters) to use
-  penalized likelihood (presumably while also modifying `tmb_map` and
-  `tmb_par`)
 
 - gmrf_parameterization:
 
@@ -139,6 +126,12 @@ tinyVASTcontrol(
 
   whether to run the model of export TMB objects prior to compilation
   (useful for debugging)
+
+- suppress_nlminb_warnings:
+
+  whether to suppress uniformative warnings from `nlminb` arising when a
+  function evaluation is NA, which are then replaced with Inf and
+  avoided during estimation
 
 - suppress_user_warnings:
 

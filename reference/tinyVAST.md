@@ -93,10 +93,10 @@ tinyVAST(
 
 - delta_options:
 
-  a named list with slots for `formula`, `space_term`, `spacetime_term`,
-  `time_term`, and `spatial_varying`. These specify options for the
-  second linear predictor of a delta model, and are only used (or
-  estimable) when a `delta family` is used for some samples.
+  a named list with slots for `formula`, `space_term`, and
+  `spacetime_term`. These specify options for the second linear
+  predictor of a delta model, and are only used (or estimable) when a
+  `delta family` is used for some samples.
 
 - spatial_varying:
 

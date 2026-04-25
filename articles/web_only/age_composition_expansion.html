@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/age_composition_expansion.Rmd" class="external-link"><code>vignettes/web_only/age_composition_expansion.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/vignettes/web_only/age_composition_expansion.Rmd" class="external-link"><code>vignettes/web_only/age_composition_expansion.Rmd</code></a></small>
       <div class="d-none name"><code>age_composition_expansion.Rmd</code></div>
     </div>
 
@@ -262,14 +262,9 @@ samples (and therefore higher standard errors):</p>
 <span>    <span class="va">N_jz</span><span class="op">[</span><span class="va">j</span>,<span class="st">'Biomass'</span><span class="op">]</span> <span class="op">=</span> <span class="va">index1</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="fl">1e9</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
-<span><span class="va">N_ct</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span> </span>
-<span>  <span class="va">N_jz</span><span class="op">$</span><span class="va">Biomass</span>, </span>
-<span>  dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">$</span><span class="va">internal</span><span class="op">$</span><span class="va">variables</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">$</span><span class="va">internal</span><span class="op">$</span><span class="va">variables</span>,<span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="op">)</span></span>
-<span><span class="va">N_ct</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span> <span class="va">N_ct</span>, MARGIN <span class="op">=</span> <span class="fl">1</span>, FUN <span class="op">=</span> <span class="st">"/"</span>, STATS <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">N_ct</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in sweep(N_ct, MARGIN = 1, FUN = "/", STATS = colSums(N_ct)): STATS</span></span>
-<span><span class="co">#&gt; does not recycle exactly across MARGIN</span></span></code></pre></div>
+<span><span class="va">N_ct</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span> <span class="va">N_jz</span><span class="op">$</span><span class="va">Biomass</span>, dim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">$</span><span class="va">internal</span><span class="op">$</span><span class="va">variables</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              dimnames<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">$</span><span class="va">internal</span><span class="op">$</span><span class="va">variables</span>,<span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">Year</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">N_ct</span> <span class="op">=</span> <span class="va">N_ct</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">N_ct</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">N_ct</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="comparison-with-vast">Comparison with VAST<a class="anchor" aria-label="anchor" href="#comparison-with-vast"></a>
@@ -308,7 +303,7 @@ different mesh, and we also skipped epsilon bias-correction for
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="age_composition_expansion_files/figure-html/agecomp-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 15.68 mins</p>
+<p>Runtime for this vignette: 15.28 mins</p>
 </div>
 </div>
 <div class="section level2">

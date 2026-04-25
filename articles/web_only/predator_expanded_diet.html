@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/predator_expanded_diet.Rmd" class="external-link"><code>vignettes/web_only/predator_expanded_diet.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/vignettes/web_only/predator_expanded_diet.Rmd" class="external-link"><code>vignettes/web_only/predator_expanded_diet.Rmd</code></a></small>
       <div class="d-none name"><code>predator_expanded_diet.Rmd</code></div>
     </div>
 
@@ -211,9 +211,7 @@ model using standard syntax:</p>
 <span>  time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
 <span>  variable_column <span class="op">=</span> <span class="st">"Category"</span>,</span>
 <span>  distribution_column <span class="op">=</span> <span class="st">"Category"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: The model may not have converged: non-positive-definite Hessian</span></span>
-<span><span class="co">#&gt; matrix.</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>We then calculate the index of predator-expanded stomach contents for
 each prey:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -282,7 +280,7 @@ standard errors) to save computation time.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Year</span>, y <span class="op">=</span> <span class="va">prop</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Category</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="predator_expanded_diet_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 1.06 mins</p>
+<p>Runtime for this vignette: 1.01 mins</p>
 <div class="section level3 unnumbered">
 <h3 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>

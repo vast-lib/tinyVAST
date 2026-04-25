@@ -9,7 +9,7 @@ to order factors from largest to smallest variance."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@ to order factors from largest to smallest variance."><meta property="og:image" c
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Rotate factors to match Principal-Components Analysis</h1>
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/R/utility.R" class="external-link"><code>R/utility.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/R/utility.R" class="external-link"><code>R/utility.R</code></a></small>
       <div class="d-none name"><code>rotate_pca.Rd</code></div>
     </div>
 
@@ -92,94 +92,6 @@ the inverse-rotated response matrix <code>x_sf</code>,
 and the rotation <code>H</code></p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Extract covariance for spatial factor analysis (too slow for CRAN)</span></span></span>
-<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># Simulate settings</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">theta_xy</span> <span class="op">=</span> <span class="fl">0.4</span></span></span>
-<span class="r-in"><span><span class="va">n_x</span> <span class="op">=</span> <span class="va">n_y</span> <span class="op">=</span> <span class="fl">10</span></span></span>
-<span class="r-in"><span><span class="va">n_c</span> <span class="op">=</span> <span class="fl">3</span>           <span class="co"># Number of species</span></span></span>
-<span class="r-in"><span><span class="va">n_f</span> <span class="op">=</span> <span class="fl">1</span>           <span class="co"># Number of factors</span></span></span>
-<span class="r-in"><span><span class="va">rho</span> <span class="op">=</span> <span class="fl">0.8</span></span></span>
-<span class="r-in"><span><span class="va">resid_sd</span> <span class="op">=</span> <span class="fl">0.5</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Simulate GMRFs</span></span></span>
-<span class="r-in"><span><span class="va">R_s</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">theta_xy</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_y</span>, FUN<span class="op">=</span><span class="st">"-"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">R_ss</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/kronecker.html" class="external-link">kronecker</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">R_s</span>, Y<span class="op">=</span><span class="va">R_s</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">delta_fs</span> <span class="op">=</span> <span class="fu">mvtnorm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html" class="external-link">rmvnorm</a></span><span class="op">(</span><span class="va">n_c</span>, sigma<span class="op">=</span><span class="va">R_ss</span> <span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Simulate loadings for two factors</span></span></span>
-<span class="r-in"><span><span class="va">L_cf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_c</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, nrow<span class="op">=</span><span class="va">n_c</span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">L_cf</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span>from<span class="op">=</span><span class="va">n_f</span><span class="op">+</span><span class="fl">1</span>, to<span class="op">=</span><span class="va">n_c</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span></span>
-<span class="r-in"><span><span class="va">L_cf</span> <span class="op">=</span> <span class="va">L_cf</span> <span class="op">+</span> <span class="va">resid_sd</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">n_c</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Simulate correlated densities</span></span></span>
-<span class="r-in"><span><span class="va">d_cs</span> <span class="op">=</span> <span class="va">L_cf</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">delta_fs</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Shape into longform data-frame and add error</span></span></span>
-<span class="r-in"><span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>species<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_c</span>, x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   <span class="st">"var"</span><span class="op">=</span><span class="st">"logn"</span>, <span class="st">"z"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">d_cs</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mean<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">z</span>, sd<span class="op">=</span><span class="fl">1</span> <span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># make mesh</span></span></span>
-<span class="r-in"><span><span class="va">mesh</span> <span class="op">=</span> <span class="fu">fmesher</span><span class="fu">::</span><span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span> <span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Specify factor model with two factors and additional independent variance with shared SD</span></span></span>
-<span class="r-in"><span><span class="va">sem</span> <span class="op">=</span> <span class="st">"</span></span></span>
-<span class="r-in"><span><span class="st">  # Loadings matrix</span></span></span>
-<span class="r-in"><span><span class="st">  f1 -&gt; 1, l_1.1</span></span></span>
-<span class="r-in"><span><span class="st">  f1 -&gt; 2, l_1.2</span></span></span>
-<span class="r-in"><span><span class="st">  f1 -&gt; 3, l_1.3</span></span></span>
-<span class="r-in"><span><span class="st">  f2 -&gt; 2, l_2.2</span></span></span>
-<span class="r-in"><span><span class="st">  f2 -&gt; 3, l_3.2</span></span></span>
-<span class="r-in"><span><span class="st"></span></span></span>
-<span class="r-in"><span><span class="st">  # Factor variance = 1</span></span></span>
-<span class="r-in"><span><span class="st">  f1 &lt;-&gt; f1, NA, 1</span></span></span>
-<span class="r-in"><span><span class="st">  f2 &lt;-&gt; f2, NA, 1</span></span></span>
-<span class="r-in"><span><span class="st"></span></span></span>
-<span class="r-in"><span><span class="st">  # Shared residual variance</span></span></span>
-<span class="r-in"><span><span class="st">  1 &lt;-&gt; 1, sd, 1</span></span></span>
-<span class="r-in"><span><span class="st">  2 &lt;-&gt; 2, sd, 1</span></span></span>
-<span class="r-in"><span><span class="st">  3 &lt;-&gt; 3, sd, 1</span></span></span>
-<span class="r-in"><span><span class="st">"</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># fit model</span></span></span>
-<span class="r-in"><span><span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"f1"</span>, <span class="st">"f2"</span>, <span class="fl">1</span><span class="op">:</span><span class="va">n_c</span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  space_term <span class="op">=</span> <span class="va">sem</span>,</span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">Data</span>,</span></span>
-<span class="r-in"><span>  formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span></span>
-<span class="r-in"><span>  variables <span class="op">=</span> <span class="va">vars</span>,</span></span>
-<span class="r-in"><span>  space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  variable_column <span class="op">=</span> <span class="st">"species"</span>,</span></span>
-<span class="r-in"><span>  time_column <span class="op">=</span> <span class="st">"time"</span>,</span></span>
-<span class="r-in"><span>  distribution_column <span class="op">=</span> <span class="st">"dist"</span>,</span></span>
-<span class="r-in"><span>  control <span class="op">=</span> <span class="fu"><a href="tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    extra_report <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Extract loadings from factor to species</span></span></span>
-<span class="r-in"><span><span class="va">L_cf</span> <span class="op">=</span> <span class="va">out</span><span class="op">$</span><span class="va">rep</span><span class="op">$</span><span class="va">Rho_cc</span><span class="op">[</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_c</span>, <span class="va">vars</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"f1"</span>,<span class="st">"f2"</span><span class="op">)</span>, <span class="va">vars</span><span class="op">)</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Extract spatial values for factors</span></span></span>
-<span class="r-in"><span><span class="va">omega_sf</span> <span class="op">=</span> <span class="va">out</span><span class="op">$</span><span class="va">internal</span><span class="op">$</span><span class="va">parlist</span><span class="op">$</span><span class="va">omega_sc</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"f1"</span>,<span class="st">"f2"</span><span class="op">)</span>, <span class="va">vars</span><span class="op">)</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Apply rotation</span></span></span>
-<span class="r-in"><span><span class="va">Rotation</span> <span class="op">=</span> <span class="fu">rotate_pca</span><span class="op">(</span> <span class="va">L_cf</span>, x_sf <span class="op">=</span> <span class="va">omega_sf</span> <span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Extract rotated loadings</span></span></span>
-<span class="r-in"><span><span class="va">Lprime_cf</span> <span class="op">=</span> <span class="va">Rotation</span><span class="op">$</span><span class="va">L_tf</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Extract rotated factor values for each mesh location</span></span></span>
-<span class="r-in"><span><span class="va">Oprime_sf</span> <span class="op">=</span> <span class="va">Rotation</span><span class="op">$</span><span class="va">x_sf</span></span></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

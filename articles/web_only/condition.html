@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/condition.Rmd" class="external-link"><code>vignettes/web_only/condition.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/vignettes/web_only/condition.Rmd" class="external-link"><code>vignettes/web_only/condition.Rmd</code></a></small>
       <div class="d-none name"><code>condition.Rmd</code></div>
     </div>
 
@@ -168,30 +168,30 @@ condition and density.</p>
 <span>           distribution_column <span class="op">=</span> <span class="st">"Type"</span>,</span>
 <span>           times <span class="op">=</span> <span class="fl">1982</span><span class="op">:</span><span class="fl">2016</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: The model may not have converged. Maximum final gradient:</span></span>
-<span><span class="co">#&gt; 0.0903345129887285.</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.0200192865675286.</span></span></code></pre></div>
 <p>We can look at structural parameters using summary functions:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># spatial terms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"space_term"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   heads        to      from parameter start      Estimate   Std_Error</span></span>
-<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;  1.423910e+00 0.133053431</span></span>
-<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt; -3.316168e-02 0.004167330</span></span>
-<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;  9.517896e-05 0.004855006</span></span>
+<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;  1.4237621584 0.133022998</span></span>
+<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt; -0.0331637176 0.004167792</span></span>
+<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;  0.0000940605 0.004855203</span></span>
 <span><span class="co">#&gt;       z_value      p_value</span></span>
-<span><span class="co">#&gt; 1 10.70179410 9.982641e-27</span></span>
-<span><span class="co">#&gt; 2 -7.95753500 1.755005e-15</span></span>
-<span><span class="co">#&gt; 3  0.01960429 9.843590e-01</span></span>
+<span><span class="co">#&gt; 1 10.70312791 9.839945e-27</span></span>
+<span><span class="co">#&gt; 2 -7.95714265 1.760577e-15</span></span>
+<span><span class="co">#&gt; 3  0.01937314 9.845434e-01</span></span>
 <span></span>
 <span><span class="co"># spatio-temporal terms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"spacetime_term"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   heads        to      from parameter start lag     Estimate   Std_Error</span></span>
-<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;   0  0.966424911 0.024274646</span></span>
-<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt;   0 -0.040541857 0.002723367</span></span>
-<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;   0  0.008199896 0.003339291</span></span>
-<span><span class="co">#&gt;     z_value      p_value</span></span>
-<span><span class="co">#&gt; 1  39.81211 0.000000e+00</span></span>
-<span><span class="co">#&gt; 2 -14.88666 4.023469e-50</span></span>
-<span><span class="co">#&gt; 3   2.45558 1.406576e-02</span></span></code></pre></div>
+<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;   0  0.966444861 0.024275465</span></span>
+<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt;   0 -0.040542306 0.002723400</span></span>
+<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;   0  0.008199409 0.003339291</span></span>
+<span><span class="co">#&gt;      z_value      p_value</span></span>
+<span><span class="co">#&gt; 1  39.811591 0.000000e+00</span></span>
+<span><span class="co">#&gt; 2 -14.886649 4.024381e-50</span></span>
+<span><span class="co">#&gt; 3   2.455434 1.407145e-02</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="abundance-weighted-expansion">Abundance-weighted expansion<a class="anchor" aria-label="anchor" href="#abundance-weighted-expansion"></a>
@@ -265,7 +265,7 @@ not directly comparable with either weight or density.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Year</span>, y<span class="op">=</span><span class="va">Est</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Year</span>, ymin<span class="op">=</span><span class="va">Est</span><span class="op">-</span><span class="va">SE</span>, ymax<span class="op">=</span><span class="va">Est</span><span class="op">+</span><span class="va">SE</span><span class="op">)</span>, alpha<span class="op">=</span><span class="fl">0.2</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="condition_files/figure-html/condition-timeseries-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 12.62 mins</p>
+<p>Runtime for this vignette: 12.24 mins</p>
 <div class="section level4">
 <h4 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h4>
