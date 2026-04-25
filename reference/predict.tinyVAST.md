@@ -43,18 +43,18 @@ predict(
   transformed predictor including both linear components, `p_g` is the
   sum of the first and second linear predictors (which only makes sense
   to inspect when using the Poisson-linked delta model), `p1_g` is the
-  first linear predictor, `palpha_g` is the first predictor from fixed
-  covariates in `formula`, `pgamma_g` is the first predictor from random
-  covariates in `formula` (e.g., splines), `pomega_g` is the first
-  predictor from spatial variation, `pepsilon_g` is the first predictor
-  from spatio-temporal variation, `pxi_g` is the first predictor from
-  spatially varying coefficients, `p2_g` is the second linear predictor,
-  `palpha2_g` is the second predictor from fixed covariates in
-  `formula`, `pgamma2_g` is the second predictor from random covariates
-  in `formula` (e.g., splines), `pomega2_g` is the second predictor from
-  spatial variation, `pepsilon2_g` is the second predictor from
-  spatio-temporal variation, and `pxi2_g` is the second predictor from
-  spatially varying coefficients.
+  first linear predictor, `palpha1_g` is the first predictor from fixed
+  covariates in `formula`, `pgamma1_g` is the first predictor from
+  random covariates in `formula` (e.g., splines), `pomega1_g` is the
+  first predictor from spatial variation, `pepsilon1_g` is the first
+  predictor from spatio-temporal variation, `pxi1_g` is the first
+  predictor from spatially varying coefficients, `p2_g` is the second
+  linear predictor, `palpha2_g` is the second predictor from fixed
+  covariates in `formula`, `pgamma2_g` is the second predictor from
+  random covariates in `formula` (e.g., splines), `pomega2_g` is the
+  second predictor from spatial variation, `pepsilon2_g` is the second
+  predictor from spatio-temporal variation, and `pxi2_g` is the second
+  predictor from spatially varying coefficients.
 
 - se.fit:
 

@@ -25,7 +25,7 @@ add_mesh_covariates(
 - mesh:
 
   A mesh object from fmesher or sdmTMB (for
-  [`sdmTMB::sdmTMB()`](https://rdrr.io/pkg/sdmTMB/man/sdmTMB.html)
+  [`sdmTMB::sdmTMB()`](https://sdmTMB.github.io/sdmTMB/reference/sdmTMB.html)
   models only).
 
 - data:
@@ -86,10 +86,9 @@ library(sdmTMB)
 #> Attaching package: ‘sdmTMB’
 #> The following objects are masked from ‘package:tinyVAST’:
 #> 
-#>     cAIC, delta_gamma, delta_lognormal, project
+#>     cAIC, delta_gamma, delta_lognormal, project, sanity
 library(sf)
-#> Warning: package ‘sf’ was built under R version 4.5.2
-#> Linking to GEOS 3.13.1, GDAL 3.11.4, PROJ 9.7.0; sf_use_s2() is TRUE
+#> Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE
 
 # Regular data frame
 mesh <- fmesher::fm_mesh_2d(pcod[, c("X", "Y")], cutoff = 10)

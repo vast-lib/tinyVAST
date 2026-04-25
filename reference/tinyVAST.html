@@ -9,7 +9,7 @@ a minimal feature-set and a widely used interface."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@ a minimal feature-set and a widely used interface."><meta property="og:image" co
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Fit vector autoregressive spatio-temporal model</h1>
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
       <div class="d-none name"><code>tinyVAST.Rd</code></div>
     </div>
 
@@ -127,8 +127,8 @@ space-time-variable interaction (i.e., the interaction occurs locally at each si
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
 <dd><p>A function returning a class <code>family</code>, including <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian()</a></code>,
-<code><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">lognormal()</a></code>, <code><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie()</a></code>,  <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial()</a></code>,  <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma()</a></code>, <code><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">student()</a></code>, <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson()</a></code>,
-<code><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">nbinom1()</a></code>, or <code><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">nbinom2()</a></code>.
+<code><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal()</a></code>, <code><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">tweedie()</a></code>,  <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial()</a></code>,  <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma()</a></code>, <code><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">student()</a></code>, <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson()</a></code>,
+<code><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">nbinom1()</a></code>, or <code><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">nbinom2()</a></code>.
 Alternatively, can be a named list of
 these functions, with names that match levels of
 <code>data$distribution_column</code> to allow different
@@ -139,7 +139,8 @@ For binomial family options, see 'Binomial families' in the Details section belo
 
 <dt id="arg-delta-options">delta_options<a class="anchor" aria-label="anchor" href="#arg-delta-options"></a></dt>
 <dd><p>a named list with slots for <code>formula</code>,
-<code>space_term</code>, and <code>spacetime_term</code>. These specify options for the
+<code>space_term</code>, <code>spacetime_term</code>, <code>time_term</code>, and
+<code>spatial_varying</code>. These specify options for the
 second linear predictor of a delta model, and are only used (or estimable)
 when a <code>delta family</code> is used for some samples.</p></dd>
 
@@ -166,12 +167,13 @@ Thee weights argument needs to be a vector and not a name of the variable in the
 <code><a href="https://r.igraph.org/reference/make_empty_graph.html" class="external-link">igraph::make_empty_graph()</a></code> for independent time-series,
 <code><a href="https://r.igraph.org/reference/make_graph.html" class="external-link">igraph::make_graph()</a></code> to apply a simultaneous autoregressive (SAR)
 process to a user-supplied graph, <code><a href="sfnetwork_mesh.html">sfnetwork_mesh()</a></code> for stream networks,
-or class <code>sfc_GEOMETRY</code> e.g constructed using <a href="https://r-spatial.github.io/sf/reference/st_make_grid.html" class="external-link">sf::st_make_grid</a>
+or class <code>sf</code> or <code>sfc</code> containing polygons
+e.g constructed using <a href="https://r-spatial.github.io/sf/reference/st_make_grid.html" class="external-link">sf::st_make_grid</a>
 to apply a SAR to an areal model with adjacency
 based on the geometry of the object,
 or <code>NULL</code> to specify a single site.  If using <code>igraph</code> then the
 graph must have vertex names <code>V(graph)$name</code> that match
-levels of <code>data[,'space_columns']</code></p></dd>
+levels of <code>data[,'space_columns']</code>.</p></dd>
 
 
 <dt id="arg-development">development<a class="anchor" aria-label="anchor" href="#arg-development"></a></dt>
@@ -333,7 +335,7 @@ for any term where it is not being used.</p></li>
 <span class="r-in"><span><span class="co"># Run crossvalidation (too slow for CRAN)</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">CV</span> <span class="op">=</span> <span class="fu">cv</span><span class="fu">::</span><span class="fu"><a href="https://gmonette.github.io/cv/reference/cv.html" class="external-link">cv</a></span><span class="op">(</span> <span class="va">out</span>, k <span class="op">=</span> <span class="fl">4</span> <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> R RNG seed set to 635383</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> R RNG seed set to 299103</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(call, parent.frame()):</span> object 'mesh' not found</span>
 <span class="r-in"><span><span class="va">CV</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'CV' not found</span>

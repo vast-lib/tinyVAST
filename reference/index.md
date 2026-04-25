@@ -23,6 +23,12 @@ Core tools for model fitting and diagnostics.
   : Simulate new data from a fitted model
 - [`print(`*`<tinyVAST>`*`)`](https://vast-lib.github.io/tinyVAST/reference/print.tinyVAST.md)
   : print summary of tinyVAST model
+- [`sanity()`](https://vast-lib.github.io/tinyVAST/reference/sanity.md)
+  : Sanity check of a tinyVAST model
+- [`make_nngp_domain()`](https://vast-lib.github.io/tinyVAST/reference/make_nngp_domain.md)
+  : Make spatial object for NNGP
+- [`plot(`*`<nngp_domain>`*`)`](https://vast-lib.github.io/tinyVAST/reference/plot.nngp_domain.md)
+  : Plot nngp_domain
 
 ## SEM and DSEM constructors
 

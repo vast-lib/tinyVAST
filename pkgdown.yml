@@ -1,4 +1,4 @@
-pandoc: 3.8.3
+pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
@@ -14,12 +14,12 @@ articles:
   web_only/probabilistic_forecasts: web_only/probabilistic_forecasts.html
   web_only/seasonal_index: web_only/seasonal_index.html
   web_only/simultaneous_autoregressive_process: web_only/simultaneous_autoregressive_process.html
-  spatial: spatial.html
   spatial_factor_analysis: spatial_factor_analysis.html
   web_only/spatial_structural_model: web_only/spatial_structural_model.html
+  spatial: spatial.html
   web_only/stream_networks: web_only/stream_networks.html
   web_only/VAST: web_only/VAST.html
-last_built: 2025-12-21T17:08Z
+last_built: 2026-04-24T21:49Z
 urls:
   reference: https://vast-lib.github.io/tinyVAST/reference
   article: https://vast-lib.github.io/tinyVAST/articles

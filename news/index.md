@@ -1,5 +1,46 @@
 # Changelog
 
+## tinyVAST 1.5.1.9000
+
+- Adding nearest-neighbors Gaussian Process option
+- Add tinyVASTcontrol(tmb_random) argument to allow exploration of
+  penalized likelihood
+- Modifying tinyVASTcontrol(tmb_par) to allow users to supply a partial
+  list of starting values, e.g., to provide values for semi-variance
+  parameters when changing model resolution.
+- Add `development$optimizer` argument for using
+  optim(method=“L-BFGS-B”) or
+  [`TMB::newton`](https://rdrr.io/pkg/TMB/man/newton.html), which is
+  necessary when using penalized likelihood with \>40,000 random
+  effects. And removing tinyVASTcontrol option for
+  suppress_optim_warnings (making it always TRUE)  
+- Adding Makevar -DTMBAD_INDEX_TYPE=uint64_t to allow GetTape for RTMB
+  manipulation
+- Change SAR using areal_model for `spatial_domain` to (1) eliminate
+  row-standardization (which messed up the areal interpretation),
+  and (2) defining an informative start for kappa to start with a value
+  that avoids numerical under/overflow;
+
+## tinyVAST 1.5.1
+
+CRAN release: 2026-04-14
+
+- Fix bug, where previous versions where not simulating measurement
+  errors for delta-models using obj\$simulate(). hithub ilar-cloud for
+  reporting on issue-402
+
+## tinyVAST 1.5.0
+
+CRAN release: 2026-03-23
+
+- Add starting value log_kappa when using SPDE method, using SD of X and
+  Y coordinates and converting to equivalent kappa
+- Fix bug in `project` for logical class in empty vectors
+- Add `development` options to explore hess-compress option (and
+  commenting out incomplete Cholesky for now)
+- Add `sanity` function to check for evidence of non-convergence
+- Improve detection of sf class for areal models
+
 ## tinyVAST 1.4.0
 
 CRAN release: 2025-12-20
@@ -83,9 +124,8 @@ CRAN release: 2025-05-07
 
 - Adding option for geometric anisotropy when using the SPDE method
 - For some reason, the CPP edits also address an error message during
-  [`devtools::check_win_devel`](https://devtools.r-lib.org/reference/check_win.html)
-  “array subscript ’const \_\_m128i\[0\]’ is partly outside array bounds
-  of ‘unsigned char \[12\]’”
+  `devtools::check_win_devel` “array subscript ’const \_\_m128i\[0\]’ is
+  partly outside array bounds of ‘unsigned char \[12\]’”
 
 ## tinyVAST 1.1.0
 

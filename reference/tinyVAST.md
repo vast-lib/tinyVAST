@@ -76,14 +76,15 @@ tinyVAST(
 
   A function returning a class `family`, including
   [`gaussian()`](https://rdrr.io/r/stats/family.html),
-  [`lognormal()`](https://rdrr.io/pkg/sdmTMB/man/families.html),
-  [`tweedie()`](https://rdrr.io/pkg/sdmTMB/man/families.html),
+  [`lognormal()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
+  [`tweedie()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
   [`binomial()`](https://rdrr.io/r/stats/family.html),
   [`Gamma()`](https://rdrr.io/r/stats/family.html),
-  [`student()`](https://rdrr.io/pkg/sdmTMB/man/families.html),
+  [`student()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
   [`poisson()`](https://rdrr.io/r/stats/family.html),
-  [`nbinom1()`](https://rdrr.io/pkg/sdmTMB/man/families.html), or
-  [`nbinom2()`](https://rdrr.io/pkg/sdmTMB/man/families.html).
+  [`nbinom1()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
+  or
+  [`nbinom2()`](https://sdmTMB.github.io/sdmTMB/reference/families.html).
   Alternatively, can be a named list of these functions, with names that
   match levels of `data$distribution_column` to allow different families
   by row of data. Delta model families are possible, and see `Families`
@@ -92,10 +93,10 @@ tinyVAST(
 
 - delta_options:
 
-  a named list with slots for `formula`, `space_term`, and
-  `spacetime_term`. These specify options for the second linear
-  predictor of a delta model, and are only used (or estimable) when a
-  `delta family` is used for some samples.
+  a named list with slots for `formula`, `space_term`, `spacetime_term`,
+  `time_term`, and `spatial_varying`. These specify options for the
+  second linear predictor of a delta model, and are only used (or
+  estimable) when a `delta family` is used for some samples.
 
 - spatial_varying:
 
@@ -125,12 +126,13 @@ tinyVAST(
   to apply a simultaneous autoregressive (SAR) process to a
   user-supplied graph,
   [`sfnetwork_mesh()`](https://vast-lib.github.io/tinyVAST/reference/sfnetwork_mesh.md)
-  for stream networks, or class `sfc_GEOMETRY` e.g constructed using
+  for stream networks, or class `sf` or `sfc` containing polygons e.g
+  constructed using
   [sf::st_make_grid](https://r-spatial.github.io/sf/reference/st_make_grid.html)
   to apply a SAR to an areal model with adjacency based on the geometry
   of the object, or `NULL` to specify a single site. If using `igraph`
   then the graph must have vertex names `V(graph)$name` that match
-  levels of `data[,'space_columns']`
+  levels of `data[,'space_columns']`.
 
 - development:
 
@@ -278,14 +280,14 @@ spatial model, the user must specify `spatial_domain` and either
 `space_term=""` or `spacetime_term=""`, where the latter two are then
 parsed to include a single exogenous variance for the single variable
 
-|  |  |
-|----|----|
-| **Model type** | **How to specify** |
-| Generalized additive model | specify `spatial_domain=NULL` `space_term=""` and `spacetime_term=""`, and then use `formula` to specify splines and covariates |
-| Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_domain=NULL` and use `spacetime_term` to specify interactions among variables and over time |
-| Univariate spatio-temporal model, or multiple independence spatio-temporal variables | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
-| Multivariate spatial model including interactions | specify `spatial_domain` and use `space_term` to specify spatial interactions |
-| Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
+|                                                                                                                                     |                                                                                                                                                                                                                                    |
+|-------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Model type**                                                                                                                      | **How to specify**                                                                                                                                                                                                                 |
+| Generalized additive model                                                                                                          | specify `spatial_domain=NULL` `space_term=""` and `spacetime_term=""`, and then use `formula` to specify splines and covariates                                                                                                    |
+| Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_domain=NULL` and use `spacetime_term` to specify interactions among variables and over time                                                                                                                       |
+| Univariate spatio-temporal model, or multiple independence spatio-temporal variables                                                | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable                                                                                   |
+| Multivariate spatial model including interactions                                                                                   | specify `spatial_domain` and use `space_term` to specify spatial interactions                                                                                                                                                      |
+| Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables)                                              | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
 
 **Model building notes**
 
@@ -345,7 +347,7 @@ out = tinyVAST( data = Data,
 # Run crossvalidation (too slow for CRAN)
 # \donttest{
 CV = cv::cv( out, k = 4 )
-#> R RNG seed set to 635383
+#> R RNG seed set to 299103
 #> Error in eval(call, parent.frame()): object 'mesh' not found
 CV
 #> Error: object 'CV' not found

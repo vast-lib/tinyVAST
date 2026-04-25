@@ -1,7 +1,6 @@
 # Spatial modeling
 
 ``` r
-
 library(tinyVAST)
 library(mgcv)
 library(fmesher)
@@ -19,7 +18,6 @@ first simulate a spatial random field and a confounder variable, and
 simulate data from this simulated process.
 
 ``` r
-
 # Simulate a 2D AR1 spatial process with a cyclic confounder w
 n_x = n_y = 25
 n_w = 10
@@ -41,7 +39,6 @@ We next construct a triangulated mesh that represents our continuous
 spatial domain
 
 ``` r
-
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')], cutoff = 2 )
 
@@ -54,7 +51,6 @@ plot(mesh)
 Finally, we can fit these data using `tinyVAST`
 
 ``` r
-
 # Define sem, with just one variance for the single variable
 sem = "
   density <-> density, spatial_sd
@@ -71,11 +67,10 @@ out = tinyVAST( data = Data,
 We can then calculate the area-weighted total abundance:
 
 ``` r
-
 # Predicted sample-weighted total
 integrate_output(out, newdata = out$data)
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
-#>          -104.15036            29.90545          -104.15036                  NA
+#>          -104.15000            29.90546          -104.15000                  NA
 # integrate_output(out, apply.epsilon=TRUE )
 # predict(out)
 
@@ -89,20 +84,18 @@ sum( Data$z )
 We can compute deviance residuals and percent-deviance explained:
 
 ``` r
-
 # Percent deviance explained
 out$deviance_explained
-#> [1] 0.5051624
+#> [1] 0.5051626
 ```
 
 We can then compare this with the PDE reported by `mgcv`
 
 ``` r
-
 start_time = Sys.time()
 mygam = gam( n ~ s(w) + s(x,y), data=Data ) #
 Sys.time() - start_time
-#> Time difference of 0.03471398 secs
+#> Time difference of 0.03471303 secs
 summary(mygam)$dev.expl
 #> [1] 0.3517756
 ```
@@ -119,7 +112,6 @@ identical PDE when switching tinyVAST to use the same bivariate spline
 for space.
 
 ``` r
-
 out_reduced = tinyVAST( data = Data,
                         formula = n ~ s(w) + s(x,y) )
 
@@ -133,15 +125,13 @@ out_reduced$deviance_explained
 `tinyVAST` then has a standard `predict` function:
 
 ``` r
-
 predict(out, newdata=data.frame(x=1, y=1, time=1, w=1, var="density") )
-#> [1] 0.3649899
+#> [1] 0.3649897
 ```
 
 and this is used to compute the spatial response
 
 ``` r
-
 # Prediction grid
 pred = outer( seq(1,n_x,len=51),
               seq(1,n_y,len=51),
@@ -153,7 +143,6 @@ image( x=seq(1,n_x,len=51), y=seq(1,n_y,len=51), z=pred, main="Predicted respons
 
 ``` r
 
-
 # True value
 image( x=1:n_x, y=1:n_y, z=matrix(Data$z,ncol=n_y), main="True response" )
 ```
@@ -163,7 +152,6 @@ image( x=1:n_x, y=1:n_y, z=matrix(Data$z,ncol=n_y), main="True response" )
 We can also compute the marginal effect of the cyclic confounder
 
 ``` r
-
 # compute partial dependence plot
 Partial = partial( object = out,
                    pred.var = "w",
@@ -182,7 +170,6 @@ intervals for marginal effects, although this is disabled on CRAN
 vignettes:
 
 ``` r
-
 # create new data frame
 newdata <- data.frame(w = seq(min(Data$w), max(Data$w), length.out = 100))
 newdata = cbind( newdata, 'x'=13, 'y'=13, 'var'='density', 'time'=2020 )
@@ -199,4 +186,4 @@ ggplot(p, aes(x=w, y=fit,
 
 ![](spatial_files/figure-html/show_ggplot-1.png)
 
-Runtime for this vignette: 2.07 secs
+Runtime for this vignette: 4.6 secs

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,9 +48,30 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.5.1.9000" id="tinyvast-1519000">tinyVAST 1.5.1.9000<a class="anchor" aria-label="anchor" href="#tinyvast-1519000"></a></h2>
+<ul><li>Adding nearest-neighbors Gaussian Process option</li>
+<li>Add tinyVASTcontrol(tmb_random) argument to allow exploration of penalized likelihood</li>
+<li>Modifying tinyVASTcontrol(tmb_par) to allow users to supply a partial list of starting values, e.g., to provide values for semi-variance parameters when changing model resolution.</li>
+<li>Add <code>development$optimizer</code> argument for using optim(method=“L-BFGS-B”) or <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">TMB::newton</a></code>, which is necessary when using penalized likelihood with &gt;40,000 random effects. And removing tinyVASTcontrol option for suppress_optim_warnings (making it always TRUE)<br></li>
+<li>Adding Makevar -DTMBAD_INDEX_TYPE=uint64_t to allow GetTape for RTMB manipulation</li>
+<li>Change SAR using areal_model for <code>spatial_domain</code> to (1) eliminate row-standardization (which messed up the areal interpretation), and (2) defining an informative start for kappa to start with a value that avoids numerical under/overflow;</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.5.1" id="tinyvast-151">tinyVAST 1.5.1<a class="anchor" aria-label="anchor" href="#tinyvast-151"></a></h2><p class="text-muted">CRAN release: 2026-04-14</p>
+<ul><li>Fix bug, where previous versions where not simulating measurement errors for delta-models using obj$simulate(). hithub ilar-cloud for reporting on issue-402</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.5.0" id="tinyvast-150">tinyVAST 1.5.0<a class="anchor" aria-label="anchor" href="#tinyvast-150"></a></h2><p class="text-muted">CRAN release: 2026-03-23</p>
+<ul><li>Add starting value log_kappa when using SPDE method, using SD of X and Y coordinates and converting to equivalent kappa</li>
+<li>Fix bug in <code>project</code> for logical class in empty vectors</li>
+<li>Add <code>development</code> options to explore hess-compress option (and commenting out incomplete Cholesky for now)</li>
+<li>Add <code>sanity</code> function to check for evidence of non-convergence</li>
+<li>Improve detection of sf class for areal models</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.4.0" id="tinyvast-140">tinyVAST 1.4.0<a class="anchor" aria-label="anchor" href="#tinyvast-140"></a></h2><p class="text-muted">CRAN release: 2025-12-20</p>
 <ul><li>Adding <code>student</code> distribution, borrowing/importing code from sdmTMB</li>
@@ -95,7 +116,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.1" id="tinyvast-111">tinyVAST 1.1.1<a class="anchor" aria-label="anchor" href="#tinyvast-111"></a></h2><p class="text-muted">CRAN release: 2025-05-07</p>
 <ul><li>Adding option for geometric anisotropy when using the SPDE method</li>
-<li>For some reason, the CPP edits also address an error message during <code><a href="https://devtools.r-lib.org/reference/check_win.html" class="external-link">devtools::check_win_devel</a></code> “array subscript ’const __m128i[0]’ is partly outside array bounds of ‘unsigned char [12]’”</li>
+<li>For some reason, the CPP edits also address an error message during <code>devtools::check_win_devel</code> “array subscript ’const __m128i[0]’ is partly outside array bounds of ‘unsigned char [12]’”</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.0" id="tinyvast-110">tinyVAST 1.1.0<a class="anchor" aria-label="anchor" href="#tinyvast-110"></a></h2><p class="text-muted">CRAN release: 2025-05-03</p>

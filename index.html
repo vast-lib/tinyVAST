@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,16 +98,19 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>tinyVAST can be installed from GitHub:</p>
+<p>tinyVAST can be installed from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tinyVAST"</span><span class="op">)</span></span></code></pre></div>
+<p>or the <code>dev</code> branch (subject to ongoing changes) can be installed from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"vast-lib/tinyVAST"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">install_github</span><span class="op">(</span><span class="st">"vast-lib/tinyVAST"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>To cite tinyVAST in publications use:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"tinyVAST"</span><span class="op">)</span></span></code></pre></div>
 <p>Thorson, J. T., Anderson, S. C., Goddard, P., &amp; Rooper, C. N. (2025). tinyVAST: R package with an expressive interface to specify lagged and simultaneous effects in multivariate spatio-temporal models. Global Ecology and Biogeography. 34(4): e70035. <a href="https://doi.org/10.1111/geb.70035" class="external-link uri">https://doi.org/10.1111/geb.70035</a></p>
 </div>
@@ -156,18 +159,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/gh/vast-lib/tinyVAST?branch=main" class="external-link"><img src="https://codecov.io/gh/vast-lib/tinyVAST/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
-<li><a href="https://vast-lib.github.io/tinyVAST/"><img src="https://img.shields.io/badge/documentation-tinyVAST-orange.svg?colorB=E91E63" alt="Documentation"></a></li>
-<li><a href="https://doi.org/10.5281/zenodo.15001856" class="external-link"><img src="https://zenodo.org/badge/704919773.svg" alt="DOI"></a></li>
-<li><a href="https://cran.r-project.org/package=tinyVAST" class="external-link"><img src="https://www.r-pkg.org/badges/version/tinyVAST"></a></li>
-<li><a href="https://cran.r-project.org/package=tinyVAST" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/tinyVAST"></a></li>
-<li><a href="https://cran.r-project.org/package=tinyVAST" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/tinyVAST"></a></li>
-</ul>
-</div>
+
 
   </aside>
 </div>

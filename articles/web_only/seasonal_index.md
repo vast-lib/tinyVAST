@@ -1,7 +1,6 @@
 # Seasonal index standardization
 
 ``` r
-
 library(tinyVAST)
 library(sf)
 library(fmesher)
@@ -9,20 +8,19 @@ library(ggplot2)
 ```
 
 `tinyVAST` can estimate seasonal spatio-temporal models using spatially
-varying coefficients (Thorson et al. 2023) to incorporate additional
-spatial variation by season and then including an autoregressive
-spatio-temporal process across season-within-year indices. This was
-originally demonstrated using package VAST (Thorson et al. 2020), and we
-here show code analyzing spring and fall bottom-trawl surveys for
-yellowtail flounder in the Northwest Atlantic conducted by the NEFSC, as
-well as a early-spring bottom trawl survey by DFO Canada. Here, we use a
-spatio-temporal process with three seasons per year, and estimating a
-lag-1 correlation (representing correlations among seasons within year)
-and a lag-3 correlation (representing correlations within season among
-years).
+varying coefficients (James T. Thorson et al. 2023) to incorporate
+additional spatial variation by season and then including an
+autoregressive spatio-temporal process across season-within-year
+indices. This was originally demonstrated using package VAST (James T.
+Thorson et al. 2020), and we here show code analyzing spring and fall
+bottom-trawl surveys for yellowtail flounder in the Northwest Atlantic
+conducted by the NEFSC, as well as a early-spring bottom trawl survey by
+DFO Canada. Here, we use a spatio-temporal process with three seasons
+per year, and estimating a lag-1 correlation (representing correlations
+among seasons within year) and a lag-3 correlation (representing
+correlations within season among years).
 
 ``` r
-
 # Load data
 data( atlantic_yellowtail ) 
 
@@ -37,7 +35,6 @@ ggplot( atlantic_yellowtail ) +
 We then define a new year_season variable
 
 ``` r
-
 # Define levels
 atlantic_yellowtail$season = 
   factor(atlantic_yellowtail$season, levels = c("DFO", "SPRING", "FALL"))
@@ -60,7 +57,6 @@ We then define argument `spatial_varying` as a formula containing the
 space-season effect, and in this instance it replaces the `space_term`:
 
 ``` r
-
 # Define mesh
 mesh = fm_mesh_2d( 
   atlantic_yellowtail[,c('longitude','latitude')], 
@@ -104,29 +100,29 @@ fit = tinyVAST(
   #  profile = "alpha_j"
   )
 )
+#> Warning: The model may not have converged: non-positive-definite Hessian
+#> matrix.
 ```
 
 We can inspect output, and see that both season-within-year (lag-1) and
 season-across-year (lag-3) terms are significant:
 
 ``` r
-
 summary(fit, "spacetime_term")
 #>   heads      to    from parameter start lag  Estimate  Std_Error   z_value
-#> 1     1 density density         1  <NA>   1 0.2460266 0.04389254  5.605204
-#> 2     1 density density         2  <NA>   3 0.5267717 0.04868399 10.820224
-#> 3     2 density density         3  <NA>   0 1.3015135 0.05159718 25.224508
+#> 1     1 density density         1  <NA>   1 0.2460269 0.04389256  5.605207
+#> 2     1 density density         2  <NA>   3 0.5267712 0.04868399 10.820213
+#> 3     2 density density         3  <NA>   0 1.3015125 0.05159715 25.224503
 #>         p_value
-#> 1  2.080103e-08
-#> 2  2.761009e-27
-#> 3 2.157267e-140
+#> 1  2.080067e-08
+#> 2  2.761334e-27
+#> 3 2.157556e-140
 ```
 
 We can then visualize density in selected years. To do this, we first
 define a predictive grid
 
 ``` r
-
 # get sf for sampling points
 sf_locs = st_as_sf(
   atlantic_yellowtail,
@@ -165,7 +161,6 @@ We then select a set of years and seasons, predict those values, and
 then plot them
 
 ``` r
-
 # season_year
 newdata = expand.grid(
   season = levels(atlantic_yellowtail$season),
@@ -213,7 +208,6 @@ covariates if we were including any) while selecting the forecast
 interval:
 
 ``` r
-
 # season_year
 projdata = expand.grid(
   season = levels(atlantic_yellowtail$season),
@@ -238,7 +232,6 @@ projdata$season_year_integer =
 we then use the `project` function, and show a deterministic projection:
 
 ``` r
-
 #
 projdata$logdens = project( 
   object = fit,
@@ -267,7 +260,6 @@ ggplot(projdata) +
 We then show a single draw from the stochastic projection
 
 ``` r
-
 # Set seed for reproducibility
 set.seed(123)
 
@@ -296,14 +288,16 @@ ggplot(projdata) +
 
 ![](seasonal_index_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 13.02 mins
+Runtime for this vignette: 7.33 mins
 
 ## Works cited
 
-Thorson, James T, Charles F Adams, Elizabeth N Brooks, et al. 2020.
-“Seasonal and Interannual Variation in Spatio-Temporal Models for Index
-Standardization and Phenology Studies.” *ICES Journal of Marine Science*
-77 (5): 1879–92. <https://doi.org/10.1093/icesjms/fsaa074>.
+Thorson, James T, Charles F Adams, Elizabeth N Brooks, Lisa B Eisner,
+David G Kimmel, Christopher M Legault, Lauren A Rogers, and Ellen M
+Yasumiishi. 2020. “Seasonal and Interannual Variation in Spatio-Temporal
+Models for Index Standardization and Phenology Studies.” *ICES Journal
+of Marine Science* 77 (5): 1879–92.
+<https://doi.org/10.1093/icesjms/fsaa074>.
 
 Thorson, James T., Cheryl L. Barnes, Sarah T. Friedman, Janelle L.
 Morano, and Margaret C. Siple. 2023. “Spatially Varying Coefficients Can

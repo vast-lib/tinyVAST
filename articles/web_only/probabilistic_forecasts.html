@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../../articles/web_only/overview.html">Overview of vignettes</a></li>
@@ -81,7 +81,7 @@
 James T. Thorson, Andrew J. Allyn</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/web_only/probabilistic_forecasts.Rmd" class="external-link"><code>vignettes/web_only/probabilistic_forecasts.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/probabilistic_forecasts.Rmd" class="external-link"><code>vignettes/web_only/probabilistic_forecasts.Rmd</code></a></small>
       <div class="d-none name"><code>probabilistic_forecasts.Rmd</code></div>
     </div>
 
@@ -97,7 +97,7 @@ James T. Thorson, Andrew J. Allyn</h4>
 <p>We developed new approaches for forecasting with spatio-temporal
 species distribution models (SDMs) that not only generate efficient
 predictions, but also separate and quantify different sources of
-prediction uncertainty <span class="citation">(Grüss et al.,
+prediction uncertainty <span class="citation">(Grüss et al.
 n.d.)</span>. In these models, uncertainty can arise from: * Past
 process errors — randomness in the estimated random effects that
 represent past temporal, spatial, or spatio-temporal variation. * Future
@@ -239,7 +239,7 @@ projections</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">abundance</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_errorbar</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymax<span class="op">=</span><span class="va">upper</span>, ymin <span class="op">=</span> <span class="va">lower</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="probabilistic_forecasts_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="576"></p>
+<p><img src="probabilistic_forecasts_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level3">
 <h3 id="alternative-options">Alternative options<a class="anchor" aria-label="anchor" href="#alternative-options"></a>
@@ -302,21 +302,22 @@ densities, forecasted indices of relative abundance are progressively
 dominated by the predicted density at a few (or single) extrapolation
 location(s).</p></li>
 </ul>
-<p>Runtime for this vignette: 9.34 mins</p>
+<p>Runtime for this vignette: 1.78 hours</p>
 </div>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-gruss_probabilistic_nodate" class="csl-entry">
-Grüss, Arnaud, Andrew J. Allyn, James T. Thorson, et al. n.d.
-<span>“Probabilistic <span>Forecasts</span> of <span>Fish</span>
-<span>Abundances</span> <span>With</span>
+Grüss, Arnaud, Andrew J. Allyn, James T. Thorson, Katherine E. Mills,
+Ellen Yasumiishi, Matthew H. Pinkerton, Darren M. Parsons, and Nokuthaba
+Sibanda. n.d. <span>“Probabilistic <span>Forecasts</span> of
+<span>Fish</span> <span>Abundances</span> <span>With</span>
 <span>Spatio</span>-<span>Temporal</span> <span>Models</span> to
 <span>Support</span> <span>Fisheries</span>
 <span>Management</span>.”</span> <em>Fish and Fisheries</em> n/a (n/a).
-<a href="https://doi.org/10.1111/faf.70025" class="external-link">https://doi.org/10.1111/faf.70025</a>.
+Accessed September 8, 2025. <a href="https://doi.org/10.1111/faf.70025" class="external-link">https://doi.org/10.1111/faf.70025</a>.
 </div>
 </div>
 </div>

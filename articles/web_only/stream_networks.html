@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../../articles/web_only/overview.html">Overview of vignettes</a></li>
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/web_only/stream_networks.Rmd" class="external-link"><code>vignettes/web_only/stream_networks.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/stream_networks.Rmd" class="external-link"><code>vignettes/web_only/stream_networks.Rmd</code></a></small>
       <div class="d-none name"><code>stream_networks.Rmd</code></div>
     </div>
 
@@ -110,7 +110,7 @@ stream segments, and nodes where edges connect.</p>
 <span>                   <span class="st">"East_Fork_Lewis_basin.shp"</span><span class="op">)</span>, quiet<span class="op">=</span><span class="cn">TRUE</span> <span class="op">)</span></span>
 <span><span class="va">stream</span> <span class="op">=</span> <span class="fu"><a href="https://luukvdmeer.github.io/sfnetworks/reference/as_sfnetwork.html" class="external-link">as_sfnetwork</a></span><span class="op">(</span><span class="va">stream</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">stream</span>, main<span class="op">=</span><span class="st">"East Fork Lewis Basin"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="stream_networks_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" width="576"></p>
+<p><img src="stream_networks_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="576"></p>
 <p>We then convert it to an S3 class “sfnetwork_mesh” defined by
 <em>tinyVAST</em> for stream networks, and rescale distances to 1000 ft
 (to ensure that distances are 0.01 to 100, avoiding issues of numerical
@@ -164,7 +164,7 @@ simulate data at those locations:</p>
 <span><span class="co"># Extract nodes and plot on network</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html" class="external-link">activate</a></span><span class="op">(</span><span class="va">stream</span>,<span class="st">"nodes"</span><span class="op">)</span><span class="op">)</span>, <span class="st">"omega"</span><span class="op">=</span><span class="va">omega_s</span><span class="op">)</span>,</span>
 <span>      add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="stream_networks_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" width="576"></p>
+<p><img src="stream_networks_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="fit-model">Fit model<a class="anchor" aria-label="anchor" href="#fit-model"></a>
@@ -217,18 +217,19 @@ simulated samples.</p>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">extrap</span>,<span class="st">"omega"</span><span class="op">=</span><span class="va">omega_i</span><span class="op">)</span>, </span>
 <span>  add<span class="op">=</span><span class="cn">TRUE</span>, pch<span class="op">=</span><span class="fl">19</span>, cex<span class="op">=</span><span class="fl">2</span>, pal<span class="op">=</span><span class="va">viridis</span> </span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="stream_networks_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="576"></p>
-<p>Runtime for this vignette: 3.32 secs</p>
+<p><img src="stream_networks_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="576"></p>
+<p>Runtime for this vignette: 4.62 secs</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-charsley_catchment-scale_2023" class="csl-entry">
-Charsley, Anthony R., Arnaud Grüss, James T. Thorson, et al. 2023.
-<span>“Catchment-Scale Stream Network Spatio-Temporal Models, Applied to
-the Freshwater Stages of a Diadromous Fish Species, Longfin Eel
-(<span>Anguilla</span> Dieffenbachii).”</span> <em>Fisheries
+Charsley, Anthony R., Arnaud Grüss, James T. Thorson, Merrill B. Rudd,
+Shannan K. Crow, Bruno David, Erica K. Williams, and Simon D. Hoyle.
+2023. <span>“Catchment-Scale Stream Network Spatio-Temporal Models,
+Applied to the Freshwater Stages of a Diadromous Fish Species, Longfin
+Eel (<span>Anguilla</span> Dieffenbachii).”</span> <em>Fisheries
 Research</em> 259 (March): 106583. <a href="https://doi.org/10.1016/j.fishres.2022.106583" class="external-link">https://doi.org/10.1016/j.fishres.2022.106583</a>.
 </div>
 <div id="ref-hocking_geostatistical_2018" class="csl-entry">

@@ -14,10 +14,16 @@ interactions among variables over time.
 
 ## Installation
 
-tinyVAST can be installed from GitHub:
+tinyVAST can be installed from CRAN:
 
 ``` r
+install.packages("tinyVAST")
+```
 
+or the `dev` branch (subject to ongoing changes) can be installed from
+GitHub:
+
+``` r
 library(devtools)
 install_github("vast-lib/tinyVAST", dependencies = TRUE)
 ```
@@ -27,7 +33,6 @@ install_github("vast-lib/tinyVAST", dependencies = TRUE)
 To cite tinyVAST in publications use:
 
 ``` r
-
 citation("tinyVAST")
 ```
 

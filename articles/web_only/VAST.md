@@ -1,7 +1,6 @@
 # Vector autoregressive spatio-temporal models
 
 ``` r
-
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
@@ -23,7 +22,6 @@ spatio-temporal process, i.e., a spatial Gompertz model (Thorson et al.
 To do so, we simulate the process:
 
 ``` r
-
 # Simulate settings
 theta_xy = 0.4
 n_x = n_y = 10
@@ -65,7 +63,6 @@ mean(Data$n==0)
 We then specify and fit the same model
 
 ``` r
-
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
@@ -82,19 +79,20 @@ spacetime_term = "
 
 # fit model
 mytinyVAST = tinyVAST( 
-           space_term = space_term,
-           spacetime_term = spacetime_term,
-           data = Data,
-           formula = n ~ 1,
-           spatial_domain = mesh,
-           family = tweedie() )
+  space_term = space_term,
+  spacetime_term = spacetime_term,
+  data = Data,
+  formula = n ~ 1,
+  spatial_domain = mesh,
+  family = tweedie() 
+)
 mytinyVAST
 #> Call: 
 #> tinyVAST(formula = n ~ 1, data = Data, space_term = space_term, 
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 16.4161 secs
+#> Time difference of 8.216516 secs
 #> 
 #> Family: 
 #> $obs
@@ -107,33 +105,37 @@ mytinyVAST
 #> 
 #> sdreport(.) result
 #>              Estimate Std. Error
-#> alpha_j   -0.51042311 0.20682192
-#> beta_z     0.84975372 0.07526572
-#> beta_z    -0.25841774 0.03730119
-#> theta_z    0.44410419 0.06898295
-#> log_sigma -0.64811502 0.05006806
-#> log_sigma  0.01446398 0.06494080
-#> log_kappa -0.15608153 0.16446880
-#> Maximum gradient component: 0.005583757 
+#> alpha_j   -0.51039962 0.20682402
+#> beta_z     0.84975932 0.07526407
+#> beta_z    -0.25841509 0.03730060
+#> theta_z    0.44410026 0.06898305
+#> log_sigma -0.64811725 0.05006776
+#> log_sigma  0.01446391 0.06494065
+#> log_kappa -0.15609782 0.16446773
+#> Maximum gradient component: 0.00235749 
 #> 
 #> Proportion conditional deviance explained: 
-#> [1] 0.4812371
+#> [1] 0.4812353
 #> 
 #> space_term: 
 #>   heads   to from parameter start  Estimate  Std_Error  z_value      p_value
-#> 1     2 logn logn         1  <NA> 0.4441042 0.06898295 6.437884 1.211509e-10
+#> 1     2 logn logn         1  <NA> 0.4441003 0.06898305 6.437817 1.212041e-10
 #> 
 #> spacetime_term: 
 #>   heads   to from parameter start lag   Estimate  Std_Error   z_value
-#> 1     1 logn logn         1  <NA>   1  0.8497537 0.07526572 11.290049
-#> 2     2 logn logn         2  <NA>   0 -0.2584177 0.03730119 -6.927869
+#> 1     1 logn logn         1  <NA>   1  0.8497593 0.07526407 11.290372
+#> 2     2 logn logn         2  <NA>   0 -0.2584151 0.03730060 -6.927908
 #>        p_value
-#> 1 1.469547e-29
-#> 2 4.272276e-12
+#> 1 1.464154e-29
+#> 2 4.271107e-12
 #> 
 #> Fixed terms: 
 #>               Estimate Std_Error   z_value    p_value
-#> (Intercept) -0.5104231 0.2068219 -2.467935 0.01358949
+#> (Intercept) -0.5103996  0.206824 -2.467797 0.01359475
+#> 
+#> Sanity check: 
+#> 
+#> **Possible issues detected! Check output of sanity().**
 ```
 
 The estimated values for `beta_z` then correspond to the simulated value
@@ -142,9 +144,7 @@ for `rho` and `spatial_sd`.
 We can compare the true densities:
 
 ``` r
-
 library(sf)
-#> Warning: package 'sf' was built under R version 4.5.2
 data_wide = reshape( Data[,c('x','y','time','mu')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
 sf_data = st_as_sf( data_wide, coords=c("x","y"))
@@ -158,7 +158,6 @@ plot(sf_plot, max.plot=n_t )
 with the estimated densities:
 
 ``` r
-
 Data$mu_hat = predict(mytinyVAST)
 data_wide = reshape( Data[,c('x','y','time','mu_hat')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
@@ -172,7 +171,6 @@ plot(sf_plot, max.plot=n_t )
 where a scatterplot shows that they are highly correlated:
 
 ``` r
-
 plot( x=Data$mu, y=Data$mu_hat )
 ```
 
@@ -181,7 +179,6 @@ plot( x=Data$mu, y=Data$mu_hat )
 We can also use the `DHARMa` package to visualize simulation residuals:
 
 ``` r
-
 # simulate new data conditional on fixed effects
 # and sampling random effects from their predictive distribution
 y_ir = simulate(mytinyVAST, nsim=100, type="mle-mvn")
@@ -199,24 +196,23 @@ We can then calculate the area-weighted total abundance and compare it
 with its true value:
 
 ``` r
-
 # Predicted sample-weighted total
 (Est = sapply( seq_len(n_t),
    FUN=\(t) integrate_output(mytinyVAST, newdata=subset(Data,time==t)) ))
-#>                          [,1]      [,2]     [,3]      [,4]      [,5]      [,6]
-#> Estimate            69.774342 68.167115 68.24959 64.038611 58.736780 60.506542
-#> Std. Error           4.733476  4.404922  4.32475  4.092695  3.880481  3.887897
-#> Est. (bias.correct) 72.867322 71.288122 71.44284 67.062705 61.536991 63.391199
-#> Std. (bias.correct)        NA        NA       NA        NA        NA        NA
+#>                          [,1]      [,2]      [,3]      [,4]     [,5]      [,6]
+#> Estimate            69.774447 68.167140 68.249630 64.038614 58.73677 60.506551
+#> Std. Error           4.733492  4.404923  4.324752  4.092695  3.88048  3.887898
+#> Est. (bias.correct) 72.867385 71.288095 71.442818 67.062659 61.53693 63.391164
+#> Std. (bias.correct)        NA        NA        NA        NA       NA        NA
 #>                          [,7]      [,8]      [,9]     [,10]     [,11]     [,12]
-#> Estimate            54.977480 58.463756 64.523920 74.895696 84.490757 76.981720
-#> Std. Error           3.772127  3.863062  4.166782  4.702731  5.335555  5.141678
-#> Est. (bias.correct) 57.610639 61.214950 67.544399 78.336996 88.253689 80.405085
+#> Estimate            54.977472 58.463750 64.523936 74.895753 84.490828 76.981717
+#> Std. Error           3.772124  3.863061  4.166782  4.702733  5.335558  5.141674
+#> Est. (bias.correct) 57.610590 61.214901 67.544370 78.337004 88.253708 80.405033
 #> Std. (bias.correct)        NA        NA        NA        NA        NA        NA
 #>                         [,13]      [,14]     [,15]
-#> Estimate            87.189025  96.106379 93.626461
-#> Std. Error           5.514166   6.001112  6.338951
-#> Est. (bias.correct) 91.106042 100.570708 98.734105
+#> Estimate            87.189069  96.106447 93.626602
+#> Std. Error           5.514166   6.001112  6.338957
+#> Est. (bias.correct) 91.106034 100.570723 98.734193
 #> Std. (bias.correct)        NA         NA        NA
 
 # True (latent) sample-weighted total
@@ -249,17 +245,14 @@ ggplot(Index, aes(time, Estimate)) +
 Next, we compare this against the current version of VAST (Thorson and
 Barnett 2017)
 
-    #> Warning: package 'TMB' was built under R version 4.5.2
-    #> Warning: package 'units' was built under R version 4.5.2
-    #> Warning: package 'marginaleffects' was built under R version 4.5.2
-
 ``` r
-
-settings = make_settings( purpose="index3",
-                          n_x = n_x*n_y,
-                          Region = "Other",
-                          bias.correct = FALSE,
-                          use_anisotropy = FALSE )
+settings = make_settings( 
+  purpose="index3",
+  n_x = n_x*n_y,
+  Region = "Other",
+  bias.correct = FALSE,
+  use_anisotropy = FALSE 
+)
 settings$FieldConfig['Epsilon','Component_1'] = 0
 settings$FieldConfig['Omega','Component_1'] = 0
 settings$RhoConfig['Epsilon2'] = 4
@@ -267,96 +260,28 @@ settings$RhoConfig[c('Beta1','Beta2')] = 3
 settings$ObsModel = c(10,2)
 
 # Run VAST
-myVAST = fit_model( settings=settings,
-                 Lat_i = Data[,'y'],
-                 Lon_i = Data[,'x'],
-                 t_i = Data[,'time'],
-                 b_i = Data[,'n'],
-                 a_i = rep(1,nrow(Data)),
-                 observations_LL = cbind(Lat=Data[,'y'],Lon=Data[,'x']),
-                 grid_dim_km = c(100,100),
-                 newtonsteps = 0,
-                 loopnum = 1,
-                 control = list(eval.max = 10000, iter.max = 10000, trace = 0) )
+myVAST = fit_model( 
+  settings=settings,
+  Lat_i = Data$y,
+  Lon_i = Data$x,
+  t_i = Data$time,
+  b_i = as.numeric(Data$n),
+  a_i = rep(1,nrow(Data)),
+  observations_LL = cbind(Lat=Data[,'y'],Lon=Data[,'x']),
+  grid_dim_km = c(100,100),
+  newtonsteps = 0,
+  loopnum = 1,
+  control = list(eval.max = 10000, iter.max = 10000, trace = 0) 
+)
 ```
 
 ``` r
-
 myVAST
-#> fit_model(.) result
-#> $par
-#>       beta1_ft       beta2_ft     L_omega2_z   L_epsilon2_z      logkappa2 
-#>    -0.59988031     0.09993533     0.55005057     0.26695392    -4.68896241 
-#> Epsilon_rho2_f      logSigmaM 
-#>     0.89582684     0.05547658 
-#> 
-#> $objective
-#> [1] 1256.257
-#> 
-#> $iterations
-#> [1] 3
-#> 
-#> $evaluations
-#> function gradient 
-#>        7        3 
-#> 
-#> $time_for_MLE
-#> Time difference of 1.521775 secs
-#> 
-#> $max_gradient
-#> [1] 0.0007302142
-#> 
-#> $Convergence_check
-#> [1] "The model is likely not converged"
-#> 
-#> $number_of_coefficients
-#>  Total  Fixed Random 
-#>   2183      7   2176 
-#> 
-#> $AIC
-#> [1] 2526.515
-#> 
-#> $diagnostics
-#>                         Param starting_value     Lower         MLE     Upper
-#> beta1_ft             beta1_ft    -0.59987818      -Inf -0.59988031       Inf
-#> beta2_ft             beta2_ft     0.09993558      -Inf  0.09993533       Inf
-#> L_omega2_z         L_omega2_z     0.55005171      -Inf  0.55005057       Inf
-#> L_epsilon2_z     L_epsilon2_z     0.26695303      -Inf  0.26695392       Inf
-#> logkappa2           logkappa2    -4.68896169 -6.214608 -4.68896241 -3.565449
-#> Epsilon_rho2_f Epsilon_rho2_f     0.89582671 -0.990000  0.89582684  0.990000
-#> logSigmaM           logSigmaM     0.05547811      -Inf  0.05547658 10.000000
-#>                final_gradient
-#> beta1_ft         7.302142e-04
-#> beta2_ft         3.958089e-05
-#> L_omega2_z       1.120538e-04
-#> L_epsilon2_z    -1.264341e-04
-#> logkappa2        9.682295e-05
-#> Epsilon_rho2_f  -1.139072e-04
-#> logSigmaM       -2.508962e-04
-#> 
-#> $SD
-#> sdreport(.) result
-#>                   Estimate Std. Error
-#> beta1_ft       -0.59988031 0.04573745
-#> beta2_ft        0.09993533 0.21591340
-#> L_omega2_z      0.55005057 0.08905102
-#> L_epsilon2_z    0.26695392 0.04043402
-#> logkappa2      -4.68896241 0.18202530
-#> Epsilon_rho2_f  0.89582684 0.06297620
-#> logSigmaM       0.05547658 0.06294172
-#> Maximum gradient component: 0.0007302142 
-#> 
-#> $time_for_sdreport
-#> Time difference of 4.742581 secs
-#> 
-#> $time_for_run
-#> Time difference of 23.95087 secs
 ```
 
-Or with sdmTMB (Anderson et al., n.d.)
+Or with sdmTMB (Anderson et al. n.d.)
 
 ``` r
-
 library(sdmTMB)
 sdmTMB_mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
@@ -370,28 +295,23 @@ mysdmTMB = sdmTMB(
   time = "time",
   family = tweedie()
 )
-#> Warning: the 'findbars' function has moved to the reformulas package. Please update your imports, or ask an upstream package maintainter to do so.
-#> This warning is displayed once per session.
-#> Warning: the 'nobars' function has moved to the reformulas package. Please update your imports, or ask an upstream package maintainter to do so.
-#> This warning is displayed once per session.
 sdmTMBtime = Sys.time() - start_time2
 ```
 
 The models all have similar runtimes
 
 ``` r
-
-Times = c( "tinyVAST" = mytinyVAST$run_time,
-           "VAST" = myVAST$total_time,
-           "sdmTMB" = sdmTMBtime )
+Times = data.frame( 
+  tinyVAST = mytinyVAST$run_time,
+  VAST = myVAST$total_time,
+  sdmTMB = sdmTMBtime 
+)
 knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 ```
 
-|          | run times (sec.) |
-|:---------|-----------------:|
-| tinyVAST |             16.4 |
-| VAST     |             27.2 |
-| sdmTMB   |             28.8 |
+| run times (sec.).tinyVAST | run times (sec.).VAST | run times (sec.).sdmTMB |
+|:--------------------------|:----------------------|:------------------------|
+| 8.2 secs                  | NA                    | 10.1 secs               |
 
 ### Delta models
 
@@ -399,7 +319,6 @@ We can also fit this univariate spatio-temporal process using a
 Poisson-linked gamma delta model (Thorson 2018)
 
 ``` r
-
 # fit model
 mydelta2 = tinyVAST( 
   data = Data,
@@ -418,7 +337,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 16.30274 secs
+#> Time difference of 8.056965 secs
 #> 
 #> Family: 
 #> $obs
@@ -430,35 +349,39 @@ mydelta2
 #> 
 #> 
 #> sdreport(.) result
-#>              Estimate Std. Error
-#> alpha_j    0.96740001 0.03523113
-#> alpha2_j  -1.24655464 0.14981014
-#> alpha2_j  -1.29278791 0.17500129
-#> alpha2_j  -1.30567555 0.19172149
-#> alpha2_j  -1.32180772 0.20304204
-#> alpha2_j  -1.57098809 0.21258829
-#> alpha2_j  -1.44507841 0.21944963
-#> alpha2_j  -1.71680202 0.22626333
-#> alpha2_j  -1.54485935 0.23247418
-#> alpha2_j  -1.39904963 0.23307994
-#> alpha2_j  -1.12515799 0.23638030
-#> alpha2_j  -1.22354407 0.23877401
-#> alpha2_j  -1.51311725 0.24006133
-#> alpha2_j  -1.24691178 0.24216425
-#> alpha2_j  -1.12785624 0.24209137
-#> alpha2_j  -1.07071406 0.24334579
-#> beta2_z    0.89674417 0.03512480
-#> beta2_z    0.31332882 0.03906491
-#> log_sigma  0.02962681 0.02475180
-#> log_kappa  0.10856725 0.14818594
-#> Maximum gradient component: 0.002531402 
+#>             Estimate Std. Error
+#> alpha_j    0.9673982 0.03523113
+#> alpha2_j  -1.2465531 0.14981116
+#> alpha2_j  -1.2927804 0.17500264
+#> alpha2_j  -1.3056616 0.19172295
+#> alpha2_j  -1.3218115 0.20304344
+#> alpha2_j  -1.5709922 0.21258960
+#> alpha2_j  -1.4450793 0.21945079
+#> alpha2_j  -1.7167974 0.22626434
+#> alpha2_j  -1.5448634 0.23247502
+#> alpha2_j  -1.3990617 0.23308060
+#> alpha2_j  -1.1251748 0.23638081
+#> alpha2_j  -1.2235461 0.23877445
+#> alpha2_j  -1.5131381 0.24006161
+#> alpha2_j  -1.2469233 0.24216447
+#> alpha2_j  -1.1278738 0.24209141
+#> alpha2_j  -1.0707282 0.24334575
+#> beta2_z    0.8967400 0.03512556
+#> beta2_z    0.3133328 0.03906544
+#> log_sigma  0.0296271 0.02475190
+#> log_kappa  0.1085638 0.14818576
+#> Maximum gradient component: 0.001977891 
 #> 
 #> Proportion conditional deviance explained: 
-#> [1] 0.3295016
+#> [1] 0.3295031
 #> 
 #> Fixed terms: 
-#>             Estimate  Std_Error  z_value       p_value
-#> (Intercept)   0.9674 0.03523113 27.45867 5.474654e-166
+#>              Estimate  Std_Error  z_value       p_value
+#> (Intercept) 0.9673982 0.03523113 27.45862 5.482304e-166
+#> 
+#> Sanity check: 
+#> 
+#> **Possible issues detected! Check output of sanity().**
 ```
 
 And we can again use the `DHARMa` package (Hartig 2017) to visualize
@@ -466,7 +389,6 @@ conditional simulation quantile (a.k.a. Dunn-Smythe) residuals (Dunn and
 Smyth 1996):
 
 ``` r
-
 # simulate new data conditional on fixed effects
 # and sampling random effects from their predictive distribution
 y_ir = simulate(mydelta2, nsim=100, type="mle-mvn")
@@ -484,7 +406,6 @@ We can then use marginal and conditional AIC to compare the fit of the
 delta-model and Tweedie distribution:
 
 ``` r
-
 # AIC table
 AIC_table = cbind(
   mAIC = c( "Tweedie" = AIC(mytinyVAST), 
@@ -502,19 +423,18 @@ knitr::kable(
 
 |                 |     mAIC |     cAIC |
 |:----------------|---------:|---------:|
-| Tweedie         | 2501.480 | 2356.788 |
+| Tweedie         | 2501.480 | 2356.787 |
 | delta-lognormal | 2947.194 | 2848.163 |
 
 ## Bivariate vector autoregressive spatio-temporal model
 
 We next highlight how to specify a bivariate spatio-temporal model with
-a cross-laggged (vector autoregressive) interaction Thorson et al.
-(2019). \## Simulate bivariate model
+a cross-laggged (vector autoregressive) interaction Thorson, Adams, and
+Holsman (2019). \## Simulate bivariate model
 
 We first simulate artificial data for the sake of demonstration:
 
 ``` r
-
 # Simulate settings
 theta_xy = 0.2
 n_x = n_y = 10
@@ -544,7 +464,6 @@ Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$mu, phi=0.5, power=1.5 )
 We next set up inputs and run the model:
 
 ``` r
-
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
@@ -564,13 +483,15 @@ out = tinyVAST( spacetime_term = dsem,
            formula = n ~ 0 + var,
            spatial_domain = mesh,
            family = tweedie() )
+#> Warning: The model may not have converged. Maximum final gradient:
+#> 0.0108368453778236.
 out
 #> Call: 
 #> tinyVAST(formula = n ~ 0 + var, data = Data, spacetime_term = dsem, 
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 1.340818 mins
+#> Time difference of 29.07819 secs
 #> 
 #> Family: 
 #> $obs
@@ -583,41 +504,45 @@ out
 #> 
 #> sdreport(.) result
 #>               Estimate Std. Error
-#> alpha_j    0.264368407 0.09266171
-#> alpha_j    0.035863837 0.07360860
-#> beta_z     0.455447933 0.06734774
-#> beta_z     0.389078116 0.08038421
-#> beta_z    -0.405603381 0.08530597
-#> beta_z    -0.084083295 0.06545855
-#> beta_z     0.329048842 0.01844056
-#> log_sigma -0.691801474 0.02886804
-#> log_sigma  0.007588816 0.05777685
-#> log_kappa -0.487467947 0.09474226
-#> Maximum gradient component: 0.003830999 
+#> alpha_j    0.090202981 0.11486664
+#> alpha_j   -0.099500541 0.10318987
+#> beta_z     0.553897565 0.07628808
+#> beta_z     0.536424139 0.07383380
+#> beta_z    -0.225705467 0.07606824
+#> beta_z    -0.070945613 0.06259109
+#> beta_z     0.336688292 0.01863795
+#> log_sigma -0.696754581 0.02881155
+#> log_sigma -0.005321748 0.05462454
+#> log_kappa -0.635425879 0.10547175
+#> Maximum gradient component: 0.01083685 
 #> 
 #> Proportion conditional deviance explained: 
-#> [1] 0.4461972
+#> [1] 0.4057952
 #> 
 #> spacetime_term: 
 #>   heads to from parameter start lag    Estimate  Std_Error   z_value
-#> 1     1 d1   d1         1  <NA>   1  0.45544793 0.06734774  6.762632
-#> 2     1 d2   d2         2  <NA>   1  0.38907812 0.08038421  4.840231
-#> 3     1 d1   d2         3  <NA>   1 -0.40560338 0.08530597 -4.754689
-#> 4     1 d2   d1         4  <NA>   1 -0.08408329 0.06545855 -1.284527
-#> 5     2 d1   d1         5  <NA>   0  0.32904884 0.01844056 17.843757
-#> 6     2 d2   d2         5  <NA>   0  0.32904884 0.01844056 17.843757
+#> 1     1 d1   d1         1  <NA>   1  0.55389757 0.07628808  7.260604
+#> 2     1 d2   d2         2  <NA>   1  0.53642414 0.07383380  7.265293
+#> 3     1 d1   d2         3  <NA>   1 -0.22570547 0.07606824 -2.967144
+#> 4     1 d2   d1         4  <NA>   1 -0.07094561 0.06259109 -1.133478
+#> 5     2 d1   d1         5  <NA>   0  0.33668829 0.01863795 18.064666
+#> 6     2 d2   d2         5  <NA>   0  0.33668829 0.01863795 18.064666
 #>        p_value
-#> 1 1.355075e-11
-#> 2 1.296885e-06
-#> 3 1.987519e-06
-#> 4 1.989575e-01
-#> 5 3.232145e-71
-#> 6 3.232145e-71
+#> 1 3.853647e-13
+#> 2 3.722318e-13
+#> 3 3.005797e-03
+#> 4 2.570136e-01
+#> 5 6.048658e-73
+#> 6 6.048658e-73
 #> 
 #> Fixed terms: 
-#>         Estimate  Std_Error   z_value     p_value
-#> vard1 0.26436841 0.09266171 2.8530491 0.004330193
-#> vard2 0.03586384 0.07360860 0.4872235 0.626099977
+#>          Estimate Std_Error    z_value   p_value
+#> vard1  0.09020298 0.1148666  0.7852844 0.4322868
+#> vard2 -0.09950054 0.1031899 -0.9642471 0.3349220
+#> 
+#> Sanity check: 
+#> 
+#> **Possible issues detected! Check output of sanity().**
 ```
 
 The values for `beta_z` again correspond to the specified value for
@@ -627,7 +552,6 @@ We can again calculate the area-weighted total abundance and compare it
 with its true value:
 
 ``` r
-
 # Predicted sample-weighted total 
 # for each year-variable combination
 Est1 = Est2 = NULL
@@ -680,7 +604,7 @@ Anderson, Sean C., Eric J. Ward, Philina A. English, Lewis A. K.
 Barnett, and James T. Thorson. n.d. “sdmTMB: An R Package for Fast,
 Flexible, and User-Friendly Generalized Linear Mixed Effects Models with
 Spatial and Spatiotemporal Random Fields.” *Journal of Open Source
-Software*, 2022.03.24.485545.
+Software*, 2022.03.24.485545. Accessed March 10, 2025.
 <https://doi.org/10.1101/2022.03.24.485545>.
 
 Dunn, Peter K., and Gordon K. Smyth. 1996. “Randomized Quantile
@@ -712,7 +636,7 @@ Thorson, James T., Stephan B. Munch, and Douglas P. Swain. 2017.
 Dynamics.” *Ecology* 98 (5): 1277–89.
 <https://doi.org/10.1002/ecy.1760>.
 
-Thorson, James T., Hans J. Skaug, Kasper Kristensen, et al. 2014. “The
-Importance of Spatial Models for Estimating the Strength of Density
-Dependence.” *Ecology* 96 (5): 1202–12.
-<https://doi.org/10.1890/14-0739.1>.
+Thorson, James T., Hans J. Skaug, Kasper Kristensen, Andrew O. Shelton,
+Eric J. Ward, John H. Harms, and James A. Benante. 2014. “The Importance
+of Spatial Models for Estimating the Strength of Density Dependence.”
+*Ecology* 96 (5): 1202–12. <https://doi.org/10.1890/14-0739.1>.

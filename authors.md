@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/vast-lib/tinyVAST/blob/HEAD/inst/CITATION)
+[`inst/CITATION`](https://github.com/vast-lib/tinyVAST/blob/dev/inst/CITATION)
 
 Thorson JT, Anderson SC, Goddard P, Rooper CN (2025). “tinyVAST: R
 package with an expressive interface to specify lagged and simultaneous

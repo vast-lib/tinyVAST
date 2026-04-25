@@ -1,7 +1,6 @@
 # Empirical orthogonal functions
 
 ``` r
-
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
@@ -10,15 +9,14 @@ set.seed(101)
 tinyVAST is an R package for fitting vector autoregressive
 spatio-temporal (VAST) models. We here explore the capacity to specify a
 generalized linear latent variable model that is configured to
-generalize an empirical orthogonal function analysis (Thorson et al.
-2020).
+generalize an empirical orthogonal function analysis (Thorson,
+Ciannelli, and Litzow 2020).
 
 ## Empirical Orthogonal Function (EOF) analysis
 
 To start, we reformat data on September Sea ice concentrations:
 
 ``` r
-
 data( sea_ice )
 library(sf)
 library(rnaturalearth)
@@ -44,7 +42,6 @@ Data = data.frame( st_drop_geometry(sf_ice),
 Next, we construct the various inputs to *tinyVAST*
 
 ``` r
-
 n_eof = 2
 dsem = make_eof_ram( variables = "Ice",
                      times = sort(unique(Data[,'year'])),
@@ -68,13 +65,14 @@ out = tinyVAST( spacetime_term = dsem,
 #> Warning in tinyVAST(spacetime_term = dsem, space_term = "", data =
 #> as.data.frame(Data), : `spatial_domain` has over 1000 components, so the model
 #> may be extremely slow
+#> Warning: The model may not have converged. Maximum final gradient:
+#> 0.0138510975868823.
 ```
 
 Finally, we can extract, rotate, and plot the dominant modes of
 variability and associated spatial responses:
 
 ``` r
-
 # Country shapefiles for plotting
 sf_maps = ne_countries( return="sf", scale="medium", continent=c("north america","europe","asia") )
 sf_maps = st_transform( sf_maps, crs=st_crs(sf_ice) )
@@ -131,7 +129,7 @@ matplot( y=L_tf, x=unique(Data$year), type="l",
 
 ![](empirical_orthogonal_functions_files/figure-html/EOF-1.png)
 
-Runtime for this vignette: 4.56 mins
+Runtime for this vignette: 4.52 mins
 
 #### Works cited
 

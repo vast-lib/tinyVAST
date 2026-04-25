@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../../articles/web_only/overview.html">Overview of vignettes</a></li>
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/web_only/empirical_orthogonal_functions.Rmd" class="external-link"><code>vignettes/web_only/empirical_orthogonal_functions.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/empirical_orthogonal_functions.Rmd" class="external-link"><code>vignettes/web_only/empirical_orthogonal_functions.Rmd</code></a></small>
       <div class="d-none name"><code>empirical_orthogonal_functions.Rmd</code></div>
     </div>
 
@@ -94,7 +94,7 @@ Thorson</h4>
 <p>tinyVAST is an R package for fitting vector autoregressive
 spatio-temporal (VAST) models. We here explore the capacity to specify a
 generalized linear latent variable model that is configured to
-generalize an empirical orthogonal function analysis <span class="citation">(Thorson et al. 2020)</span>.</p>
+generalize an empirical orthogonal function analysis <span class="citation">(Thorson, Ciannelli, and Litzow 2020)</span>.</p>
 <div class="section level2">
 <h2 id="empirical-orthogonal-function-eof-analysis">Empirical Orthogonal Function (EOF) analysis<a class="anchor" aria-label="anchor" href="#empirical-orthogonal-function-eof-analysis"></a>
 </h2>
@@ -144,7 +144,9 @@ generalize an empirical orthogonal function analysis <span class="citation">(Tho
 <span>                                      gmrf_parameterization<span class="op">=</span><span class="st">"projection"</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in tinyVAST(spacetime_term = dsem, space_term = "", data =</span></span>
 <span><span class="co">#&gt; as.data.frame(Data), : `spatial_domain` has over 1000 components, so the model</span></span>
-<span><span class="co">#&gt; may be extremely slow</span></span></code></pre></div>
+<span><span class="co">#&gt; may be extremely slow</span></span>
+<span><span class="co">#&gt; Warning: The model may not have converged. Maximum final gradient:</span></span>
+<span><span class="co">#&gt; 0.0138510975868823.</span></span></code></pre></div>
 <p>Finally, we can extract, rotate, and plot the dominant modes of
 variability and associated spatial responses:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -200,12 +202,12 @@ variability and associated spatial responses:</p>
 <span>         col<span class="op">=</span><span class="fu">viridisLite</span><span class="fu">::</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">viridis</a></span><span class="op">(</span><span class="va">n_eof</span><span class="op">)</span>, lwd<span class="op">=</span><span class="fl">2</span>, lty<span class="op">=</span><span class="st">"solid"</span> <span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span> <span class="st">"top"</span>, ncol<span class="op">=</span><span class="va">n_eof</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"EOF"</span>,<span class="fl">1</span><span class="op">:</span><span class="va">n_eof</span><span class="op">)</span>,</span>
 <span>          fill<span class="op">=</span><span class="fu">viridisLite</span><span class="fu">::</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">viridis</a></span><span class="op">(</span><span class="va">n_eof</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="empirical_orthogonal_functions_files/figure-html/EOF-1.png" class="r-plt" width="576"></p>
-<p>Runtime for this vignette: 4.56 mins</p>
+<p><img src="empirical_orthogonal_functions_files/figure-html/EOF-1.png" class="r-plt" alt="" width="576"></p>
+<p>Runtime for this vignette: 4.52 mins</p>
 <div class="section level4">
 <h4 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h4>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-thorson_defining_2020" class="csl-entry">
 Thorson, James T., Lorenzo Ciannelli, and Michael A. Litzow. 2020.
 <span>“Defining Indices of Ecosystem Variability Using Biological

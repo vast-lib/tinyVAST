@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Calculate conditional AIC</h1>
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/R/cAIC.R" class="external-link"><code>R/cAIC.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/R/cAIC.R" class="external-link"><code>R/cAIC.R</code></a></small>
       <div class="d-none name"><code>cAIC.Rd</code></div>
     </div>
 
@@ -117,7 +117,7 @@ nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
 <span class="r-in"><span>                space_term <span class="op">=</span> <span class="st">"logdens &lt;-&gt; logdens, sd_space"</span>,</span></span>
 <span class="r-in"><span>                space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lon"</span>,<span class="st">'Lat'</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span></span>
-<span class="r-in"><span>                family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span>link<span class="op">=</span><span class="st">"log"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                family <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span>link<span class="op">=</span><span class="st">"log"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                variable_column <span class="op">=</span> <span class="st">"var"</span>,</span></span>
 <span class="r-in"><span>                control <span class="op">=</span> <span class="fu"><a href="tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> getsd <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                                           profile <span class="op">=</span> <span class="st">"alpha_j"</span> <span class="op">)</span> <span class="op">)</span></span></span>

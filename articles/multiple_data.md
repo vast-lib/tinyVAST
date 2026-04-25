@@ -1,7 +1,6 @@
 # Multiple data types
 
 ``` r
-
 library(tinyVAST)
 library(sf)
 library(fmesher)
@@ -17,7 +16,6 @@ of Mexico. However, the interface is quite general and allows combining
 a wide range of data types.
 
 ``` r
-
 # Load data
 data( red_snapper ) 
 data( red_snapper_shapefile ) 
@@ -41,7 +39,6 @@ data type. See (Grüss and Thorson 2019) or (Thorson and Kristensen 2024)
 Chap-7 for more details
 
 ``` r
-
 # Define link and distribution for each data type
 Family = list(
    "Encounter" = binomial(link="cloglog"),
@@ -57,7 +54,6 @@ red_snapper$Data_type = relevel( red_snapper$Data_type,
 We then proceed with the other inputs as per usual:
 
 ``` r
-
 # Define mesh
 mesh = fm_mesh_2d( red_snapper[,c('Lon','Lat')], cutoff = 0.5 )
 
@@ -83,7 +79,6 @@ fit = tinyVAST( data = red_snapper,
 We then plot density estimates for each year:
 
 ``` r
-
 # make extrapolation-grid
 sf_grid = st_make_grid( red_snapper_shapefile, cellsize=c(0.2,0.2) )
 sf_grid = st_intersection( sf_grid, red_snapper_shapefile )
@@ -126,7 +121,6 @@ colnames(plot_grid) = colnames(index) = sort(unique(red_snapper$Year))
 We then plot densities in each year
 
 ``` r
-
 # Convert to sf and plot
 plot_grid = st_sf( sf_grid, 
                    plot_grid )
@@ -139,7 +133,6 @@ plot( plot_grid,
 Similarly, we can plot the abundance index and standard errors
 
 ``` r
-
 ggplot( data.frame("Year"=colnames(index),"Est"=index[1,],"SE"=index[2,]) ) + 
   geom_point( aes(x=Year, y=Est)) + 
   geom_errorbar( aes(x=Year, ymin=Est-SE, ymax=Est+SE) )
@@ -147,7 +140,7 @@ ggplot( data.frame("Year"=colnames(index),"Est"=index[1,],"SE"=index[2,]) ) +
 
 ![](multiple_data_files/figure-html/unnamed-chunk-7-1.png)
 
-Runtime for this vignette: 46.23 secs
+Runtime for this vignette: 1.31 mins
 
 ## Works cited
 
@@ -157,4 +150,4 @@ Habitat Usage.” *ICES Journal of Marine Science* 76 (6): 1748–61.
 <https://doi.org/10.1093/icesjms/fsz075>.
 
 Thorson, James, and Kasper Kristensen. 2024. *Spatio-Temporal Models for
-Ecologists*. 1st edition. Chapman; Hall/CRC.
+Ecologists*. 1st edition. Boca Raton, FL: Chapman; Hall/CRC.

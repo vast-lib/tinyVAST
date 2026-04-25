@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/web_only/overview.html">Overview of vignettes</a></li>
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/mgcv.Rmd" class="external-link"><code>vignettes/mgcv.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/mgcv.Rmd" class="external-link"><code>vignettes/mgcv.Rmd</code></a></small>
       <div class="d-none name"><code>mgcv.Rmd</code></div>
     </div>
 
@@ -138,7 +138,7 @@ simulation residuals:</p>
 <span>                            observedResponse <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">y</span>, </span>
 <span>                            fittedPredictedResponse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">myfit</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="576"></p>
 <p><code>tinyVAST</code> then has a standard <code>predict</code>
 function:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -156,7 +156,7 @@ function:</p>
 <span></span>
 <span><span class="co"># Lattice plots as default option</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">Partial</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="576"></p>
 <p>Alternatively, we can use <code>visreg</code> to visualize output,
 although it is disabled for CRAN vignette checks:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -171,7 +171,7 @@ although it is disabled for CRAN vignette checks:</p>
 <span><span class="co">#&gt; Warning in title(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in axis(side = 1, at = c(0.0833333333333333, 0.291666666666667, :</span></span>
 <span><span class="co">#&gt; "what" is not a graphical parameter</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="576"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"x"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in plot.window(...): "what" is not a graphical parameter</span></span>
@@ -182,10 +182,10 @@ although it is disabled for CRAN vignette checks:</p>
 <span><span class="co">#&gt; graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in box(...): "what" is not a graphical parameter</span></span>
 <span><span class="co">#&gt; Warning in title(...): "what" is not a graphical parameter</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" alt="" width="576"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://pbreheny.github.io/visreg/reference/visreg.html" class="external-link">visreg</a></span><span class="op">(</span><span class="va">myfit</span>, xvar<span class="op">=</span><span class="st">"w"</span>, by<span class="op">=</span><span class="st">"group"</span>, what<span class="op">=</span><span class="st">"p_g"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-7-3.png" class="r-plt" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-7-3.png" class="r-plt" alt="" width="576"></p>
 <p>Alternatively, we can calculate derived quantities via Monte Carlo
 integration of the estimated density function:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -220,21 +220,21 @@ integration of the estimated density function:</p>
 <span></span>
 <span><span class="co"># Lattice plots as default option</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">mypartial</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="576"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Lattice plot of true values</span></span>
 <span><span class="va">mypartial</span><span class="op">$</span><span class="va">yhat</span> <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">z</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pdp/man/plotPartial.html" class="external-link">plotPartial</a></span><span class="op">(</span> <span class="va">mypartial</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" width="576"></p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" alt="" width="576"></p>
 <p>We can again use <code>visreg</code> to visualize response surfaces,
 although it doesn’t seem possible to extract a grouped spatial term, so
 we here show only a single term:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">=</span> <span class="fu"><a href="https://pbreheny.github.io/visreg/reference/visreg2d.html" class="external-link">visreg2d</a></span><span class="op">(</span> <span class="va">myfit</span>, <span class="st">"x"</span>, <span class="st">"y"</span>, cond<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"group"</span><span class="op">=</span><span class="fl">1</span><span class="op">)</span>, plot<span class="op">=</span><span class="cn">FALSE</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">out</span>, main<span class="op">=</span><span class="st">"f(x,y) for group=1"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="mgcv_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="576"></p>
-<p>Runtime for this vignette: 21.88 secs</p>
+<p><img src="mgcv_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="576"></p>
+<p>Runtime for this vignette: 50 secs</p>
   </main>
 </div>
 

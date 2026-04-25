@@ -1,7 +1,6 @@
 # Dynamic structural equation models
 
 ``` r
-
 library(tinyVAST)
 set.seed(101)
 options("tinyVAST.verbose" = FALSE)
@@ -12,7 +11,6 @@ options("tinyVAST.verbose" = FALSE)
 autoregressive model for wolf and moose abundance on Isle Royale.
 
 ``` r
-
 data(isle_royale, package="dsem")
 
 # Convert to long-form
@@ -43,7 +41,7 @@ mytiny
 #>         2:3]))
 #> 
 #> Run time: 
-#> Time difference of 0.3712521 secs
+#> Time difference of 0.6548898 secs
 #> 
 #> Family: 
 #> $obs
@@ -65,8 +63,8 @@ mytiny
 #> beta_z     -0.01285890 5.063467e-02
 #> beta_z      0.37727131 3.504314e-02
 #> beta_z      0.17062266 1.584742e-02
-#> log_sigma -12.62369789 2.032840e+04
-#> Maximum gradient component: 3.603845e-05 
+#> log_sigma -12.62527598 2.008268e+04
+#> Maximum gradient component: 3.634186e-05 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 1
@@ -81,7 +79,7 @@ mytiny
 #> 6     2 wolves wolves         6  <NA>   0  0.37727131 0.03504314 10.7659099
 #> 7     2  moose  moose         7  <NA>   0  0.17062266 0.01584742 10.7665881
 #>        p_value
-#> 1 2.812223e-26
+#> 1 2.812224e-26
 #> 2 9.115511e-01
 #> 3 1.270389e-04
 #> 4 8.189516e-34
@@ -93,6 +91,8 @@ mytiny
 #>           Estimate Std_Error  z_value       p_value
 #> varwolves 3.325262 0.2483494 13.38945  6.969636e-41
 #> varmoose  6.441653 0.2116035 30.44210 1.524035e-203
+#> 
+#> Sanity check:
 
 # Deviance explained relative to both intercepts
 # Note that a process-error-only estimate with have devexpl -> 1
@@ -124,7 +124,6 @@ And we can specifically inspect the estimated interaction matrix:
 We can then compare this with package `dsem`
 
 ``` r
-
 library(dsem)
 
 # Keep in wide-form
@@ -140,16 +139,17 @@ mydsem = dsem::dsem( sem = dsem,
 #>   Coefficient_name Number_of_coefficients   Type
 #> 1           beta_z                      7  Fixed
 #> 2        lnsigma_j                      2  Fixed
-#> 3             x_tj                    122 Random
+#> 3             mu_j                      2 Random
+#> 4             x_tj                    122 Random
 mydsem
 #> $par
-#>       beta_z       beta_z       beta_z       beta_z       beta_z       beta_z 
-#>   0.84199231   0.06629794  -0.05542667   1.02617142   0.37035485   0.38054542 
-#>       beta_z    lnsigma_j    lnsigma_j 
-#>   0.82581950 -11.71750317 -12.72180788 
+#>        beta_z        beta_z        beta_z        beta_z        beta_z 
+#>   0.895834720   0.007358847  -0.124879928   0.874884847  -0.014394603 
+#>        beta_z        beta_z     lnsigma_j     lnsigma_j 
+#>   0.378522244   0.172997994 -18.717126268 -12.672292982 
 #> 
 #> $objective
-#> [1] 102.5012
+#> [1] 7.739638
 #> attr(,"logarithm")
 #> [1] TRUE
 #> 
@@ -157,11 +157,11 @@ mydsem
 #> [1] 0
 #> 
 #> $iterations
-#> [1] 71
+#> [1] 72
 #> 
 #> $evaluations
 #> function gradient 
-#>      104       72 
+#>       85       73 
 #> 
 #> $message
 #> [1] "relative convergence (4)"
@@ -170,24 +170,24 @@ mydsem
 knitr::kable( summary(mydsem), digits=3 )
 ```
 
-| path | lag | name | start | parameter | first | second | direction | Estimate |
-|:---|---:|:---|---:|---:|:---|:---|:---|---:|
-| wolves -\> wolves | 1 | arW | NA | 1 | wolves | wolves | 1 | 0.842 |
-| moose -\> wolves | 1 | MtoW | NA | 2 | moose | wolves | 1 | 0.066 |
-| wolves -\> moose | 1 | WtoM | NA | 3 | wolves | moose | 1 | -0.055 |
-| moose -\> moose | 1 | arM | NA | 4 | moose | moose | 1 | 1.026 |
-| wolves \<-\> moose | 0 | corr | NA | 5 | wolves | moose | 2 | 0.370 |
-| wolves \<-\> wolves | 0 | V\[wolves\] | NA | 6 | wolves | wolves | 2 | 0.381 |
-| moose \<-\> moose | 0 | V\[moose\] | NA | 7 | moose | moose | 2 | 0.826 |
+| path                | lag | name        | start | parameter | first  | second | direction | Estimate |
+|:--------------------|----:|:------------|------:|----------:|:-------|:-------|:----------|---------:|
+| wolves -\> wolves   |   1 | arW         |    NA |         1 | wolves | wolves | 1         |    0.896 |
+| moose -\> wolves    |   1 | MtoW        |    NA |         2 | moose  | wolves | 1         |    0.007 |
+| wolves -\> moose    |   1 | WtoM        |    NA |         3 | wolves | moose  | 1         |   -0.125 |
+| moose -\> moose     |   1 | arM         |    NA |         4 | moose  | moose  | 1         |    0.875 |
+| wolves \<-\> moose  |   0 | corr        |    NA |         5 | wolves | moose  | 2         |   -0.014 |
+| wolves \<-\> wolves |   0 | V\[wolves\] |    NA |         6 | wolves | wolves | 2         |    0.379 |
+| moose \<-\> moose   |   0 | V\[moose\]  |    NA |         7 | moose  | moose  | 2         |    0.173 |
 
 where we again inspect the estimated interaction matrix:
 
 |        | wolves |  moose |
 |:-------|-------:|-------:|
-| wolves |  0.842 | -0.055 |
-| moose  |  0.066 |  1.026 |
+| wolves |  0.896 | -0.125 |
+| moose  |  0.007 |  0.875 |
 
-Runtime for this vignette: 1.48 secs
+Runtime for this vignette: 2.31 secs
 
 ## Works cited
 

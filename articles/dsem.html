@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/web_only/overview.html">Overview of vignettes</a></li>
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/dsem.Rmd" class="external-link"><code>vignettes/dsem.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/dsem.Rmd" class="external-link"><code>vignettes/dsem.Rmd</code></a></small>
       <div class="d-none name"><code>dsem.Rmd</code></div>
     </div>
 
@@ -126,7 +126,7 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;         2:3]))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 0.3712521 secs</span></span>
+<span><span class="co">#&gt; Time difference of 0.6548898 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -148,8 +148,8 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; beta_z     -0.01285890 5.063467e-02</span></span>
 <span><span class="co">#&gt; beta_z      0.37727131 3.504314e-02</span></span>
 <span><span class="co">#&gt; beta_z      0.17062266 1.584742e-02</span></span>
-<span><span class="co">#&gt; log_sigma -12.62369789 2.032840e+04</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 3.603845e-05 </span></span>
+<span><span class="co">#&gt; log_sigma -12.62527598 2.008268e+04</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 3.634186e-05 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
@@ -164,7 +164,7 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; 6     2 wolves wolves         6  &lt;NA&gt;   0  0.37727131 0.03504314 10.7659099</span></span>
 <span><span class="co">#&gt; 7     2  moose  moose         7  &lt;NA&gt;   0  0.17062266 0.01584742 10.7665881</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 2.812223e-26</span></span>
+<span><span class="co">#&gt; 1 2.812224e-26</span></span>
 <span><span class="co">#&gt; 2 9.115511e-01</span></span>
 <span><span class="co">#&gt; 3 1.270389e-04</span></span>
 <span><span class="co">#&gt; 4 8.189516e-34</span></span>
@@ -176,6 +176,8 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;           Estimate Std_Error  z_value       p_value</span></span>
 <span><span class="co">#&gt; varwolves 3.325262 0.2483494 13.38945  6.969636e-41</span></span>
 <span><span class="co">#&gt; varmoose  6.441653 0.2116035 30.44210 1.524035e-203</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sanity check:</span></span>
 <span></span>
 <span><span class="co"># Deviance explained relative to both intercepts</span></span>
 <span><span class="co"># Note that a process-error-only estimate with have devexpl -&gt; 1</span></span>
@@ -334,16 +336,17 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;   Coefficient_name Number_of_coefficients   Type</span></span>
 <span><span class="co">#&gt; 1           beta_z                      7  Fixed</span></span>
 <span><span class="co">#&gt; 2        lnsigma_j                      2  Fixed</span></span>
-<span><span class="co">#&gt; 3             x_tj                    122 Random</span></span>
+<span><span class="co">#&gt; 3             mu_j                      2 Random</span></span>
+<span><span class="co">#&gt; 4             x_tj                    122 Random</span></span>
 <span><span class="va">mydsem</span></span>
 <span><span class="co">#&gt; $par</span></span>
-<span><span class="co">#&gt;       beta_z       beta_z       beta_z       beta_z       beta_z       beta_z </span></span>
-<span><span class="co">#&gt;   0.84199231   0.06629794  -0.05542667   1.02617142   0.37035485   0.38054542 </span></span>
-<span><span class="co">#&gt;       beta_z    lnsigma_j    lnsigma_j </span></span>
-<span><span class="co">#&gt;   0.82581950 -11.71750317 -12.72180788 </span></span>
+<span><span class="co">#&gt;        beta_z        beta_z        beta_z        beta_z        beta_z </span></span>
+<span><span class="co">#&gt;   0.895834720   0.007358847  -0.124879928   0.874884847  -0.014394603 </span></span>
+<span><span class="co">#&gt;        beta_z        beta_z     lnsigma_j     lnsigma_j </span></span>
+<span><span class="co">#&gt;   0.378522244   0.172997994 -18.717126268 -12.672292982 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 102.5012</span></span>
+<span><span class="co">#&gt; [1] 7.739638</span></span>
 <span><span class="co">#&gt; attr(,"logarithm")</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -351,11 +354,11 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 71</span></span>
+<span><span class="co">#&gt; [1] 72</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;      104       72 </span></span>
+<span><span class="co">#&gt;       85       73 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "relative convergence (4)"</span></span>
@@ -395,7 +398,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">wolves</td>
 <td align="left">wolves</td>
 <td align="left">1</td>
-<td align="right">0.842</td>
+<td align="right">0.896</td>
 </tr>
 <tr class="even">
 <td align="left">moose -&gt; wolves</td>
@@ -406,7 +409,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">moose</td>
 <td align="left">wolves</td>
 <td align="left">1</td>
-<td align="right">0.066</td>
+<td align="right">0.007</td>
 </tr>
 <tr class="odd">
 <td align="left">wolves -&gt; moose</td>
@@ -417,7 +420,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">wolves</td>
 <td align="left">moose</td>
 <td align="left">1</td>
-<td align="right">-0.055</td>
+<td align="right">-0.125</td>
 </tr>
 <tr class="even">
 <td align="left">moose -&gt; moose</td>
@@ -428,7 +431,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">moose</td>
 <td align="left">moose</td>
 <td align="left">1</td>
-<td align="right">1.026</td>
+<td align="right">0.875</td>
 </tr>
 <tr class="odd">
 <td align="left">wolves &lt;-&gt; moose</td>
@@ -439,7 +442,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">wolves</td>
 <td align="left">moose</td>
 <td align="left">2</td>
-<td align="right">0.370</td>
+<td align="right">-0.014</td>
 </tr>
 <tr class="even">
 <td align="left">wolves &lt;-&gt; wolves</td>
@@ -450,7 +453,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">wolves</td>
 <td align="left">wolves</td>
 <td align="left">2</td>
-<td align="right">0.381</td>
+<td align="right">0.379</td>
 </tr>
 <tr class="odd">
 <td align="left">moose &lt;-&gt; moose</td>
@@ -461,7 +464,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">moose</td>
 <td align="left">moose</td>
 <td align="left">2</td>
-<td align="right">0.826</td>
+<td align="right">0.173</td>
 </tr>
 </tbody>
 </table>
@@ -475,21 +478,21 @@ and moose abundance on Isle Royale.</p>
 <tbody>
 <tr class="odd">
 <td align="left">wolves</td>
-<td align="right">0.842</td>
-<td align="right">-0.055</td>
+<td align="right">0.896</td>
+<td align="right">-0.125</td>
 </tr>
 <tr class="even">
 <td align="left">moose</td>
-<td align="right">0.066</td>
-<td align="right">1.026</td>
+<td align="right">0.007</td>
+<td align="right">0.875</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 1.48 secs</p>
+<p>Runtime for this vignette: 2.31 secs</p>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-thorson_dynamic_2024" class="csl-entry">
 Thorson, James T., Alexander G. Andrews III, Timothy E. Essington, and
 Scott I. Large. 2024. <span>“Dynamic Structural Equation Models

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../../articles/web_only/overview.html">Overview of vignettes</a></li>
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/web_only/seasonal_index.Rmd" class="external-link"><code>vignettes/web_only/seasonal_index.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/seasonal_index.Rmd" class="external-link"><code>vignettes/web_only/seasonal_index.Rmd</code></a></small>
       <div class="d-none name"><code>seasonal_index.Rmd</code></div>
     </div>
 
@@ -93,18 +93,18 @@ Thorson</h4>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://inlabru-org.github.io/fmesher/" class="external-link">fmesher</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 <p><code>tinyVAST</code> can estimate seasonal spatio-temporal models
-using spatially varying coefficients <span class="citation">(Thorson et
-al. 2023)</span> to incorporate additional spatial variation by season
-and then including an autoregressive spatio-temporal process across
-season-within-year indices. This was originally demonstrated using
-package VAST <span class="citation">(Thorson et al. 2020)</span>, and we
-here show code analyzing spring and fall bottom-trawl surveys for
-yellowtail flounder in the Northwest Atlantic conducted by the NEFSC, as
-well as a early-spring bottom trawl survey by DFO Canada. Here, we use a
-spatio-temporal process with three seasons per year, and estimating a
-lag-1 correlation (representing correlations among seasons within year)
-and a lag-3 correlation (representing correlations within season among
-years).</p>
+using spatially varying coefficients <span class="citation">(James T.
+Thorson et al. 2023)</span> to incorporate additional spatial variation
+by season and then including an autoregressive spatio-temporal process
+across season-within-year indices. This was originally demonstrated
+using package VAST <span class="citation">(James T. Thorson et al.
+2020)</span>, and we here show code analyzing spring and fall
+bottom-trawl surveys for yellowtail flounder in the Northwest Atlantic
+conducted by the NEFSC, as well as a early-spring bottom trawl survey by
+DFO Canada. Here, we use a spatio-temporal process with three seasons
+per year, and estimating a lag-1 correlation (representing correlations
+among seasons within year) and a lag-3 correlation (representing
+correlations within season among years).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span> <span class="va">atlantic_yellowtail</span> <span class="op">)</span> </span>
@@ -113,7 +113,7 @@ years).</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span> <span class="va">atlantic_yellowtail</span> <span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">longitude</span>, y <span class="op">=</span> <span class="va">latitude</span>, col <span class="op">=</span> <span class="va">season</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="seasonal_index_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" width="576"></p>
+<p><img src="seasonal_index_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="576"></p>
 <p>We then define a new year_season variable</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define levels</span></span>
@@ -168,7 +168,7 @@ containing the space-season effect, and in this instance it replaces the
 <span>  spacetime_term <span class="op">=</span> <span class="va">spacetime_term</span>,</span>
 <span>  time_term <span class="op">=</span> <span class="va">time_term</span>,</span>
 <span>  spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="st">"log"</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="st">"log"</span><span class="op">)</span>,</span>
 <span>  <span class="co"># Indexing</span></span>
 <span>  space_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"longitude"</span>,<span class="st">'latitude'</span><span class="op">)</span>,</span>
 <span>  time_column <span class="op">=</span> <span class="st">"season_year_integer"</span>,</span>
@@ -178,19 +178,21 @@ containing the space-season effect, and in this instance it replaces the
 <span>  control <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span></span>
 <span>  <span class="co">#  profile = "alpha_j"</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The model may not have converged: non-positive-definite Hessian</span></span>
+<span><span class="co">#&gt; matrix.</span></span></code></pre></div>
 <p>We can inspect output, and see that both season-within-year (lag-1)
 and season-across-year (lag-3) terms are significant:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"spacetime_term"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   heads      to    from parameter start lag  Estimate  Std_Error   z_value</span></span>
-<span><span class="co">#&gt; 1     1 density density         1  &lt;NA&gt;   1 0.2460266 0.04389254  5.605204</span></span>
-<span><span class="co">#&gt; 2     1 density density         2  &lt;NA&gt;   3 0.5267717 0.04868399 10.820224</span></span>
-<span><span class="co">#&gt; 3     2 density density         3  &lt;NA&gt;   0 1.3015135 0.05159718 25.224508</span></span>
+<span><span class="co">#&gt; 1     1 density density         1  &lt;NA&gt;   1 0.2460269 0.04389256  5.605207</span></span>
+<span><span class="co">#&gt; 2     1 density density         2  &lt;NA&gt;   3 0.5267712 0.04868399 10.820213</span></span>
+<span><span class="co">#&gt; 3     2 density density         3  &lt;NA&gt;   0 1.3015125 0.05159715 25.224503</span></span>
 <span><span class="co">#&gt;         p_value</span></span>
-<span><span class="co">#&gt; 1  2.080103e-08</span></span>
-<span><span class="co">#&gt; 2  2.761009e-27</span></span>
-<span><span class="co">#&gt; 3 2.157267e-140</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  2.080067e-08</span></span>
+<span><span class="co">#&gt; 2  2.761334e-27</span></span>
+<span><span class="co">#&gt; 3 2.157556e-140</span></span></code></pre></div>
 <p>We can then visualize density in selected years. To do this, we first
 define a predictive grid</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -266,7 +268,7 @@ then plot them</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">logdens</span>, geometry <span class="op">=</span> <span class="va">geometry</span><span class="op">)</span>, col <span class="op">=</span> <span class="cn">NA</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>, cols <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">season</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="seasonal_index_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="576"></p>
+<p><img src="seasonal_index_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="576"></p>
 <p>We can also project the model. To do so, we first rebuild the
 <code>newdata</code> argument for the projection period (which would
 involve forecasted covariates if we were including any) while selecting
@@ -315,7 +317,7 @@ deterministic projection:</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">projdata</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">logdens</span>, geometry <span class="op">=</span> <span class="va">geometry</span><span class="op">)</span>, col <span class="op">=</span> <span class="cn">NA</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>, cols <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">season</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="seasonal_index_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" width="576"></p>
+<p><img src="seasonal_index_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="576"></p>
 <p>We then show a single draw from the stochastic projection</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set seed for reproducibility</span></span>
@@ -342,17 +344,19 @@ deterministic projection:</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">projdata</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">logdens</span>, geometry <span class="op">=</span> <span class="va">geometry</span><span class="op">)</span>, col <span class="op">=</span> <span class="cn">NA</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>, cols <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">season</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="seasonal_index_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="576"></p>
-<p>Runtime for this vignette: 13.02 mins</p>
+<p><img src="seasonal_index_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="576"></p>
+<p>Runtime for this vignette: 7.33 mins</p>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-thorson_seasonal_2020" class="csl-entry">
-Thorson, James T, Charles F Adams, Elizabeth N Brooks, et al. 2020.
-<span>“Seasonal and Interannual Variation in Spatio-Temporal Models for
-Index Standardization and Phenology Studies.”</span> <em>ICES Journal of
-Marine Science</em> 77 (5): 1879–92. <a href="https://doi.org/10.1093/icesjms/fsaa074" class="external-link">https://doi.org/10.1093/icesjms/fsaa074</a>.
+Thorson, James T, Charles F Adams, Elizabeth N Brooks, Lisa B Eisner,
+David G Kimmel, Christopher M Legault, Lauren A Rogers, and Ellen M
+Yasumiishi. 2020. <span>“Seasonal and Interannual Variation in
+Spatio-Temporal Models for Index Standardization and Phenology
+Studies.”</span> <em>ICES Journal of Marine Science</em> 77 (5):
+1879–92. <a href="https://doi.org/10.1093/icesjms/fsaa074" class="external-link">https://doi.org/10.1093/icesjms/fsaa074</a>.
 </div>
 <div id="ref-thorson_spatially_2023" class="csl-entry">
 Thorson, James T., Cheryl L. Barnes, Sarah T. Friedman, Janelle L.

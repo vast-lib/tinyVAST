@@ -1,7 +1,6 @@
 # Spatial structural models
 
 ``` r
-
 library(tinyVAST)
 library(fmesher)
 library(igraph)
@@ -16,7 +15,6 @@ al. 2025)
 ## Load data
 
 ``` r
-
 # Load data
 data(alaska_sponge_coral_fish)
 combined_samples = alaska_sponge_coral_fish$combined_samples
@@ -35,7 +33,6 @@ We then define a separate intercept for each group and year, and a
 log-area offset
 
 ``` r
-
 # Define formula
 Formula = Count ~ 0 + interaction(Group4,Year) + offset(log(AreaSwept))
 ```
@@ -48,7 +45,6 @@ proportional variation in fish density between camera and trawl
 measurements.
 
 ``` r
-
 # Define arrow-and-lag notation
 space_term = "
   # Habitat effects on drop-camera measurements
@@ -74,7 +70,6 @@ We also estimate separate measurement-error parameters for each of six
 variables
 
 ``` r
-
 # Specify distribution for each variable
 Family = list(
   Coral = tweedie(),
@@ -89,7 +84,6 @@ Family = list(
 We then run the model without standard errors to speed up the vignette:
 
 ``` r
-
 # Specify estimation settings
 control = tinyVASTcontrol( 
   profile = c("alpha_j"),
@@ -117,7 +111,6 @@ Finally, we use `igraph` to allow detailed control when plotting the
 estimated structural linkages among variables:
 
 ``` r
-
 # Function to relabel variables
 Switch = function(x){
   switch( x, "Coral"="C", "Sponge"="S", "Rock"="R", 
@@ -184,7 +177,7 @@ plot.igraph(
 
 ![](spatial_structural_model_files/figure-html/unnamed-chunk-7-1.png)
 
-Runtime for this vignette: 8.11 mins
+Runtime for this vignette: 4.28 mins
 
 ## Works cited
 

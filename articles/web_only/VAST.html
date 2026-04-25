@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../../articles/web_only/overview.html">Overview of vignettes</a></li>
@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/HEAD/vignettes/web_only/VAST.Rmd" class="external-link"><code>vignettes/web_only/VAST.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/VAST.Rmd" class="external-link"><code>vignettes/web_only/VAST.Rmd</code></a></small>
       <div class="d-none name"><code>VAST.Rmd</code></div>
     </div>
 
@@ -137,7 +137,7 @@ spatio-temporal process, i.e., a spatial Gompertz model <span class="citation">(
 <span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>time<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_t</span>, x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span><span class="op">)</span>, </span>
 <span>                   var <span class="op">=</span> <span class="st">"logn"</span>, </span>
 <span>                   mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">p_ts</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/dtweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span>
+<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/Tweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">n</span><span class="op">==</span><span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.072</span></span></code></pre></div>
 </div>
@@ -162,19 +162,20 @@ spatio-temporal process, i.e., a spatial Gompertz model <span class="citation">(
 <span></span>
 <span><span class="co"># fit model</span></span>
 <span><span class="va">mytinyVAST</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> </span>
-<span>           space_term <span class="op">=</span> <span class="va">space_term</span>,</span>
-<span>           spacetime_term <span class="op">=</span> <span class="va">spacetime_term</span>,</span>
-<span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">1</span>,</span>
-<span>           spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>           family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  space_term <span class="op">=</span> <span class="va">space_term</span>,</span>
+<span>  spacetime_term <span class="op">=</span> <span class="va">spacetime_term</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
+<span>  formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">1</span>,</span>
+<span>  spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="op">)</span></span>
 <span><span class="va">mytinyVAST</span></span>
 <span><span class="co">#&gt; Call: </span></span>
 <span><span class="co">#&gt; tinyVAST(formula = n ~ 1, data = Data, space_term = space_term, </span></span>
 <span><span class="co">#&gt;     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 16.4161 secs</span></span>
+<span><span class="co">#&gt; Time difference of 8.216516 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -187,46 +188,49 @@ spatio-temporal process, i.e., a spatial Gompertz model <span class="citation">(
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;              Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j   -0.51042311 0.20682192</span></span>
-<span><span class="co">#&gt; beta_z     0.84975372 0.07526572</span></span>
-<span><span class="co">#&gt; beta_z    -0.25841774 0.03730119</span></span>
-<span><span class="co">#&gt; theta_z    0.44410419 0.06898295</span></span>
-<span><span class="co">#&gt; log_sigma -0.64811502 0.05006806</span></span>
-<span><span class="co">#&gt; log_sigma  0.01446398 0.06494080</span></span>
-<span><span class="co">#&gt; log_kappa -0.15608153 0.16446880</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.005583757 </span></span>
+<span><span class="co">#&gt; alpha_j   -0.51039962 0.20682402</span></span>
+<span><span class="co">#&gt; beta_z     0.84975932 0.07526407</span></span>
+<span><span class="co">#&gt; beta_z    -0.25841509 0.03730060</span></span>
+<span><span class="co">#&gt; theta_z    0.44410026 0.06898305</span></span>
+<span><span class="co">#&gt; log_sigma -0.64811725 0.05006776</span></span>
+<span><span class="co">#&gt; log_sigma  0.01446391 0.06494065</span></span>
+<span><span class="co">#&gt; log_kappa -0.15609782 0.16446773</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.00235749 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
-<span><span class="co">#&gt; [1] 0.4812371</span></span>
+<span><span class="co">#&gt; [1] 0.4812353</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; space_term: </span></span>
 <span><span class="co">#&gt;   heads   to from parameter start  Estimate  Std_Error  z_value      p_value</span></span>
-<span><span class="co">#&gt; 1     2 logn logn         1  &lt;NA&gt; 0.4441042 0.06898295 6.437884 1.211509e-10</span></span>
+<span><span class="co">#&gt; 1     2 logn logn         1  &lt;NA&gt; 0.4441003 0.06898305 6.437817 1.212041e-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; spacetime_term: </span></span>
 <span><span class="co">#&gt;   heads   to from parameter start lag   Estimate  Std_Error   z_value</span></span>
-<span><span class="co">#&gt; 1     1 logn logn         1  &lt;NA&gt;   1  0.8497537 0.07526572 11.290049</span></span>
-<span><span class="co">#&gt; 2     2 logn logn         2  &lt;NA&gt;   0 -0.2584177 0.03730119 -6.927869</span></span>
+<span><span class="co">#&gt; 1     1 logn logn         1  &lt;NA&gt;   1  0.8497593 0.07526407 11.290372</span></span>
+<span><span class="co">#&gt; 2     2 logn logn         2  &lt;NA&gt;   0 -0.2584151 0.03730060 -6.927908</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 1.469547e-29</span></span>
-<span><span class="co">#&gt; 2 4.272276e-12</span></span>
+<span><span class="co">#&gt; 1 1.464154e-29</span></span>
+<span><span class="co">#&gt; 2 4.271107e-12</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
 <span><span class="co">#&gt;               Estimate Std_Error   z_value    p_value</span></span>
-<span><span class="co">#&gt; (Intercept) -0.5104231 0.2068219 -2.467935 0.01358949</span></span></code></pre></div>
+<span><span class="co">#&gt; (Intercept) -0.5103996  0.206824 -2.467797 0.01359475</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sanity check: </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; **Possible issues detected! Check output of sanity().**</span></span></code></pre></div>
 <p>The estimated values for <code>beta_z</code> then correspond to the
 simulated value for <code>rho</code> and <code>spatial_sd</code>.</p>
 <p>We can compare the true densities:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: package 'sf' was built under R version 4.5.2</span></span>
 <span><span class="va">data_wide</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span>,<span class="st">'time'</span>,<span class="st">'mu'</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>                     direction <span class="op">=</span> <span class="st">"wide"</span>, idvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span>, timevar <span class="op">=</span> <span class="st">"time"</span><span class="op">)</span></span>
 <span><span class="va">sf_data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span> <span class="va">data_wide</span>, coords<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sf_grid</span> <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_make_grid.html" class="external-link">st_make_grid</a></span><span class="op">(</span> <span class="va">sf_data</span> <span class="op">)</span></span>
 <span><span class="va">sf_plot</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">sf_grid</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="va">sf_data</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sf_plot</span>, max.plot<span class="op">=</span><span class="va">n_t</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="VAST_files/figure-html/VAST-true-dens-1.png" class="r-plt" width="576"></p>
+<p><img src="VAST_files/figure-html/VAST-true-dens-1.png" class="r-plt" alt="" width="576"></p>
 <p>with the estimated densities:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Data</span><span class="op">$</span><span class="va">mu_hat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mytinyVAST</span><span class="op">)</span></span>
@@ -235,11 +239,11 @@ simulated value for <code>rho</code> and <code>spatial_sd</code>.</p>
 <span><span class="va">sf_data</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span> <span class="va">data_wide</span>, coords<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sf_plot</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="va">sf_grid</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="va">sf_data</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sf_plot</span>, max.plot<span class="op">=</span><span class="va">n_t</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="VAST_files/figure-html/VAST-est-dens-1.png" class="r-plt" width="576"></p>
+<p><img src="VAST_files/figure-html/VAST-est-dens-1.png" class="r-plt" alt="" width="576"></p>
 <p>where a scatterplot shows that they are highly correlated:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> x<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, y<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu_hat</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="VAST_files/figure-html/VAST-scatterplot-1.png" class="r-plt" width="576"></p>
+<p><img src="VAST_files/figure-html/VAST-scatterplot-1.png" class="r-plt" alt="" width="576"></p>
 <p>We can also use the <code>DHARMa</code> package to visualize
 simulation residuals:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -252,27 +256,27 @@ simulation residuals:</p>
 <span>                            observedResponse <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">n</span>, </span>
 <span>                            fittedPredictedResponse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">mytinyVAST</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="VAST_files/figure-html/VAST-DHARMa-1.png" class="r-plt" width="576"></p>
+<p><img src="VAST_files/figure-html/VAST-DHARMa-1.png" class="r-plt" alt="" width="576"></p>
 <p>We can then calculate the area-weighted total abundance and compare
 it with its true value:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predicted sample-weighted total</span></span>
 <span><span class="op">(</span><span class="va">Est</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_t</span><span class="op">)</span>,</span>
 <span>   FUN<span class="op">=</span>\<span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="../../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">mytinyVAST</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">Data</span>,<span class="va">time</span><span class="op">==</span><span class="va">t</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                          [,1]      [,2]     [,3]      [,4]      [,5]      [,6]</span></span>
-<span><span class="co">#&gt; Estimate            69.774342 68.167115 68.24959 64.038611 58.736780 60.506542</span></span>
-<span><span class="co">#&gt; Std. Error           4.733476  4.404922  4.32475  4.092695  3.880481  3.887897</span></span>
-<span><span class="co">#&gt; Est. (bias.correct) 72.867322 71.288122 71.44284 67.062705 61.536991 63.391199</span></span>
-<span><span class="co">#&gt; Std. (bias.correct)        NA        NA       NA        NA        NA        NA</span></span>
+<span><span class="co">#&gt;                          [,1]      [,2]      [,3]      [,4]     [,5]      [,6]</span></span>
+<span><span class="co">#&gt; Estimate            69.774447 68.167140 68.249630 64.038614 58.73677 60.506551</span></span>
+<span><span class="co">#&gt; Std. Error           4.733492  4.404923  4.324752  4.092695  3.88048  3.887898</span></span>
+<span><span class="co">#&gt; Est. (bias.correct) 72.867385 71.288095 71.442818 67.062659 61.53693 63.391164</span></span>
+<span><span class="co">#&gt; Std. (bias.correct)        NA        NA        NA        NA       NA        NA</span></span>
 <span><span class="co">#&gt;                          [,7]      [,8]      [,9]     [,10]     [,11]     [,12]</span></span>
-<span><span class="co">#&gt; Estimate            54.977480 58.463756 64.523920 74.895696 84.490757 76.981720</span></span>
-<span><span class="co">#&gt; Std. Error           3.772127  3.863062  4.166782  4.702731  5.335555  5.141678</span></span>
-<span><span class="co">#&gt; Est. (bias.correct) 57.610639 61.214950 67.544399 78.336996 88.253689 80.405085</span></span>
+<span><span class="co">#&gt; Estimate            54.977472 58.463750 64.523936 74.895753 84.490828 76.981717</span></span>
+<span><span class="co">#&gt; Std. Error           3.772124  3.863061  4.166782  4.702733  5.335558  5.141674</span></span>
+<span><span class="co">#&gt; Est. (bias.correct) 57.610590 61.214901 67.544370 78.337004 88.253708 80.405033</span></span>
 <span><span class="co">#&gt; Std. (bias.correct)        NA        NA        NA        NA        NA        NA</span></span>
 <span><span class="co">#&gt;                         [,13]      [,14]     [,15]</span></span>
-<span><span class="co">#&gt; Estimate            87.189025  96.106379 93.626461</span></span>
-<span><span class="co">#&gt; Std. Error           5.514166   6.001112  6.338951</span></span>
-<span><span class="co">#&gt; Est. (bias.correct) 91.106042 100.570708 98.734105</span></span>
+<span><span class="co">#&gt; Estimate            87.189069  96.106447 93.626602</span></span>
+<span><span class="co">#&gt; Std. Error           5.514166   6.001112  6.338957</span></span>
+<span><span class="co">#&gt; Est. (bias.correct) 91.106034 100.570723 98.734193</span></span>
 <span><span class="co">#&gt; Std. (bias.correct)        NA         NA        NA</span></span>
 <span></span>
 <span><span class="co"># True (latent) sample-weighted total</span></span>
@@ -296,21 +300,20 @@ it with its true value:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span> color <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>            linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">True</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="VAST_files/figure-html/VAST-abundance-1.png" class="r-plt" width="576"></p>
+<p><img src="VAST_files/figure-html/VAST-abundance-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level3">
 <h3 id="comparison-with-vast-or-sdmtmb">Comparison with VAST or sdmTMB<a class="anchor" aria-label="anchor" href="#comparison-with-vast-or-sdmtmb"></a>
 </h3>
 <p>Next, we compare this against the current version of VAST <span class="citation">(Thorson and Barnett 2017)</span></p>
-<pre><code><span><span class="co">#&gt; Warning: package 'TMB' was built under R version 4.5.2</span></span>
-<span><span class="co">#&gt; Warning: package 'units' was built under R version 4.5.2</span></span>
-<span><span class="co">#&gt; Warning: package 'marginaleffects' was built under R version 4.5.2</span></span></code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">settings</span> <span class="op">=</span> <span class="fu">make_settings</span><span class="op">(</span> purpose<span class="op">=</span><span class="st">"index3"</span>,</span>
-<span>                          n_x <span class="op">=</span> <span class="va">n_x</span><span class="op">*</span><span class="va">n_y</span>,</span>
-<span>                          Region <span class="op">=</span> <span class="st">"Other"</span>,</span>
-<span>                          bias.correct <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                          use_anisotropy <span class="op">=</span> <span class="cn">FALSE</span> <span class="op">)</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">settings</span> <span class="op">=</span> <span class="fu">make_settings</span><span class="op">(</span> </span>
+<span>  purpose<span class="op">=</span><span class="st">"index3"</span>,</span>
+<span>  n_x <span class="op">=</span> <span class="va">n_x</span><span class="op">*</span><span class="va">n_y</span>,</span>
+<span>  Region <span class="op">=</span> <span class="st">"Other"</span>,</span>
+<span>  bias.correct <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  use_anisotropy <span class="op">=</span> <span class="cn">FALSE</span> </span>
+<span><span class="op">)</span></span>
 <span><span class="va">settings</span><span class="op">$</span><span class="va">FieldConfig</span><span class="op">[</span><span class="st">'Epsilon'</span>,<span class="st">'Component_1'</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="va">settings</span><span class="op">$</span><span class="va">FieldConfig</span><span class="op">[</span><span class="st">'Omega'</span>,<span class="st">'Component_1'</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="va">settings</span><span class="op">$</span><span class="va">RhoConfig</span><span class="op">[</span><span class="st">'Epsilon2'</span><span class="op">]</span> <span class="op">=</span> <span class="fl">4</span></span>
@@ -318,133 +321,62 @@ it with its true value:</p>
 <span><span class="va">settings</span><span class="op">$</span><span class="va">ObsModel</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Run VAST</span></span>
-<span><span class="va">myVAST</span> <span class="op">=</span> <span class="fu">fit_model</span><span class="op">(</span> settings<span class="op">=</span><span class="va">settings</span>,</span>
-<span>                 Lat_i <span class="op">=</span> <span class="va">Data</span><span class="op">[</span>,<span class="st">'y'</span><span class="op">]</span>,</span>
-<span>                 Lon_i <span class="op">=</span> <span class="va">Data</span><span class="op">[</span>,<span class="st">'x'</span><span class="op">]</span>,</span>
-<span>                 t_i <span class="op">=</span> <span class="va">Data</span><span class="op">[</span>,<span class="st">'time'</span><span class="op">]</span>,</span>
-<span>                 b_i <span class="op">=</span> <span class="va">Data</span><span class="op">[</span>,<span class="st">'n'</span><span class="op">]</span>,</span>
-<span>                 a_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                 observations_LL <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>Lat<span class="op">=</span><span class="va">Data</span><span class="op">[</span>,<span class="st">'y'</span><span class="op">]</span>,Lon<span class="op">=</span><span class="va">Data</span><span class="op">[</span>,<span class="st">'x'</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>                 grid_dim_km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>,<span class="fl">100</span><span class="op">)</span>,</span>
-<span>                 newtonsteps <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>                 loopnum <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                 control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>eval.max <span class="op">=</span> <span class="fl">10000</span>, iter.max <span class="op">=</span> <span class="fl">10000</span>, trace <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">myVAST</span></span>
-<span><span class="co">#&gt; fit_model(.) result</span></span>
-<span><span class="co">#&gt; $par</span></span>
-<span><span class="co">#&gt;       beta1_ft       beta2_ft     L_omega2_z   L_epsilon2_z      logkappa2 </span></span>
-<span><span class="co">#&gt;    -0.59988031     0.09993533     0.55005057     0.26695392    -4.68896241 </span></span>
-<span><span class="co">#&gt; Epsilon_rho2_f      logSigmaM </span></span>
-<span><span class="co">#&gt;     0.89582684     0.05547658 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 1256.257</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 3</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $evaluations</span></span>
-<span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;        7        3 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $time_for_MLE</span></span>
-<span><span class="co">#&gt; Time difference of 1.521775 secs</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $max_gradient</span></span>
-<span><span class="co">#&gt; [1] 0.0007302142</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $Convergence_check</span></span>
-<span><span class="co">#&gt; [1] "The model is likely not converged"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $number_of_coefficients</span></span>
-<span><span class="co">#&gt;  Total  Fixed Random </span></span>
-<span><span class="co">#&gt;   2183      7   2176 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $AIC</span></span>
-<span><span class="co">#&gt; [1] 2526.515</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $diagnostics</span></span>
-<span><span class="co">#&gt;                         Param starting_value     Lower         MLE     Upper</span></span>
-<span><span class="co">#&gt; beta1_ft             beta1_ft    -0.59987818      -Inf -0.59988031       Inf</span></span>
-<span><span class="co">#&gt; beta2_ft             beta2_ft     0.09993558      -Inf  0.09993533       Inf</span></span>
-<span><span class="co">#&gt; L_omega2_z         L_omega2_z     0.55005171      -Inf  0.55005057       Inf</span></span>
-<span><span class="co">#&gt; L_epsilon2_z     L_epsilon2_z     0.26695303      -Inf  0.26695392       Inf</span></span>
-<span><span class="co">#&gt; logkappa2           logkappa2    -4.68896169 -6.214608 -4.68896241 -3.565449</span></span>
-<span><span class="co">#&gt; Epsilon_rho2_f Epsilon_rho2_f     0.89582671 -0.990000  0.89582684  0.990000</span></span>
-<span><span class="co">#&gt; logSigmaM           logSigmaM     0.05547811      -Inf  0.05547658 10.000000</span></span>
-<span><span class="co">#&gt;                final_gradient</span></span>
-<span><span class="co">#&gt; beta1_ft         7.302142e-04</span></span>
-<span><span class="co">#&gt; beta2_ft         3.958089e-05</span></span>
-<span><span class="co">#&gt; L_omega2_z       1.120538e-04</span></span>
-<span><span class="co">#&gt; L_epsilon2_z    -1.264341e-04</span></span>
-<span><span class="co">#&gt; logkappa2        9.682295e-05</span></span>
-<span><span class="co">#&gt; Epsilon_rho2_f  -1.139072e-04</span></span>
-<span><span class="co">#&gt; logSigmaM       -2.508962e-04</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $SD</span></span>
-<span><span class="co">#&gt; sdreport(.) result</span></span>
-<span><span class="co">#&gt;                   Estimate Std. Error</span></span>
-<span><span class="co">#&gt; beta1_ft       -0.59988031 0.04573745</span></span>
-<span><span class="co">#&gt; beta2_ft        0.09993533 0.21591340</span></span>
-<span><span class="co">#&gt; L_omega2_z      0.55005057 0.08905102</span></span>
-<span><span class="co">#&gt; L_epsilon2_z    0.26695392 0.04043402</span></span>
-<span><span class="co">#&gt; logkappa2      -4.68896241 0.18202530</span></span>
-<span><span class="co">#&gt; Epsilon_rho2_f  0.89582684 0.06297620</span></span>
-<span><span class="co">#&gt; logSigmaM       0.05547658 0.06294172</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.0007302142 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $time_for_sdreport</span></span>
-<span><span class="co">#&gt; Time difference of 4.742581 secs</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $time_for_run</span></span>
-<span><span class="co">#&gt; Time difference of 23.95087 secs</span></span></code></pre></div>
-<p>Or with sdmTMB <span class="citation">(Anderson et al.,
+<span><span class="va">myVAST</span> <span class="op">=</span> <span class="fu">fit_model</span><span class="op">(</span> </span>
+<span>  settings<span class="op">=</span><span class="va">settings</span>,</span>
+<span>  Lat_i <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">y</span>,</span>
+<span>  Lon_i <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">x</span>,</span>
+<span>  t_i <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  b_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">Data</span><span class="op">$</span><span class="va">n</span><span class="op">)</span>,</span>
+<span>  a_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  observations_LL <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>Lat<span class="op">=</span><span class="va">Data</span><span class="op">[</span>,<span class="st">'y'</span><span class="op">]</span>,Lon<span class="op">=</span><span class="va">Data</span><span class="op">[</span>,<span class="st">'x'</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  grid_dim_km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>,<span class="fl">100</span><span class="op">)</span>,</span>
+<span>  newtonsteps <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  loopnum <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>eval.max <span class="op">=</span> <span class="fl">10000</span>, iter.max <span class="op">=</span> <span class="fl">10000</span>, trace <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> </span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">myVAST</span></span></code></pre></div>
+<p>Or with sdmTMB <span class="citation">(Anderson et al.
 n.d.)</span></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pbs-assess.github.io/sdmTMB/" class="external-link">sdmTMB</a></span><span class="op">)</span></span>
-<span><span class="va">sdmTMB_mesh</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/make_mesh.html" class="external-link">make_mesh</a></span><span class="op">(</span><span class="va">Data</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>, n_knots<span class="op">=</span><span class="va">n_x</span><span class="op">*</span><span class="va">n_y</span> <span class="op">)</span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sdmTMB.github.io/sdmTMB/" class="external-link">sdmTMB</a></span><span class="op">)</span></span>
+<span><span class="va">sdmTMB_mesh</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/make_mesh.html" class="external-link">make_mesh</a></span><span class="op">(</span><span class="va">Data</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>, n_knots<span class="op">=</span><span class="va">n_x</span><span class="op">*</span><span class="va">n_y</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">start_time2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">mysdmTMB</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/sdmTMB.html" class="external-link">sdmTMB</a></span><span class="op">(</span></span>
+<span><span class="va">mysdmTMB</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/sdmTMB.html" class="external-link">sdmTMB</a></span><span class="op">(</span></span>
 <span>  formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>  mesh <span class="op">=</span> <span class="va">sdmTMB_mesh</span>,</span>
 <span>  spatial <span class="op">=</span> <span class="st">"on"</span>,</span>
 <span>  spatiotemporal <span class="op">=</span> <span class="st">"ar1"</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: the 'findbars' function has moved to the reformulas package. Please update your imports, or ask an upstream package maintainter to do so.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
-<span><span class="co">#&gt; Warning: the 'nobars' function has moved to the reformulas package. Please update your imports, or ask an upstream package maintainter to do so.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
 <span><span class="va">sdmTMBtime</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time2</span></span></code></pre></div>
 <p>The models all have similar runtimes</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">Times</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"tinyVAST"</span> <span class="op">=</span> <span class="va">mytinyVAST</span><span class="op">$</span><span class="va">run_time</span>,</span>
-<span>           <span class="st">"VAST"</span> <span class="op">=</span> <span class="va">myVAST</span><span class="op">$</span><span class="va">total_time</span>,</span>
-<span>           <span class="st">"sdmTMB"</span> <span class="op">=</span> <span class="va">sdmTMBtime</span> <span class="op">)</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">Times</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> </span>
+<span>  tinyVAST <span class="op">=</span> <span class="va">mytinyVAST</span><span class="op">$</span><span class="va">run_time</span>,</span>
+<span>  VAST <span class="op">=</span> <span class="va">myVAST</span><span class="op">$</span><span class="va">total_time</span>,</span>
+<span>  sdmTMB <span class="op">=</span> <span class="va">sdmTMBtime</span> </span>
+<span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="st">"run times (sec.)"</span><span class="op">=</span><span class="va">Times</span><span class="op">)</span>, digits<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
+<colgroup>
+<col width="36%">
+<col width="30%">
+<col width="33%">
+</colgroup>
 <thead><tr class="header">
-<th align="left"></th>
-<th align="right">run times (sec.)</th>
+<th align="left">run times (sec.).tinyVAST</th>
+<th align="left">run times (sec.).VAST</th>
+<th align="left">run times (sec.).sdmTMB</th>
 </tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">tinyVAST</td>
-<td align="right">16.4</td>
-</tr>
-<tr class="even">
-<td align="left">VAST</td>
-<td align="right">27.2</td>
-</tr>
-<tr class="odd">
-<td align="left">sdmTMB</td>
-<td align="right">28.8</td>
-</tr>
-</tbody>
+<tbody><tr class="odd">
+<td align="left">8.2 secs</td>
+<td align="left">NA</td>
+<td align="left">10.1 secs</td>
+</tr></tbody>
 </table>
 </div>
 <div class="section level3">
@@ -453,7 +385,7 @@ n.d.)</span></p>
 <p>We can also fit this univariate spatio-temporal process using a
 Poisson-linked gamma delta model <span class="citation">(Thorson
 2018)</span></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fit model</span></span>
 <span><span class="va">mydelta2</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span> </span>
 <span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
@@ -472,7 +404,7 @@ Poisson-linked gamma delta model <span class="citation">(Thorson
 <span><span class="co">#&gt;     spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 16.30274 secs</span></span>
+<span><span class="co">#&gt; Time difference of 8.056965 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -484,38 +416,42 @@ Poisson-linked gamma delta model <span class="citation">(Thorson
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
-<span><span class="co">#&gt;              Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j    0.96740001 0.03523113</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.24655464 0.14981014</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.29278791 0.17500129</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.30567555 0.19172149</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.32180772 0.20304204</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.57098809 0.21258829</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.44507841 0.21944963</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.71680202 0.22626333</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.54485935 0.23247418</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.39904963 0.23307994</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.12515799 0.23638030</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.22354407 0.23877401</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.51311725 0.24006133</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.24691178 0.24216425</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.12785624 0.24209137</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.07071406 0.24334579</span></span>
-<span><span class="co">#&gt; beta2_z    0.89674417 0.03512480</span></span>
-<span><span class="co">#&gt; beta2_z    0.31332882 0.03906491</span></span>
-<span><span class="co">#&gt; log_sigma  0.02962681 0.02475180</span></span>
-<span><span class="co">#&gt; log_kappa  0.10856725 0.14818594</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.002531402 </span></span>
+<span><span class="co">#&gt;             Estimate Std. Error</span></span>
+<span><span class="co">#&gt; alpha_j    0.9673982 0.03523113</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2465531 0.14981116</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2927804 0.17500264</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.3056616 0.19172295</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.3218115 0.20304344</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.5709922 0.21258960</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.4450793 0.21945079</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.7167974 0.22626434</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.5448634 0.23247502</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.3990617 0.23308060</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.1251748 0.23638081</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2235461 0.23877445</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.5131381 0.24006161</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2469233 0.24216447</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.1278738 0.24209141</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.0707282 0.24334575</span></span>
+<span><span class="co">#&gt; beta2_z    0.8967400 0.03512556</span></span>
+<span><span class="co">#&gt; beta2_z    0.3133328 0.03906544</span></span>
+<span><span class="co">#&gt; log_sigma  0.0296271 0.02475190</span></span>
+<span><span class="co">#&gt; log_kappa  0.1085638 0.14818576</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.001977891 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
-<span><span class="co">#&gt; [1] 0.3295016</span></span>
+<span><span class="co">#&gt; [1] 0.3295031</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
-<span><span class="co">#&gt;             Estimate  Std_Error  z_value       p_value</span></span>
-<span><span class="co">#&gt; (Intercept)   0.9674 0.03523113 27.45867 5.474654e-166</span></span></code></pre></div>
+<span><span class="co">#&gt;              Estimate  Std_Error  z_value       p_value</span></span>
+<span><span class="co">#&gt; (Intercept) 0.9673982 0.03523113 27.45862 5.482304e-166</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sanity check: </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; **Possible issues detected! Check output of sanity().**</span></span></code></pre></div>
 <p>And we can again use the <code>DHARMa</code> package <span class="citation">(Hartig 2017)</span> to visualize conditional
 simulation quantile (a.k.a. Dunn-Smythe) residuals <span class="citation">(Dunn and Smyth 1996)</span>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># simulate new data conditional on fixed effects</span></span>
 <span><span class="co"># and sampling random effects from their predictive distribution</span></span>
 <span><span class="va">y_ir</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate</a></span><span class="op">(</span><span class="va">mydelta2</span>, nsim<span class="op">=</span><span class="fl">100</span>, type<span class="op">=</span><span class="st">"mle-mvn"</span><span class="op">)</span></span>
@@ -525,10 +461,10 @@ simulation quantile (a.k.a. Dunn-Smythe) residuals <span class="citation">(Dunn 
 <span>                            observedResponse <span class="op">=</span> <span class="va">Data</span><span class="op">$</span><span class="va">n</span>, </span>
 <span>                            fittedPredictedResponse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">mydelta2</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="VAST_files/figure-html/delta-DHARMa-1.png" class="r-plt" width="576"></p>
+<p><img src="VAST_files/figure-html/delta-DHARMa-1.png" class="r-plt" alt="" width="576"></p>
 <p>We can then use marginal and conditional AIC to compare the fit of
 the delta-model and Tweedie distribution:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># AIC table</span></span>
 <span><span class="va">AIC_table</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
 <span>  mAIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"Tweedie"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">mytinyVAST</span><span class="op">)</span>, </span>
@@ -552,7 +488,7 @@ the delta-model and Tweedie distribution:</p>
 <tr class="odd">
 <td align="left">Tweedie</td>
 <td align="right">2501.480</td>
-<td align="right">2356.788</td>
+<td align="right">2356.787</td>
 </tr>
 <tr class="even">
 <td align="left">delta-lognormal</td>
@@ -567,10 +503,10 @@ the delta-model and Tweedie distribution:</p>
 <h2 id="bivariate-vector-autoregressive-spatio-temporal-model">Bivariate vector autoregressive spatio-temporal model<a class="anchor" aria-label="anchor" href="#bivariate-vector-autoregressive-spatio-temporal-model"></a>
 </h2>
 <p>We next highlight how to specify a bivariate spatio-temporal model
-with a cross-laggged (vector autoregressive) interaction <span class="citation">Thorson et al. (2019)</span>. ## Simulate bivariate
-model</p>
+with a cross-laggged (vector autoregressive) interaction <span class="citation">Thorson, Adams, and Holsman (2019)</span>. ## Simulate
+bivariate model</p>
 <p>We first simulate artificial data for the sake of demonstration:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate settings</span></span>
 <span><span class="va">theta_xy</span> <span class="op">=</span> <span class="fl">0.2</span></span>
 <span><span class="va">n_x</span> <span class="op">=</span> <span class="va">n_y</span> <span class="op">=</span> <span class="fl">10</span></span>
@@ -592,12 +528,12 @@ model</p>
 <span><span class="co"># Shape into longform data-frame and add error</span></span>
 <span><span class="va">Data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>time<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_t</span>, x<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_x</span>, y<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="va">n_y</span>, <span class="st">"var"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"d1"</span>,<span class="st">"d2"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                   mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/dtweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span></code></pre></div>
+<span><span class="va">Data</span><span class="op">$</span><span class="va">n</span> <span class="op">=</span> <span class="fu">tweedie</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tweedie/man/Tweedie.html" class="external-link">rtweedie</a></span><span class="op">(</span> n<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Data</span><span class="op">)</span>, mu<span class="op">=</span><span class="va">Data</span><span class="op">$</span><span class="va">mu</span>, phi<span class="op">=</span><span class="fl">0.5</span>, power<span class="op">=</span><span class="fl">1.5</span> <span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="fit-bivariate-model">Fit bivariate model<a class="anchor" aria-label="anchor" href="#fit-bivariate-model"></a>
 </h3>
 <p>We next set up inputs and run the model:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># make mesh</span></span>
 <span><span class="va">mesh</span> <span class="op">=</span> <span class="fu"><a href="https://inlabru-org.github.io/fmesher/reference/fm_mesh_2d.html" class="external-link">fm_mesh_2d</a></span><span class="op">(</span> <span class="va">Data</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>,<span class="st">'y'</span><span class="op">)</span><span class="op">]</span> <span class="op">)</span></span>
 <span></span>
@@ -616,14 +552,16 @@ model</p>
 <span>           data <span class="op">=</span> <span class="va">Data</span>,</span>
 <span>           formula <span class="op">=</span> <span class="va">n</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">var</span>,</span>
 <span>           spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
-<span>           family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/sdmTMB/man/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
+<span>           family <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The model may not have converged. Maximum final gradient:</span></span>
+<span><span class="co">#&gt; 0.0108368453778236.</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; Call: </span></span>
 <span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + var, data = Data, spacetime_term = dsem, </span></span>
 <span><span class="co">#&gt;     family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 1.340818 mins</span></span>
+<span><span class="co">#&gt; Time difference of 29.07819 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -636,46 +574,50 @@ model</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;               Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j    0.264368407 0.09266171</span></span>
-<span><span class="co">#&gt; alpha_j    0.035863837 0.07360860</span></span>
-<span><span class="co">#&gt; beta_z     0.455447933 0.06734774</span></span>
-<span><span class="co">#&gt; beta_z     0.389078116 0.08038421</span></span>
-<span><span class="co">#&gt; beta_z    -0.405603381 0.08530597</span></span>
-<span><span class="co">#&gt; beta_z    -0.084083295 0.06545855</span></span>
-<span><span class="co">#&gt; beta_z     0.329048842 0.01844056</span></span>
-<span><span class="co">#&gt; log_sigma -0.691801474 0.02886804</span></span>
-<span><span class="co">#&gt; log_sigma  0.007588816 0.05777685</span></span>
-<span><span class="co">#&gt; log_kappa -0.487467947 0.09474226</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.003830999 </span></span>
+<span><span class="co">#&gt; alpha_j    0.090202981 0.11486664</span></span>
+<span><span class="co">#&gt; alpha_j   -0.099500541 0.10318987</span></span>
+<span><span class="co">#&gt; beta_z     0.553897565 0.07628808</span></span>
+<span><span class="co">#&gt; beta_z     0.536424139 0.07383380</span></span>
+<span><span class="co">#&gt; beta_z    -0.225705467 0.07606824</span></span>
+<span><span class="co">#&gt; beta_z    -0.070945613 0.06259109</span></span>
+<span><span class="co">#&gt; beta_z     0.336688292 0.01863795</span></span>
+<span><span class="co">#&gt; log_sigma -0.696754581 0.02881155</span></span>
+<span><span class="co">#&gt; log_sigma -0.005321748 0.05462454</span></span>
+<span><span class="co">#&gt; log_kappa -0.635425879 0.10547175</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.01083685 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
-<span><span class="co">#&gt; [1] 0.4461972</span></span>
+<span><span class="co">#&gt; [1] 0.4057952</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; spacetime_term: </span></span>
 <span><span class="co">#&gt;   heads to from parameter start lag    Estimate  Std_Error   z_value</span></span>
-<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.45544793 0.06734774  6.762632</span></span>
-<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.38907812 0.08038421  4.840231</span></span>
-<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.40560338 0.08530597 -4.754689</span></span>
-<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.08408329 0.06545855 -1.284527</span></span>
-<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.32904884 0.01844056 17.843757</span></span>
-<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.32904884 0.01844056 17.843757</span></span>
+<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.55389757 0.07628808  7.260604</span></span>
+<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.53642414 0.07383380  7.265293</span></span>
+<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.22570547 0.07606824 -2.967144</span></span>
+<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.07094561 0.06259109 -1.133478</span></span>
+<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.33668829 0.01863795 18.064666</span></span>
+<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.33668829 0.01863795 18.064666</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 1.355075e-11</span></span>
-<span><span class="co">#&gt; 2 1.296885e-06</span></span>
-<span><span class="co">#&gt; 3 1.987519e-06</span></span>
-<span><span class="co">#&gt; 4 1.989575e-01</span></span>
-<span><span class="co">#&gt; 5 3.232145e-71</span></span>
-<span><span class="co">#&gt; 6 3.232145e-71</span></span>
+<span><span class="co">#&gt; 1 3.853647e-13</span></span>
+<span><span class="co">#&gt; 2 3.722318e-13</span></span>
+<span><span class="co">#&gt; 3 3.005797e-03</span></span>
+<span><span class="co">#&gt; 4 2.570136e-01</span></span>
+<span><span class="co">#&gt; 5 6.048658e-73</span></span>
+<span><span class="co">#&gt; 6 6.048658e-73</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
-<span><span class="co">#&gt;         Estimate  Std_Error   z_value     p_value</span></span>
-<span><span class="co">#&gt; vard1 0.26436841 0.09266171 2.8530491 0.004330193</span></span>
-<span><span class="co">#&gt; vard2 0.03586384 0.07360860 0.4872235 0.626099977</span></span></code></pre></div>
+<span><span class="co">#&gt;          Estimate Std_Error    z_value   p_value</span></span>
+<span><span class="co">#&gt; vard1  0.09020298 0.1148666  0.7852844 0.4322868</span></span>
+<span><span class="co">#&gt; vard2 -0.09950054 0.1031899 -0.9642471 0.3349220</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Sanity check: </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; **Possible issues detected! Check output of sanity().**</span></span></code></pre></div>
 <p>The values for <code>beta_z</code> again correspond to the specified
 value for interaction-matrix <code>B</code></p>
 <p>We can again calculate the area-weighted total abundance and compare
 it with its true value:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Predicted sample-weighted total </span></span>
 <span><span class="co"># for each year-variable combination</span></span>
 <span><span class="va">Est1</span> <span class="op">=</span> <span class="va">Est2</span> <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -718,13 +660,13 @@ it with its true value:</p>
 <span>                  xend <span class="op">=</span> <span class="va">time</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">Estimate</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">True</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="VAST_files/figure-html/VAST-VAR-index-1.png" class="r-plt" width="576"></p>
+<p><img src="VAST_files/figure-html/VAST-VAR-index-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-anderson_sdmtmb_nodate" class="csl-entry">
 Anderson, Sean C., Eric J. Ward, Philina A. English, Lewis A. K.
 Barnett, and James T. Thorson. n.d. <span>“<span class="nocase">sdmTMB</span>: <span>An</span> <span>R</span>
@@ -734,7 +676,7 @@ Barnett, and James T. Thorson. n.d. <span>“<span class="nocase">sdmTMB</span>:
 <span>Models</span> with <span>Spatial</span> and
 <span>Spatiotemporal</span> <span>Random</span>
 <span>Fields</span>.”</span> <em>Journal of Open Source Software</em>,
-2022.03.24.485545. <a href="https://doi.org/10.1101/2022.03.24.485545" class="external-link">https://doi.org/10.1101/2022.03.24.485545</a>.
+2022.03.24.485545. Accessed March 10, 2025. <a href="https://doi.org/10.1101/2022.03.24.485545" class="external-link">https://doi.org/10.1101/2022.03.24.485545</a>.
 </div>
 <div id="ref-dunn_randomized_1996" class="csl-entry">
 Dunn, Peter K., and Gordon K. Smyth. 1996. <span>“Randomized Quantile
@@ -770,9 +712,10 @@ Thorson, James T., Stephan B. Munch, and Douglas P. Swain. 2017.
 Community Dynamics.”</span> <em>Ecology</em> 98 (5): 1277–89. <a href="https://doi.org/10.1002/ecy.1760" class="external-link">https://doi.org/10.1002/ecy.1760</a>.
 </div>
 <div id="ref-thorson_importance_2014" class="csl-entry">
-Thorson, James T., Hans J. Skaug, Kasper Kristensen, et al. 2014.
-<span>“The Importance of Spatial Models for Estimating the Strength of
-Density Dependence.”</span> <em>Ecology</em> 96 (5): 1202–12. <a href="https://doi.org/10.1890/14-0739.1" class="external-link">https://doi.org/10.1890/14-0739.1</a>.
+Thorson, James T., Hans J. Skaug, Kasper Kristensen, Andrew O. Shelton,
+Eric J. Ward, John H. Harms, and James A. Benante. 2014. <span>“The
+Importance of Spatial Models for Estimating the Strength of Density
+Dependence.”</span> <em>Ecology</em> 96 (5): 1202–12. <a href="https://doi.org/10.1890/14-0739.1" class="external-link">https://doi.org/10.1890/14-0739.1</a>.
 </div>
 </div>
 </div>

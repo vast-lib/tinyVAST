@@ -1,7 +1,6 @@
 # Predator expanded diet
 
 ``` r
-
 library(tinyVAST)
 library(sf)
 library(fmesher)
@@ -44,7 +43,6 @@ analyses of marine predator diets from data-rich and data-limited
 systems. Fish and Fisheries, 21: 718-739.
 
 ``` r
-
 # We load two datasets:
 data( red_grouper_diet )
 # (1) A predator biomass catch rate dataset, where biomass catch rate is in kg per square-km
@@ -90,7 +88,6 @@ After assembling the data in a long-form data frame, we can run the
 model using standard syntax:
 
 ``` r
-
 # make mesh
 mesh = fm_mesh_2d(
   loc = sampling_data[,c("Lon","Lat")],
@@ -138,13 +135,14 @@ fit = tinyVAST(
   variable_column = "Category",
   distribution_column = "Category"
 )
+#> Warning: The model may not have converged: non-positive-definite Hessian
+#> matrix.
 ```
 
 We then calculate the index of predator-expanded stomach contents for
 each prey:
 
 ``` r
-
 # Get extrapolation grid
 extrap = red_grouper_diet$input_grid
 
@@ -179,7 +177,6 @@ prey. Here, we do this manually (i.e., without bias-correction or
 standard errors) to save computation time.
 
 ``` r
-
 index_ct = array(NA,
   dim = c(4,5),
   dimnames = list( Category = levels(Stomach_content_data$Category),
@@ -217,11 +214,12 @@ ggplot( proportions ) +
 
 ![](predator_expanded_diet_files/figure-html/unnamed-chunk-5-1.png)
 
-Runtime for this vignette: 44.13 secs
+Runtime for this vignette: 1.06 mins
 
 ### Works cited
 
-Grüss, Arnaud, James T. Thorson, Gemma Carroll, et al. 2020.
-“Spatio-Temporal Analyses of Marine Predator Diets from Data-Rich and
-Data-Limited Systems.” *Fish and Fisheries* 21 (4): 718–39.
-<https://doi.org/10.1111/faf.12457>.
+Grüss, Arnaud, James T. Thorson, Gemma Carroll, Elizabeth L. Ng, Kirstin
+K. Holsman, Kerim Aydin, Stan Kotwicki, Hem N. Morzaria-Luna, Cameron H.
+Ainsworth, and Kevin A. Thompson. 2020. “Spatio-Temporal Analyses of
+Marine Predator Diets from Data-Rich and Data-Limited Systems.” *Fish
+and Fisheries* 21 (4): 718–39. <https://doi.org/10.1111/faf.12457>.
