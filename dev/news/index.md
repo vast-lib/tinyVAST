@@ -1,0 +1,226 @@
+# Changelog
+
+## tinyVAST 1.5.1.9000
+
+- Adding nearest-neighbors Gaussian Process option
+- Add tinyVASTcontrol(tmb_random) argument to allow exploration of
+  penalized likelihood
+- Modifying tinyVASTcontrol(tmb_par) to allow users to supply a partial
+  list of starting values, e.g., to provide values for semi-variance
+  parameters when changing model resolution.
+- Add `development$optimizer` argument for using
+  optim(method=“L-BFGS-B”) or
+  [`TMB::newton`](https://rdrr.io/pkg/TMB/man/newton.html), which is
+  necessary when using penalized likelihood with \>40,000 random
+  effects. And removing tinyVASTcontrol option for
+  suppress_optim_warnings (making it always TRUE)  
+- Adding Makevar -DTMBAD_INDEX_TYPE=uint64_t to allow GetTape for RTMB
+  manipulation
+- Change SAR using areal_model for `spatial_domain` to (1) eliminate
+  row-standardization (which messed up the areal interpretation),
+  and (2) defining an informative start for kappa to start with a value
+  that avoids numerical under/overflow;
+
+## tinyVAST 1.5.1
+
+CRAN release: 2026-04-14
+
+- Fix bug, where previous versions where not simulating measurement
+  errors for delta-models using obj\$simulate(). hithub ilar-cloud for
+  reporting on issue-402
+
+## tinyVAST 1.5.0
+
+CRAN release: 2026-03-23
+
+- Add starting value log_kappa when using SPDE method, using SD of X and
+  Y coordinates and converting to equivalent kappa
+- Fix bug in `project` for logical class in empty vectors
+- Add `development` options to explore hess-compress option (and
+  commenting out incomplete Cholesky for now)
+- Add `sanity` function to check for evidence of non-convergence
+- Improve detection of sf class for areal models
+
+## tinyVAST 1.4.0
+
+CRAN release: 2025-12-20
+
+- Adding `student` distribution, borrowing/importing code from sdmTMB
+- Changing `deviance_explained` to map off student DF at MLE to avoid
+  negative values, in way that can be easily generalized.
+- Changing `deviance_explained` to map off overdispersion for negbin1
+  and negbin2
+- Changing `deviance_explained` to map of power parameter for tweedie
+  distribution
+- add testthat checks comparing tweedie and negbin2 deviance-explained
+  for tinyVAST with mgcv package
+- Add vignette for seasonal spatio-temporal index standardization, using
+  Yellowtail flounder data from VAST demo
+
+## tinyVAST 1.3.0
+
+CRAN release: 2025-09-13
+
+- Adding `add_vertex_covariates` to associate mesh vertices with
+  covariates (hean Anderson)
+- Adding option for covariate-based anisotropy using `vertex_formula`,
+  while also allowing geometric anisotropy.
+- Adding option for barriers using `triangle_formula` which permits an
+  offset for barrier covariates
+- Adding `spatial_cor` to use sparse matrices to compute the correlation
+  between a `coord` and `pred` coordinates, e.g. to visualize
+  covariate-based anisotropy
+- Fix `make_eof_ram` to work as intended for multivariate models, e.g.,
+  having a separate response map and shared indices across variables
+  (previously had a shared response map and shared indices, i.e.,
+  collapsed to univariate model)
+- Fix bug arising in `predict` when `spatial_varying` involved a column
+  of `newdata` that was expecting a factor, but provided a
+  `character-vector`. Now coercers to factors using the levels of the
+  original `data` (same behavior as for `formula`)
+- Export `fit$rep$negloglik_i` as log-likelihood for each datum, for use
+  in calculating out-of-sample predictive score
+- Turn off SE reporting during index calculations (as speedup), and
+  allow SE reporting for `mu_g` in `predict`
+- Fix bug arising in `project` when `spatial_varying` was specified
+- Adding web-only vignette showing predator-expanded diet estimator
+  using joint model of specific stomach contents and predator density
+- Fix bug arising when using `weights` argument using family of
+  `delta_gamma` or `delta_lognormal`, where this bug was introduced in
+  release 1.2.0 (h/t Peri Gerson for identifying the issue)
+- Add vignette showing `project` function
+- Add a web-only vignette showing the sponge-coral-fish case study to
+  illustrate spatial structural modelling
+
+## tinyVAST 1.2.0
+
+CRAN release: 2025-07-19
+
+- Adding a new spatial domain using
+  [`sf::st_make_grid`](https://r-spatial.github.io/sf/reference/st_make_grid.html)
+- Adding option for geometric anisotropy when using
+  [`sf::st_make_grid`](https://r-spatial.github.io/sf/reference/st_make_grid.html)
+- Fix bug in deviance for lognormal distribution in delta models (h/t
+  Sean Anderson for finding it)
+- Change family = “binomial” to use `weights` as number of Binomial
+  trials N
+- Fix `deviance_explained` to work with non-default `weights` argument
+- Add `fit$internal$packageVersion` to allow `predict`, `cAIC` etc to
+  check and throw error if there’s a package inconsistency between
+  object and installed package
+- Add `conditional_gmrf` to do conditional simulations from a GMRF
+- Add `project` to project tinyVAST forward in time
+- Eliminate `...` argument to `tinyVAST` so that it’s obvious if an
+  argument is mis-named.
+- Fix bug which previously resulted in non-converged models, where
+  including DSEM arrow “x\<-\>x, 0, sd_xy” would improperly add another
+  term “x \<-\> x, 0, V\[x\]” because it didn’t previously parse the
+  whitespaces when detecting missing covariances (h/t Jon Reum for
+  flagging the issue)
+
+## tinyVAST 1.1.1
+
+CRAN release: 2025-05-07
+
+- Adding option for geometric anisotropy when using the SPDE method
+- For some reason, the CPP edits also address an error message during
+  `devtools::check_win_devel` “array subscript ’const \_\_m128i\[0\]’ is
+  partly outside array bounds of ‘unsigned char \[12\]’”
+
+## tinyVAST 1.1.0
+
+CRAN release: 2025-05-03
+
+- Adding `term_covariance` to calculate the covariance among variables
+  for SEM term, or covariance among variables-and-lags for DSEM terms
+- Adding Restricted Spatial Regression estimator for covariates
+  `alphaprime_j` and `alphaprime2_j` to `fit$rep` output.
+- Adding methods to allow use of `cv` to calculate crossvalidation skill
+- Add `bias.correct` option to predict (but still no flag for SEs for
+  anything except p_i)
+- Switch `sample_variable` from using `obj$env$MC` to
+  `obj$env$spHess(random=TRUE)` which seems more stable as dependency
+- Add functionality for `te` and `ti` splines, although they remain
+  poorly tested
+- Add error check to `sfnetwork_mesh` to detect if the stream network is
+  not ordered as a tree
+- Improve stream network vignette to use matrix notation for joint
+  precision, and modify `simulate_sfnetwork` to use that
+- Change `tinyVAST.cpp` to use matrix notation constructor and fix bug
+  in previous constructor where the covariance between first and second
+  nodes was not right
+- Expand `test-sfnetworks.R` integrated test to confirm that
+  matrix-notation precision constructor is identical to the inverse of
+  Ornstein-Uhlenbeck covariance as intended.
+
+## tinyVAST 1.0.1
+
+CRAN release: 2025-03-21
+
+- Modify examples for `simulate.tinyVAST` and `sample_variable` to try
+  to avoid terminal output giving error in valgrind check
+- Add `ivector_minus_one` function to satisfy clang-UBSAN
+- Swap `GMRF(Q).Quadform(x)` to
+  `x.matrix().transpose() * (Q * x.matrix())` to avoid calculating
+  log-determinant of `Q` in the smoothers penalty, to avoid valgrind
+  errors
+- Add tinyVASTcontrol option that suppresses nlminb warning messages by
+  default, which are typically not informative to casual users
+
+## tinyVAST 1.0.0
+
+CRAN release: 2025-03-13
+
+- Adding nbinom1 and nbinom2 families
+- Simplify argument names, by changing `sem` to `space_term`, `dsem` to
+  `spacetime_term` and `spatial_graph` to `spatial_domain`, and
+  eliminating `delta_` in the names for arguments to `delta_options`
+- Add `time_term` to allow time-variable interaction (e.g., AR1
+  intercepts)
+- Adding overview and model-description vignettes
+- Add `simulate` S3 generic
+
+## tinyVAST 0.7.1
+
+- Fixed bug (wrong output) when using `predict(fit, what="mu_g")` and a
+  Poisson-linked delta model
+- Fixed bug (cryptic error message) when using `integrate_output`
+- Add `cAIC` (but disabling EDF calculation for now)
+
+## tinyVAST 0.7.0
+
+- Adding option for spatially-varying-coefficient (SVC) models
+- Add error-check for when `data` has a factor with extra levels, which
+  conflicted with the logic of adding all `origdata` levels to `newdata`
+  when calling `predict`, and hence caused an uniformative error
+  previously
+
+## tinyVAST 0.6.0
+
+- Change `integrate_output` interface by splitting `W_gz` and `V_gz`
+  into four vectors `area`, `type`, `covariate`, and `weighting_index`
+  to simplify documentations and improve naming
+- Fix bug where cloglog and logit links were not previously implemented
+  for use in `predict` and `integrate_output`
+
+## tinyVAST 0.5.0
+
+- Adding vignette showing how to fit multiple data types in an SDM
+- Adding `deviance_explained` and calculating this by default
+
+## tinyVAST 0.4.0
+
+- Adding code for simulation residuals, and examples to vignettes
+
+## tinyVAST 0.3.0
+
+- Adding `sdmTMB` as dependency, and importing family options from it
+- Adding vignette for joint analysis of condition and density
+
+## tinyVAST 0.2.0
+
+- Add option to specify covariance in SEM and DSEM notation
+
+## tinyVAST 0.1.0
+
+- Initial public alpha release

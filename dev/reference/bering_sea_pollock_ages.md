@@ -1,0 +1,14 @@
+# Survey catch-rates at age for Alaska pollock in the Eastern and Northern Bering Sea
+
+Data used to demonstrate and test model-based age expansion, using
+density= dependence corrected survey catch rates after first=stage
+expansion from the bottom trawl survey for ages 1-15, conducted by by
+the Alaska Fisheries Science Center, including annual surveys in the
+eastern Bering Sea 1982-2019 and 2021-2023, as well as the northern
+Bering Sea in 1982/85/88/91 and 2010/17/18/19/21/22/23.
+
+## Usage
+
+``` r
+data(bering_sea_pollock_ages)
+```
