@@ -41,7 +41,7 @@ mytiny
 #>         2:3]))
 #> 
 #> Run time: 
-#> Time difference of 0.6315031 secs
+#> Time difference of 0.5893919 secs
 #> 
 #> Family: 
 #> $obs
@@ -187,7 +187,7 @@ where we again inspect the estimated interaction matrix:
 | wolves |  0.896 | -0.125 |
 | moose  |  0.007 |  0.875 |
 
-Runtime for this vignette: 2.27 secs
+Runtime for this vignette: 2.26 secs
 
 ## Works cited
 
