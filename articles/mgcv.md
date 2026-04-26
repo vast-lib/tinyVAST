@@ -187,4 +187,4 @@ plot( out, main="f(x,y) for group=1")
 
 ![](mgcv_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 46.55 secs
+Runtime for this vignette: 49.93 secs
