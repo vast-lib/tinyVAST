@@ -9,7 +9,8 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/James-Thorson-NOAA/tinyVAST/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/vast-lib/tinyVAST/branch/main/graph/badge.svg)](https://app.codecov.io/gh/vast-lib/tinyVAST?branch=main)
-[![Documentation](https://img.shields.io/badge/documentation-tinyVAST-orange.svg?colorB=E91E63)](https://vast-lib.github.io/tinyVAST/)
+[![Documentation](https://img.shields.io/badge/main-tinyVAST-orange.svg?colorB=E91E63)](https://vast-lib.github.io/tinyVAST/)
+[![Documentation](https://img.shields.io/badge/dev-tinyVAST-orange.svg?colorB=E91E63)](https://vast-lib.github.io/tinyVAST/dev/)
 [![DOI](https://zenodo.org/badge/704919773.svg)](https://doi.org/10.5281/zenodo.15001856)
 [![](https://www.r-pkg.org/badges/version/tinyVAST)](https://cran.r-project.org/package=tinyVAST)
 [![](https://cranlogs.r-pkg.org/badges/tinyVAST)](https://cran.r-project.org/package=tinyVAST)
