@@ -1170,8 +1170,9 @@ Type objective_function<Type>::operator() (){
     // W_gz.col(0): Area
     // W_gz.col(1): Extra covariate, e.g., coordinates
   DATA_IMATRIX( V_gz );            // Settings for expansion
-    // E_gz.col(0) : Expansion Type ( 0=sum(D*Area);  1=weighted.mean(W_gz.col(1),w=D*Area))
-    // E_gz.col(1) : Prior row for bivariate weighting
+    // V_gz.col(0) : Expansion Type ( 0=sum(D*Area);  1=weighted.mean(W_gz.col(1),w=D*Area))
+    // V_gz.col(1) : Prior row for bivariate weighting
+    // V_gz.col(2) : Blocks for derived quantities
 
   // Params
   PARAMETER_VECTOR( alpha_j ); // Fixed covariate parameters
@@ -1525,7 +1526,10 @@ Type objective_function<Type>::operator() (){
       REPORT( phi0_g );
 
       // Second sweep for covariate or density-weighted averages
+      int n_blocks = V_gz.col(2).maxCoeff();
       vector<Type> phi_g( mu_g.size() );
+      vector<Type> sumphi_b( n_blocks );
+      sumphi_b.setZero();
       phi_g.setZero();
       for( int g=0; g<mu_g.size(); g++ ){
         if( V_gz(g,0)==0 ){
@@ -1548,15 +1552,20 @@ Type objective_function<Type>::operator() (){
           // density-weighted total of prediction
           phi_g(g) = phi0_g(V_gz(g,1)) * mu_g(g);
         }
+
+        // Combine them in blocks
+        sumphi_b( V_gz(g,2) - 1 ) += phi_g(g);
       }
+
       //Type Metric = sum(phi_g);
-      Type Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
+      vector<Type> Metric( n_blocks );
+      Metric = newton::Tag( sum(phi_g) ); // Set lowrank tag on Metric = sum(exp(x))
       REPORT( phi_g );
       REPORT( Metric );
       ADREPORT( Metric );
 
-      if( eps.size() == 1 ){
-        nll += Metric * eps(0);
+      if( eps.size() == n_blocks ){
+        nll += (Metric * eps).sum();
       }
     }
 

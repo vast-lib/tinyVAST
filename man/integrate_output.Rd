@@ -8,6 +8,7 @@ integrate_output(
   object,
   newdata,
   area,
+  block = rep(1, nrow(newdata)),
   type = rep(1, nrow(newdata)),
   weighting_index,
   covariate,
@@ -30,6 +31,12 @@ then \code{integrate_output} is applying a midpoint approximation to the integra
 \item{area}{vector of values used for area-weighted expansion of
 estimated density surface for each row of \code{newdata}
 with length of \code{nrow(newdata)}.}
+
+\item{block}{vector of integers, indicating blocks of predictions that are combined
+into one or more derived quantities.  This can be used to compute area-expanded
+indices for more than one year or category using a single call, and might be
+substantially faster for large models (because it avoids extra model builds
+for each derived quantity)}
 
 \item{type}{Integer-vector indicating what type of expansion to apply to
 each row of \code{newdata}, with length of \code{nrow(newdata)}.
