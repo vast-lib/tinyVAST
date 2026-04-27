@@ -1559,14 +1559,13 @@ Type objective_function<Type>::operator() (){
 
       //Type Metric = sum(phi_g);
       vector<Type> Metric( n_blocks );
-      Metric = newton::Tag( sumphi_b ); // Set lowrank tag on Metric = sum(exp(x))
+      for( int b = 0; b < n_blocks; b++ ){
+        Metric(b) = newton::Tag( sumphi_b(b) ); // Set lowrank tag on Metric = sum(exp(x))
+        nll += Metric(b) * eps(b);
+      }
       REPORT( phi_g );
       REPORT( Metric );
       ADREPORT( Metric );
-
-      if( eps.size() == n_blocks ){
-        nll += (Metric * eps).sum();
-      }
     }
 
     REPORT( p1_g );
