@@ -288,7 +288,7 @@ ggplot(projdata) +
 
 ![](seasonal_index_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 7.47 mins
+Runtime for this vignette: 7.33 mins
 
 ## Works cited
 

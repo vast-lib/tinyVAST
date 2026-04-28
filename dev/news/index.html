@@ -59,6 +59,7 @@
 <li>Add <code>development$optimizer</code> argument for using optim(method=“L-BFGS-B”) or <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">TMB::newton</a></code>, which is necessary when using penalized likelihood with &gt;40,000 random effects. And removing tinyVASTcontrol option for suppress_optim_warnings (making it always TRUE)<br></li>
 <li>Adding Makevar -DTMBAD_INDEX_TYPE=uint64_t to allow GetTape for RTMB manipulation</li>
 <li>Change SAR using areal_model for <code>spatial_domain</code> to (1) eliminate row-standardization (which messed up the areal interpretation), and (2) defining an informative start for kappa to start with a value that avoids numerical under/overflow;</li>
+<li>Adding argument <code>block</code> to <code>integrate_output</code> to allow calculating multiple derived quantities using a single call (to avoid extra MakeADFun calls)</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.5.1" id="tinyvast-151">tinyVAST 1.5.1<a class="anchor" aria-label="anchor" href="#tinyvast-151"></a></h2><p class="text-muted">CRAN release: 2026-04-14</p>

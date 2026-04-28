@@ -20,6 +20,9 @@
   row-standardization (which messed up the areal interpretation),
   and (2) defining an informative start for kappa to start with a value
   that avoids numerical under/overflow;
+- Adding argument `block` to `integrate_output` to allow calculating
+  multiple derived quantities using a single call (to avoid extra
+  MakeADFun calls)
 
 ## tinyVAST 1.5.1
 

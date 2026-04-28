@@ -71,6 +71,7 @@ and/or weighting one model variable by another.</p>
 <span>  <span class="va">object</span>,</span>
 <span>  <span class="va">newdata</span>,</span>
 <span>  <span class="va">area</span>,</span>
+<span>  block <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="va">weighting_index</span>,</span>
 <span>  <span class="va">covariate</span>,</span>
@@ -102,6 +103,14 @@ then <code>integrate_output</code> is applying a midpoint approximation to the i
 <dd><p>vector of values used for area-weighted expansion of
 estimated density surface for each row of <code>newdata</code>
 with length of <code>nrow(newdata)</code>.</p></dd>
+
+
+<dt id="arg-block">block<a class="anchor" aria-label="anchor" href="#arg-block"></a></dt>
+<dd><p>vector of integers, indicating blocks of predictions that are combined
+into one or more derived quantities.  This can be used to compute area-expanded
+indices for more than one year or category using a single call, and might be
+substantially faster for large models (because it avoids extra model builds
+for each derived quantity)</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>

@@ -140,7 +140,7 @@ ggplot( data.frame("Year"=colnames(index),"Est"=index[1,],"SE"=index[2,]) ) +
 
 ![](multiple_data_files/figure-html/unnamed-chunk-7-1.png)
 
-Runtime for this vignette: 1.35 mins
+Runtime for this vignette: 1.34 mins
 
 ## Works cited
 
