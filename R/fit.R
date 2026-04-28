@@ -145,7 +145,7 @@
 #'   update.formula binomial poisson predict as.formula na.pass sd dist optim
 #' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport runSymbolicAnalysis config
-#' @importFrom checkmate assertClass assertDataFrame checkInteger checkNumeric assertNumeric
+#' @importFrom checkmate assertClass assertDataFrame assertNumeric assertInteger
 #' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet Diagonal
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data

@@ -305,7 +305,7 @@ function( object,
   if(missing(covariate)){
     covariate = rep(0, nrow(newdata))
   }
-  assertInteger( covariate, len=nrow(newdata), any.missing=FALSE )
+  assertNumeric( covariate, len=nrow(newdata), any.missing=FALSE )
   
   # Bundle
   tmb_data2$V_gz = cbind( type, weighting_index, block )
