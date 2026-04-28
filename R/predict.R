@@ -271,7 +271,8 @@ function( object,
   }
 
   # Blocks
-  checkInteger( block, lower = 1, len=nrow(newdata), any.missing=FALSE )
+  block = as.integer(block)
+  assertInteger( block, lower = 1, len=nrow(newdata), any.missing=FALSE )
 
   # Expansion area
   if(missing(area)){
@@ -279,7 +280,7 @@ function( object,
   }else if(length(area)==1){
     area = rep(area, nrow(newdata))
   }  
-  checkNumeric( area, lower=0, len=nrow(newdata), any.missing=FALSE )
+  assertNumeric( area, lower=0, len=nrow(newdata), any.missing=FALSE )
 
   # Expansion type
   if(missing(type)){
@@ -287,7 +288,8 @@ function( object,
   }else if(length(type)==1){
     type = rep(type, nrow(type))
   }  
-  checkInteger( type, lower=0, upper=4, len=nrow(newdata), any.missing=FALSE )
+  type = as.integer(type)
+  assertInteger( type, lower=0, upper=4, len=nrow(newdata), any.missing=FALSE )
   
   # Index for variable-weighted value
   if(missing(weighting_index)){
@@ -296,13 +298,14 @@ function( object,
   if( any(weighting_index>=seq_len(nrow(newdata))) ){
     stop("Invalid `weighting_index`")
   }
-  checkInteger( weighting_index, lower=0, len=nrow(newdata), any.missing=FALSE )
+  weighting_index = as.integer(weighting_index)
+  assertInteger( weighting_index, lower=0, len=nrow(newdata), any.missing=FALSE )
   
   # 
   if(missing(covariate)){
     covariate = rep(0, nrow(newdata))
   }
-  checkNumeric( covariate, len=nrow(newdata), any.missing=FALSE )
+  assertInteger( covariate, len=nrow(newdata), any.missing=FALSE )
   
   # Bundle
   tmb_data2$V_gz = cbind( type, weighting_index, block )
@@ -342,14 +345,16 @@ function( object,
   }
 
   # Rebuild object
-  newobj = MakeADFun( data = tmb_data2,
-                      parameters = tmb_par2,
-                      map = object$tmb_inputs$tmb_map,
-                      random = object$tmb_inputs$tmb_random,
-                      DLL = "tinyVAST",
-                      intern = intern,
-                      inner.control = inner.control,
-                      profile = object$internal$control$profile )
+  newobj = MakeADFun(
+    data = tmb_data2,
+    parameters = tmb_par2,
+    map = object$tmb_inputs$tmb_map,
+    random = object$tmb_inputs$tmb_random,
+    DLL = "tinyVAST",
+    intern = intern,
+    inner.control = inner.control,
+    profile = object$internal$control$profile
+  )
   newobj$env$beSilent()
 
   # Run sdreport
