@@ -1,6 +1,7 @@
 # Dynamic structural equation models
 
 ``` r
+
 library(tinyVAST)
 set.seed(101)
 options("tinyVAST.verbose" = FALSE)
@@ -11,6 +12,7 @@ options("tinyVAST.verbose" = FALSE)
 autoregressive model for wolf and moose abundance on Isle Royale.
 
 ``` r
+
 data(isle_royale, package="dsem")
 
 # Convert to long-form
@@ -41,7 +43,7 @@ mytiny
 #>         2:3]))
 #> 
 #> Run time: 
-#> Time difference of 0.657846 secs
+#> Time difference of 0.6770885 secs
 #> 
 #> Family: 
 #> $obs
@@ -124,6 +126,7 @@ And we can specifically inspect the estimated interaction matrix:
 We can then compare this with package `dsem`
 
 ``` r
+
 library(dsem)
 
 # Keep in wide-form
@@ -170,15 +173,15 @@ mydsem
 knitr::kable( summary(mydsem), digits=3 )
 ```
 
-| path                | lag | name        | start | parameter | first  | second | direction | Estimate |
-|:--------------------|----:|:------------|------:|----------:|:-------|:-------|:----------|---------:|
-| wolves -\> wolves   |   1 | arW         |    NA |         1 | wolves | wolves | 1         |    0.896 |
-| moose -\> wolves    |   1 | MtoW        |    NA |         2 | moose  | wolves | 1         |    0.007 |
-| wolves -\> moose    |   1 | WtoM        |    NA |         3 | wolves | moose  | 1         |   -0.125 |
-| moose -\> moose     |   1 | arM         |    NA |         4 | moose  | moose  | 1         |    0.875 |
-| wolves \<-\> moose  |   0 | corr        |    NA |         5 | wolves | moose  | 2         |   -0.014 |
-| wolves \<-\> wolves |   0 | V\[wolves\] |    NA |         6 | wolves | wolves | 2         |    0.379 |
-| moose \<-\> moose   |   0 | V\[moose\]  |    NA |         7 | moose  | moose  | 2         |    0.173 |
+| path | lag | name | start | parameter | first | second | direction | Estimate |
+|:---|---:|:---|---:|---:|:---|:---|:---|---:|
+| wolves -\> wolves | 1 | arW | NA | 1 | wolves | wolves | 1 | 0.896 |
+| moose -\> wolves | 1 | MtoW | NA | 2 | moose | wolves | 1 | 0.007 |
+| wolves -\> moose | 1 | WtoM | NA | 3 | wolves | moose | 1 | -0.125 |
+| moose -\> moose | 1 | arM | NA | 4 | moose | moose | 1 | 0.875 |
+| wolves \<-\> moose | 0 | corr | NA | 5 | wolves | moose | 2 | -0.014 |
+| wolves \<-\> wolves | 0 | V\[wolves\] | NA | 6 | wolves | wolves | 2 | 0.379 |
+| moose \<-\> moose | 0 | V\[moose\] | NA | 7 | moose | moose | 2 | 0.173 |
 
 where we again inspect the estimated interaction matrix:
 
@@ -187,7 +190,7 @@ where we again inspect the estimated interaction matrix:
 | wolves |  0.896 | -0.125 |
 | moose  |  0.007 |  0.875 |
 
-Runtime for this vignette: 2.31 secs
+Runtime for this vignette: 2.4 secs
 
 ## Works cited
 

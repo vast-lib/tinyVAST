@@ -1,6 +1,7 @@
 # Age composition expansion
 
 ``` r
+
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -20,6 +21,7 @@ each primary unit has been expanded to the total abundance in that
 primary sample:
 
 ``` r
+
 data( bering_sea_pollock_ages )
 
 # subset to Years 2017-2023 (to speed up the example)
@@ -61,6 +63,7 @@ a value that is shared among ages, to ensure these variances are
 estimable:
 
 ``` r
+
 # adds different variances for each age
 sem = ""
 
@@ -99,6 +102,7 @@ We the fit the model with a log-linked Tweedie distribution and a single
 linear predictor:
 
 ``` r
+
 # Define separate tweedie family for each age
 Family = list(
   Age_1 = tweedie(),
@@ -144,6 +148,7 @@ being biased low for ages with fewer samples (and therefore higher
 standard errors):
 
 ``` r
+
 # Get shapefile for survey extent
 data( bering_sea )
 
@@ -200,6 +205,7 @@ predictors, used a different mesh, and we also skipped epsilon
 bias-correction for *tinyVAST* to have a faster-running vignette.
 
 ``` r
+
 # Load VAST results for same data
 data(bering_sea_pollock_vast)
 myvast = bering_sea_pollock_vast
@@ -230,7 +236,7 @@ ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
 
 ![](age_composition_expansion_files/figure-html/agecomp-1.png)
 
-Runtime for this vignette: 16.14 mins
+Runtime for this vignette: 15.94 mins
 
 ## Works cited
 

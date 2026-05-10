@@ -1,6 +1,7 @@
 # Probabilistic forecasts
 
 ``` r
+
 library(fmesher)
 library(tinyVAST)
 library(ggplot2)
@@ -11,7 +12,7 @@ library(ggplot2)
 We developed new approaches for forecasting with spatio-temporal species
 distribution models (SDMs) that not only generate efficient predictions,
 but also separate and quantify different sources of prediction
-uncertainty (Grüss et al. n.d.). In these models, uncertainty can arise
+uncertainty (Grüss et al., n.d.). In these models, uncertainty can arise
 from: \* Past process errors — randomness in the estimated random
 effects that represent past temporal, spatial, or spatio-temporal
 variation. \* Future process errors — uncertainty about how random
@@ -41,6 +42,7 @@ index of relative biomass to the next century.
 ### Load data and define mesh
 
 ``` r
+
 # Load data
 data( bering_sea_capelin_forecasts )
 Data <- bering_sea_capelin_forecasts$Data 
@@ -61,6 +63,7 @@ forecasted using a single linear predictor using the Tweedie
 distribution.
 
 ``` r
+
 # Define spatial variation
 space_term <- "
   capelin <-> capelin, sd_space
@@ -81,6 +84,7 @@ spacetime_term <- "
 Finally, we fit the model
 
 ``` r
+
 # Fit the model (turning off use_anisotropy to save time)
 fit <- tinyVAST(
   formula = Wt ~ 1 + sst_anomaly + offset(log(AreaSwept_km2)),
@@ -126,6 +130,7 @@ the function `project`: `past_var = TRUE`, `future_var = TRUE`, and
 `parm_var = FALSE`.
 
 ``` r
+
 # Generate projections 
 # (using 50 candidate parameter draws to speed up vignette)
 New_Data <- bering_sea_capelin_forecasts$New_Data
@@ -150,6 +155,7 @@ bridges uncertainty between short-term forecasts and long-term
 projections
 
 ``` r
+
 # Plot the projected index of relative biomass
 Y_tq <- t( apply( projected_index, MARGIN = 1, FUN = quantile, 
                   probs = c( 0.1, 0.5, 0.9 ) ) )
@@ -225,13 +231,11 @@ spatio-temporal variation:
   dominated by the predicted density at a few (or single) extrapolation
   location(s).
 
-Runtime for this vignette: 1.78 hours
+Runtime for this vignette: 1.8 hours
 
 ## Works cited
 
-Grüss, Arnaud, Andrew J. Allyn, James T. Thorson, Katherine E. Mills,
-Ellen Yasumiishi, Matthew H. Pinkerton, Darren M. Parsons, and Nokuthaba
-Sibanda. n.d. “Probabilistic Forecasts of Fish Abundances With
-Spatio-Temporal Models to Support Fisheries Management.” *Fish and
-Fisheries* n/a (n/a). Accessed September 8, 2025.
+Grüss, Arnaud, Andrew J. Allyn, James T. Thorson, et al. n.d.
+“Probabilistic Forecasts of Fish Abundances With Spatio-Temporal Models
+to Support Fisheries Management.” *Fish and Fisheries* n/a (n/a).
 <https://doi.org/10.1111/faf.70025>.

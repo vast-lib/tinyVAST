@@ -1,6 +1,7 @@
 # Vector autoregressive spatio-temporal models
 
 ``` r
+
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
@@ -22,6 +23,7 @@ spatio-temporal process, i.e., a spatial Gompertz model (Thorson et al.
 To do so, we simulate the process:
 
 ``` r
+
 # Simulate settings
 theta_xy = 0.4
 n_x = n_y = 10
@@ -63,6 +65,7 @@ mean(Data$n==0)
 We then specify and fit the same model
 
 ``` r
+
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
@@ -92,7 +95,7 @@ mytinyVAST
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 8.136432 secs
+#> Time difference of 8.076576 secs
 #> 
 #> Family: 
 #> $obs
@@ -144,6 +147,7 @@ for `rho` and `spatial_sd`.
 We can compare the true densities:
 
 ``` r
+
 library(sf)
 data_wide = reshape( Data[,c('x','y','time','mu')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
@@ -158,6 +162,7 @@ plot(sf_plot, max.plot=n_t )
 with the estimated densities:
 
 ``` r
+
 Data$mu_hat = predict(mytinyVAST)
 data_wide = reshape( Data[,c('x','y','time','mu_hat')],
                      direction = "wide", idvar = c('x','y'), timevar = "time")
@@ -171,6 +176,7 @@ plot(sf_plot, max.plot=n_t )
 where a scatterplot shows that they are highly correlated:
 
 ``` r
+
 plot( x=Data$mu, y=Data$mu_hat )
 ```
 
@@ -179,6 +185,7 @@ plot( x=Data$mu, y=Data$mu_hat )
 We can also use the `DHARMa` package to visualize simulation residuals:
 
 ``` r
+
 # simulate new data conditional on fixed effects
 # and sampling random effects from their predictive distribution
 y_ir = simulate(mytinyVAST, nsim=100, type="mle-mvn")
@@ -196,6 +203,7 @@ We can then calculate the area-weighted total abundance and compare it
 with its true value:
 
 ``` r
+
 # Predicted sample-weighted total
 (Est = sapply( seq_len(n_t),
    FUN=\(t) integrate_output(mytinyVAST, newdata=subset(Data,time==t)) ))
@@ -246,6 +254,7 @@ Next, we compare this against the current version of VAST (Thorson and
 Barnett 2017)
 
 ``` r
+
 settings = make_settings( 
   purpose="index3",
   n_x = n_x*n_y,
@@ -276,12 +285,14 @@ myVAST = fit_model(
 ```
 
 ``` r
+
 myVAST
 ```
 
-Or with sdmTMB (Anderson et al. n.d.)
+Or with sdmTMB (Anderson et al., n.d.)
 
 ``` r
+
 library(sdmTMB)
 sdmTMB_mesh = make_mesh(Data, c("x","y"), n_knots=n_x*n_y )
 
@@ -301,6 +312,7 @@ sdmTMBtime = Sys.time() - start_time2
 The models all have similar runtimes
 
 ``` r
+
 Times = data.frame( 
   tinyVAST = mytinyVAST$run_time,
   VAST = myVAST$total_time,
@@ -311,7 +323,7 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 | run times (sec.).tinyVAST | run times (sec.).VAST | run times (sec.).sdmTMB |
 |:--------------------------|:----------------------|:------------------------|
-| 8.1 secs                  | NA                    | 10.1 secs               |
+| 8.1 secs                  | NA                    | 10.2 secs               |
 
 ### Delta models
 
@@ -319,6 +331,7 @@ We can also fit this univariate spatio-temporal process using a
 Poisson-linked gamma delta model (Thorson 2018)
 
 ``` r
+
 # fit model
 mydelta2 = tinyVAST( 
   data = Data,
@@ -337,7 +350,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 7.868109 secs
+#> Time difference of 7.903513 secs
 #> 
 #> Family: 
 #> $obs
@@ -389,6 +402,7 @@ conditional simulation quantile (a.k.a. Dunn-Smythe) residuals (Dunn and
 Smyth 1996):
 
 ``` r
+
 # simulate new data conditional on fixed effects
 # and sampling random effects from their predictive distribution
 y_ir = simulate(mydelta2, nsim=100, type="mle-mvn")
@@ -406,6 +420,7 @@ We can then use marginal and conditional AIC to compare the fit of the
 delta-model and Tweedie distribution:
 
 ``` r
+
 # AIC table
 AIC_table = cbind(
   mAIC = c( "Tweedie" = AIC(mytinyVAST), 
@@ -429,12 +444,13 @@ knitr::kable(
 ## Bivariate vector autoregressive spatio-temporal model
 
 We next highlight how to specify a bivariate spatio-temporal model with
-a cross-laggged (vector autoregressive) interaction Thorson, Adams, and
-Holsman (2019). \## Simulate bivariate model
+a cross-laggged (vector autoregressive) interaction Thorson et al.
+(2019). \## Simulate bivariate model
 
 We first simulate artificial data for the sake of demonstration:
 
 ``` r
+
 # Simulate settings
 theta_xy = 0.2
 n_x = n_y = 10
@@ -464,6 +480,7 @@ Data$n = tweedie::rtweedie( n=nrow(Data), mu=Data$mu, phi=0.5, power=1.5 )
 We next set up inputs and run the model:
 
 ``` r
+
 # make mesh
 mesh = fm_mesh_2d( Data[,c('x','y')] )
 
@@ -491,7 +508,7 @@ out
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 28.9268 secs
+#> Time difference of 29.21052 secs
 #> 
 #> Family: 
 #> $obs
@@ -552,6 +569,7 @@ We can again calculate the area-weighted total abundance and compare it
 with its true value:
 
 ``` r
+
 # Predicted sample-weighted total 
 # for each year-variable combination
 Est1 = Est2 = NULL
@@ -604,7 +622,7 @@ Anderson, Sean C., Eric J. Ward, Philina A. English, Lewis A. K.
 Barnett, and James T. Thorson. n.d. “sdmTMB: An R Package for Fast,
 Flexible, and User-Friendly Generalized Linear Mixed Effects Models with
 Spatial and Spatiotemporal Random Fields.” *Journal of Open Source
-Software*, 2022.03.24.485545. Accessed March 10, 2025.
+Software*, 2022.03.24.485545.
 <https://doi.org/10.1101/2022.03.24.485545>.
 
 Dunn, Peter K., and Gordon K. Smyth. 1996. “Randomized Quantile
@@ -636,7 +654,7 @@ Thorson, James T., Stephan B. Munch, and Douglas P. Swain. 2017.
 Dynamics.” *Ecology* 98 (5): 1277–89.
 <https://doi.org/10.1002/ecy.1760>.
 
-Thorson, James T., Hans J. Skaug, Kasper Kristensen, Andrew O. Shelton,
-Eric J. Ward, John H. Harms, and James A. Benante. 2014. “The Importance
-of Spatial Models for Estimating the Strength of Density Dependence.”
-*Ecology* 96 (5): 1202–12. <https://doi.org/10.1890/14-0739.1>.
+Thorson, James T., Hans J. Skaug, Kasper Kristensen, et al. 2014. “The
+Importance of Spatial Models for Estimating the Strength of Density
+Dependence.” *Ecology* 96 (5): 1202–12.
+<https://doi.org/10.1890/14-0739.1>.

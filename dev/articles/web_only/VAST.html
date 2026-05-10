@@ -176,7 +176,7 @@ spatio-temporal process, i.e., a spatial Gompertz model <span class="citation">(
 <span><span class="co">#&gt;     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 8.136432 secs</span></span>
+<span><span class="co">#&gt; Time difference of 8.076576 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -337,7 +337,7 @@ it with its true value:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">myVAST</span></span></code></pre></div>
-<p>Or with sdmTMB <span class="citation">(Anderson et al.
+<p>Or with sdmTMB <span class="citation">(Anderson et al.,
 n.d.)</span></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sdmTMB.github.io/sdmTMB/" class="external-link">sdmTMB</a></span><span class="op">)</span></span>
@@ -376,7 +376,7 @@ n.d.)</span></p>
 <tbody><tr class="odd">
 <td align="left">8.1 secs</td>
 <td align="left">NA</td>
-<td align="left">10.1 secs</td>
+<td align="left">10.2 secs</td>
 </tr></tbody>
 </table>
 </div>
@@ -405,7 +405,7 @@ Poisson-linked gamma delta model <span class="citation">(Thorson
 <span><span class="co">#&gt;     spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 7.868109 secs</span></span>
+<span><span class="co">#&gt; Time difference of 7.903513 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -504,8 +504,8 @@ the delta-model and Tweedie distribution:</p>
 <h2 id="bivariate-vector-autoregressive-spatio-temporal-model">Bivariate vector autoregressive spatio-temporal model<a class="anchor" aria-label="anchor" href="#bivariate-vector-autoregressive-spatio-temporal-model"></a>
 </h2>
 <p>We next highlight how to specify a bivariate spatio-temporal model
-with a cross-laggged (vector autoregressive) interaction <span class="citation">Thorson, Adams, and Holsman (2019)</span>. ## Simulate
-bivariate model</p>
+with a cross-laggged (vector autoregressive) interaction <span class="citation">Thorson et al. (2019)</span>. ## Simulate bivariate
+model</p>
 <p>We first simulate artificial data for the sake of demonstration:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simulate settings</span></span>
@@ -562,7 +562,7 @@ bivariate model</p>
 <span><span class="co">#&gt;     family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 28.9268 secs</span></span>
+<span><span class="co">#&gt; Time difference of 29.21052 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -667,7 +667,7 @@ it with its true value:</p>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-anderson_sdmtmb_nodate" class="csl-entry">
 Anderson, Sean C., Eric J. Ward, Philina A. English, Lewis A. K.
 Barnett, and James T. Thorson. n.d. <span>“<span class="nocase">sdmTMB</span>: <span>An</span> <span>R</span>
@@ -677,7 +677,7 @@ Barnett, and James T. Thorson. n.d. <span>“<span class="nocase">sdmTMB</span>:
 <span>Models</span> with <span>Spatial</span> and
 <span>Spatiotemporal</span> <span>Random</span>
 <span>Fields</span>.”</span> <em>Journal of Open Source Software</em>,
-2022.03.24.485545. Accessed March 10, 2025. <a href="https://doi.org/10.1101/2022.03.24.485545" class="external-link">https://doi.org/10.1101/2022.03.24.485545</a>.
+2022.03.24.485545. <a href="https://doi.org/10.1101/2022.03.24.485545" class="external-link">https://doi.org/10.1101/2022.03.24.485545</a>.
 </div>
 <div id="ref-dunn_randomized_1996" class="csl-entry">
 Dunn, Peter K., and Gordon K. Smyth. 1996. <span>“Randomized Quantile
@@ -713,10 +713,9 @@ Thorson, James T., Stephan B. Munch, and Douglas P. Swain. 2017.
 Community Dynamics.”</span> <em>Ecology</em> 98 (5): 1277–89. <a href="https://doi.org/10.1002/ecy.1760" class="external-link">https://doi.org/10.1002/ecy.1760</a>.
 </div>
 <div id="ref-thorson_importance_2014" class="csl-entry">
-Thorson, James T., Hans J. Skaug, Kasper Kristensen, Andrew O. Shelton,
-Eric J. Ward, John H. Harms, and James A. Benante. 2014. <span>“The
-Importance of Spatial Models for Estimating the Strength of Density
-Dependence.”</span> <em>Ecology</em> 96 (5): 1202–12. <a href="https://doi.org/10.1890/14-0739.1" class="external-link">https://doi.org/10.1890/14-0739.1</a>.
+Thorson, James T., Hans J. Skaug, Kasper Kristensen, et al. 2014.
+<span>“The Importance of Spatial Models for Estimating the Strength of
+Density Dependence.”</span> <em>Ecology</em> 96 (5): 1202–12. <a href="https://doi.org/10.1890/14-0739.1" class="external-link">https://doi.org/10.1890/14-0739.1</a>.
 </div>
 </div>
 </div>

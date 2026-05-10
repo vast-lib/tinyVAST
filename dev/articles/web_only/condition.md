@@ -1,6 +1,7 @@
 # Condition and density
 
 ``` r
+
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -20,6 +21,7 @@ showcases several improvements in interpretation and interface.
 We first load and combine the two data sets:
 
 ``` r
+
 data( condition_and_density )
 
 # Combine both parts
@@ -44,6 +46,7 @@ formed_data = cbind( combo_data[,c("Year","Lat","Lon")],
 We then construct the SPDE mesh
 
 ``` r
+
 # make mesh
 mesh = fm_mesh_2d( formed_data[,c('Lon','Lat')], cutoff=1 )
 ```
@@ -52,6 +55,7 @@ Next, we specify spatial and spatio-temporal variance in both condition
 and density.
 
 ``` r
+
 #
 sem = "
   Biomass <-> Biomass, sdB
@@ -71,6 +75,7 @@ Finally, we define the distribution for each data set using the `family`
 argument:
 
 ``` r
+
 #
 Family = list(
   Biomass = tweedie(),
@@ -81,6 +86,7 @@ Family = list(
 Finally, we fit the model using tinyVAST
 
 ``` r
+
 # fit model
 fit = tinyVAST( data = formed_data,
            formula = Response ~ interaction(Year,Type) + log_length,
@@ -102,6 +108,7 @@ fit = tinyVAST( data = formed_data,
 We can look at structural parameters using summary functions:
 
 ``` r
+
 # spatial terms
 summary(fit, "space_term")
 #>   heads        to      from parameter start      Estimate   Std_Error
@@ -130,6 +137,7 @@ summary(fit, "spacetime_term")
 To explore output, we can plot output using the survey extent:
 
 ``` r
+
 # Extract shapefile
 region = condition_and_density$eastern_bering_sea
 
@@ -178,6 +186,7 @@ with condition. Therefore, condition will have units that are not
 directly comparable with either weight or density.
 
 ``` r
+
 # 
 expand_data = rbind( newdata2, newdata )
 
@@ -202,7 +211,7 @@ ggplot( cond_tz ) +
 
 ![](condition_files/figure-html/condition-timeseries-1.png)
 
-Runtime for this vignette: 13 mins
+Runtime for this vignette: 13.19 mins
 
 #### Works cited
 
