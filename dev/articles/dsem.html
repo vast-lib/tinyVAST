@@ -127,7 +127,7 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt;         2:3]))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 0.6770885 secs</span></span>
+<span><span class="co">#&gt; Time difference of 0.6182246 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -326,25 +326,25 @@ and moose abundance on Isle Royale.</p>
 <span></span>
 <span><span class="co"># Keep in wide-form</span></span>
 <span><span class="va">dsem_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/ts.html" class="external-link">ts</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">isle_royale</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>, start<span class="op">=</span><span class="fl">1959</span><span class="op">)</span></span>
-<span><span class="va">Family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"normal"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># fit without delta0</span></span>
-<span><span class="co"># SEs aren't available because measurement errors goes to zero</span></span>
-<span><span class="va">mydsem</span> <span class="op">=</span> <span class="fu">dsem</span><span class="fu">::</span><span class="fu"><a href="https://james-thorson-NOAA.github.io/dsem/reference/dsem.html" class="external-link">dsem</a></span><span class="op">(</span> sem <span class="op">=</span> <span class="va">dsem</span>,</span>
-<span>             tsdata <span class="op">=</span> <span class="va">dsem_data</span>,</span>
-<span>             control <span class="op">=</span> <span class="fu"><a href="https://james-thorson-NOAA.github.io/dsem/reference/dsem_control.html" class="external-link">dsem_control</a></span><span class="op">(</span>getsd<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>,</span>
-<span>             family <span class="op">=</span> <span class="va">Family</span> <span class="op">)</span></span>
+<span><span class="co"># Fitting with family = "fixed" seems stable on CRAN checks</span></span>
+<span><span class="va">mydsem</span> <span class="op">=</span> <span class="fu">dsem</span><span class="fu">::</span><span class="fu"><a href="https://james-thorson-NOAA.github.io/dsem/reference/dsem.html" class="external-link">dsem</a></span><span class="op">(</span> </span>
+<span>  sem <span class="op">=</span> <span class="va">dsem</span>,</span>
+<span>  tsdata <span class="op">=</span> <span class="va">dsem_data</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://james-thorson-NOAA.github.io/dsem/reference/dsem_control.html" class="external-link">dsem_control</a></span><span class="op">(</span></span>
+<span>    getsd <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span>, </span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Coefficient_name Number_of_coefficients   Type</span></span>
 <span><span class="co">#&gt; 1           beta_z                      7  Fixed</span></span>
-<span><span class="co">#&gt; 2        lnsigma_j                      2  Fixed</span></span>
-<span><span class="co">#&gt; 3             mu_j                      2 Random</span></span>
-<span><span class="co">#&gt; 4             x_tj                    122 Random</span></span>
+<span><span class="co">#&gt; 2             mu_j                      2 Random</span></span>
 <span><span class="va">mydsem</span></span>
 <span><span class="co">#&gt; $par</span></span>
-<span><span class="co">#&gt;        beta_z        beta_z        beta_z        beta_z        beta_z </span></span>
-<span><span class="co">#&gt;   0.895834720   0.007358847  -0.124879928   0.874884847  -0.014394603 </span></span>
-<span><span class="co">#&gt;        beta_z        beta_z     lnsigma_j     lnsigma_j </span></span>
-<span><span class="co">#&gt;   0.378522244   0.172997994 -18.717126268 -12.672292982 </span></span>
+<span><span class="co">#&gt;       beta_z       beta_z       beta_z       beta_z       beta_z       beta_z </span></span>
+<span><span class="co">#&gt;  0.895834720  0.007358847 -0.124879928  0.874884847 -0.014394603  0.378522244 </span></span>
+<span><span class="co">#&gt;       beta_z </span></span>
+<span><span class="co">#&gt;  0.172997994 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
 <span><span class="co">#&gt; [1] 7.739638</span></span>
@@ -355,11 +355,11 @@ and moose abundance on Isle Royale.</p>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 72</span></span>
+<span><span class="co">#&gt; [1] 41</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       85       73 </span></span>
+<span><span class="co">#&gt;       56       42 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "relative convergence (4)"</span></span>
@@ -465,7 +465,7 @@ and moose abundance on Isle Royale.</p>
 <td align="left">moose</td>
 <td align="left">moose</td>
 <td align="left">2</td>
-<td align="right">0.173</td>
+<td align="right">0.172</td>
 </tr>
 </tbody>
 </table>
@@ -489,7 +489,7 @@ and moose abundance on Isle Royale.</p>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 2.4 secs</p>
+<p>Runtime for this vignette: 2.23 secs</p>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>
