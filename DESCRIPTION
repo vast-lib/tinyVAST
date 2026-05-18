@@ -1,8 +1,8 @@
 Type: Package
 Package: tinyVAST
 Title: Multivariate Spatio-Temporal Models using Structural Equations
-Version: 1.5.1.9000
-Date: 2026-04-25
+Version: 1.6.0
+Date: 2026-05-18
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
 	   role = c("aut", "cre"),
@@ -78,4 +78,4 @@ LazyDataCompression: xz
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 URL: https://vast-lib.github.io/tinyVAST/
-BugReports: https://github.com/vast-lib/tinyVAST/issues
+BugReports: https://github.com/vast-lib/tinyVAST/issues/
