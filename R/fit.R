@@ -141,8 +141,8 @@
 #' @importFrom methods is as
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
 #' @importFrom stats .getXlevels gaussian lm model.frame model.matrix update
-#'   model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
-#'   update.formula binomial poisson predict as.formula na.pass sd dist optim
+#' @importFrom stats model.offset model.response na.omit nlminb optimHess pnorm rnorm terms
+#' @importFrom stats update.formula binomial poisson predict as.formula na.pass sd dist optim
 #' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport runSymbolicAnalysis config
 #' @importFrom checkmate assertClass assertDataFrame assertNumeric assertInteger
@@ -151,7 +151,7 @@
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv
 #' @importFrom sf st_relate st_coordinates st_centroid st_within st_crs
-#'   st_geometry_type st_geometry
+#' @importFrom sf st_geometry_type st_geometry
 #' @importFrom cli cli_abort cli_warn cli_inform cli_alert_success cli_alert_danger cli_alert_info
 #' @importFrom GpGp find_ordered_nn
 #' @importFrom GPvecchia order_maxmin_exact
