@@ -231,7 +231,7 @@ spatio-temporal variation:
   dominated by the predicted density at a few (or single) extrapolation
   location(s).
 
-Runtime for this vignette: 1.79 hours
+Runtime for this vignette: 1.8 hours
 
 ## Works cited
 

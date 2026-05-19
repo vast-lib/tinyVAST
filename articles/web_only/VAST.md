@@ -95,7 +95,7 @@ mytinyVAST
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 8.121468 secs
+#> Time difference of 8.164582 secs
 #> 
 #> Family: 
 #> $obs
@@ -323,7 +323,7 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 | run times (sec.).tinyVAST | run times (sec.).VAST | run times (sec.).sdmTMB |
 |:--------------------------|:----------------------|:------------------------|
-| 8.1 secs                  | NA                    | 10.7 secs               |
+| 8.2 secs                  | NA                    | 10.6 secs               |
 
 ### Delta models
 
@@ -350,7 +350,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 8.089347 secs
+#> Time difference of 7.950033 secs
 #> 
 #> Family: 
 #> $obs
@@ -508,7 +508,7 @@ out
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 28.6711 secs
+#> Time difference of 28.63254 secs
 #> 
 #> Family: 
 #> $obs

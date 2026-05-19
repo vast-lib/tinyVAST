@@ -102,7 +102,7 @@ We can then compare this with the PDE reported by `mgcv`
 start_time = Sys.time()
 mygam = gam( n ~ s(w) + s(x,y), data=Data ) #
 Sys.time() - start_time
-#> Time difference of 0.03426766 secs
+#> Time difference of 0.03389382 secs
 summary(mygam)$dev.expl
 #> [1] 0.3517756
 ```
