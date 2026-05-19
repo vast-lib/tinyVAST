@@ -223,6 +223,6 @@ ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat
 
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png)
 
-Runtime for this vignette: 21.61 secs
+Runtime for this vignette: 21.7 secs
 
 ## Works cited
