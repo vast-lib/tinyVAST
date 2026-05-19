@@ -1,4 +1,6 @@
 url: https://vast-lib.github.io/tinyVAST/
+development:
+  mode: auto
 template:
   bootstrap: 5
 
@@ -51,6 +53,8 @@ reference:
   - simulate.tinyVAST
   - print.tinyVAST
   - sanity
+  - make_nngp_domain
+  - plot.nngp_domain
 
 - title: 'SEM and DSEM constructors'
   desc: |

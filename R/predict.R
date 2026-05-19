@@ -119,6 +119,11 @@ function( object,
 #' @param area vector of values used for area-weighted expansion of 
 #'        estimated density surface for each row of `newdata`
 #'        with length of \code{nrow(newdata)}.
+#' @param block vector of integers, indicating blocks of predictions that are combined
+#'        into one or more derived quantities.  This can be used to compute area-expanded
+#'        indices for more than one year or category using a single call, and might be
+#'        substantially faster for large models (because it avoids extra model builds
+#'        for each derived quantity)
 #' @param type Integer-vector indicating what type of expansion to apply to
 #'        each row of `newdata`, with length of \code{nrow(newdata)}.  
 #' \describe{
@@ -238,6 +243,7 @@ integrate_output <-
 function( object,
           newdata,
           area,
+          block = rep(1,nrow(newdata)),
           type = rep(1,nrow(newdata)),
           weighting_index,
           covariate,
@@ -251,9 +257,10 @@ function( object,
   check_tinyVAST_version( object$internal$packageVersion )
   if(missing(newdata)) newdata = object$data
   # Build new .. object$data must be same as used for fitting to get SEs / skewness of random effects
-  tmb_data2 = add_predictions( object = object,
-                               newdata = newdata ) # ,
-                               # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
+  tmb_data2 = add_predictions(
+    object = object,
+    newdata = newdata
+  ) # remove_origdata = isFALSE(apply.epsilon) & isFALSE(bias.correct) )
   tmb_data2$model_options[c(3,5)] = 0     # Make sure no other SE reporting is used
 
   # Check for no random effects
@@ -263,6 +270,9 @@ function( object,
     }
   }
 
+  # Blocks
+  block = as.integer(block)
+  assertInteger( block, lower = 1, len=nrow(newdata), any.missing=FALSE )
 
   # Expansion area
   if(missing(area)){
@@ -270,7 +280,7 @@ function( object,
   }else if(length(area)==1){
     area = rep(area, nrow(newdata))
   }  
-  checkNumeric( area, lower=0, len=nrow(newdata), any.missing=FALSE )
+  assertNumeric( area, lower=0, len=nrow(newdata), any.missing=FALSE )
 
   # Expansion type
   if(missing(type)){
@@ -278,7 +288,8 @@ function( object,
   }else if(length(type)==1){
     type = rep(type, nrow(type))
   }  
-  checkInteger( type, lower=0, upper=4, len=nrow(newdata), any.missing=FALSE )
+  type = as.integer(type)
+  assertInteger( type, lower=0, upper=4, len=nrow(newdata), any.missing=FALSE )
   
   # Index for variable-weighted value
   if(missing(weighting_index)){
@@ -287,16 +298,17 @@ function( object,
   if( any(weighting_index>=seq_len(nrow(newdata))) ){
     stop("Invalid `weighting_index`")
   }
-  checkInteger( weighting_index, lower=0, len=nrow(newdata), any.missing=FALSE )
+  weighting_index = as.integer(weighting_index)
+  assertInteger( weighting_index, lower=0, len=nrow(newdata), any.missing=FALSE )
   
   # 
   if(missing(covariate)){
     covariate = rep(0, nrow(newdata))
   }
-  checkNumeric( covariate, len=nrow(newdata), any.missing=FALSE )
+  assertNumeric( covariate, len=nrow(newdata), any.missing=FALSE )
   
   # Bundle
-  tmb_data2$V_gz = cbind( type, weighting_index )
+  tmb_data2$V_gz = cbind( type, weighting_index, block )
   tmb_data2$W_gz = cbind( area, covariate )
   
   # Area-expanded sum
@@ -326,37 +338,42 @@ function( object,
   #
   tmb_par2 = object$internal$parlist
   if( isTRUE(apply.epsilon) ){
-    tmb_par2$eps = 0
+    tmb_par2$eps = rep( 0, max(block) )
     inner.control = list(sparse=TRUE, lowrank=TRUE, trace=FALSE)
   }else{
     inner.control = list(sparse=TRUE, lowrank=FALSE, trace=FALSE)
   }
 
   # Rebuild object
-  newobj = MakeADFun( data = tmb_data2,
-                      parameters = tmb_par2,
-                      map = object$tmb_inputs$tmb_map,
-                      random = object$tmb_inputs$tmb_random,
-                      DLL = "tinyVAST",
-                      intern = intern,
-                      inner.control = inner.control,
-                      profile = object$internal$control$profile )
+  newobj = MakeADFun(
+    data = tmb_data2,
+    parameters = tmb_par2,
+    map = object$tmb_inputs$tmb_map,
+    random = object$tmb_inputs$tmb_random,
+    DLL = "tinyVAST",
+    intern = intern,
+    inner.control = inner.control,
+    profile = object$internal$control$profile
+  )
   newobj$env$beSilent()
 
   # Run sdreport
   if( isTRUE(apply.epsilon) ){
     #Metric = newobj$report()$Metric
     grad = newobj$gr( newobj$par )[which(names(newobj$par)=="eps")]
-    out = c( "Estimate"=NA, "Std. Error"=NA, "Est. (bias.correct)"=grad, "Std. (bias.correct)"=NA )
+    out = data.frame( "Estimate"=NA, "Std. Error"=NA, "Est. (bias.correct)"=grad, "Std. (bias.correct)"=NA )
   }else if( isTRUE(getsd) | isTRUE(bias.correct) ){
-    newsd = sdreport( obj = newobj,
-                      par.fixed = object$opt$par,
-                      hessian.fixed = object$internal$Hess_fixed,
-                      bias.correct = bias.correct )
-    out = summary(newsd, "report")['Metric',]
+    newsd = sdreport(
+      obj = newobj,
+      par.fixed = object$opt$par,
+      hessian.fixed = object$internal$Hess_fixed,
+      bias.correct = bias.correct
+    )
+    newsd_summary = summary(newsd, "report")
+    out = newsd_summary[ which(rownames(newsd_summary)=='Metric'), ]
   }else{
     rep = newobj$report()
-    out = c( "Estimate"=rep$Metric, "Std. Error"=NA, "Est. (bias.correct)"=NA, "Std. (bias.correct)"=NA )
+    out = data.frame( "Estimate"=rep$Metric, "Std. Error"=NA, "Est. (bias.correct)"=NA, "Std. (bias.correct)"=NA )
   }
   
   # deal with memory internally
