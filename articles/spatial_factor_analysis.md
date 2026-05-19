@@ -1,6 +1,7 @@
 # Spatial factor analysis
 
 ``` r
+
 library(tinyVAST)
 library(fmesher)
 set.seed(101)
@@ -21,6 +22,7 @@ project via a simulated loadings matrix, and then simulate a Tweedie
 response for each manifest variable:
 
 ``` r
+
 # Simulate settings
 theta_xy = 0.4
 n_x = n_y = 10
@@ -45,6 +47,7 @@ d_cs = L_cf %*% delta_fs
 Where we can inspect the simulated loadings matrix
 
 ``` r
+
 dimnames(L_cf) = list( paste0("Var ", 1:nrow(L_cf)),
                        paste0("Factor ", 1:ncol(L_cf)) )
 knitr::kable( L_cf,
@@ -59,11 +62,12 @@ knitr::kable( L_cf,
 | Var 4 |    -0.57 |     0.34 |      0.0 |      0.5 |      0.0 |
 | Var 5 |    -0.03 |    -0.24 |      0.0 |      0.0 |      0.5 |
 
-True loadings
+True loadings {.table}
 
 We then specify the model as expected by *tinyVAST*:
 
 ``` r
+
 # Shape into longform data-frame and add error
 Data = data.frame( expand.grid(species=1:n_c, x=1:n_x, y=1:n_y),
                    "var"="logn", "z"=exp(as.vector(d_cs)) )
@@ -114,7 +118,7 @@ out
 #>     variables = c("f1", "f2", 1:n_c), distribution_column = "dist")
 #> 
 #> Run time: 
-#> Time difference of 2.076524 secs
+#> Time difference of 2.199744 secs
 #> 
 #> Family: 
 #> $obs
@@ -176,7 +180,7 @@ out
 #> factor(species)4  0.14727256 0.2705807  0.54428332 0.58624652
 #> factor(species)5 -0.26515247 0.1463893 -1.81128250 0.07009713
 #> 
-#> Sanity check:
+#> Sanity check: 
 #> 
 #> **Possible issues detected! Check output of sanity().**
 ```
@@ -184,6 +188,7 @@ out
 We can compare the true loadings (rotated to optimize comparison):
 
 ``` r
+
 Lrot_cf = rotate_pca( L_cf )$L_tf
 dimnames(Lrot_cf) = list( paste0("Var ", 1:nrow(Lrot_cf)),
                        paste0("Factor ", 1:ncol(Lrot_cf)) )
@@ -199,11 +204,12 @@ knitr::kable( Lrot_cf,
 | Var 4 |    -0.70 |     0.25 |     0.06 |     0.37 |     0.03 |
 | Var 5 |     0.17 |     0.23 |     0.47 |    -0.08 |     0.03 |
 
-Rotated true loadings
+Rotated true loadings {.table}
 
 with the estimated loadings
 
 ``` r
+
 # Extract and rotate estimated loadings
 Lhat_cf = matrix( 0, nrow=n_c, ncol=2 )
 Lhat_cf[lower.tri(Lhat_cf,diag=TRUE)] = as.list(out$sdrep, what="Estimate")$theta_z
@@ -213,6 +219,7 @@ Lhat_cf = rotate_pca( L_tf=Lhat_cf, order="decreasing" )$L_tf
 Where we can compared the estimated and true loadings matrices:
 
 ``` r
+
 dimnames(Lhat_cf) = list( paste0("Var ", 1:nrow(Lhat_cf)),
                        paste0("Factor ", 1:ncol(Lhat_cf)) )
 knitr::kable( Lhat_cf,
@@ -227,12 +234,13 @@ knitr::kable( Lhat_cf,
 | Var 4 |     0.57 |     0.05 |
 | Var 5 |     0.07 |    -0.25 |
 
-Rotated estimated loadings
+Rotated estimated loadings {.table}
 
 Or we can specify the model while ensuring that residual spatial
 variation is also captured:
 
 ``` r
+
 #
 sem = "
   f1 -> 1, l1
@@ -278,6 +286,7 @@ Lhat_cf = rotate_pca( L_tf=Lhat_cf, order="decreasing" )$L_tf
 Where we can again compared the estimated and true loadings matrices:
 
 ``` r
+
 dimnames(Lhat_cf) = list( paste0("Var ", 1:nrow(Lhat_cf)),
                        paste0("Factor ", 1:ncol(Lhat_cf)) )
 knitr::kable( Lhat_cf,
@@ -292,9 +301,9 @@ knitr::kable( Lhat_cf,
 | Var 4 |     0.47 |    -0.02 |
 | Var 5 |     0.07 |    -0.07 |
 
-Rotated estimated loadings with full rank
+Rotated estimated loadings with full rank {.table}
 
-Runtime for this vignette: 9.13 secs
+Runtime for this vignette: 9.73 secs
 
 ## Works cited
 

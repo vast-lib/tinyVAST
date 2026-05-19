@@ -93,10 +93,10 @@ tinyVAST(
 
 - delta_options:
 
-  a named list with slots for `formula`, `space_term`, and
-  `spacetime_term`. These specify options for the second linear
-  predictor of a delta model, and are only used (or estimable) when a
-  `delta family` is used for some samples.
+  a named list with slots for `formula`, `space_term`, `spacetime_term`,
+  `time_term`, and `spatial_varying`. These specify options for the
+  second linear predictor of a delta model, and are only used (or
+  estimable) when a `delta family` is used for some samples.
 
 - spatial_varying:
 
@@ -280,14 +280,14 @@ spatial model, the user must specify `spatial_domain` and either
 `space_term=""` or `spacetime_term=""`, where the latter two are then
 parsed to include a single exogenous variance for the single variable
 
-|                                                                                                                                     |                                                                                                                                                                                                                                    |
-|-------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Model type**                                                                                                                      | **How to specify**                                                                                                                                                                                                                 |
-| Generalized additive model                                                                                                          | specify `spatial_domain=NULL` `space_term=""` and `spacetime_term=""`, and then use `formula` to specify splines and covariates                                                                                                    |
-| Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_domain=NULL` and use `spacetime_term` to specify interactions among variables and over time                                                                                                                       |
-| Univariate spatio-temporal model, or multiple independence spatio-temporal variables                                                | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable                                                                                   |
-| Multivariate spatial model including interactions                                                                                   | specify `spatial_domain` and use `space_term` to specify spatial interactions                                                                                                                                                      |
-| Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables)                                              | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
+|  |  |
+|----|----|
+| **Model type** | **How to specify** |
+| Generalized additive model | specify `spatial_domain=NULL` `space_term=""` and `spacetime_term=""`, and then use `formula` to specify splines and covariates |
+| Dynamic structural equation model (including vector autoregressive, dynamic factor analysis, ARIMA, and structural equation models) | specify `spatial_domain=NULL` and use `spacetime_term` to specify interactions among variables and over time |
+| Univariate spatio-temporal model, or multiple independence spatio-temporal variables | specify `spatial_domain` and `spacetime_term=""`, where the latter is then parsed to include a single exogenous variance for the single variable |
+| Multivariate spatial model including interactions | specify `spatial_domain` and use `space_term` to specify spatial interactions |
+| Vector autoregressive spatio-temporal model (i.e., lag-1 interactions among variables) | specify `spatial_domain` and use `spacetime_term=""` to specify interactions among variables and over time, where spatio-temporal variables are constructed via the separable interaction of `spacetime_term` and `spatial_domain` |
 
 **Model building notes**
 

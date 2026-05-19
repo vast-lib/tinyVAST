@@ -1,6 +1,7 @@
 # Stream network models
 
 ``` r
+
 library(sf)
 library(sfnetworks)
 library(tinyVAST)
@@ -22,6 +23,7 @@ to *sfnetwork* format. This format includes edges representing stream
 segments, and nodes where edges connect.
 
 ``` r
+
 stream <- st_read( file.path(system.file("stream_network",package="tinyVAST"),
                    "East_Fork_Lewis_basin.shp"), quiet=TRUE )
 stream = as_sfnetwork(stream)
@@ -36,6 +38,7 @@ distances are 0.01 to 100, avoiding issues of numerical under or
 overflow).
 
 ``` r
+
 # Rescale
 graph = sfnetwork_mesh( stream )
 graph$table$dist = graph$table$dist / 1000  # Convert distance scale
@@ -49,6 +52,7 @@ stream using `st_line_sample`, project the GMRF to those locations using
 `sfnetwork_evaluator`, and simulate data at those locations:
 
 ``` r
+
 # Parameters
 alpha = 2
 kappa = 0.05
@@ -81,6 +85,7 @@ Data = data.frame( Count = Count_i,
 We can visualize the GMRF at those locations using *sfnetwork*
 
 ``` r
+
 # Plot stream
 plot(stream)
 # Extract nodes and plot on network
@@ -95,6 +100,7 @@ plot( st_sf(st_geometry(activate(stream,"nodes")), "omega"=omega_s),
 Finally, we can fit the model:
 
 ``` r
+
 # fit model
 out = tinyVAST( data = Data,
            formula = Count ~ 1,
@@ -111,6 +117,7 @@ and plot those with the true (simulated) values at the location of
 simulated samples.
 
 ``` r
+
 # Define plotting points
 sf_plot = st_union( st_line_sample( activate(stream,"edges"), density=1/1000))
 sf_plot = st_cast( sf_plot, "POINT" )
@@ -148,15 +155,14 @@ plot(
 
 ![](stream_networks_files/figure-html/unnamed-chunk-7-1.png)
 
-Runtime for this vignette: 4.49 secs
+Runtime for this vignette: 4.66 secs
 
 ## Works cited
 
-Charsley, Anthony R., Arnaud Grüss, James T. Thorson, Merrill B. Rudd,
-Shannan K. Crow, Bruno David, Erica K. Williams, and Simon D. Hoyle.
-2023. “Catchment-Scale Stream Network Spatio-Temporal Models, Applied to
-the Freshwater Stages of a Diadromous Fish Species, Longfin Eel
-(Anguilla Dieffenbachii).” *Fisheries Research* 259 (March): 106583.
+Charsley, Anthony R., Arnaud Grüss, James T. Thorson, et al. 2023.
+“Catchment-Scale Stream Network Spatio-Temporal Models, Applied to the
+Freshwater Stages of a Diadromous Fish Species, Longfin Eel (Anguilla
+Dieffenbachii).” *Fisheries Research* 259 (March): 106583.
 <https://doi.org/10.1016/j.fishres.2022.106583>.
 
 Hocking, Daniel J., James T. Thorson, Kyle O’Neil, and Benjamin H.

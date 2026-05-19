@@ -1,6 +1,7 @@
 # Simultaneous autoregressive process
 
 ``` r
+
 library(tinyVAST)
 library(igraph)
 library(rnaturalearth)
@@ -20,6 +21,7 @@ To do so, we first load salmong returns, and remove 0s to allow
 comparison between Tweedie and lognormal distributions.
 
 ``` r
+
 data( salmon_returns )
 
 # Transform data
@@ -35,11 +37,12 @@ Data = na.omit(salmon_returns)
 We first explore an AR2 process, with independent variation among
 regions. This model shows a substantial first-order autocorrelation for
 sockeye and chum, and substantial second-order autocorrelation for pink
-salmon. An AR(2) process is stationary if $\phi_{1} + \phi_{2} < 1$ and
-$\phi_{2} - \phi_{1} < 1$, and this stationarity criterion suggests that
+salmon. An AR(2) process is stationary if $`\phi_1 + \phi_2 < 1`$ and
+$`\phi_2 - \phi_1 < 1`$, and this stationarity criterion suggests that
 each time-series is close to (but not quite) nonstationary.
 
 ``` r
+
 # Define graph for SAR process
 unconnected_graph = make_empty_graph( nlevels(Data$Region) )
 V(unconnected_graph)$name = levels(Data$Region)
@@ -49,6 +52,7 @@ plot(unconnected_graph)
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-3-1.png)
 
 ``` r
+
 
 # Define SEM for AR2 process
 dsem = "
@@ -101,6 +105,7 @@ knitr::kable( Summary, digits=3)
 We also explore an SAR process for adjacency among regions
 
 ``` r
+
 # Define graph for SAR process
 adjacency_graph = make_graph( ~ Korea - Japan - M.I - WKam - EKam -
                                 WAK - SPen - Kod - CI - PWS -
@@ -111,6 +116,7 @@ We can plot this adjacency on a map to emphasize that it is a simple way
 to encode information about spatial proximity:
 
 ``` r
+
 #maps = ne_countries( country = c("united states of america","russia","canada","south korea","north korea","japan") )
 maps = ne_countries( continent = c("north america","asia","europe") )
 maps = st_combine( maps )
@@ -150,6 +156,7 @@ plot( adjacency_graph,
 We can then pass this adjacency graph to `tinyVAST` during fitting:
 
 ``` r
+
 # Fit tinyVAST model
 mytiny = tinyVAST(
      formula = Biomass_nozeros ~ 0 + Species + Region,
@@ -189,6 +196,7 @@ that spatial adjancency is not a parsimonious way to describe
 correlations among time-series.
 
 ``` r
+
 # AIC for unconnected time-series
 AIC(mytiny0)
 #> [1] 49086.47
@@ -200,6 +208,7 @@ AIC(mytiny)
 Finally, we can plot observations and predictions for the selected model
 
 ``` r
+
 # Compile long-form dataframe of observations and predictions
 Resid = rbind( cbind(Data[,c('Species','Year','Region','Biomass_nozeros')], "Which"="Obs"),
                cbind(Data[,c('Species','Year','Region')], "Biomass_nozeros"=predict(mytiny0,Data), "Which"="Pred") )
@@ -214,6 +223,6 @@ ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat
 
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png)
 
-Runtime for this vignette: 19.85 secs
+Runtime for this vignette: 21.97 secs
 
 ## Works cited

@@ -1,6 +1,7 @@
 # Comparison with mgcv
 
 ``` r
+
 library(tinyVAST)
 library(pdp)  # approx = TRUE gives effects for average of other covariates
 library(lattice)
@@ -16,6 +17,7 @@ interface. We here show how it can replicate analysis using splines
 specified via `mgcv`
 
 ``` r
+
 # Simulate
 n_obs = 1000
 x = rnorm(n_obs)
@@ -37,6 +39,7 @@ We can then compute the percent deviance explained, and confirm that it
 is identical to that calculated using mgcv
 
 ``` r
+
 # By default
 myfit$deviance_explained
 #> [1] 0.9814343
@@ -50,6 +53,7 @@ summary(mygam_reduced)$dev.expl
 We can also use the `DHARMa` package to visualize simulation residuals:
 
 ``` r
+
 # simulate new data conditional on fixed and random effects
 y_ir = replicate( n = 100, 
            expr = myfit$obj$simulate()$y_i )
@@ -66,6 +70,7 @@ plot(res)
 `tinyVAST` then has a standard `predict` function:
 
 ``` r
+
 predict(myfit, newdata=data.frame(x=0, y=1, w=0.4, group=2, a=1) )
 #> [1] 2.977754
 ```
@@ -73,6 +78,7 @@ predict(myfit, newdata=data.frame(x=0, y=1, w=0.4, group=2, a=1) )
 and this is used to compute partial-dependence plots using package `pdp`
 
 ``` r
+
 # compute partial dependence plot
 Partial = partial( object = myfit,
                    pred.var = c("w","group"),
@@ -90,6 +96,7 @@ Alternatively, we can use `visreg` to visualize output, although it is
 disabled for CRAN vignette checks:
 
 ``` r
+
 visreg(myfit, xvar="group", what="p_g")
 #> Warning in plot.window(...): "what" is not a graphical parameter
 #> Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter
@@ -106,6 +113,7 @@ visreg(myfit, xvar="group", what="p_g")
 ![](mgcv_files/figure-html/unnamed-chunk-7-1.png)
 
 ``` r
+
 visreg(myfit, xvar="x", what="p_g")
 #> Warning in plot.window(...): "what" is not a graphical parameter
 #> Warning in plot.xy(xy, type, ...): "what" is not a graphical parameter
@@ -120,6 +128,7 @@ visreg(myfit, xvar="x", what="p_g")
 ![](mgcv_files/figure-html/unnamed-chunk-7-2.png)
 
 ``` r
+
 visreg(myfit, xvar="w", by="group", what="p_g")
 ```
 
@@ -129,6 +138,7 @@ Alternatively, we can calculate derived quantities via Monte Carlo
 integration of the estimated density function:
 
 ``` r
+
 # Predicted sample-weighted total
 integrate_output(myfit)
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
@@ -142,6 +152,7 @@ sum( Data$z )
 Similarly, we can fit a grouped 2D spline
 
 ``` r
+
 # Simulate
 R = exp(-0.4 * abs(outer(1:10, 1:10, FUN="-")) )
 z = mvtnorm::rmvnorm(3, sigma=kronecker(R,R) )
@@ -169,6 +180,7 @@ plotPartial( mypartial )
 
 ``` r
 
+
 # Lattice plot of true values
 mypartial$yhat = Data$z
 plotPartial( mypartial )
@@ -181,10 +193,11 @@ doesn’t seem possible to extract a grouped spatial term, so we here show
 only a single term:
 
 ``` r
+
 out = visreg2d( myfit, "x", "y", cond=list("group"=1), plot=FALSE )
 plot( out, main="f(x,y) for group=1")
 ```
 
 ![](mgcv_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 49.93 secs
+Runtime for this vignette: 52.21 secs

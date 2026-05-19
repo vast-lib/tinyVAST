@@ -1,6 +1,7 @@
 # Dynamic structural equation models
 
 ``` r
+
 library(tinyVAST)
 set.seed(101)
 options("tinyVAST.verbose" = FALSE)
@@ -11,6 +12,7 @@ options("tinyVAST.verbose" = FALSE)
 autoregressive model for wolf and moose abundance on Isle Royale.
 
 ``` r
+
 data(isle_royale, package="dsem")
 
 # Convert to long-form
@@ -41,7 +43,7 @@ mytiny
 #>         2:3]))
 #> 
 #> Run time: 
-#> Time difference of 0.6287231 secs
+#> Time difference of 0.9539242 secs
 #> 
 #> Family: 
 #> $obs
@@ -124,29 +126,30 @@ And we can specifically inspect the estimated interaction matrix:
 We can then compare this with package `dsem`
 
 ``` r
+
 library(dsem)
 
 # Keep in wide-form
 dsem_data = ts( log(isle_royale[,2:3]), start=1959)
-Family = c("normal", "normal")
 
 # fit without delta0
-# SEs aren't available because measurement errors goes to zero
-mydsem = dsem::dsem( sem = dsem,
-             tsdata = dsem_data,
-             control = dsem_control(getsd=FALSE),
-             family = Family )
+# Fitting with family = "fixed" seems stable on CRAN checks
+mydsem = dsem::dsem( 
+  sem = dsem,
+  tsdata = dsem_data,
+  control = dsem_control(
+    getsd = FALSE
+  ), 
+)
 #>   Coefficient_name Number_of_coefficients   Type
 #> 1           beta_z                      7  Fixed
-#> 2        lnsigma_j                      2  Fixed
-#> 3             mu_j                      2 Random
-#> 4             x_tj                    122 Random
+#> 2             mu_j                      2 Random
 mydsem
 #> $par
-#>        beta_z        beta_z        beta_z        beta_z        beta_z 
-#>   0.895834720   0.007358847  -0.124879928   0.874884847  -0.014394603 
-#>        beta_z        beta_z     lnsigma_j     lnsigma_j 
-#>   0.378522244   0.172997994 -18.717126268 -12.672292982 
+#>       beta_z       beta_z       beta_z       beta_z       beta_z       beta_z 
+#>  0.895834720  0.007358847 -0.124879928  0.874884847 -0.014394603  0.378522244 
+#>       beta_z 
+#>  0.172997994 
 #> 
 #> $objective
 #> [1] 7.739638
@@ -157,11 +160,11 @@ mydsem
 #> [1] 0
 #> 
 #> $iterations
-#> [1] 72
+#> [1] 41
 #> 
 #> $evaluations
 #> function gradient 
-#>       85       73 
+#>       56       42 
 #> 
 #> $message
 #> [1] "relative convergence (4)"
@@ -170,15 +173,15 @@ mydsem
 knitr::kable( summary(mydsem), digits=3 )
 ```
 
-| path                | lag | name        | start | parameter | first  | second | direction | Estimate |
-|:--------------------|----:|:------------|------:|----------:|:-------|:-------|:----------|---------:|
-| wolves -\> wolves   |   1 | arW         |    NA |         1 | wolves | wolves | 1         |    0.896 |
-| moose -\> wolves    |   1 | MtoW        |    NA |         2 | moose  | wolves | 1         |    0.007 |
-| wolves -\> moose    |   1 | WtoM        |    NA |         3 | wolves | moose  | 1         |   -0.125 |
-| moose -\> moose     |   1 | arM         |    NA |         4 | moose  | moose  | 1         |    0.875 |
-| wolves \<-\> moose  |   0 | corr        |    NA |         5 | wolves | moose  | 2         |   -0.014 |
-| wolves \<-\> wolves |   0 | V\[wolves\] |    NA |         6 | wolves | wolves | 2         |    0.379 |
-| moose \<-\> moose   |   0 | V\[moose\]  |    NA |         7 | moose  | moose  | 2         |    0.173 |
+| path | lag | name | start | parameter | first | second | direction | Estimate |
+|:---|---:|:---|---:|---:|:---|:---|:---|---:|
+| wolves -\> wolves | 1 | arW | NA | 1 | wolves | wolves | 1 | 0.896 |
+| moose -\> wolves | 1 | MtoW | NA | 2 | moose | wolves | 1 | 0.007 |
+| wolves -\> moose | 1 | WtoM | NA | 3 | wolves | moose | 1 | -0.125 |
+| moose -\> moose | 1 | arM | NA | 4 | moose | moose | 1 | 0.875 |
+| wolves \<-\> moose | 0 | corr | NA | 5 | wolves | moose | 2 | -0.014 |
+| wolves \<-\> wolves | 0 | V\[wolves\] | NA | 6 | wolves | wolves | 2 | 0.379 |
+| moose \<-\> moose | 0 | V\[moose\] | NA | 7 | moose | moose | 2 | 0.172 |
 
 where we again inspect the estimated interaction matrix:
 
@@ -187,7 +190,7 @@ where we again inspect the estimated interaction matrix:
 | wolves |  0.896 | -0.125 |
 | moose  |  0.007 |  0.875 |
 
-Runtime for this vignette: 2.28 secs
+Runtime for this vignette: 2.91 secs
 
 ## Works cited
 

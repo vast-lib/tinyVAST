@@ -17,6 +17,7 @@ interactions among variables over time.
 tinyVAST can be installed from CRAN:
 
 ``` r
+
 install.packages("tinyVAST")
 ```
 
@@ -24,6 +25,7 @@ or the `dev` branch (subject to ongoing changes) can be installed from
 GitHub:
 
 ``` r
+
 library(devtools)
 install_github("vast-lib/tinyVAST", dependencies = TRUE)
 ```
@@ -33,6 +35,7 @@ install_github("vast-lib/tinyVAST", dependencies = TRUE)
 To cite tinyVAST in publications use:
 
 ``` r
+
 citation("tinyVAST")
 ```
 
@@ -104,6 +107,10 @@ Core tools for model fitting and diagnostics.
   : print summary of tinyVAST model
 - [`sanity()`](https://vast-lib.github.io/tinyVAST/reference/sanity.md)
   : Sanity check of a tinyVAST model
+- [`make_nngp_domain()`](https://vast-lib.github.io/tinyVAST/reference/make_nngp_domain.md)
+  : Make spatial object for NNGP
+- [`plot(`*`<nngp_domain>`*`)`](https://vast-lib.github.io/tinyVAST/reference/plot.nngp_domain.md)
+  : Plot nngp_domain
 
 ## SEM and DSEM constructors
 

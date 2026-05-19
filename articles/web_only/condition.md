@@ -1,6 +1,7 @@
 # Condition and density
 
 ``` r
+
 library(tinyVAST)
 library(fmesher)
 library(sf)
@@ -20,6 +21,7 @@ showcases several improvements in interpretation and interface.
 We first load and combine the two data sets:
 
 ``` r
+
 data( condition_and_density )
 
 # Combine both parts
@@ -44,6 +46,7 @@ formed_data = cbind( combo_data[,c("Year","Lat","Lon")],
 We then construct the SPDE mesh
 
 ``` r
+
 # make mesh
 mesh = fm_mesh_2d( formed_data[,c('Lon','Lat')], cutoff=1 )
 ```
@@ -52,6 +55,7 @@ Next, we specify spatial and spatio-temporal variance in both condition
 and density.
 
 ``` r
+
 #
 sem = "
   Biomass <-> Biomass, sdB
@@ -71,6 +75,7 @@ Finally, we define the distribution for each data set using the `family`
 argument:
 
 ``` r
+
 #
 Family = list(
   Biomass = tweedie(),
@@ -81,6 +86,7 @@ Family = list(
 Finally, we fit the model using tinyVAST
 
 ``` r
+
 # fit model
 fit = tinyVAST( data = formed_data,
            formula = Response ~ interaction(Year,Type) + log_length,
@@ -96,33 +102,34 @@ fit = tinyVAST( data = formed_data,
            distribution_column = "Type",
            times = 1982:2016 )
 #> Warning: The model may not have converged. Maximum final gradient:
-#> 0.0200192865675286.
+#> 0.0903345129887285.
 ```
 
 We can look at structural parameters using summary functions:
 
 ``` r
+
 # spatial terms
 summary(fit, "space_term")
 #>   heads        to      from parameter start      Estimate   Std_Error
-#> 1     2   Biomass   Biomass         1  <NA>  1.4237621584 0.133022998
-#> 2     2 Condition Condition         2  <NA> -0.0331637176 0.004167792
-#> 3     1 Condition   Biomass         3  <NA>  0.0000940605 0.004855203
+#> 1     2   Biomass   Biomass         1  <NA>  1.423910e+00 0.133053431
+#> 2     2 Condition Condition         2  <NA> -3.316168e-02 0.004167330
+#> 3     1 Condition   Biomass         3  <NA>  9.517896e-05 0.004855006
 #>       z_value      p_value
-#> 1 10.70312791 9.839945e-27
-#> 2 -7.95714265 1.760577e-15
-#> 3  0.01937314 9.845434e-01
+#> 1 10.70179410 9.982641e-27
+#> 2 -7.95753500 1.755005e-15
+#> 3  0.01960429 9.843590e-01
 
 # spatio-temporal terms
 summary(fit, "spacetime_term")
 #>   heads        to      from parameter start lag     Estimate   Std_Error
-#> 1     2   Biomass   Biomass         1  <NA>   0  0.966444861 0.024275465
-#> 2     2 Condition Condition         2  <NA>   0 -0.040542306 0.002723400
-#> 3     1 Condition   Biomass         3  <NA>   0  0.008199409 0.003339291
-#>      z_value      p_value
-#> 1  39.811591 0.000000e+00
-#> 2 -14.886649 4.024381e-50
-#> 3   2.455434 1.407145e-02
+#> 1     2   Biomass   Biomass         1  <NA>   0  0.966424911 0.024274646
+#> 2     2 Condition Condition         2  <NA>   0 -0.040541857 0.002723367
+#> 3     1 Condition   Biomass         3  <NA>   0  0.008199896 0.003339291
+#>     z_value      p_value
+#> 1  39.81211 0.000000e+00
+#> 2 -14.88666 4.023469e-50
+#> 3   2.45558 1.406576e-02
 ```
 
 ## Abundance-weighted expansion
@@ -130,6 +137,7 @@ summary(fit, "spacetime_term")
 To explore output, we can plot output using the survey extent:
 
 ``` r
+
 # Extract shapefile
 region = condition_and_density$eastern_bering_sea
 
@@ -178,6 +186,7 @@ with condition. Therefore, condition will have units that are not
 directly comparable with either weight or density.
 
 ``` r
+
 # 
 expand_data = rbind( newdata2, newdata )
 
@@ -202,7 +211,7 @@ ggplot( cond_tz ) +
 
 ![](condition_files/figure-html/condition-timeseries-1.png)
 
-Runtime for this vignette: 12.25 mins
+Runtime for this vignette: 13.17 mins
 
 #### Works cited
 
