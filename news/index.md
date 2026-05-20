@@ -2,6 +2,8 @@
 
 ## tinyVAST 1.6.0
 
+CRAN release: 2026-05-19
+
 - Adding nearest-neighbors Gaussian Process option
 - Add tinyVASTcontrol(tmb_random) argument to allow exploration of
   penalized likelihood

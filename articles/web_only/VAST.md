@@ -95,7 +95,7 @@ mytinyVAST
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 8.777435 secs
+#> Time difference of 8.793781 secs
 #> 
 #> Family: 
 #> $obs
@@ -350,7 +350,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 8.16088 secs
+#> Time difference of 8.238648 secs
 #> 
 #> Family: 
 #> $obs
@@ -508,7 +508,7 @@ out
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 29.28416 secs
+#> Time difference of 29.48807 secs
 #> 
 #> Family: 
 #> $obs
