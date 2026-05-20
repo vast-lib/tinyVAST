@@ -1,3 +1,7 @@
+# tinyVAST 1.6.0.9000
+
+* Fix AR sign in SAR example (was using negative, because I hadn't updated after changing signs in dsem)
+
 # tinyVAST 1.6.0
 
 * Adding nearest-neighbors Gaussian Process option 
