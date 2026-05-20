@@ -1,6 +1,13 @@
 # Changelog
 
-## tinyVAST 1.5.1.9000
+## tinyVAST 1.6.0.9000
+
+- Fix AR sign in SAR example (was using negative, because I hadn’t
+  updated after changing signs in dsem)
+
+## tinyVAST 1.6.0
+
+CRAN release: 2026-05-19
 
 - Adding nearest-neighbors Gaussian Process option
 - Add tinyVASTcontrol(tmb_random) argument to allow exploration of

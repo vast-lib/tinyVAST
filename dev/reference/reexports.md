@@ -5,4 +5,8 @@ to see their documentation.
 
 - sdmTMB:
 
-  `lognormal`, `nbinom1`, `nbinom2`, `student`, `tweedie`
+  [`lognormal()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
+  [`nbinom1()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
+  [`nbinom2()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
+  [`student()`](https://sdmTMB.github.io/sdmTMB/reference/families.html),
+  [`tweedie()`](https://sdmTMB.github.io/sdmTMB/reference/families.html)
