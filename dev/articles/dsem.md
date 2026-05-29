@@ -43,7 +43,7 @@ mytiny
 #>         2:3]))
 #> 
 #> Run time: 
-#> Time difference of 0.942476 secs
+#> Time difference of 0.9746611 secs
 #> 
 #> Family: 
 #> $obs
@@ -56,43 +56,43 @@ mytiny
 #> 
 #> sdreport(.) result
 #>               Estimate   Std. Error
-#> alpha_j     3.32526197 2.483494e-01
-#> alpha_j     6.44165343 2.116035e-01
-#> beta_z      0.89304266 8.420632e-02
-#> beta_z      0.01420908 1.279150e-01
-#> beta_z     -0.13239996 3.454997e-02
-#> beta_z      0.86147627 7.107386e-02
-#> beta_z     -0.01285890 5.063467e-02
-#> beta_z      0.37727131 3.504314e-02
-#> beta_z      0.17062266 1.584742e-02
-#> log_sigma -12.62527598 2.008268e+04
-#> Maximum gradient component: 3.634186e-05 
+#> alpha_j     3.32526214 2.483494e-01
+#> alpha_j     6.44165368 2.116033e-01
+#> beta_z      0.89304279 8.420631e-02
+#> beta_z      0.01420916 1.279150e-01
+#> beta_z     -0.13239998 3.454996e-02
+#> beta_z      0.86147624 7.107380e-02
+#> beta_z     -0.01285882 5.063467e-02
+#> beta_z      0.37727137 3.504315e-02
+#> beta_z      0.17062265 1.584742e-02
+#> log_sigma -12.50889085 1.839990e+04
+#> Maximum gradient component: 4.38807e-05 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 1
 #> 
 #> spacetime_term: 
 #>   heads     to   from parameter start lag    Estimate  Std_Error    z_value
-#> 1     1 wolves wolves         1  <NA>   1  0.89304266 0.08420632 10.6054118
-#> 2     1 wolves  moose         2  <NA>   1  0.01420908 0.12791496  0.1110823
-#> 3     1  moose wolves         3  <NA>   1 -0.13239996 0.03454997 -3.8321293
-#> 4     1  moose  moose         4  <NA>   1  0.86147627 0.07107386 12.1208601
-#> 5     2  moose wolves         5  <NA>   0 -0.01285890 0.05063467 -0.2539545
-#> 6     2 wolves wolves         6  <NA>   0  0.37727131 0.03504314 10.7659099
-#> 7     2  moose  moose         7  <NA>   0  0.17062266 0.01584742 10.7665881
+#> 1     1 wolves wolves         1  <NA>   1  0.89304279 0.08420631 10.6054140
+#> 2     1 wolves  moose         2  <NA>   1  0.01420916 0.12791499  0.1110828
+#> 3     1  moose wolves         3  <NA>   1 -0.13239998 0.03454996 -3.8321309
+#> 4     1  moose  moose         4  <NA>   1  0.86147624 0.07107380 12.1208692
+#> 5     2  moose wolves         5  <NA>   0 -0.01285882 0.05063467 -0.2539528
+#> 6     2 wolves wolves         6  <NA>   0  0.37727137 0.03504315 10.7659078
+#> 7     2  moose  moose         7  <NA>   0  0.17062265 0.01584742 10.7665883
 #>        p_value
-#> 1 2.812224e-26
-#> 2 9.115511e-01
-#> 3 1.270389e-04
-#> 4 8.189516e-34
-#> 5 7.995307e-01
-#> 6 4.986648e-27
-#> 7 4.950067e-27
+#> 1 2.812157e-26
+#> 2 9.115507e-01
+#> 3 1.270381e-04
+#> 4 8.188607e-34
+#> 5 7.995320e-01
+#> 6 4.986766e-27
+#> 7 4.950052e-27
 #> 
 #> Fixed terms: 
 #>           Estimate Std_Error  z_value       p_value
-#> varwolves 3.325262 0.2483494 13.38945  6.969636e-41
-#> varmoose  6.441653 0.2116035 30.44210 1.524035e-203
+#> varwolves 3.325262 0.2483494 13.38945  6.969522e-41
+#> varmoose  6.441654 0.2116033 30.44212 1.522921e-203
 #> 
 #> Sanity check:
 
@@ -190,7 +190,7 @@ where we again inspect the estimated interaction matrix:
 | wolves |  0.896 | -0.125 |
 | moose  |  0.007 |  0.875 |
 
-Runtime for this vignette: 2.86 secs
+Runtime for this vignette: 2.92 secs
 
 ## Works cited
 

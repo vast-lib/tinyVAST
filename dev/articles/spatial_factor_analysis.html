@@ -236,7 +236,7 @@ response for each manifest variable:</p>
 <span><span class="co">#&gt;     variables = c("f1", "f2", 1:n_c), distribution_column = "dist")</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 2.156293 secs</span></span>
+<span><span class="co">#&gt; Time difference of 2.133749 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -266,7 +266,7 @@ response for each manifest variable:</p>
 <span><span class="co">#&gt; log_sigma -0.52203929 0.06761656</span></span>
 <span><span class="co">#&gt; log_sigma  0.21850709 0.13313013</span></span>
 <span><span class="co">#&gt; log_kappa -0.26762174 0.21031509</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.002544271 </span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.002544266 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
 <span><span class="co">#&gt; [1] 0.5312474</span></span>
@@ -367,7 +367,8 @@ comparison):</p>
 <code class="sourceCode R"><span><span class="co"># Extract and rotate estimated loadings</span></span>
 <span><span class="va">Lhat_cf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span> <span class="fl">0</span>, nrow<span class="op">=</span><span class="va">n_c</span>, ncol<span class="op">=</span><span class="fl">2</span> <span class="op">)</span></span>
 <span><span class="va">Lhat_cf</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">lower.tri</a></span><span class="op">(</span><span class="va">Lhat_cf</span>,diag<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">sdrep</span>, what<span class="op">=</span><span class="st">"Estimate"</span><span class="op">)</span><span class="op">$</span><span class="va">theta_z</span></span>
-<span><span class="va">Lhat_cf</span> <span class="op">=</span> <span class="fu"><a href="../reference/rotate_pca.html">rotate_pca</a></span><span class="op">(</span> L_tf<span class="op">=</span><span class="va">Lhat_cf</span>, order<span class="op">=</span><span class="st">"decreasing"</span> <span class="op">)</span><span class="op">$</span><span class="va">L_tf</span></span></code></pre></div>
+<span><span class="va">Lhat_cf</span> <span class="op">=</span> <span class="fu"><a href="../reference/rotate_pca.html">rotate_pca</a></span><span class="op">(</span> L_tf<span class="op">=</span><span class="va">Lhat_cf</span>, order<span class="op">=</span><span class="st">"decreasing"</span> <span class="op">)</span><span class="op">$</span><span class="va">L_tf</span></span>
+<span><span class="co">#&gt; Warning in sqrt(Eigen$values): NaNs produced</span></span></code></pre></div>
 <p>Where we can compared the estimated and true loadings matrices:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">Lhat_cf</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Var "</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Lhat_cf</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -450,8 +451,7 @@ variation is also captured:</p>
 <span><span class="va">Lhat_cf</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">lower.tri</a></span><span class="op">(</span><span class="va">Lhat_cf</span>,diag<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">sdrep</span>, what<span class="op">=</span><span class="st">"Estimate"</span><span class="op">)</span><span class="op">$</span><span class="va">theta_z</span></span>
 <span><span class="co">#&gt; Warning in Lhat_cf[lower.tri(Lhat_cf, diag = TRUE)] = as.list(out$sdrep, :</span></span>
 <span><span class="co">#&gt; number of items to replace is not a multiple of replacement length</span></span>
-<span><span class="va">Lhat_cf</span> <span class="op">=</span> <span class="fu"><a href="../reference/rotate_pca.html">rotate_pca</a></span><span class="op">(</span> L_tf<span class="op">=</span><span class="va">Lhat_cf</span>, order<span class="op">=</span><span class="st">"decreasing"</span> <span class="op">)</span><span class="op">$</span><span class="va">L_tf</span></span>
-<span><span class="co">#&gt; Warning in sqrt(Eigen$values): NaNs produced</span></span></code></pre></div>
+<span><span class="va">Lhat_cf</span> <span class="op">=</span> <span class="fu"><a href="../reference/rotate_pca.html">rotate_pca</a></span><span class="op">(</span> L_tf<span class="op">=</span><span class="va">Lhat_cf</span>, order<span class="op">=</span><span class="st">"decreasing"</span> <span class="op">)</span><span class="op">$</span><span class="va">L_tf</span></span></code></pre></div>
 <p>Where we can again compared the estimated and true loadings
 matrices:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -494,7 +494,7 @@ matrices:</p>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 9.39 secs</p>
+<p>Runtime for this vignette: 9.46 secs</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
