@@ -2,6 +2,7 @@
 
 * Fix AR sign in SAR example (was using negative, because I hadn't updated after changing signs in dsem)
 * Tag `weights_i` with DATA_UPDATE to explore SGD
+* Fix bug in `predict` when using `sf_areal_domain` input
 
 # tinyVAST 1.6.0
 

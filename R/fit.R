@@ -146,7 +146,7 @@
 #' @importFrom utils packageVersion capture.output
 #' @importFrom TMB MakeADFun sdreport runSymbolicAnalysis config
 #' @importFrom checkmate assertClass assertDataFrame assertNumeric assertInteger
-#' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet Diagonal
+#' @importFrom Matrix Cholesky solve Matrix diag t mat2triplet Diagonal rowSums
 #' @importFrom abind abind
 #' @importFrom insight get_response get_data
 #' @importFrom cv GetResponse cv
@@ -593,11 +593,14 @@ function( formula,
     kappa_startvalue = 1
     estimate_anisotropy = FALSE
   }else{
-    stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
+    stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, nngp_domain, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
   Atriplet = Matrix::mat2triplet(A_is)
   if( (n_s>1000) & isFALSE(control$suppress_user_warnings) ){
     warning("`spatial_domain` has over 1000 components, so the model may be extremely slow")
+  }
+  if( isFALSE(all.equal(rowSums(A_is), 1, tol = 0.01)) ){
+    stop("Some samples appear to be outside spatial domain" )
   }
 
   #

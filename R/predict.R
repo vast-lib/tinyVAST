@@ -494,34 +494,48 @@ function( object,
   W2_gl = make_spatial_varying( object$internal$delta_spatial_varying )
 
   # Assemble A_gs
-  if( is(object$spatial_domain, "fm_mesh_2d") ){
+  if( is(object$spatial_domain,"vertex_coords") ){
+    A_gs = fm_evaluator( object$spatial_domain, loc=as.matrix(newdata[,object$internal$space_columns]) )$proj$A
+  }else if( is(object$spatial_domain, "fm_mesh_2d") ){
     A_gs = fm_evaluator( object$spatial_domain, loc=as.matrix(newdata[,object$internal$space_columns]) )$proj$A
   }else if( is(object$spatial_domain, "igraph") ) {
     Match = match( newdata[,object$internal$space_columns], rownames(object$tmb_inputs$tmb_data$Adj) )
-    if(any(is.na(Match))) stop("Check `spatial_domain` for SAR")
+    if(any(is.na(Match))) stop("Check `object$spatial_domain` for SAR")
     A_gs = sparseMatrix( i=seq_len(nrow(newdata)), j=Match, x=rep(1,nrow(newdata)) )
   }else if( is(object$spatial_domain,"sfnetwork_mesh") ){      # if( !is.null(sem) )
     # stream network
     A_gs = sfnetwork_evaluator( stream = object$spatial_domain$stream,
                                 loc = as.matrix(newdata[,object$internal$space_columns]) )
-  }else if( is(object$spatial_domain, "sfc_GEOMETRY") ){
+  }else if( is_areal_sf(object$spatial_domain) ){
     sf_coords = st_as_sf( newdata,
                           coords = object$internal$space_columns,
                           crs = st_crs(object$spatial_domain) )
-    s_i = as.integer(st_within( sf_coords, object$spatial_domain ))
-    if(any(is.na(s_i))){
+    s_g = as.integer(st_within( sf_coords, object$spatial_domain ))
+    if(any(is.na(s_g))){
       stop("Some rows of `newdata` in `predict` are not within the SAR domain.
             Please exclude rows listed below or refit model with extended domain.\n",
-            paste0(which(is.na(s_i)), collapse = ", ") )
+            paste0(which(is.na(s_g)), collapse = ", ") )
     }
-    A_gs = sparseMatrix( i = seq_along(s_i),
-                         j = s_i,
+    A_gs = sparseMatrix( i = seq_along(s_g),
+                         j = s_g,
                          x = 1,
-                         dims = c(length(s_i),length(object$spatial_domain)) )
-  }else{
+                         dims = c(length(s_g),length(object$spatial_domain)) )
+  }else if( is(object$spatial_domain,"nngp_domain") ){
+    sf_coords = st_as_sf( newdatadata,
+                          coords = object$internal$space_columns,
+                          crs = st_crs(object$spatial_domain$sf_areal) )
+    s_g = as.integer(st_within( sf_coords, object$spatial_domain$sf_areal ))
+    A_gs = sparseMatrix( i = seq_along(s_g),
+                         j = s_g,
+                         x = 1,
+                         dims = c(length(s_g),length(object$spatial_domain)) )
+  }else if( is.null(object$spatial_domain) ) {
     A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
     A_gs = as(Matrix(A_gs),"CsparseMatrix")
+  }else{
+    stop("`spatial_domain` is does not match options:  class fm_mesh_2d, igraph, nngp_domain, sfnetwork_mesh, sfc_GEOMETRY, or NULL")
   }
+
   predAtriplet = Matrix::mat2triplet(A_gs)
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
