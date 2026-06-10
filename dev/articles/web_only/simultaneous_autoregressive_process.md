@@ -86,7 +86,7 @@ mytiny0 = tinyVAST(
   ) 
 )
 #> Warning: The model may not have converged. Maximum final gradient:
-#> 0.0401846865091132.
+#> 0.0402331871246707.
 
 # Summarize output
 Summary = summary(mytiny0, what="spacetime_term")
@@ -191,12 +191,12 @@ knitr::kable( Summary, digits=3)
 
 | heads | to      | from    | parameter | start | lag | Estimate | Std_Error | z_value | p_value |
 |:------|:--------|:--------|:----------|:------|:----|---------:|----------:|--------:|--------:|
-| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.510 |     0.100 |  15.022 |   0.000 |
+| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.510 |     0.101 |  15.022 |   0.000 |
 | 1     | sockeye | sockeye | 2         | NA    | 2   |   -0.510 |     0.101 |  -5.051 |   0.000 |
-| 1     | pink    | pink    | 3         | NA    | 1   |    0.006 |     0.007 |   0.888 |   0.374 |
-| 1     | pink    | pink    | 4         | NA    | 2   |    1.018 |     0.007 | 138.729 |   0.000 |
-| 1     | chum    | chum    | 5         | NA    | 1   |    1.759 |     0.073 |  24.062 |   0.000 |
-| 1     | chum    | chum    | 6         | NA    | 2   |   -0.765 |     0.073 | -10.483 |   0.000 |
+| 1     | pink    | pink    | 3         | NA    | 1   |    0.006 |     0.007 |   0.889 |   0.374 |
+| 1     | pink    | pink    | 4         | NA    | 2   |    1.018 |     0.007 | 138.731 |   0.000 |
+| 1     | chum    | chum    | 5         | NA    | 1   |    1.759 |     0.073 |  24.067 |   0.000 |
+| 1     | chum    | chum    | 6         | NA    | 2   |   -0.766 |     0.073 | -10.486 |   0.000 |
 | 2     | pink    | pink    | 7         | NA    | 0   |    0.416 |     0.036 |  11.707 |   0.000 |
 | 2     | chum    | chum    | 8         | NA    | 0   |    0.070 |     0.016 |   4.387 |   0.000 |
 | 2     | sockeye | sockeye | 9         | NA    | 0   |    0.158 |     0.027 |   5.821 |   0.000 |
@@ -235,6 +235,6 @@ ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat
 
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png)
 
-Runtime for this vignette: 21.94 secs
+Runtime for this vignette: 19.9 secs
 
 ## Works cited

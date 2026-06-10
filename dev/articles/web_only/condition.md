@@ -102,7 +102,7 @@ fit = tinyVAST( data = formed_data,
            distribution_column = "Type",
            times = 1982:2016 )
 #> Warning: The model may not have converged. Maximum final gradient:
-#> 0.0814599603559473.
+#> 0.109014212924711.
 ```
 
 We can look at structural parameters using summary functions:
@@ -112,24 +112,24 @@ We can look at structural parameters using summary functions:
 # spatial terms
 summary(fit, "space_term")
 #>   heads        to      from parameter start      Estimate   Std_Error
-#> 1     2   Biomass   Biomass         1  <NA>  1.423825e+00 0.133036075
-#> 2     2 Condition Condition         2  <NA> -3.316266e-02 0.004167561
-#> 3     1 Condition   Biomass         3  <NA>  9.444598e-05 0.004855098
+#> 1     2   Biomass   Biomass         1  <NA>  1.423927e+00 0.133056743
+#> 2     2 Condition Condition         2  <NA> -3.316122e-02 0.004167236
+#> 3     1 Condition   Biomass         3  <NA>  9.535397e-05 0.004854973
 #>       z_value      p_value
-#> 1 10.70255154 9.901357e-27
-#> 2 -7.95733097 1.757900e-15
-#> 3  0.01945295 9.844798e-01
+#> 1 10.70164927 9.998259e-27
+#> 2 -7.95760570 1.754003e-15
+#> 3  0.01964048 9.843302e-01
 
 # spatio-temporal terms
 summary(fit, "spacetime_term")
 #>   heads        to      from parameter start lag     Estimate   Std_Error
-#> 1     2   Biomass   Biomass         1  <NA>   0  0.966438656 0.024275263
-#> 2     2 Condition Condition         2  <NA>   0 -0.040541792 0.002723371
-#> 3     1 Condition   Biomass         3  <NA>   0  0.008199665 0.003339284
+#> 1     2   Biomass   Biomass         1  <NA>   0  0.966423845 0.024274590
+#> 2     2 Condition Condition         2  <NA>   0 -0.040542155 0.002723386
+#> 3     1 Condition   Biomass         3  <NA>   0  0.008199916 0.003339300
 #>      z_value      p_value
-#> 1  39.811666 0.000000e+00
-#> 2 -14.886621 4.026063e-50
-#> 3   2.455516 1.406825e-02
+#> 1  39.812160 0.000000e+00
+#> 2 -14.886672 4.022997e-50
+#> 3   2.455579 1.406577e-02
 ```
 
 ## Abundance-weighted expansion
@@ -211,7 +211,7 @@ ggplot( cond_tz ) +
 
 ![](condition_files/figure-html/condition-timeseries-1.png)
 
-Runtime for this vignette: 14.48 mins
+Runtime for this vignette: 15.04 mins
 
 #### Works cited
 
