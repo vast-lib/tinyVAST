@@ -20,11 +20,10 @@ make_dsem_ram(
 
 - dsem:
 
-  dynamic structural equation model structure, passed to either
-  [`specifyModel`](https://rdrr.io/pkg/sem/man/specifyModel.html) or
-  [`specifyEquations`](https://rdrr.io/pkg/sem/man/specifyModel.html)
-  and then parsed to control the set of path coefficients and
-  variance-covariance parameters
+  Specification for time-series structural equation model structure
+  including lagged or simultaneous effects. See Details section in
+  [`make_dsem_ram`](https://james-thorson-NOAA.github.io/dsem/reference/make_dsem_ram.html)
+  for more description
 
 - times:
 
@@ -36,17 +35,8 @@ make_dsem_ram(
 
 - covs:
 
-  optional: a character vector of one or more elements, with each
-  element giving a string of variable names, separated by commas.
-  Variances and covariances among all variables in each such string are
-  added to the model. For confirmatory factor analysis models specified
-  via `cfa`, `covs` defaults to all of the factors in the model, thus
-  specifying all variances and covariances among these factors.
-  *Warning*: `covs="x1, x2"` and `covs=c("x1", "x2")` are *not*
-  equivalent: `covs="x1, x2"` specifies the variance of `x1`, the
-  variance of `x2`, *and* their covariance, while `covs=c("x1", "x2")`
-  specifies the variance of `x1` and the variance of `x2` *but not*
-  their covariance.
+  A character vector listing variables for which to estimate a standard
+  deviation
 
 - quiet:
 

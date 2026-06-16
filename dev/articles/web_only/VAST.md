@@ -95,7 +95,7 @@ mytinyVAST
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 8.113798 secs
+#> Time difference of 7.841873 secs
 #> 
 #> Family: 
 #> $obs
@@ -115,7 +115,7 @@ mytinyVAST
 #> log_sigma -0.64811725 0.05006776
 #> log_sigma  0.01446391 0.06494065
 #> log_kappa -0.15609782 0.16446773
-#> Maximum gradient component: 0.002357413 
+#> Maximum gradient component: 0.002357296 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.4812353
@@ -191,9 +191,11 @@ We can also use the `DHARMa` package to visualize simulation residuals:
 y_ir = simulate(mytinyVAST, nsim=100, type="mle-mvn")
 
 #
-res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
-                            observedResponse = Data$n, 
-                            fittedPredictedResponse = fitted(mytinyVAST) )
+res = DHARMa::createDHARMa( 
+  simulatedResponse = y_ir, 
+  observedResponse = as.vector(Data$n), 
+  fittedPredictedResponse = fitted(mytinyVAST) 
+)
 plot(res)
 ```
 
@@ -323,7 +325,7 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 | run times (sec.).tinyVAST | run times (sec.).VAST | run times (sec.).sdmTMB |
 |:--------------------------|:----------------------|:------------------------|
-| 8.1 secs                  | NA                    | 10.4 secs               |
+| 7.8 secs                  | NA                    | 10 secs                 |
 
 ### Delta models
 
@@ -350,7 +352,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 7.842909 secs
+#> Time difference of 7.829035 secs
 #> 
 #> Family: 
 #> $obs
@@ -508,7 +510,7 @@ out
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 28.59841 secs
+#> Time difference of 28.41411 secs
 #> 
 #> Family: 
 #> $obs

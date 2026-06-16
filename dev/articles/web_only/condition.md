@@ -110,24 +110,24 @@ We can look at structural parameters using summary functions:
 # spatial terms
 summary(fit, "space_term")
 #>   heads        to      from parameter start      Estimate   Std_Error
-#> 1     2   Biomass   Biomass         1  <NA>  1.423834e+00 0.133037936
-#> 2     2 Condition Condition         2  <NA> -3.316317e-02 0.004167696
-#> 3     1 Condition   Biomass         3  <NA>  9.397253e-05 0.004855141
+#> 1     2   Biomass   Biomass         1  <NA>  1.423829e+00 0.133036913
+#> 2     2 Condition Condition         2  <NA> -3.316326e-02 0.004167716
+#> 3     1 Condition   Biomass         3  <NA>  9.393485e-05 0.004855149
 #>       z_value      p_value
-#> 1 10.70246851 9.910236e-27
-#> 2 -7.95719520 1.759830e-15
-#> 3  0.01935526 9.845577e-01
+#> 1 10.70251335 9.905440e-27
+#> 2 -7.95717884 1.760062e-15
+#> 3  0.01934747 9.845639e-01
 
 # spatio-temporal terms
 summary(fit, "spacetime_term")
 #>   heads        to      from parameter start lag     Estimate   Std_Error
-#> 1     2   Biomass   Biomass         1  <NA>   0  0.966441615 0.024275387
-#> 2     2 Condition Condition         2  <NA>   0 -0.040542600 0.002723426
-#> 3     1 Condition   Biomass         3  <NA>   0  0.008199636 0.003339309
+#> 1     2   Biomass   Biomass         1  <NA>   0  0.966442228 0.024275412
+#> 2     2 Condition Condition         2  <NA>   0 -0.040542597 0.002723426
+#> 3     1 Condition   Biomass         3  <NA>   0  0.008199615 0.003339308
 #>      z_value      p_value
-#> 1  39.811585 0.000000e+00
-#> 2 -14.886617 4.026341e-50
-#> 3   2.455489 1.406930e-02
+#> 1  39.811569 0.000000e+00
+#> 2 -14.886616 4.026394e-50
+#> 3   2.455483 1.406954e-02
 ```
 
 ## Abundance-weighted expansion
@@ -209,7 +209,7 @@ ggplot( cond_tz ) +
 
 ![](condition_files/figure-html/condition-timeseries-1.png)
 
-Runtime for this vignette: 14.18 mins
+Runtime for this vignette: 14.2 mins
 
 #### Works cited
 

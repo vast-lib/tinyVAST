@@ -73,10 +73,9 @@
 
 
 <dl><dt id="arg-dsem">dsem<a class="anchor" aria-label="anchor" href="#arg-dsem"></a></dt>
-<dd><p>dynamic structural equation model structure,
-passed to either <code><a href="https://rdrr.io/pkg/sem/man/specifyModel.html" class="external-link">specifyModel</a></code>
-or <code><a href="https://rdrr.io/pkg/sem/man/specifyModel.html" class="external-link">specifyEquations</a></code> and then parsed to control
-the set of path coefficients and variance-covariance parameters</p></dd>
+<dd><p>Specification for time-series structural equation model structure
+including lagged or simultaneous effects.  See Details section in
+<code><a href="https://james-thorson-NOAA.github.io/dsem/reference/make_dsem_ram.html" class="external-link">make_dsem_ram</a></code> for more description</p></dd>
 
 
 <dt id="arg-times">times<a class="anchor" aria-label="anchor" href="#arg-times"></a></dt>
@@ -88,15 +87,7 @@ the set of path coefficients and variance-covariance parameters</p></dd>
 
 
 <dt id="arg-covs">covs<a class="anchor" aria-label="anchor" href="#arg-covs"></a></dt>
-<dd><p>optional: a character vector of one or more elements, with each element
-  	giving a string of variable names, separated by commas. Variances and covariances
-  	among all variables in each such string are added to the model. For confirmatory
-  	factor analysis models specified via <code>cfa</code>, <code>covs</code> defaults to all of
-  	the factors in the model, thus specifying all variances and covariances among these factors.
-  	<em>Warning</em>: <code>covs="x1, x2"</code> and <code>covs=c("x1", "x2")</code> are <em>not</em>
-  	equivalent: <code>covs="x1, x2"</code> specifies the variance of <code>x1</code>, the variance
-  	of <code>x2</code>, <em>and</em> their covariance, while <code>covs=c("x1", "x2")</code> specifies
-  	the variance of <code>x1</code> and the variance of <code>x2</code> <em>but not</em> their covariance.</p></dd>
+<dd><p>A character vector listing variables for which to estimate a standard deviation</p></dd>
 
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>

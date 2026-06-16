@@ -56,6 +56,8 @@
 <ul><li>Fix AR sign in SAR example (was using negative, because I hadn’t updated after changing signs in dsem)</li>
 <li>Tag <code>weights_i</code> with DATA_UPDATE to explore SGD</li>
 <li>Fix bug in <code>predict</code> when using <code>sf_areal_domain</code> input</li>
+<li>Add error when <code>rowSums(A_is)!=1</code> (i.e., samples are outside domain) and warning when <code>rowSums(A_gs)!=1</code> (i.e., predictions are outside domain)</li>
+<li>Add <code>sem_imports.R</code> to avoid listing sem in IMPORTS (allowed given that sem has GPL-3 licence), and based on prior email.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.0" id="tinyvast-160">tinyVAST 1.6.0<a class="anchor" aria-label="anchor" href="#tinyvast-160"></a></h2><p class="text-muted">CRAN release: 2026-05-19</p>
