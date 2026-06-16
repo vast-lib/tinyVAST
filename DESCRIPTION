@@ -31,7 +31,6 @@ Imports:
     methods,
     utils,
     mgcv,
-    sem,
     sf,
     sfnetworks,
     TMB (>= 1.9.17),
