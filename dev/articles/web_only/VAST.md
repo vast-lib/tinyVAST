@@ -95,7 +95,7 @@ mytinyVAST
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 9.111298 secs
+#> Time difference of 8.113798 secs
 #> 
 #> Family: 
 #> $obs
@@ -115,7 +115,7 @@ mytinyVAST
 #> log_sigma -0.64811725 0.05006776
 #> log_sigma  0.01446391 0.06494065
 #> log_kappa -0.15609782 0.16446773
-#> Maximum gradient component: 0.002357261 
+#> Maximum gradient component: 0.002357413 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.4812353
@@ -323,7 +323,7 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 | run times (sec.).tinyVAST | run times (sec.).VAST | run times (sec.).sdmTMB |
 |:--------------------------|:----------------------|:------------------------|
-| 9.1 secs                  | NA                    | 13.2 secs               |
+| 8.1 secs                  | NA                    | 10.4 secs               |
 
 ### Delta models
 
@@ -350,7 +350,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 8.542231 secs
+#> Time difference of 7.842909 secs
 #> 
 #> Family: 
 #> $obs
@@ -508,7 +508,7 @@ out
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 31.87956 secs
+#> Time difference of 28.59841 secs
 #> 
 #> Family: 
 #> $obs

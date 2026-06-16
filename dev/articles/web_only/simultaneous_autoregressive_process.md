@@ -86,7 +86,7 @@ mytiny0 = tinyVAST(
   ) 
 )
 #> Warning: The model may not have converged. Maximum final gradient:
-#> 0.0402331871246707.
+#> 0.0401879623199238.
 
 # Summarize output
 Summary = summary(mytiny0, what="spacetime_term")
@@ -235,6 +235,6 @@ ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat
 
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png)
 
-Runtime for this vignette: 19.9 secs
+Runtime for this vignette: 19.04 secs
 
 ## Works cited
