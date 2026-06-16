@@ -39,7 +39,7 @@ Imports:
     checkmate,
     abind,
     sdmTMB,
-    dsem (>= 1.6.0),
+    dsem (>= 3.0.0),
     insight,
     cv,
     sparseinv,
