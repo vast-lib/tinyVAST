@@ -240,3 +240,33 @@ function ( model, warn = TRUE)
 
 strip.white <- function (x)
 gsub(" ", "", x)
+
+classifyVariables <- function (model)
+{
+    variables <- logical(0)
+    for (paths in model[, 1]) {
+        vars <- strip.white(paths)
+        vars <- sub("-*>", "->", sub("<-*", "<-", vars))
+        if (grepl("<->", vars)) {
+            vars <- strsplit(vars, "<->")[[1]]
+            if (is.na(variables[vars[1]]))
+                variables[vars[1]] <- FALSE
+            if (is.na(variables[vars[2]]))
+                variables[vars[2]] <- FALSE
+        }
+        else if (grepl("->", vars)) {
+            vars <- strsplit(vars, "->")[[1]]
+            if (is.na(variables[vars[1]]))
+                variables[vars[1]] <- FALSE
+            variables[vars[2]] <- TRUE
+        }
+        else if (grepl("<-", vars)) {
+            vars <- strsplit(vars, "<-")[[1]]
+            if (is.na(variables[vars[2]]))
+                variables[vars[2]] <- FALSE
+            variables[vars[1]] <- TRUE
+        }
+        else stop("incorrectly specified model")
+    }
+    list(endogenous = names(variables[variables]), exogenous = names(variables[!variables]))
+}
