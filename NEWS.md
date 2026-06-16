@@ -3,6 +3,8 @@
 * Fix AR sign in SAR example (was using negative, because I hadn't updated after changing signs in dsem)
 * Tag `weights_i` with DATA_UPDATE to explore SGD
 * Fix bug in `predict` when using `sf_areal_domain` input
+* Add error when `rowSums(A_is)!=1` (i.e., samples are outside domain) and warning when `rowSums(A_gs)!=1`
+  (i.e., predictions are outside domain)
 
 # tinyVAST 1.6.0
 
