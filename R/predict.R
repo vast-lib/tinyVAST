@@ -537,6 +537,9 @@ function( object,
   }
 
   predAtriplet = Matrix::mat2triplet(A_gs)
+  if( isFALSE(all.equal(rowSums(A_gs), 1, tol = 0.01)) ){
+    warning("Some predictions appear to be outside spatial domain" )
+  }
 
   # Turn of t_i and c_i when times and variables are missing, so that delta_k isn't built
   if( length(object$internal$times) > 0 ){
