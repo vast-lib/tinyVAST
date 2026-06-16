@@ -136,7 +136,6 @@
 #'   for any term where it is not being used.
 #'
 #' @importFrom igraph as_adjacency_matrix ecount
-#' @importFrom sem specifyModel specifyEquations
 #' @importFrom corpcor pseudoinverse
 #' @importFrom methods is as
 #' @importFrom fmesher fm_evaluator fm_mesh_2d fm_fem
