@@ -155,9 +155,11 @@ We can also use the `DHARMa` package to visualize simulation residuals:
 y_ir = simulate(mytinyVAST, nsim=100, type="mle-mvn")
 
 #
-res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
-                            observedResponse = Data$n, 
-                            fittedPredictedResponse = fitted(mytinyVAST) )
+res = DHARMa::createDHARMa( 
+  simulatedResponse = y_ir, 
+  observedResponse = as.vector(Data$n), 
+  fittedPredictedResponse = fitted(mytinyVAST) 
+)
 plot(res)
 ```
 
