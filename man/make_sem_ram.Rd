@@ -7,24 +7,15 @@
 make_sem_ram(sem, variables, quiet = FALSE, covs = variables)
 }
 \arguments{
-\item{sem}{structural equation model structure, passed to either \code{\link[sem]{specifyModel}}
-or \code{\link[sem]{specifyEquations}} and then parsed to control
+\item{sem}{structural equation model structure, passed to either \code{specifyModel}
+or \code{specifyEquations} and then parsed to control
 the set of path coefficients and variance-covariance parameters}
 
 \item{variables}{A character vector listing the set of variables}
 
-\item{quiet}{if \code{FALSE}, the default, then the number of input lines is reported and
-    a message is printed suggesting that \code{specifyEquations} or \code{cfa} be used.}
+\item{quiet}{Boolean indicating whether to print messages to terminal}
 
-\item{covs}{optional: a character vector of one or more elements, with each element
-  	giving a string of variable names, separated by commas. Variances and covariances
-  	among all variables in each such string are added to the model. For confirmatory
-  	factor analysis models specified via \code{cfa}, \code{covs} defaults to all of
-  	the factors in the model, thus specifying all variances and covariances among these factors.
-  	\emph{Warning}: \code{covs="x1, x2"} and \code{covs=c("x1", "x2")} are \emph{not}
-  	equivalent: \code{covs="x1, x2"} specifies the variance of \code{x1}, the variance
-  	of \code{x2}, \emph{and} their covariance, while \code{covs=c("x1", "x2")} specifies
-  	the variance of \code{x1} and the variance of \code{x2} \emph{but not} their covariance.}
+\item{covs}{A character vector listing variables for which to estimate a standard deviation}
 }
 \value{
 An S3-class \code{"sem_ram"} containing:

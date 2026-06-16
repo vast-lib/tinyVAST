@@ -2,12 +2,12 @@
 #'
 #' @description \code{make_sem_ram} converts SEM arrow notation to \code{ram} describing SEM parameters
 #'
-#' @param sem structural equation model structure, passed to either \code{\link[sem]{specifyModel}}
-#'        or \code{\link[sem]{specifyEquations}} and then parsed to control
+#' @param sem structural equation model structure, passed to either \code{specifyModel}
+#'        or \code{specifyEquations} and then parsed to control
 #'        the set of path coefficients and variance-covariance parameters
 #' @param variables A character vector listing the set of variables
 #'
-#' @inheritParams sem::specifyModel
+#' @inheritParams make_dsem_ram
 #'
 #' @return An S3-class \code{"sem_ram"} containing:
 #' \describe{
@@ -35,7 +35,7 @@ function( sem,
     )
   }
   if( isFALSE("semmod" %in% class(model)) ){
-    stop("Must supply either input for `sem::specifyModel` or `sem::specifyEquations`")
+    stop("Must supply either input for `specifyModel` or `specifyEquations`")
   }
 
   #vars = sapply( vars, FUN=function(char){gsub("-", "", gsub(" ", "", char))} )

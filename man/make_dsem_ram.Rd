@@ -14,24 +14,15 @@ make_dsem_ram(
 )
 }
 \arguments{
-\item{dsem}{dynamic structural equation model structure,
-passed to either \code{\link[sem]{specifyModel}}
-or \code{\link[sem]{specifyEquations}} and then parsed to control
-the set of path coefficients and variance-covariance parameters}
+\item{dsem}{Specification for time-series structural equation model structure
+including lagged or simultaneous effects.  See Details section in
+\code{\link[dsem]{make_dsem_ram}} for more description}
 
 \item{times}{A character vector listing the set of times in order}
 
 \item{variables}{A character vector listing the set of variables}
 
-\item{covs}{optional: a character vector of one or more elements, with each element
-  	giving a string of variable names, separated by commas. Variances and covariances
-  	among all variables in each such string are added to the model. For confirmatory
-  	factor analysis models specified via \code{cfa}, \code{covs} defaults to all of
-  	the factors in the model, thus specifying all variances and covariances among these factors.
-  	\emph{Warning}: \code{covs="x1, x2"} and \code{covs=c("x1", "x2")} are \emph{not}
-  	equivalent: \code{covs="x1, x2"} specifies the variance of \code{x1}, the variance
-  	of \code{x2}, \emph{and} their covariance, while \code{covs=c("x1", "x2")} specifies
-  	the variance of \code{x1} and the variance of \code{x2} \emph{but not} their covariance.}
+\item{covs}{A character vector listing variables for which to estimate a standard deviation}
 
 \item{quiet}{Boolean indicating whether to print messages to terminal}
 

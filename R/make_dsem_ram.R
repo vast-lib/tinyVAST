@@ -1,17 +1,14 @@
 #' @title Make a RAM (Reticular Action Model)
 #'
-#' @inheritParams tinyVAST
-#' @inheritParams sem::specifyModel
-#'
 #' @description \code{make_dsem_ram} converts SEM arrow notation to \code{ram} describing SEM parameters
 #'
-#' @param dsem dynamic structural equation model structure,
-#'        passed to either \code{\link[sem]{specifyModel}}
-#'        or \code{\link[sem]{specifyEquations}} and then parsed to control
-#'        the set of path coefficients and variance-covariance parameters
+#' @param dsem Specification for time-series structural equation model structure
+#'        including lagged or simultaneous effects.  See Details section in
+#'        \code{\link[dsem]{make_dsem_ram}} for more description
 #' @param times A character vector listing the set of times in order
 #' @param variables A character vector listing the set of variables
 #' @param quiet Boolean indicating whether to print messages to terminal
+#' @param covs A character vector listing variables for which to estimate a standard deviation
 #' @param remove_na Boolean indicating whether to remove NA values from RAM (default) or not.
 #'            \code{remove_NA=FALSE} might be useful for exploration and diagnostics for
 #'            advanced users
