@@ -156,7 +156,7 @@ y_ir = simulate(mytinyVAST, nsim=100, type="mle-mvn")
 
 #
 res = DHARMa::createDHARMa( 
-  simulatedResponse = y_ir, 
+  simulatedResponse = as.matrix(y_ir), 
   observedResponse = as.vector(Data$n), 
   fittedPredictedResponse = fitted(mytinyVAST) 
 )
@@ -288,9 +288,10 @@ And we can again use the `DHARMa` package [@hartig_dharma_2017] to visualize con
 y_ir = simulate(mydelta2, nsim=100, type="mle-mvn")
 
 # Visualize using DHARMa
-res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
-                            observedResponse = Data$n, 
-                            fittedPredictedResponse = fitted(mydelta2) )
+res = DHARMa::createDHARMa( 
+  simulatedResponse = as.matrix(y_ir), 
+  observedResponse = as.vector(Data$n), 
+  fittedPredictedResponse = fitted(mydelta2) )
 plot(res)
 ```
 
@@ -417,5 +418,11 @@ ggplot(Index, aes( time, Estimate )) +
   geom_point( aes(x=time, y=Estimate), color = "black") +
   geom_point( aes(x=time, y=True), color = "red" )
 ```
+
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+run_time = Sys.time() - start_time
+```
+Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
 
 # Works cited
