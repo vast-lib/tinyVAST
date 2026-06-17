@@ -420,9 +420,4 @@ ggplot(Index, aes( time, Estimate )) +
 ```
 
 
-```{r, include = FALSE, warning=FALSE, message=FALSE}
-run_time = Sys.time() - start_time
-```
-Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
-
 # Works cited
