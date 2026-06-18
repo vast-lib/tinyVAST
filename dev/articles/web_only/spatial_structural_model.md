@@ -184,7 +184,7 @@ plot.igraph(
 
 ![](spatial_structural_model_files/figure-html/unnamed-chunk-7-1.png)
 
-Runtime for this vignette: 4.27 mins
+Runtime for this vignette: 4.49 mins
 
 ## Works cited
 

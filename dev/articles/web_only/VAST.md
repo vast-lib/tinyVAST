@@ -95,7 +95,7 @@ mytinyVAST
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 7.841873 secs
+#> Time difference of 7.910192 secs
 #> 
 #> Family: 
 #> $obs
@@ -115,7 +115,7 @@ mytinyVAST
 #> log_sigma -0.64811725 0.05006776
 #> log_sigma  0.01446391 0.06494065
 #> log_kappa -0.15609782 0.16446773
-#> Maximum gradient component: 0.002357296 
+#> Maximum gradient component: 0.002357342 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.4812353
@@ -192,7 +192,7 @@ y_ir = simulate(mytinyVAST, nsim=100, type="mle-mvn")
 
 #
 res = DHARMa::createDHARMa( 
-  simulatedResponse = y_ir, 
+  simulatedResponse = as.matrix(y_ir), 
   observedResponse = as.vector(Data$n), 
   fittedPredictedResponse = fitted(mytinyVAST) 
 )
@@ -325,7 +325,7 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 | run times (sec.).tinyVAST | run times (sec.).VAST | run times (sec.).sdmTMB |
 |:--------------------------|:----------------------|:------------------------|
-| 7.8 secs                  | NA                    | 10 secs                 |
+| 7.9 secs                  | NA                    | 10.4 secs               |
 
 ### Delta models
 
@@ -352,7 +352,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 7.829035 secs
+#> Time difference of 8.094309 secs
 #> 
 #> Family: 
 #> $obs
@@ -410,9 +410,10 @@ Smyth 1996):
 y_ir = simulate(mydelta2, nsim=100, type="mle-mvn")
 
 # Visualize using DHARMa
-res = DHARMa::createDHARMa( simulatedResponse = y_ir, 
-                            observedResponse = Data$n, 
-                            fittedPredictedResponse = fitted(mydelta2) )
+res = DHARMa::createDHARMa( 
+  simulatedResponse = as.matrix(y_ir), 
+  observedResponse = as.vector(Data$n), 
+  fittedPredictedResponse = fitted(mydelta2) )
 plot(res)
 ```
 
@@ -503,14 +504,14 @@ out = tinyVAST( spacetime_term = dsem,
            spatial_domain = mesh,
            family = tweedie() )
 #> Warning: The model may not have converged. Maximum final gradient:
-#> 0.0108454520027217.
+#> 0.010846328598201.
 out
 #> Call: 
 #> tinyVAST(formula = n ~ 0 + var, data = Data, spacetime_term = dsem, 
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 28.41411 secs
+#> Time difference of 29.07261 secs
 #> 
 #> Family: 
 #> $obs
@@ -523,41 +524,41 @@ out
 #> 
 #> sdreport(.) result
 #>               Estimate Std. Error
-#> alpha_j    0.090202972 0.11486664
-#> alpha_j   -0.099500543 0.10318987
-#> beta_z     0.553897574 0.07628808
-#> beta_z     0.536424135 0.07383380
-#> beta_z    -0.225705468 0.07606824
-#> beta_z    -0.070945619 0.06259109
-#> beta_z     0.336688287 0.01863795
+#> alpha_j    0.090203010 0.11486666
+#> alpha_j   -0.099500586 0.10318985
+#> beta_z     0.553897737 0.07628806
+#> beta_z     0.536424060 0.07383380
+#> beta_z    -0.225705336 0.07606823
+#> beta_z    -0.070945619 0.06259108
+#> beta_z     0.336688294 0.01863795
 #> log_sigma -0.696754577 0.02881155
-#> log_sigma -0.005321747 0.05462454
-#> log_kappa -0.635425859 0.10547174
-#> Maximum gradient component: 0.01084545 
+#> log_sigma -0.005321716 0.05462454
+#> log_kappa -0.635425830 0.10547175
+#> Maximum gradient component: 0.01084633 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.4057952
 #> 
 #> spacetime_term: 
 #>   heads to from parameter start lag    Estimate  Std_Error   z_value
-#> 1     1 d1   d1         1  <NA>   1  0.55389757 0.07628808  7.260605
-#> 2     1 d2   d2         2  <NA>   1  0.53642413 0.07383380  7.265293
-#> 3     1 d1   d2         3  <NA>   1 -0.22570547 0.07606824 -2.967144
-#> 4     1 d2   d1         4  <NA>   1 -0.07094562 0.06259109 -1.133478
+#> 1     1 d1   d1         1  <NA>   1  0.55389774 0.07628806  7.260608
+#> 2     1 d2   d2         2  <NA>   1  0.53642406 0.07383380  7.265291
+#> 3     1 d1   d2         3  <NA>   1 -0.22570534 0.07606823 -2.967143
+#> 4     1 d2   d1         4  <NA>   1 -0.07094562 0.06259108 -1.133478
 #> 5     2 d1   d1         5  <NA>   0  0.33668829 0.01863795 18.064666
 #> 6     2 d2   d2         5  <NA>   0  0.33668829 0.01863795 18.064666
 #>        p_value
-#> 1 3.853638e-13
-#> 2 3.722319e-13
-#> 3 3.005797e-03
-#> 4 2.570136e-01
-#> 5 6.048655e-73
-#> 6 6.048655e-73
+#> 1 3.853539e-13
+#> 2 3.722367e-13
+#> 3 3.005810e-03
+#> 4 2.570135e-01
+#> 5 6.048662e-73
+#> 6 6.048662e-73
 #> 
 #> Fixed terms: 
 #>          Estimate Std_Error    z_value   p_value
-#> vard1  0.09020297 0.1148666  0.7852844 0.4322869
-#> vard2 -0.09950054 0.1031899 -0.9642472 0.3349220
+#> vard1  0.09020301 0.1148667  0.7852846 0.4322868
+#> vard2 -0.09950059 0.1031899 -0.9642478 0.3349217
 #> 
 #> Sanity check: 
 #> 
