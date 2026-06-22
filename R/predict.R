@@ -123,7 +123,9 @@ function( object,
 #'        into one or more derived quantities.  This can be used to compute area-expanded
 #'        indices for more than one year or category using a single call, and might be
 #'        substantially faster for large models (because it avoids extra model builds
-#'        for each derived quantity)
+#'        for each derived quantity).  Note that the output will have as many rows
+#'        as the highest value of \code{block}, and NAs for rows where \code{block}
+#'        does not contain that integer.
 #' @param type Integer-vector indicating what type of expansion to apply to
 #'        each row of `newdata`, with length of \code{nrow(newdata)}.  
 #' \describe{
@@ -376,6 +378,12 @@ function( object,
     out = data.frame( "Estimate"=rep$Metric, "Std. Error"=NA, "Est. (bias.correct)"=NA, "Std. (bias.correct)"=NA )
   }
   
+  # Replace missing levels of block with NAs
+  which_missing = which(table(factor(block,levels = seq_len(max(block)))) == 0)
+  if(length(which_missing)>0){
+    out[which_missing,] = NA
+  }
+
   # deal with memory internally
   remove("newobj")
   gc() 
