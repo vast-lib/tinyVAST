@@ -76,3 +76,7 @@ fit = tinyVAST(
 )
 
 predict(fit)
+cbind(
+  predict(fit, what = "pomega1_g"),
+  omega_i
+)
