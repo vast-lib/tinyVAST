@@ -521,10 +521,15 @@ function( object,
                          x = 1,
                          dims = c(length(s_g),length(object$spatial_domain)) )
   }else if( is(object$spatial_domain,"nngp_domain") ){
-    sf_coords = st_as_sf( newdatadata,
+    sf_coords = st_as_sf( newdata,
                           coords = object$internal$space_columns,
                           crs = st_crs(object$spatial_domain$sf_areal) )
     s_g = as.integer(st_within( sf_coords, object$spatial_domain$sf_areal ))
+    if(any(is.na(s_g))){
+      stop("Some rows of `newdata` in `predict` are not within the NNGP domain.
+            Please exclude rows listed below or refit model with extended domain.\n",
+            paste0(which(is.na(s_g)), collapse = ", ") )
+    }
     A_gs = sparseMatrix( i = seq_along(s_g),
                          j = s_g,
                          x = 1,
