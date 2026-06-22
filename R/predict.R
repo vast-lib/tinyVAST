@@ -533,7 +533,7 @@ function( object,
     A_gs = sparseMatrix( i = seq_along(s_g),
                          j = s_g,
                          x = 1,
-                         dims = c(length(s_g),length(object$spatial_domain)) )
+                         dims = c(length(s_g),length(object$spatial_domain$sf_areal)) )
   }else if( is.null(object$spatial_domain) ) {
     A_gs = matrix(1, nrow=nrow(newdata), ncol=1)    # dgCMatrix
     A_gs = as(Matrix(A_gs),"CsparseMatrix")

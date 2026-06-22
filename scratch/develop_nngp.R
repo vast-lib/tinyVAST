@@ -6,6 +6,12 @@ if( FALSE ){
   TMB::compile('tinyVAST.cpp', framework = "TMBad")
 }
 
+# Test compile on dev brancy
+if( FALSE ){
+  remotes::install_github("vast-lib/tinyVAST@dev")
+  packageVersion("tinyVAST")
+}
+
 # Document
 if( FALSE ){
   setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
@@ -69,4 +75,4 @@ fit = tinyVAST(
   )
 )
 
-
+predict(fit)
