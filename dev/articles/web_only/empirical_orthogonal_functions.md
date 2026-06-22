@@ -68,6 +68,8 @@ out = tinyVAST( spacetime_term = dsem,
 #> Warning in tinyVAST(spacetime_term = dsem, space_term = "", data =
 #> as.data.frame(Data), : `spatial_domain` has over 1000 components, so the model
 #> may be extremely slow
+#> Warning: The model may not have converged. Maximum final gradient:
+#> 0.015393535938708.
 ```
 
 Finally, we can extract, rotate, and plot the dominant modes of
@@ -131,7 +133,7 @@ matplot( y=L_tf, x=unique(Data$year), type="l",
 
 ![](empirical_orthogonal_functions_files/figure-html/EOF-1.png)
 
-Runtime for this vignette: 4.63 mins
+Runtime for this vignette: 4.59 mins
 
 #### Works cited
 

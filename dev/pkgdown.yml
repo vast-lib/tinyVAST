@@ -19,7 +19,7 @@ articles:
   spatial: spatial.html
   web_only/stream_networks: web_only/stream_networks.html
   web_only/VAST: web_only/VAST.html
-last_built: 2026-06-17T22:36Z
+last_built: 2026-06-22T13:26Z
 urls:
   reference: https://vast-lib.github.io/tinyVAST/reference
   article: https://vast-lib.github.io/tinyVAST/articles
