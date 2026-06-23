@@ -208,3 +208,86 @@ standard-error, whereas using `apply.epsilon=TRUE` and `intern=TRUE`
 will not.
 
 ## Examples
+
+``` r
+# Settings
+ set.seed(123)
+ n_sampled = 50
+ samples_per_site = 3
+ n_extra = 50
+
+# Simulate densities and lognormal samples
+ s_i = rep( seq_len(n_sampled), each = samples_per_site )
+ x_s = exp( 1 + rnorm( n_sampled + n_extra ))
+ y_i = exp( rnorm(n_sampled * samples_per_site, mean = log(x_s[s_i]), sd = 0.5 ) )
+ data = data.frame( y = y_i, s = s_i )
+
+# Make spatial graph of all sites
+ library(igraph)
+#> 
+#> Attaching package: ‘igraph’
+#> The following objects are masked from ‘package:stats’:
+#> 
+#>     decompose, spectrum
+#> The following object is masked from ‘package:base’:
+#> 
+#>     union
+ unconnected_graph = make_empty_graph( n_sampled + n_extra )
+ V(unconnected_graph)$name = as.character(seq_len(n_sampled + n_extra))
+
+# Fit in tinyVAST
+ fit = tinyVAST(
+   data = data,
+   formula = y ~ 1,
+   spatial_domain = unconnected_graph,
+   space_column = "s",
+   family = lognormal("log"),
+   space_term = "response <-> response, spatial_sd"
+ )
+
+# Sample densities
+ domain_df = data.frame(s = as.character(seq_len(n_sampled + n_extra)))
+ samples = sample_variable(
+   fit,
+   newdata = domain_df,
+   n_samples = 1000,
+   sample_fixed = FALSE,
+   variable_name = "mu_g"
+ )
+#> # Obtaining samples from predictive distribution for variable mu_g
+#>   Finished sample 100 of 1000
+#>   Finished sample 200 of 1000
+#>   Finished sample 300 of 1000
+#>   Finished sample 400 of 1000
+#>   Finished sample 500 of 1000
+#>   Finished sample 600 of 1000
+#>   Finished sample 700 of 1000
+#>   Finished sample 800 of 1000
+#>   Finished sample 900 of 1000
+#>   Finished sample 1000 of 1000
+
+# Estimate total
+# Note that bias-corrected estimator matches True and sample-based estimator
+ total = integrate_output(
+   fit,
+   newdata = domain_df
+ )
+
+# Compare these options
+ c( True = sum(x_s), Sampled = mean(colSums(samples)), total )
+#>                True             Sampled            Estimate          Std. Error 
+#>           449.20844           469.35138           379.43103            33.89539 
+#> Est. (bias.correct) Std. (bias.correct) 
+#>           452.91075                  NA 
+
+# Calculate effective area occupied from samples
+ numerator = colSums(samples)
+ denominator = apply( samples, MARGIN = 2, FUN = \(x) weighted.mean(x=x, w=x) )
+ c(
+   Estimate = mean( numerator / denominator ),
+   SD = sd( numerator / denominator ),
+   True = sum(x_s) / weighted.mean(x_s, w = x_s)
+ )
+#>  Estimate        SD      True 
+#> 47.208213  6.572453 48.191013 
+```

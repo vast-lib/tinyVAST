@@ -248,7 +248,88 @@ will still calculate the standard-error, whereas using
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Settings</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">n_sampled</span> <span class="op">=</span> <span class="fl">50</span></span></span>
+<span class="r-in"><span> <span class="va">samples_per_site</span> <span class="op">=</span> <span class="fl">3</span></span></span>
+<span class="r-in"><span> <span class="va">n_extra</span> <span class="op">=</span> <span class="fl">50</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simulate densities and lognormal samples</span></span></span>
+<span class="r-in"><span> <span class="va">s_i</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sampled</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">samples_per_site</span> <span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">x_s</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span> <span class="fl">1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span> <span class="va">n_sampled</span> <span class="op">+</span> <span class="va">n_extra</span> <span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">y_i</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_sampled</span> <span class="op">*</span> <span class="va">samples_per_site</span>, mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x_s</span><span class="op">[</span><span class="va">s_i</span><span class="op">]</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fl">0.5</span> <span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> y <span class="op">=</span> <span class="va">y_i</span>, s <span class="op">=</span> <span class="va">s_i</span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Make spatial graph of all sites</span></span></span>
+<span class="r-in"><span> <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘igraph’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:stats’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     decompose, spectrum</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following object is masked from ‘package:base’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     union</span>
+<span class="r-in"><span> <span class="va">unconnected_graph</span> <span class="op">=</span> <span class="fu"><a href="https://r.igraph.org/reference/make_empty_graph.html" class="external-link">make_empty_graph</a></span><span class="op">(</span> <span class="va">n_sampled</span> <span class="op">+</span> <span class="va">n_extra</span> <span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="https://r.igraph.org/reference/V.html" class="external-link">V</a></span><span class="op">(</span><span class="va">unconnected_graph</span><span class="op">)</span><span class="op">$</span><span class="va">name</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sampled</span> <span class="op">+</span> <span class="va">n_extra</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Fit in tinyVAST</span></span></span>
+<span class="r-in"><span> <span class="va">fit</span> <span class="op">=</span> <span class="fu"><a href="tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>   data <span class="op">=</span> <span class="va">data</span>,</span></span>
+<span class="r-in"><span>   formula <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>   spatial_domain <span class="op">=</span> <span class="va">unconnected_graph</span>,</span></span>
+<span class="r-in"><span>   space_column <span class="op">=</span> <span class="st">"s"</span>,</span></span>
+<span class="r-in"><span>   family <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="st">"log"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>   space_term <span class="op">=</span> <span class="st">"response &lt;-&gt; response, spatial_sd"</span></span></span>
+<span class="r-in"><span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Sample densities</span></span></span>
+<span class="r-in"><span> <span class="va">domain_df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sampled</span> <span class="op">+</span> <span class="va">n_extra</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">samples</span> <span class="op">=</span> <span class="fu"><a href="sample_variable.html">sample_variable</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>   <span class="va">fit</span>,</span></span>
+<span class="r-in"><span>   newdata <span class="op">=</span> <span class="va">domain_df</span>,</span></span>
+<span class="r-in"><span>   n_samples <span class="op">=</span> <span class="fl">1000</span>,</span></span>
+<span class="r-in"><span>   sample_fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>   variable_name <span class="op">=</span> <span class="st">"mu_g"</span></span></span>
+<span class="r-in"><span> <span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> # Obtaining samples from predictive distribution for variable mu_g</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 100 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 200 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 300 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 400 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 500 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 600 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 700 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 800 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 900 of 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Finished sample 1000 of 1000</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Estimate total</span></span></span>
+<span class="r-in"><span><span class="co"># Note that bias-corrected estimator matches True and sample-based estimator</span></span></span>
+<span class="r-in"><span> <span class="va">total</span> <span class="op">=</span> <span class="fu">integrate_output</span><span class="op">(</span></span></span>
+<span class="r-in"><span>   <span class="va">fit</span>,</span></span>
+<span class="r-in"><span>   newdata <span class="op">=</span> <span class="va">domain_df</span></span></span>
+<span class="r-in"><span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compare these options</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> True <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x_s</span><span class="op">)</span>, Sampled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">samples</span><span class="op">)</span><span class="op">)</span>, <span class="va">total</span> <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                True             Sampled            Estimate          Std. Error </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           449.20844           469.35138           379.43103            33.89539 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Est. (bias.correct) Std. (bias.correct) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           452.91075                  NA </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Calculate effective area occupied from samples</span></span></span>
+<span class="r-in"><span> <span class="va">numerator</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">samples</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">denominator</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span> <span class="va">samples</span>, MARGIN <span class="op">=</span> <span class="fl">2</span>, FUN <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, w<span class="op">=</span><span class="va">x</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>   Estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span> <span class="va">numerator</span> <span class="op">/</span> <span class="va">denominator</span> <span class="op">)</span>,</span></span>
+<span class="r-in"><span>   SD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span> <span class="va">numerator</span> <span class="op">/</span> <span class="va">denominator</span> <span class="op">)</span>,</span></span>
+<span class="r-in"><span>   True <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x_s</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="va">x_s</span>, w <span class="op">=</span> <span class="va">x_s</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Estimate        SD      True </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47.208213  6.572453 48.191013 </span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

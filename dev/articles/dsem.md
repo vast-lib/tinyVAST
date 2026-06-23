@@ -43,7 +43,7 @@ mytiny
 #>         2:3]))
 #> 
 #> Run time: 
-#> Time difference of 0.6573119 secs
+#> Time difference of 0.6653132 secs
 #> 
 #> Family: 
 #> $obs
