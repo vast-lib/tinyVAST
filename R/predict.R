@@ -293,7 +293,7 @@ function( object,
 #'  denominator = apply( samples, MARGIN = 2, FUN = \(x) weighted.mean(x=x, w=x) )
 #'  c(
 #'    Estimate = mean( numerator / denominator ),
-#'    SD = sd(  numerator / denominator )
+#'    SD = sd( numerator / denominator ),
 #'    True = sum(x_s) / weighted.mean(x_s, w = x_s)
 #'  )
 #'

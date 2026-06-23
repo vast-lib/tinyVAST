@@ -2,6 +2,7 @@
 # Original authors: John Fox, Michael Friendly, and contributors.
 # Original code Copyright (C) John Fox
 # Used and modified under the terms of the GNU General Public License v3.
+# Avoiding Imports because CRAN check suggested cutting dependencies.
 
 specifyModel <-
 function( file = "",
@@ -269,4 +270,11 @@ classifyVariables <- function (model)
         else stop("incorrectly specified model")
     }
     list(endogenous = names(variables[variables]), exogenous = names(variables[!variables]))
+}
+
+not.number <- function (constant)
+{
+  save <- options(warn = -1)
+  on.exit(save)
+  is.na(as.numeric(constant))
 }
