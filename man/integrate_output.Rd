@@ -36,7 +36,9 @@ with length of \code{nrow(newdata)}.}
 into one or more derived quantities.  This can be used to compute area-expanded
 indices for more than one year or category using a single call, and might be
 substantially faster for large models (because it avoids extra model builds
-for each derived quantity)}
+for each derived quantity).  Note that the output will have as many rows
+as the highest value of \code{block}, and NAs for rows where \code{block}
+does not contain that integer.}
 
 \item{type}{Integer-vector indicating what type of expansion to apply to
 each row of \code{newdata}, with length of \code{nrow(newdata)}.
@@ -163,4 +165,58 @@ However, that option is somewhat experimental, and a user might want to confirm
 that the two options give identical results. Similarly, using \code{bias.correct=TRUE}
 will still calculate the standard-error, whereas using
 \code{apply.epsilon=TRUE} and \code{intern=TRUE} will not.
+}
+\examples{
+# Settings
+ set.seed(123)
+ n_sampled = 50
+ samples_per_site = 3
+ n_extra = 50
+
+# Simulate densities and lognormal samples
+ s_i = rep( seq_len(n_sampled), each = samples_per_site )
+ x_s = exp( 1 + rnorm( n_sampled + n_extra ))
+ y_i = exp( rnorm(n_sampled * samples_per_site, mean = log(x_s[s_i]), sd = 0.5 ) )
+ data = data.frame( y = y_i, s = s_i )
+
+# Make spatial graph of all sites
+ library(igraph)
+ unconnected_graph = make_empty_graph( n_sampled + n_extra )
+ V(unconnected_graph)$name = as.character(seq_len(n_sampled + n_extra))
+
+# Fit in tinyVAST
+ fit = tinyVAST(
+   data = data,
+   formula = y ~ 1,
+   spatial_domain = unconnected_graph,
+   space_column = "s",
+   family = lognormal("log"),
+   space_term = "response <-> response, spatial_sd"
+ )
+
+# Sample densities
+ samples = sample_variable(
+   fit,
+   newdata = domain_df,
+   n_samples = 1000,
+   sample_fixed = FALSE,
+   variable_name = "mu_g"
+ )
+
+# Estimate total
+Note that bias-corrected estimator matches True and sample-based estimator
+ domain_df = data.frame(s = as.character(seq_len(n_sampled + n_extra)))
+ total = integrate_output(
+   fit,
+   newdata = domain_df
+ )
+
+# Compare these options
+ c( True = sum(x_s), Sampled = mean(colSums(samples)), total )
+
+# Calculate effective area occupied from samples
+ numerator = colSums(samples)
+ denominator = apply( samples, MARGIN = 2, FUN = \(x) weighted.mean(x=x, w=x) )
+ mean( numerator / denominator )
+
 }

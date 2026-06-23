@@ -239,7 +239,60 @@ function( object,
 #' estimate if available, and the standard error for the bias-corrected estimator.
 #' Depending upon settings, one or more of these will be \code{NA} values, and the
 #' function can be repeatedly called to get multiple estimators and/or statistics.
-#' 
+#'
+#' @examples
+#' # Settings
+#'  set.seed(123)
+#'  n_sampled = 50
+#'  samples_per_site = 3
+#'  n_extra = 50
+#'
+#' # Simulate densities and lognormal samples
+#'  s_i = rep( seq_len(n_sampled), each = samples_per_site )
+#'  x_s = exp( 1 + rnorm( n_sampled + n_extra ))
+#'  y_i = exp( rnorm(n_sampled * samples_per_site, mean = log(x_s[s_i]), sd = 0.5 ) )
+#'  data = data.frame( y = y_i, s = s_i )
+#'
+#' # Make spatial graph of all sites
+#'  library(igraph)
+#'  unconnected_graph = make_empty_graph( n_sampled + n_extra )
+#'  V(unconnected_graph)$name = as.character(seq_len(n_sampled + n_extra))
+#'
+#' # Fit in tinyVAST
+#'  fit = tinyVAST(
+#'    data = data,
+#'    formula = y ~ 1,
+#'    spatial_domain = unconnected_graph,
+#'    space_column = "s",
+#'    family = lognormal("log"),
+#'    space_term = "response <-> response, spatial_sd"
+#'  )
+#'
+#' # Sample densities
+#'  samples = sample_variable(
+#'    fit,
+#'    newdata = domain_df,
+#'    n_samples = 1000,
+#'    sample_fixed = FALSE,
+#'    variable_name = "mu_g"
+#'  )
+#'
+#' # Estimate total
+#' Note that bias-corrected estimator matches True and sample-based estimator
+#'  domain_df = data.frame(s = as.character(seq_len(n_sampled + n_extra)))
+#'  total = integrate_output(
+#'    fit,
+#'    newdata = domain_df
+#'  )
+#'
+#' # Compare these options
+#'  c( True = sum(x_s), Sampled = mean(colSums(samples)), total )
+#'
+#' # Calculate effective area occupied from samples
+#'  numerator = colSums(samples)
+#'  denominator = apply( samples, MARGIN = 2, FUN = \(x) weighted.mean(x=x, w=x) )
+#'  mean( numerator / denominator )
+#'
 #' @export
 integrate_output <-
 function( object,
