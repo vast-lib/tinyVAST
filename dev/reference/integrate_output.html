@@ -110,7 +110,9 @@ with length of <code>nrow(newdata)</code>.</p></dd>
 into one or more derived quantities.  This can be used to compute area-expanded
 indices for more than one year or category using a single call, and might be
 substantially faster for large models (because it avoids extra model builds
-for each derived quantity)</p></dd>
+for each derived quantity).  Note that the output will have as many rows
+as the highest value of <code>block</code>, and NAs for rows where <code>block</code>
+does not contain that integer.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
@@ -244,6 +246,10 @@ will still calculate the standard-error, whereas using
 <code>apply.epsilon=TRUE</code> and <code>intern=TRUE</code> will not.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

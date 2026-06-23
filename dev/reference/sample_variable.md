@@ -70,17 +70,19 @@ random effects then have implausibly high magnitude.
 ## Examples
 
 ``` r
- set.seed(101)
- x = runif(n = 100, min = 0, max = 2*pi)
- y = 1 + sin(x) + 0.1 * rnorm(100)
+set.seed(101)
+x = runif(n = 100, min = 0, max = 2*pi)
+y = 1 + sin(x) + 0.1 * rnorm(100)
 
- # Do fit with getJointPrecision=TRUE
- fit = tinyVAST( formula = y ~ s(x),
-                 data = data.frame(x=x,y=y) )
+# Do fit with getJointPrecision=TRUE
+fit = tinyVAST(
+  formula = y ~ s(x),
+  data = data.frame(x=x,y=y)
+)
 
- # samples from distribution for the mean
- # excluding fixed effects due to CRAN checks
- samples = sample_variable(fit, sample_fixed = FALSE)
+# samples from distribution for the mean
+# excluding fixed effects due to CRAN checks
+samples = sample_variable(fit, sample_fixed = FALSE)
 #> # Obtaining samples from predictive distribution for variable mu_i
 #>   Finished sample 10 of 100
 #>   Finished sample 20 of 100
@@ -92,4 +94,6 @@ random effects then have implausibly high magnitude.
 #>   Finished sample 80 of 100
 #>   Finished sample 90 of 100
 #>   Finished sample 100 of 100
+
+# See ?integrate_output for a more complicated example
 ```

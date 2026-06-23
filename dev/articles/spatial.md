@@ -102,7 +102,7 @@ We can then compare this with the PDE reported by `mgcv`
 start_time = Sys.time()
 mygam = gam( n ~ s(w) + s(x,y), data=Data ) #
 Sys.time() - start_time
-#> Time difference of 0.02985644 secs
+#> Time difference of 0.03251934 secs
 summary(mygam)$dev.expl
 #> [1] 0.3517756
 ```
@@ -199,4 +199,4 @@ ggplot(p, aes(x=w, y=fit,
 
 ![](spatial_files/figure-html/show_ggplot-1.png)
 
-Runtime for this vignette: 4.7 secs
+Runtime for this vignette: 4.75 secs

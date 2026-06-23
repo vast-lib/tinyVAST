@@ -52,7 +52,9 @@ integrate_output(
   into one or more derived quantities. This can be used to compute
   area-expanded indices for more than one year or category using a
   single call, and might be substantially faster for large models
-  (because it avoids extra model builds for each derived quantity)
+  (because it avoids extra model builds for each derived quantity). Note
+  that the output will have as many rows as the highest value of
+  `block`, and NAs for rows where `block` does not contain that integer.
 
 - type:
 
@@ -204,3 +206,5 @@ might want to confirm that the two options give identical results.
 Similarly, using `bias.correct=TRUE` will still calculate the
 standard-error, whereas using `apply.epsilon=TRUE` and `intern=TRUE`
 will not.
+
+## Examples
