@@ -269,6 +269,7 @@ function( object,
 #'  )
 #'
 #' # Sample densities
+#'  domain_df = data.frame(s = as.character(seq_len(n_sampled + n_extra)))
 #'  samples = sample_variable(
 #'    fit,
 #'    newdata = domain_df,
@@ -279,7 +280,6 @@ function( object,
 #'
 #' # Estimate total
 #' # Note that bias-corrected estimator matches True and sample-based estimator
-#'  domain_df = data.frame(s = as.character(seq_len(n_sampled + n_extra)))
 #'  total = integrate_output(
 #'    fit,
 #'    newdata = domain_df
