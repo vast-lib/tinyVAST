@@ -278,7 +278,7 @@ function( object,
 #'  )
 #'
 #' # Estimate total
-#' Note that bias-corrected estimator matches True and sample-based estimator
+#' # Note that bias-corrected estimator matches True and sample-based estimator
 #'  domain_df = data.frame(s = as.character(seq_len(n_sampled + n_extra)))
 #'  total = integrate_output(
 #'    fit,
@@ -291,7 +291,11 @@ function( object,
 #' # Calculate effective area occupied from samples
 #'  numerator = colSums(samples)
 #'  denominator = apply( samples, MARGIN = 2, FUN = \(x) weighted.mean(x=x, w=x) )
-#'  mean( numerator / denominator )
+#'  c(
+#'    Estimate = mean( numerator / denominator ),
+#'    SD = sd(  numerator / denominator )
+#'    True = sum(x_s) / weighted.mean(x_s, w = x_s)
+#'  )
 #'
 #' @export
 integrate_output <-
