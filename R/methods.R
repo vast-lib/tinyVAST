@@ -488,9 +488,11 @@ function( object,
     par_iz[object$obj$env$lrandom(),] = attr(tmp, "samples")
   }
 
-  y_iz = apply( par_iz,
-                MARGIN = 2,
-                FUN = function(par_i) object$obj$simulate(par_i)$y_i )
+  y_iz = apply(
+    par_iz,
+    MARGIN = 2,
+    FUN = function(par_i) object$obj$simulate(par_i)$y_i
+  )
   return( y_iz )
 }
 
