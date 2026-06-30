@@ -1,5 +1,17 @@
 # Changelog
 
+## tinyVAST 1.6.1
+
+- Fix AR sign in SAR example (was using negative, because I hadn’t
+  updated after changing signs in dsem)
+- Tag `weights_i` with DATA_UPDATE to explore SGD
+- Fix bug in `predict` when using `sf_areal_domain` input
+- Add error when `rowSums(A_is)!=1` (i.e., samples are outside domain)
+  and warning when `rowSums(A_gs)!=1` (i.e., predictions are outside
+  domain)
+- Add `sem_imports.R` to avoid listing sem in IMPORTS (allowed given
+  that sem has GPL-3 licence), and based on prior email.
+
 ## tinyVAST 1.6.0
 
 CRAN release: 2026-05-19

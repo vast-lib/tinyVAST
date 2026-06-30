@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">tinyVAST</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,32 +137,37 @@ to (but not quite) nonstationary.</p>
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Define SEM for AR2 process</span></span>
 <span><span class="va">dsem</span> <span class="op">=</span> <span class="st">"</span></span>
-<span><span class="st">  sockeye -&gt; sockeye, -1, lag1_sockeye</span></span>
-<span><span class="st">  sockeye -&gt; sockeye, -2, lag2_sockeye</span></span>
+<span><span class="st">  sockeye -&gt; sockeye, 1, lag1_sockeye</span></span>
+<span><span class="st">  sockeye -&gt; sockeye, 2, lag2_sockeye</span></span>
 <span><span class="st"></span></span>
-<span><span class="st">  pink -&gt; pink, -1, lag1_pink</span></span>
-<span><span class="st">  pink -&gt; pink, -2, lag2_pink</span></span>
+<span><span class="st">  pink -&gt; pink, 1, lag1_pink</span></span>
+<span><span class="st">  pink -&gt; pink, 2, lag2_pink</span></span>
 <span><span class="st"></span></span>
-<span><span class="st">  chum -&gt; chum, -1, lag1_chum</span></span>
-<span><span class="st">  chum -&gt; chum, -2, lag2_chum</span></span>
+<span><span class="st">  chum -&gt; chum, 1, lag1_chum</span></span>
+<span><span class="st">  chum -&gt; chum, 2, lag2_chum</span></span>
 <span><span class="st">"</span></span>
 <span></span>
 <span><span class="co"># Fit tinyVAST model</span></span>
 <span><span class="va">mytiny0</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span>
-<span>     formula <span class="op">=</span> <span class="va">Biomass_nozeros</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Region</span>,</span>
-<span>     data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>     spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
-<span>     variable_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>     time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
-<span>     space_column <span class="op">=</span> <span class="st">"Region"</span>,</span>
-<span>     distribution_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>     family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
-<span>     spatial_domain <span class="op">=</span> <span class="va">unconnected_graph</span>,</span>
-<span>     control <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> profile<span class="op">=</span><span class="st">"alpha_j"</span> <span class="op">)</span> <span class="op">)</span></span>
+<span>  formula <span class="op">=</span> <span class="va">Biomass_nozeros</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Region</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
+<span>  spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
+<span>  variable_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
+<span>  time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
+<span>  space_column <span class="op">=</span> <span class="st">"Region"</span>,</span>
+<span>  distribution_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> </span>
+<span>    <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span>  <span class="op">)</span>,</span>
+<span>  spatial_domain <span class="op">=</span> <span class="va">unconnected_graph</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> </span>
+<span>    profile <span class="op">=</span> <span class="st">"alpha_j"</span> </span>
+<span>  <span class="op">)</span> </span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: The model may not have converged. Maximum final gradient:</span></span>
-<span><span class="co">#&gt; 0.0319691201067783.</span></span>
+<span><span class="co">#&gt; 0.0401879623199238.</span></span>
 <span></span>
 <span><span class="co"># Summarize output</span></span>
 <span><span class="va">Summary</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mytiny0</span>, what<span class="op">=</span><span class="st">"spacetime_term"</span><span class="op">)</span></span>
@@ -199,10 +204,10 @@ to (but not quite) nonstationary.</p>
 <td align="left">sockeye</td>
 <td align="left">1</td>
 <td align="left">NA</td>
-<td align="left">-1</td>
-<td align="right">0.808</td>
-<td align="right">0.059</td>
-<td align="right">13.710</td>
+<td align="left">1</td>
+<td align="right">0.810</td>
+<td align="right">0.067</td>
+<td align="right">12.048</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -211,11 +216,11 @@ to (but not quite) nonstationary.</p>
 <td align="left">sockeye</td>
 <td align="left">2</td>
 <td align="left">NA</td>
-<td align="left">-2</td>
-<td align="right">0.195</td>
-<td align="right">0.059</td>
-<td align="right">3.308</td>
-<td align="right">0.001</td>
+<td align="left">2</td>
+<td align="right">0.181</td>
+<td align="right">0.067</td>
+<td align="right">2.711</td>
+<td align="right">0.007</td>
 </tr>
 <tr class="odd">
 <td align="left">1</td>
@@ -223,11 +228,11 @@ to (but not quite) nonstationary.</p>
 <td align="left">pink</td>
 <td align="left">3</td>
 <td align="left">NA</td>
-<td align="left">-1</td>
-<td align="right">0.050</td>
-<td align="right">0.019</td>
-<td align="right">2.640</td>
-<td align="right">0.008</td>
+<td align="left">1</td>
+<td align="right">0.038</td>
+<td align="right">0.015</td>
+<td align="right">2.532</td>
+<td align="right">0.011</td>
 </tr>
 <tr class="even">
 <td align="left">1</td>
@@ -235,10 +240,10 @@ to (but not quite) nonstationary.</p>
 <td align="left">pink</td>
 <td align="left">4</td>
 <td align="left">NA</td>
-<td align="left">-2</td>
-<td align="right">0.882</td>
-<td align="right">0.022</td>
-<td align="right">39.935</td>
+<td align="left">2</td>
+<td align="right">0.943</td>
+<td align="right">0.017</td>
+<td align="right">54.224</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -247,10 +252,10 @@ to (but not quite) nonstationary.</p>
 <td align="left">chum</td>
 <td align="left">5</td>
 <td align="left">NA</td>
-<td align="left">-1</td>
-<td align="right">0.675</td>
-<td align="right">0.102</td>
-<td align="right">6.584</td>
+<td align="left">1</td>
+<td align="right">0.742</td>
+<td align="right">0.198</td>
+<td align="right">3.757</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -259,11 +264,11 @@ to (but not quite) nonstationary.</p>
 <td align="left">chum</td>
 <td align="left">6</td>
 <td align="left">NA</td>
-<td align="left">-2</td>
-<td align="right">0.293</td>
-<td align="right">0.099</td>
-<td align="right">2.940</td>
-<td align="right">0.003</td>
+<td align="left">2</td>
+<td align="right">0.247</td>
+<td align="right">0.196</td>
+<td align="right">1.263</td>
+<td align="right">0.207</td>
 </tr>
 <tr class="odd">
 <td align="left">2</td>
@@ -272,9 +277,9 @@ to (but not quite) nonstationary.</p>
 <td align="left">7</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.648</td>
-<td align="right">0.039</td>
-<td align="right">16.767</td>
+<td align="right">0.525</td>
+<td align="right">0.035</td>
+<td align="right">14.788</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -284,9 +289,9 @@ to (but not quite) nonstationary.</p>
 <td align="left">8</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.294</td>
-<td align="right">0.035</td>
-<td align="right">8.353</td>
+<td align="right">0.252</td>
+<td align="right">0.048</td>
+<td align="right">5.231</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -296,9 +301,9 @@ to (but not quite) nonstationary.</p>
 <td align="left">9</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.421</td>
+<td align="right">0.361</td>
 <td align="right">0.036</td>
-<td align="right">11.622</td>
+<td align="right">9.943</td>
 <td align="right">0.000</td>
 </tr>
 </tbody>
@@ -320,8 +325,6 @@ way to encode information about spatial proximity:</p>
 <span><span class="va">maps</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/rnaturalearth/reference/ne_countries.html" class="external-link">ne_countries</a></span><span class="op">(</span> continent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"north america"</span>,<span class="st">"asia"</span>,<span class="st">"europe"</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">maps</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html" class="external-link">st_combine</a></span><span class="op">(</span> <span class="va">maps</span> <span class="op">)</span></span>
 <span><span class="va">maps</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span> <span class="va">maps</span>, crs<span class="op">=</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fl">3832</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="co">#maps = st_crop( maps, xmin = -5*1e5, xmax = 12*1e5,</span></span>
-<span><span class="co">#                      ymin = 0 * 1e6, ymax=10 * 1e6 )</span></span>
 <span></span>
 <span><span class="co"># Format inputs</span></span>
 <span><span class="va">loc_xy</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
@@ -333,39 +336,48 @@ way to encode information about spatial proximity:</p>
 <span><span class="co"># Plot</span></span>
 <span><span class="va">xlim</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">4</span>,<span class="fl">10</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1e6</span></span>
 <span><span class="va">ylim</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">10</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1e6</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">maps</span>, </span>
-<span>      xlim <span class="op">=</span> <span class="va">xlim</span>,</span>
-<span>      ylim <span class="op">=</span> <span class="va">ylim</span>,</span>
-<span>      col <span class="op">=</span> <span class="st">"grey"</span>,</span>
-<span>      asp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>      add <span class="op">=</span> <span class="cn">FALSE</span> <span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">adjacency_graph</span>, </span>
-<span>      layout <span class="op">=</span> <span class="va">loc_xy</span>,</span>
-<span>      add <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>      rescale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>      vertex.label.color <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>      xlim <span class="op">=</span> <span class="va">xlim</span>, </span>
-<span>      ylim <span class="op">=</span> <span class="va">ylim</span>, </span>
-<span>      edge.width <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>      edge.color <span class="op">=</span> <span class="st">"red"</span> <span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> </span>
+<span>  <span class="va">maps</span>, </span>
+<span>  xlim <span class="op">=</span> <span class="va">xlim</span>,</span>
+<span>  ylim <span class="op">=</span> <span class="va">ylim</span>,</span>
+<span>  col <span class="op">=</span> <span class="st">"grey"</span>,</span>
+<span>  asp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  add <span class="op">=</span> <span class="cn">FALSE</span> </span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> </span>
+<span>  <span class="va">adjacency_graph</span>, </span>
+<span>  layout <span class="op">=</span> <span class="va">loc_xy</span>,</span>
+<span>  add <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>  rescale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  vertex.label.color <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>  xlim <span class="op">=</span> <span class="va">xlim</span>, </span>
+<span>  ylim <span class="op">=</span> <span class="va">ylim</span>, </span>
+<span>  edge.width <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  edge.color <span class="op">=</span> <span class="st">"red"</span> </span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="672"></p>
 <p>We can then pass this adjacency graph to <code>tinyVAST</code> during
 fitting:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit tinyVAST model</span></span>
 <span><span class="va">mytiny</span> <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVAST.html">tinyVAST</a></span><span class="op">(</span></span>
-<span>     formula <span class="op">=</span> <span class="va">Biomass_nozeros</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Region</span>,</span>
-<span>     data <span class="op">=</span> <span class="va">Data</span>,</span>
-<span>     spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
-<span>     variable_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>     time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
-<span>     space_column <span class="op">=</span> <span class="st">"Region"</span>,</span>
-<span>     distribution_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>     family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>                          <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span>,</span>
-<span>     spatial_domain <span class="op">=</span> <span class="va">adjacency_graph</span>,</span>
-<span>     control <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> profile<span class="op">=</span><span class="st">"alpha_j"</span> <span class="op">)</span> <span class="op">)</span></span>
+<span>  formula <span class="op">=</span> <span class="va">Biomass_nozeros</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Region</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">Data</span>,</span>
+<span>  spacetime_term <span class="op">=</span> <span class="va">dsem</span>,</span>
+<span>  variable_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
+<span>  time_column <span class="op">=</span> <span class="st">"Year"</span>,</span>
+<span>  space_column <span class="op">=</span> <span class="st">"Region"</span>,</span>
+<span>  distribution_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> </span>
+<span>    <span class="st">"chum"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    <span class="st">"pink"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    <span class="st">"sockeye"</span> <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span>  <span class="op">)</span>,</span>
+<span>  spatial_domain <span class="op">=</span> <span class="va">adjacency_graph</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="../../reference/tinyVASTcontrol.html">tinyVASTcontrol</a></span><span class="op">(</span> </span>
+<span>    profile<span class="op">=</span><span class="st">"alpha_j"</span> </span>
+<span>  <span class="op">)</span> </span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summarize output</span></span>
 <span><span class="va">Summary</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mytiny</span>, what<span class="op">=</span><span class="st">"spacetime_term"</span><span class="op">)</span></span>
@@ -402,10 +414,10 @@ fitting:</p>
 <td align="left">sockeye</td>
 <td align="left">1</td>
 <td align="left">NA</td>
-<td align="left">-1</td>
-<td align="right">1.427</td>
-<td align="right">0.086</td>
-<td align="right">16.616</td>
+<td align="left">1</td>
+<td align="right">1.510</td>
+<td align="right">0.100</td>
+<td align="right">15.022</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -414,10 +426,10 @@ fitting:</p>
 <td align="left">sockeye</td>
 <td align="left">2</td>
 <td align="left">NA</td>
-<td align="left">-2</td>
-<td align="right">-0.426</td>
-<td align="right">0.087</td>
-<td align="right">-4.924</td>
+<td align="left">2</td>
+<td align="right">-0.510</td>
+<td align="right">0.101</td>
+<td align="right">-5.051</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -426,11 +438,11 @@ fitting:</p>
 <td align="left">pink</td>
 <td align="left">3</td>
 <td align="left">NA</td>
-<td align="left">-1</td>
-<td align="right">0.009</td>
-<td align="right">0.008</td>
-<td align="right">1.144</td>
-<td align="right">0.253</td>
+<td align="left">1</td>
+<td align="right">0.006</td>
+<td align="right">0.007</td>
+<td align="right">0.888</td>
+<td align="right">0.374</td>
 </tr>
 <tr class="even">
 <td align="left">1</td>
@@ -438,10 +450,10 @@ fitting:</p>
 <td align="left">pink</td>
 <td align="left">4</td>
 <td align="left">NA</td>
-<td align="left">-2</td>
-<td align="right">0.986</td>
-<td align="right">0.009</td>
-<td align="right">111.673</td>
+<td align="left">2</td>
+<td align="right">1.018</td>
+<td align="right">0.007</td>
+<td align="right">138.733</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -450,10 +462,10 @@ fitting:</p>
 <td align="left">chum</td>
 <td align="left">5</td>
 <td align="left">NA</td>
-<td align="left">-1</td>
-<td align="right">1.844</td>
-<td align="right">0.064</td>
-<td align="right">28.901</td>
+<td align="left">1</td>
+<td align="right">1.759</td>
+<td align="right">0.073</td>
+<td align="right">24.067</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -462,10 +474,10 @@ fitting:</p>
 <td align="left">chum</td>
 <td align="left">6</td>
 <td align="left">NA</td>
-<td align="left">-2</td>
-<td align="right">-0.846</td>
-<td align="right">0.064</td>
-<td align="right">-13.195</td>
+<td align="left">2</td>
+<td align="right">-0.766</td>
+<td align="right">0.073</td>
+<td align="right">-10.485</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -475,9 +487,9 @@ fitting:</p>
 <td align="left">7</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.397</td>
-<td align="right">0.028</td>
-<td align="right">14.298</td>
+<td align="right">0.416</td>
+<td align="right">0.036</td>
+<td align="right">11.707</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -487,9 +499,9 @@ fitting:</p>
 <td align="left">8</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.033</td>
-<td align="right">0.008</td>
-<td align="right">3.835</td>
+<td align="right">0.070</td>
+<td align="right">0.016</td>
+<td align="right">4.387</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
@@ -499,9 +511,9 @@ fitting:</p>
 <td align="left">9</td>
 <td align="left">NA</td>
 <td align="left">0</td>
-<td align="right">0.173</td>
-<td align="right">0.021</td>
-<td align="right">8.361</td>
+<td align="right">0.158</td>
+<td align="right">0.027</td>
+<td align="right">5.821</td>
 <td align="right">0.000</td>
 </tr>
 </tbody>
@@ -516,10 +528,10 @@ correlations among time-series.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># AIC for unconnected time-series</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">mytiny0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 49086.47</span></span>
+<span><span class="co">#&gt; [1] 48939.44</span></span>
 <span><span class="co"># AIC for SAR spatial variation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">mytiny</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 49802.83</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 49477.36</span></span></code></pre></div>
 <p>Finally, we can plot observations and predictions for the selected
 model</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -534,7 +546,7 @@ model</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span>, cols<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">Species</span><span class="op">)</span>, scales<span class="op">=</span><span class="st">"free"</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>trans<span class="op">=</span><span class="st">'log'</span><span class="op">)</span>  <span class="co">#</span></span></code></pre></div>
 <p><img src="simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 21.35 secs</p>
+<p>Runtime for this vignette: 21.88 secs</p>
 </div>
 </div>
 <div class="section level2">

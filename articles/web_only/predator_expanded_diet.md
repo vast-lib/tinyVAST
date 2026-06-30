@@ -138,8 +138,6 @@ fit = tinyVAST(
   variable_column = "Category",
   distribution_column = "Category"
 )
-#> Warning: The model may not have converged: non-positive-definite Hessian
-#> matrix.
 ```
 
 We then calculate the index of predator-expanded stomach contents for
@@ -219,7 +217,7 @@ ggplot( proportions ) +
 
 ![](predator_expanded_diet_files/figure-html/unnamed-chunk-5-1.png)
 
-Runtime for this vignette: 1.1 mins
+Runtime for this vignette: 1.06 mins
 
 ### Works cited
 
