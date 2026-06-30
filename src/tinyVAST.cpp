@@ -1112,6 +1112,7 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( c_i );
   DATA_VECTOR( offset_i );
   DATA_VECTOR( weights_i );
+  DATA_UPDATE( weights_i );  // Warning: cannot use branching (weights_i > 0) when using DATA_UPDATE
   DATA_VECTOR( size_i );  // Ignored unless family = binomial
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk

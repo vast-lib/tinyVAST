@@ -44,16 +44,20 @@ representation of the tail probabilities, and results in some samples with impla
 such that the associated random effects then have implausibly high magnitude.
 }
 \examples{
- set.seed(101)
- x = runif(n = 100, min = 0, max = 2*pi)
- y = 1 + sin(x) + 0.1 * rnorm(100)
+set.seed(101)
+x = runif(n = 100, min = 0, max = 2*pi)
+y = 1 + sin(x) + 0.1 * rnorm(100)
 
- # Do fit with getJointPrecision=TRUE
- fit = tinyVAST( formula = y ~ s(x),
-                 data = data.frame(x=x,y=y) )
+# Do fit with getJointPrecision=TRUE
+fit = tinyVAST(
+  formula = y ~ s(x),
+  data = data.frame(x=x,y=y)
+)
 
- # samples from distribution for the mean
- # excluding fixed effects due to CRAN checks
- samples = sample_variable(fit, sample_fixed = FALSE)
+# samples from distribution for the mean
+# excluding fixed effects due to CRAN checks
+samples = sample_variable(fit, sample_fixed = FALSE)
+
+# See ?integrate_output for a more complicated example
 
 }

@@ -27,24 +27,26 @@ test_that("dsem and tinyVAST give identical results without lags", {
   )
 
   # dsem build inputs
+  sigma = exp(f1$internal$parlist$log_sigma)
   f2 = dsem(
     tsdata = tsdat,
-    family = c( "normal", "normal" ),
+    #family = c( "normal", "normal" ),
+    family = list( X = gaussian_fixed_sd(sd=sigma), Y = gaussian_fixed_sd(sd=sigma) ),
     sem = "X -> Y, 0, beta",
-    control = dsem_control( run_model = FALSE, use_REML = FALSE )
+    control = dsem_control( run_model = TRUE, use_REML = FALSE )
   )
 
   # Refit with same measurement error as tinyVAST
-  map = f2$tmb_inputs$map
-    map$lnsigma_j = factor( c(NA,NA) )
-  pars = f2$tmb_inputs$parameters
-    pars$lnsigma_j = rep( f1$internal$parlist$log_sigma, 2 )
-  f2 = dsem(
-    tsdata = ts( data.frame(X=X, Y=Y) ),
-    family = c( "normal", "normal" ),
-    sem = "X -> Y, 0, beta",
-    control = dsem_control( parameters = pars, map = map, use_REML = FALSE )
-  )
+  #map = f2$tmb_inputs$map
+  #  map$lnsigma_j = factor( c(NA,NA) )
+  #pars = f2$tmb_inputs$parameters
+  #  pars$lnsigma_j = rep( f1$internal$parlist$log_sigma, 2 )
+  #f2 = dsem(
+  #  tsdata = ts( data.frame(X=X, Y=Y) ),
+  #  family = c( "normal", "normal" ),
+  #  sem = "X -> Y, 0, beta",
+  #  control = dsem_control( parameters = pars, map = map, use_REML = FALSE )
+  #)
 
   #
   unconnected_graph = make_empty_graph( 1 )
@@ -98,25 +100,27 @@ test_that("dsem and tinyVAST give identical results with lags", {
   )
 
   # dsem build inputs
+  sigma = exp(f1$internal$parlist$log_sigma)
   f2 = dsem(
     tsdata = tsdat,
-    family = c( "normal", "normal" ),
+    #family = c( "normal", "normal" ),
+    family = list( X = gaussian_fixed_sd(sd=sigma), Y = gaussian_fixed_sd(sd=sigma) ),
     sem = "X -> Y, 1, beta",
-    control = dsem_control( run_model = TRUE, use_REML = FALSE, nlminb_loops = 0, newton_loops = 0,
+    control = dsem_control( run_model = TRUE, use_REML = FALSE, #nlminb_loops = 1, newton_loops = 0,
                             getsd = FALSE, extra_convergence_checks = FALSE )
   )
 
   # Refit with same measurement error as tinyVAST
-  map = f2$tmb_inputs$map
-    map$lnsigma_j = factor( c(NA,NA) )
-  pars = f2$tmb_inputs$parameters
-    pars$lnsigma_j = rep( f1$internal$parlist$log_sigma, 2 )
-  f2 = dsem(
-    tsdata = tsdat,
-    family = c( "normal", "normal" ),
-    sem = "X -> Y, 1, beta",
-    control = dsem_control( parameters = pars, map = map, use_REML = FALSE, extra_convergence_checks = FALSE )
-  )
+  #map = f2$tmb_inputs$map
+  #  map$lnsigma_j = factor( c(NA,NA) )
+  #pars = f2$tmb_inputs$parameters
+  #  pars$lnsigma_j = rep( f1$internal$parlist$log_sigma, 2 )
+  #f2 = dsem(
+  #  tsdata = tsdat,
+  #  family = c( "normal", "normal" ),
+  #  sem = "X -> Y, 1, beta",
+  #  control = dsem_control( parameters = pars, map = map, use_REML = FALSE, extra_convergence_checks = FALSE )
+  #)
 
   expect_equal( as.numeric(f1$opt$par[1:5]),
                 as.numeric(f2$opt$par[c(4:5,1:3)]),
