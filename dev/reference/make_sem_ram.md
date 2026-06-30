@@ -36,10 +36,8 @@ An S3-class `"sem_ram"` containing:
 
 - `model`:
 
-  Output from
-  [`specifyEquations`](https://rdrr.io/pkg/sem/man/specifyModel.html) or
-  [`specifyModel`](https://rdrr.io/pkg/sem/man/specifyModel.html) that
-  defines paths and parameters
+  Output from `specifyEquations` or `specifyModel` that defines paths
+  and parameters
 
 - `ram`:
 
