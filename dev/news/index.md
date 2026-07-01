@@ -1,6 +1,13 @@
 # Changelog
 
-## tinyVAST 1.6.0.9000
+## tinyVAST 1.6.1.9000
+
+- Replace array with tmbutils::array in CPP, to disambiguate new array
+  typedef in RcppEigen, following andrjohns in dsem#63
+
+## tinyVAST 1.6.1
+
+CRAN release: 2026-06-30
 
 - Fix AR sign in SAR example (was using negative, because I hadn’t
   updated after changing signs in dsem)
