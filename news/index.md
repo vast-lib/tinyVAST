@@ -2,6 +2,8 @@
 
 ## tinyVAST 1.6.1
 
+CRAN release: 2026-06-30
+
 - Fix AR sign in SAR example (was using negative, because I hadn’t
   updated after changing signs in dsem)
 - Tag `weights_i` with DATA_UPDATE to explore SGD
