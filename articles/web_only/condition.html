@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/v1.6.1/vignettes/web_only/condition.Rmd" class="external-link"><code>vignettes/web_only/condition.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/condition.Rmd" class="external-link"><code>vignettes/web_only/condition.Rmd</code></a></small>
       <div class="d-none name"><code>condition.Rmd</code></div>
     </div>
 
@@ -168,30 +168,30 @@ condition and density.</p>
 <span>           distribution_column <span class="op">=</span> <span class="st">"Type"</span>,</span>
 <span>           times <span class="op">=</span> <span class="fl">1982</span><span class="op">:</span><span class="fl">2016</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: The model may not have converged. Maximum final gradient:</span></span>
-<span><span class="co">#&gt; 0.0884906858042102.</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.0938537782766785.</span></span></code></pre></div>
 <p>We can look at structural parameters using summary functions:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># spatial terms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"space_term"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   heads        to      from parameter start      Estimate   Std_Error</span></span>
-<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;  1.423914e+00 0.133054127</span></span>
-<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt; -3.316155e-02 0.004167306</span></span>
-<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;  9.519121e-05 0.004854997</span></span>
+<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;  1.423904e+00 0.133052054</span></span>
+<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt; -3.316140e-02 0.004167289</span></span>
+<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;  9.519108e-05 0.004854991</span></span>
 <span><span class="co">#&gt;       z_value      p_value</span></span>
-<span><span class="co">#&gt; 1 10.70176358 9.985930e-27</span></span>
-<span><span class="co">#&gt; 2 -7.95755188 1.754766e-15</span></span>
+<span><span class="co">#&gt; 1 10.70185334 9.976260e-27</span></span>
+<span><span class="co">#&gt; 2 -7.95754650 1.754842e-15</span></span>
 <span><span class="co">#&gt; 3  0.01960685 9.843570e-01</span></span>
 <span></span>
 <span><span class="co"># spatio-temporal terms</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"spacetime_term"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   heads        to      from parameter start lag     Estimate   Std_Error</span></span>
-<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;   0  0.966424684 0.024274635</span></span>
-<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt;   0 -0.040541961 0.002723374</span></span>
-<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;   0  0.008199889 0.003339295</span></span>
+<span><span class="co">#&gt; 1     2   Biomass   Biomass         1  &lt;NA&gt;   0  0.966430563 0.024274883</span></span>
+<span><span class="co">#&gt; 2     2 Condition Condition         2  &lt;NA&gt;   0 -0.040542330 0.002723399</span></span>
+<span><span class="co">#&gt; 3     1 Condition   Biomass         3  &lt;NA&gt;   0  0.008199725 0.003339301</span></span>
 <span><span class="co">#&gt;      z_value      p_value</span></span>
-<span><span class="co">#&gt; 1  39.812121 0.000000e+00</span></span>
-<span><span class="co">#&gt; 2 -14.886666 4.023366e-50</span></span>
-<span><span class="co">#&gt; 3   2.455575 1.406593e-02</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  39.811956 0.000000e+00</span></span>
+<span><span class="co">#&gt; 2 -14.886664 4.023500e-50</span></span>
+<span><span class="co">#&gt; 3   2.455521 1.406805e-02</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="abundance-weighted-expansion">Abundance-weighted expansion<a class="anchor" aria-label="anchor" href="#abundance-weighted-expansion"></a>
@@ -265,7 +265,7 @@ not directly comparable with either weight or density.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Year</span>, y<span class="op">=</span><span class="va">Est</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Year</span>, ymin<span class="op">=</span><span class="va">Est</span><span class="op">-</span><span class="va">SE</span>, ymax<span class="op">=</span><span class="va">Est</span><span class="op">+</span><span class="va">SE</span><span class="op">)</span>, alpha<span class="op">=</span><span class="fl">0.2</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="condition_files/figure-html/condition-timeseries-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 14.24 mins</p>
+<p>Runtime for this vignette: 14.08 mins</p>
 <div class="section level4">
 <h4 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h4>
