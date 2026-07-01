@@ -431,7 +431,7 @@ Type gamma_distribution( vector<Type> gamma_k,
 
 // distribution/projection for omega
 template<class Type>
-array<Type> omega_distribution( array<Type> omega_sc,
+tmbutils::array<Type> omega_distribution( tmbutils::array<Type> omega_sc,
                                  vector<int> model_options,
                                  Eigen::SparseMatrix<Type> Rho_cc,
                                  Eigen::SparseMatrix<Type> Gamma_cc,
@@ -496,7 +496,7 @@ array<Type> omega_distribution( array<Type> omega_sc,
 // distribution/projection for xi
 template<class Type>
 Type xi_distribution( vector<int> model_options,
-                      array<Type> xi_sl,
+                      tmbutils::array<Type> xi_sl,
                       vector<Type> log_sigmaxi_l,
                       Eigen::SparseMatrix<Type> Q_ss,
                       Type range,
@@ -524,7 +524,7 @@ Type xi_distribution( vector<int> model_options,
 
 // distribution/projection for epsilon
 template<class Type>
-array<Type> epsilon_distribution( array<Type> epsilon_stc,
+tmbutils::array<Type> epsilon_distribution( tmbutils::array<Type> epsilon_stc,
                                   vector<int> model_options,
                                   Eigen::SparseMatrix<Type> Rho_hh,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
@@ -546,7 +546,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
 
     //if( epsilon_stc.size()>0 ){ // PARALLEL_REGION
     // Reshape for either model_options
-    array<Type> epsilon_hs( n_h, n_s );
+    tmbutils::array<Type> epsilon_hs( n_h, n_s );
     for( int s=0; s<n_s; s++ ){
     for( int t=0; t<n_t; t++ ){
     for( int c=0; c<n_c; c++ ){
@@ -606,7 +606,7 @@ array<Type> epsilon_distribution( array<Type> epsilon_stc,
 
 // distribution/projection for epsilon
 template<class Type>
-array<Type> delta_distribution( array<Type> delta_tc,
+tmbutils::array<Type> delta_distribution( tmbutils::array<Type> delta_tc,
                                   vector<int> model_options,
                                   Eigen::SparseMatrix<Type> Rho_hh,
                                   Eigen::SparseMatrix<Type> Gamma_hh,
@@ -623,7 +623,7 @@ array<Type> delta_distribution( array<Type> delta_tc,
     int h;
 
     // Reshape for either model_options
-    array<Type> delta_h1( n_h, 1 );
+    tmbutils::array<Type> delta_h1( n_h, 1 );
     for( int t=0; t<n_t; t++ ){
     for( int c=0; c<n_c; c++ ){
       h = c*n_t + t;
@@ -673,7 +673,7 @@ bool isNA(Type x){
 // Sparse array * matrix
 // NAs in IVECTOR or IMATRIX get converted to -2147483648, so isNA doesn't work ... instead drop NAs from A prior to passing to TMB
 template<class Type>
-vector<Type> multiply_epsilon( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
+vector<Type> multiply_epsilon( matrix<int> A, vector<Type> weight, tmbutils::array<Type> x, int n_i ){
   vector<Type> out( n_i );
   out.setZero();
   if( x.size() > 0 ){
@@ -684,7 +684,7 @@ vector<Type> multiply_epsilon( matrix<int> A, vector<Type> weight, array<Type> x
   return out;
 }
 template<class Type>
-vector<Type> multiply_omega( matrix<int> A, vector<Type> weight, array<Type> x, int n_i ){
+vector<Type> multiply_omega( matrix<int> A, vector<Type> weight, tmbutils::array<Type> x, int n_i ){
   vector<Type> out( n_i );
   out.setZero();
   if( x.size() > 0 ){
@@ -695,7 +695,7 @@ vector<Type> multiply_omega( matrix<int> A, vector<Type> weight, array<Type> x, 
   return out;
 }
 template<class Type>
-vector<Type> multiply_xi( Eigen::SparseMatrix<Type> A_is, array<Type> xi_sl, matrix<Type> W_il ){
+vector<Type> multiply_xi( Eigen::SparseMatrix<Type> A_is, tmbutils::array<Type> xi_sl, matrix<Type> W_il ){
   vector<Type> out( W_il.rows() );
   out.setZero();
   if( xi_sl.size() > 0 ){
@@ -708,7 +708,7 @@ vector<Type> multiply_xi( Eigen::SparseMatrix<Type> A_is, array<Type> xi_sl, mat
   return out;
 }
 template<class Type>
-vector<Type> multiply_delta( array<Type> delta_tc, vector<int> t_i, vector<int> c_i, int n_i ){
+vector<Type> multiply_delta( tmbutils::array<Type> delta_tc, vector<int> t_i, vector<int> c_i, int n_i ){
   vector<Type> delta_i( n_i );
   delta_i.setZero();
   if( delta_tc.size() > 0 ){
