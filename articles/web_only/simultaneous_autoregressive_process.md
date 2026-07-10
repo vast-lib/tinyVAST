@@ -191,10 +191,10 @@ knitr::kable( Summary, digits=3)
 
 | heads | to      | from    | parameter | start | lag | Estimate | Std_Error | z_value | p_value |
 |:------|:--------|:--------|:----------|:------|:----|---------:|----------:|--------:|--------:|
-| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.510 |     0.101 |  15.022 |   0.000 |
+| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.510 |     0.101 |  15.021 |   0.000 |
 | 1     | sockeye | sockeye | 2         | NA    | 2   |   -0.510 |     0.101 |  -5.051 |   0.000 |
-| 1     | pink    | pink    | 3         | NA    | 1   |    0.006 |     0.007 |   0.889 |   0.374 |
-| 1     | pink    | pink    | 4         | NA    | 2   |    1.018 |     0.007 | 138.731 |   0.000 |
+| 1     | pink    | pink    | 3         | NA    | 1   |    0.006 |     0.007 |   0.888 |   0.374 |
+| 1     | pink    | pink    | 4         | NA    | 2   |    1.018 |     0.007 | 138.732 |   0.000 |
 | 1     | chum    | chum    | 5         | NA    | 1   |    1.759 |     0.073 |  24.067 |   0.000 |
 | 1     | chum    | chum    | 6         | NA    | 2   |   -0.766 |     0.073 | -10.486 |   0.000 |
 | 2     | pink    | pink    | 7         | NA    | 0   |    0.416 |     0.036 |  11.707 |   0.000 |
@@ -235,6 +235,6 @@ ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat
 
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png)
 
-Runtime for this vignette: 19.05 secs
+Runtime for this vignette: 18.5 secs
 
 ## Works cited

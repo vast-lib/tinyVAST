@@ -217,7 +217,7 @@ ggplot( proportions ) +
 
 ![](predator_expanded_diet_files/figure-html/unnamed-chunk-5-1.png)
 
-Runtime for this vignette: 1.05 mins
+Runtime for this vignette: 1.07 mins
 
 ### Works cited
 
