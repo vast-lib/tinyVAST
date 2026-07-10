@@ -118,7 +118,7 @@ out
 #>     variables = c("f1", "f2", 1:n_c), distribution_column = "dist")
 #> 
 #> Run time: 
-#> Time difference of 2.201223 secs
+#> Time difference of 1.545879 secs
 #> 
 #> Family: 
 #> $obs
@@ -148,7 +148,7 @@ out
 #> log_sigma -0.52203929 0.06761656
 #> log_sigma  0.21850709 0.13313013
 #> log_kappa -0.26762174 0.21031509
-#> Maximum gradient component: 0.002544266 
+#> Maximum gradient component: 0.002544269 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.5312474
@@ -281,6 +281,7 @@ Lhat_cf[lower.tri(Lhat_cf,diag=TRUE)] = as.list(out$sdrep, what="Estimate")$thet
 #> Warning in Lhat_cf[lower.tri(Lhat_cf, diag = TRUE)] = as.list(out$sdrep, :
 #> number of items to replace is not a multiple of replacement length
 Lhat_cf = rotate_pca( L_tf=Lhat_cf, order="decreasing" )$L_tf
+#> Warning in sqrt(Eigen$values): NaNs produced
 ```
 
 Where we can again compared the estimated and true loadings matrices:
@@ -303,7 +304,7 @@ knitr::kable( Lhat_cf,
 
 Rotated estimated loadings with full rank {.table}
 
-Runtime for this vignette: 9.02 secs
+Runtime for this vignette: 6.92 secs
 
 ## Works cited
 
