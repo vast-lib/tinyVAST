@@ -139,14 +139,15 @@ test_that("formula function poly(.,raw=FALSE) is parsed correctly when fitting a
 
 
 test_that("tinyVAST works as dsem", {
+  skip_on_cran()
   data(isle_royale, package="dsem")
   
   # Convert to long-form
-  data = expand.grid( "time"=isle_royale[,1], "var"=colnames(isle_royale[,2:3]) )
-  data$logn = unlist(log(isle_royale[2:3]))
+  data_long = expand.grid( "time"=isle_royale[,1], "var"=colnames(isle_royale[,2:3]) )
+  data_long$logn = unlist(log(isle_royale[2:3]))
   
   # Define cross-lagged DSEM
-  dsem = "
+  dsem_term = "
     # Link, lag, param_name
     wolves -> wolves, 1, arW
     moose -> wolves, 1, MtoW
@@ -157,19 +158,39 @@ test_that("tinyVAST works as dsem", {
   "
   
   # fit model ... spacetime_term
-  fit1 = tinyVAST( spacetime_term = dsem,
-                   data = data,
-                   times = isle_royale[,1],
-                   variables = colnames(isle_royale[,2:3]),
-                   formula = logn ~ 0 + var )
+  fit1 = tinyVAST(
+    spacetime_term = dsem_term,
+    data = data_long,
+    times = isle_royale[,1],
+    variables = colnames(isle_royale[,2:3]),
+    formula = logn ~ 0 + var
+  )
   # fit model ... time_term
-  fit2 = tinyVAST( time_term = dsem,
-                   data = data,
-                   times = isle_royale[,1],
-                   variables = colnames(isle_royale[,2:3]),
-                   formula = logn ~ 0 + var )
+  fit2 = tinyVAST(
+    time_term = dsem_term,
+    data = data_long,
+    times = isle_royale[,1],
+    variables = colnames(isle_royale[,2:3]),
+    formula = logn ~ 0 + var
+  )
+
+  # initial build of object
+  data_ts = ts( log(isle_royale[,2:3]), start=1959)
+  fit_dsem = dsem(
+    sem = dsem_term,
+    tsdata = data_ts,
+    family = list(
+      wolves = fixed(),
+      moose = fixed()
+    ),
+    estimate_delta0 = FALSE,
+    control = dsem_control(
+      use_REML = FALSE
+    )
+  )
 
   expect_equal( as.numeric(fit1$opt$obj), as.numeric(fit2$opt$obj), tolerance = 1e-3  )
   expect_equal( as.numeric(fit1$opt$obj), 5.781919, tolerance = 1e-3 )
+  expect_equal( as.numeric(fit1$opt$obj), as.numeric(fit_dsem$opt$obj), tolerance = 1e-3 )
 
 } )
