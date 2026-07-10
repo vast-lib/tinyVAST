@@ -4,6 +4,8 @@
 
 - Replace array with tmbutils::array in CPP, to disambiguate new array
   typedef in RcppEigen, following andrjohns in dsem#63
+- Remove “test-basic-fits.R” test “tinyVAST works as dsem” from CRAN,
+  due to weird and un-reproducible ERROR on CRAN openBLAS check
 
 ## tinyVAST 1.6.1
 
