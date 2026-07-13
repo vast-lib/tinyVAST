@@ -73,6 +73,7 @@ test_that("dsem and tinyVAST give identical results without lags", {
 
 test_that("dsem and tinyVAST give identical results with lags", {
   # Simulate data
+  library(dsem)
   set.seed(101)
   n_rows = 100
   X = 1 + rnorm(n_rows - 1)

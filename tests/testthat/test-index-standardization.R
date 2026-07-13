@@ -74,8 +74,10 @@ test_that("Basic index standardization works", {
 })
 
 test_that("Index standardization results are identical in VAST, tinyVAST, and sdmTMB", {
-  skip_if_not(require(VAST))
-  skip_if_not(require(sdmTMB))
+  skip_if_not_installed("VAST")
+  skip_if_not_installed("sdmTMB")
+  library(VAST)
+  library(sdmTMB)
   library(fmesher)
   set.seed(101)
   options("tinyVAST.verbose" = FALSE)
