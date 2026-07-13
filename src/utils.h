@@ -522,16 +522,18 @@ Type xi_distribution( vector<int> model_options,
 }
 
 // distribution/projection for epsilon
+// Passing const with pointer to simplify compilation (and avoid potential compiler errors during devtools checks)
 template<class Type>
-tmbutils::array<Type> epsilon_distribution( tmbutils::array<Type> epsilon_stc,
-                                  vector<int> model_options,
-                                  Eigen::SparseMatrix<Type> Rho_hh,
-                                  Eigen::SparseMatrix<Type> Gamma_hh,
-                                  Eigen::SparseMatrix<Type> Gammainv_hh,
-                                  Eigen::SparseMatrix<Type> Q_ss,
-                                  Type range,
-                                  nngp_data_t<Type> nngp_data,
-                                  Type &nll ){
+tmbutils::array<Type> epsilon_distribution(
+    tmbutils::array<Type> epsilon_stc,
+    const vector<int> &model_options,
+    const Eigen::SparseMatrix<Type> &Rho_hh,
+    const Eigen::SparseMatrix<Type> &Gamma_hh,
+    const Eigen::SparseMatrix<Type> &Gammainv_hh,
+    const Eigen::SparseMatrix<Type> &Q_ss,
+    Type range,
+    const nngp_data_t<Type> &nngp_data,
+    Type &nll ){
 
   if( epsilon_stc.size() > 0 ){
     int n_s = epsilon_stc.dim(0);
