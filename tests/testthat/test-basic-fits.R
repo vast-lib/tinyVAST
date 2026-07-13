@@ -140,6 +140,7 @@ test_that("formula function poly(.,raw=FALSE) is parsed correctly when fitting a
 
 test_that("tinyVAST works as dsem", {
   skip_on_cran()
+  library(dsem)
   data(isle_royale, package="dsem")
   
   # Convert to long-form
