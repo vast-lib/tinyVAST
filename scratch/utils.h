@@ -1,3 +1,6 @@
+// Notes
+// don't use pass-by-const-reference for tmbutils::array
+
 namespace tinyVAST {
 
 enum valid_family {
@@ -681,7 +684,7 @@ template<class Type>
 vector<Type> multiply_epsilon(
     const matrix<int> &A,
     const vector<Type> &weight,
-    const tmbutils::array<Type> &x,
+    tmbutils::array<Type> x,
     int n_i ){
 
   vector<Type> out( n_i );
@@ -697,7 +700,7 @@ template<class Type>
 vector<Type> multiply_omega(
     const matrix<int> &A,
     const vector<Type> &weight,
-    const tmbutils::array<Type> &x,
+    tmbutils::array<Type> x,
     int n_i ){
 
   vector<Type> out( n_i );
@@ -712,7 +715,7 @@ vector<Type> multiply_omega(
 template<class Type>
 vector<Type> multiply_xi(
     const Eigen::SparseMatrix<Type> &A_is,
-    const tmbutils::array<Type> &xi_sl,
+    tmbutils::array<Type> xi_sl,
     const matrix<Type> &W_il ){
 
   vector<Type> out( W_il.rows() );
@@ -728,7 +731,7 @@ vector<Type> multiply_xi(
 }
 template<class Type>
 vector<Type> multiply_delta(
-    const tmbutils::array<Type> &delta_tc,
+    tmbutils::array<Type> delta_tc,
     const vector<int> &t_i,
     const vector<int> &c_i,
     int n_i ){
