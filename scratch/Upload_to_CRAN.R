@@ -3,8 +3,8 @@
 library(devtools)
 #pandoc::pandoc_install()
 
-setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
-#setwd( R'(C:\Users\james\OneDrive\Desktop\Git\tinyVAST)')
+#setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
+setwd( R'(C:\Users\james\OneDrive\Desktop\Git\tinyVAST)')
 
 # Compile
 if( FALSE ){
@@ -12,7 +12,7 @@ if( FALSE ){
 }
 
 # Test install
-install_local(force=TRUE, dep=TRUE, build_vignettes=TRUE, upgrade=FALSE)
+pak::pak(dep=TRUE, upgrade=FALSE)
 #install_local(force=TRUE, dep=TRUE, build_vignettes=FALSE, upgrade=FALSE)
 browseVignettes("tinyVAST")
 
