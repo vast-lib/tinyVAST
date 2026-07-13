@@ -48,10 +48,11 @@ enum valid_link {
 //}
 
 template<class Type>
-Eigen::SparseMatrix<Type> vectorsToSparseMatrix( vector<int> i,
-                                                 vector<int> j,
-                                                 vector<Type> x,
-                                                 int N ){
+Eigen::SparseMatrix<Type> vectorsToSparseMatrix(
+    const vector<int> &i,
+    const vector<int> &j,
+    const vector<Type> &x,
+    int N ){
 
   // https://eigen.tuxfamily.org/dox/classEigen_1_1SparseMatrix.html#title35
   using namespace Eigen;
@@ -101,10 +102,11 @@ struct spde_covariates_t{
 };
 // make stiffness G1 from covariates in columns of E0, E1, E2
 template<class Type>
-Eigen::SparseMatrix<Type> G_spde_covariates( spde_covariates_t<Type> spde,
-                                              matrix<Type> H_jj,
-                                              //matrix<Type> V_zk,
-                                              vector<Type> triangle_k ){
+Eigen::SparseMatrix<Type> G_spde_covariates(
+    const spde_covariates_t<Type> &spde,
+    const matrix<Type> &H_jj,
+    //matrix<Type> V_zk,
+    const vector<Type> &triangle_k ){
 
   // TO ADD EDGE COVARIATES:
   // 0.  add n_e = edge0_tj.rows()
@@ -161,13 +163,13 @@ Eigen::SparseMatrix<Type> G_spde_covariates( spde_covariates_t<Type> spde,
 // Using a SAR (not standardized) to approximate spatial function
 template<class Type>
 Eigen::SparseMatrix<Type> Q_SAR(
-  //Type rho,
-  Type kappa,
-  matrix<Type> H,
-  int n_s,
-  vector<int> i_z,
-  vector<int> j_z,
-  matrix<Type> delta_z2 ){
+    //Type rho,
+    Type kappa,
+    const matrix<Type> &H,
+    int n_s,
+    const vector<int> &i_z,
+    const vector<int> &j_z,
+    const matrix<Type> &delta_z2 ){
 
   //Type max_dist = delta_z2.cwiseAbs().maxCoeff();
 
@@ -201,11 +203,12 @@ Eigen::SparseMatrix<Type> Q_SAR(
 
 // New matrix-notation precision constructor for tail-down exponential stream network
 template<class Type>
-Eigen::SparseMatrix<Type> Q_network2( Type log_theta,
-                                     int n_s,
-                                     vector<int> parent_s,
-                                     vector<int> child_s,
-                                     vector<Type> dist_s ){
+Eigen::SparseMatrix<Type> Q_network2(
+    Type log_theta,
+    int n_s,
+    const vector<int> &parent_s,
+    const vector<int> &child_s,
+    const vector<Type> &dist_s ){
 
   // Compute vectors
   Type theta = exp(log_theta);
@@ -607,12 +610,13 @@ tmbutils::array<Type> epsilon_distribution(
 
 // distribution/projection for epsilon
 template<class Type>
-tmbutils::array<Type> delta_distribution( tmbutils::array<Type> delta_tc,
-                                  vector<int> model_options,
-                                  Eigen::SparseMatrix<Type> Rho_hh,
-                                  Eigen::SparseMatrix<Type> Gamma_hh,
-                                  Eigen::SparseMatrix<Type> Gammainv_hh,
-                                  Type &nll ){
+tmbutils::array<Type> delta_distribution(
+    tmbutils::array<Type> delta_tc,
+    const vector<int> &model_options,
+    const Eigen::SparseMatrix<Type> &Rho_hh,
+    const Eigen::SparseMatrix<Type> &Gamma_hh,
+    const Eigen::SparseMatrix<Type> &Gammainv_hh,
+    Type &nll ){
 
   if( delta_tc.size() > 0 ){
     int n_t = delta_tc.dim(0);
@@ -674,7 +678,12 @@ bool isNA(Type x){
 // Sparse array * matrix
 // NAs in IVECTOR or IMATRIX get converted to -2147483648, so isNA doesn't work ... instead drop NAs from A prior to passing to TMB
 template<class Type>
-vector<Type> multiply_epsilon( matrix<int> A, vector<Type> weight, tmbutils::array<Type> x, int n_i ){
+vector<Type> multiply_epsilon(
+    const matrix<int> &A,
+    const vector<Type> &weight,
+    const tmbutils::array<Type> &x,
+    int n_i ){
+
   vector<Type> out( n_i );
   out.setZero();
   if( x.size() > 0 ){
@@ -685,7 +694,12 @@ vector<Type> multiply_epsilon( matrix<int> A, vector<Type> weight, tmbutils::arr
   return out;
 }
 template<class Type>
-vector<Type> multiply_omega( matrix<int> A, vector<Type> weight, tmbutils::array<Type> x, int n_i ){
+vector<Type> multiply_omega(
+    const matrix<int> &A,
+    const vector<Type> &weight,
+    const tmbutils::array<Type> &x,
+    int n_i ){
+
   vector<Type> out( n_i );
   out.setZero();
   if( x.size() > 0 ){
@@ -696,7 +710,11 @@ vector<Type> multiply_omega( matrix<int> A, vector<Type> weight, tmbutils::array
   return out;
 }
 template<class Type>
-vector<Type> multiply_xi( Eigen::SparseMatrix<Type> A_is, tmbutils::array<Type> xi_sl, matrix<Type> W_il ){
+vector<Type> multiply_xi(
+    const Eigen::SparseMatrix<Type> &A_is,
+    const tmbutils::array<Type> &xi_sl,
+    const matrix<Type> &W_il ){
+
   vector<Type> out( W_il.rows() );
   out.setZero();
   if( xi_sl.size() > 0 ){
@@ -709,7 +727,12 @@ vector<Type> multiply_xi( Eigen::SparseMatrix<Type> A_is, tmbutils::array<Type> 
   return out;
 }
 template<class Type>
-vector<Type> multiply_delta( tmbutils::array<Type> delta_tc, vector<int> t_i, vector<int> c_i, int n_i ){
+vector<Type> multiply_delta(
+    const tmbutils::array<Type> &delta_tc,
+    const vector<int> &t_i,
+    const vector<int> &c_i,
+    int n_i ){
+
   vector<Type> delta_i( n_i );
   delta_i.setZero();
   if( delta_tc.size() > 0 ){
@@ -728,10 +751,11 @@ Type sign(Type x){
 
 // dlnorm
 template<class Type>
-Type dlnorm( Type x,
-             Type meanlog,
-             Type sdlog,
-             int give_log=0){
+Type dlnorm(
+    Type x,
+    Type meanlog,
+    Type sdlog,
+    int give_log=0){
 
   //return 1/(sqrt(2*M_PI)*sd) * exp(-.5*pow((x-mean)/sd,2));
   Type logres = dnorm( log(x), meanlog, sdlog, true) - log(x);
@@ -740,11 +764,12 @@ Type dlnorm( Type x,
 
 // dlnorm
 template<class Type>
-Type dbinom_custom( Type x,
-             Type log_prob,
-             Type log_one_minus_prob,
-             Type size,
-             int give_log = 0 ){
+Type dbinom_custom(
+    Type x,
+    Type log_prob,
+    Type log_one_minus_prob,
+    Type size,
+    int give_log = 0 ){
 
   // size choose x
   Type logres = lgamma(size + 1.0) - lgamma(x + 1.0) - lgamma(size - x + 1.0);
@@ -755,9 +780,10 @@ Type dbinom_custom( Type x,
 
 // dlnorm
 template<class Type>
-Type devresid_binom( Type y,
-                     Type weight,  // weight = size
-                     Type mu ){
+Type devresid_binom(
+    Type y,
+    Type weight,  // weight = size
+    Type mu ){
 
   Type y_weight = y * weight;
   Type mu_weight = mu * weight;
@@ -779,9 +805,10 @@ Type devresid_binom( Type y,
 // Deviance for the Tweedie
 // https://en.wikipedia.org/wiki/Tweedie_distribution#Properties
 template<class Type>
-Type devresid_tweedie( Type y,
-                       Type mu,
-                       Type p ){
+Type devresid_tweedie(
+    Type y,
+    Type mu,
+    Type p ){
 
   Type c1 = pow( y, 2.0-p ) / (1.0-p) / (2.0-p);
   Type c2 = y * pow( mu, 1.0-p ) / (1.0-p);
@@ -794,10 +821,11 @@ Type devresid_tweedie( Type y,
 // Deviance for the student-T
 // from chatGPT (experimental) ... converges on Gaussian as df -> Inf
 template<class Type>
-Type devresid_student( Type y,
-                       Type mu,
-                       Type sigma,
-                       Type df ){
+Type devresid_student(
+    Type y,
+    Type mu,
+    Type sigma,
+    Type df ){
 
   Type deviance = (df + 1.0) * log( 1.0 + pow(y-mu,2.0) / (df * sigma*sigma) );
   Type devresid = sign( y - mu ) * pow( deviance, 0.5 );
@@ -806,7 +834,13 @@ Type devresid_student( Type y,
 
 // COPIED from sdmTMB.cpp in sdmTMB package on Nov. 14, 2025
 template <class Type>
-Type dstudent(Type x, Type mean, Type sigma, Type df, int give_log = 0) {
+Type dstudent(
+    Type x,
+    Type mean,
+    Type sigma,
+    Type df,
+    int give_log = 0) {
+
   // from metRology::dt.scaled()
   // dt((x - mean)/sd, df, ncp = ncp, log = TRUE) - log(sd)
   Type logres = dt((x - mean) / sigma, df, true) - log(sigma);
@@ -830,9 +864,10 @@ Type dstudent(Type x, Type mean, Type sigma, Type df, int give_log = 0) {
 //  return devresid;
 //}
 template<class Type>
-Type devresid_nbinom2( Type y,
-                       Type logmu,
-                       Type logtheta ){
+Type devresid_nbinom2(
+    Type y,
+    Type logmu,
+    Type logtheta ){
 
   // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
   Type logp1 = dnbinom_robust( y, log(y + Type(1e-10)), Type(2.0) * log(y + Type(1e-10)) - logtheta, true );
@@ -846,15 +881,17 @@ Type devresid_nbinom2( Type y,
 // distribution/projection for epsilon
 // deviance = deviance1 + deviance2
 template<class Type>
-Type one_predictor_likelihood( Type &y,
-                        Type p,
-                        Type size,
-                        int link,
-                        int family,
-                        vector<Type> log_sigma_segment,
-                        Type &nll,
-                        Type &devresid,
-                        objective_function<Type>* of ){
+Type one_predictor_likelihood(
+    Type &y,
+    Type p,
+    Type size,
+    int link,
+    int family,
+    vector<Type> log_sigma_segment,
+    Type &nll,
+    Type &devresid,
+    objective_function<Type>* of ){
+
   Type mu, logmu, log_one_minus_mu;
   //Type devresid = 0;
 
@@ -972,17 +1009,19 @@ Type one_predictor_likelihood( Type &y,
 
 // distribution/projection for epsilon
 template<class Type>
-Type two_predictor_likelihood( Type &y,
-                               Type p1,
-                               Type p2,
-                               Type size,
-                               vector<int> link,
-                               vector<int> family,
-                               vector<Type> log_sigma_segment,
-                               int poislink,
-                               Type &nll,
-                               Type &dev,
-                               objective_function<Type>* of ){
+Type two_predictor_likelihood(
+    Type &y,
+    Type p1,
+    Type p2,
+    Type size,
+    vector<int> link,
+    vector<int> family,
+    vector<Type> log_sigma_segment,
+    int poislink,
+    Type &nll,
+    Type &dev,
+    objective_function<Type>* of ){
+
   Type mu1, logmu1, mu2, logmu2, log_one_minus_mu1;
 
   // First link
