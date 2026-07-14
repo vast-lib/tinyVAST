@@ -191,7 +191,7 @@ and season-across-year (lag-3) terms are significant:</p>
 <span><span class="co">#&gt; 3     2 density density         3  &lt;NA&gt;   0 1.3015125 0.05159715 25.224503</span></span>
 <span><span class="co">#&gt;         p_value</span></span>
 <span><span class="co">#&gt; 1  2.080067e-08</span></span>
-<span><span class="co">#&gt; 2  2.761335e-27</span></span>
+<span><span class="co">#&gt; 2  2.761334e-27</span></span>
 <span><span class="co">#&gt; 3 2.157556e-140</span></span></code></pre></div>
 <p>We can then visualize density in selected years. To do this, we first
 define a predictive grid</p>
@@ -345,7 +345,7 @@ deterministic projection:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">logdens</span>, geometry <span class="op">=</span> <span class="va">geometry</span><span class="op">)</span>, col <span class="op">=</span> <span class="cn">NA</span> <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span> rows <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">year</span><span class="op">)</span>, cols <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">season</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="seasonal_index_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 3.94 mins</p>
+<p>Runtime for this vignette: 9.48 mins</p>
 <div class="section level2">
 <h2 class="unnumbered" id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h2>

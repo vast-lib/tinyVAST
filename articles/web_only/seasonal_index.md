@@ -120,7 +120,7 @@ summary(fit, "spacetime_term")
 #> 3     2 density density         3  <NA>   0 1.3015125 0.05159715 25.224503
 #>         p_value
 #> 1  2.080067e-08
-#> 2  2.761335e-27
+#> 2  2.761334e-27
 #> 3 2.157556e-140
 ```
 
@@ -298,7 +298,7 @@ ggplot(projdata) +
 
 ![](seasonal_index_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 3.94 mins
+Runtime for this vignette: 9.48 mins
 
 ## Works cited
 
