@@ -3,6 +3,7 @@
 * Replace array<Type> with tmbutils::array<Type> in CPP, to disambiguate new array typedef in RcppEigen, following andrjohns in dsem#63
 * Remove "test-basic-fits.R" test "tinyVAST works as dsem" from CRAN, due to weird and un-reproducible ERROR on CRAN openBLAS check
 * Update `epsilon_distribution` to pass arguments using const and pointers (pass-by-const-reference) to avoid compiler errors
+* Move helper functions to `tinyVAST` namespace
 
 # tinyVAST 1.6.1
 
