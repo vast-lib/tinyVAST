@@ -84,3 +84,17 @@ jobs:
           upload-snapshots: true
           args: 'c("--no-manual", "--as-cran", "--ignore-vignettes", "--no-build-vignettes")'
           build_args: 'c("--no-manual", "--no-build-vignettes")'
+
+      - name: Build tar.gz for CRAN submission
+        if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
+        run: |
+          install.packages('pkgbuild')
+          pkgbuild::build(".", dest_path = ".", vignettes = TRUE)
+        shell: Rscript {0}
+
+      - name: Upload tar.gz
+        if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tinyVAST-tarball
+          path: '*.tar.gz'
