@@ -107,7 +107,7 @@ struct spde_covariates_t{
 template<class Type>
 Eigen::SparseMatrix<Type> G_spde_covariates(
     const spde_covariates_t<Type> &spde,
-    const matrix<Type> &H_jj,
+    matrix<Type> H_jj,
     //matrix<Type> V_zk,
     const vector<Type> &triangle_k ){
 
@@ -268,11 +268,12 @@ struct nngp_data_t{
 };
 // Density function .. sigma2 fixed at 1.0
 template<class Type>
-Type NNGP( Type sigma2,
-           Type range,
-           vector<Type> field_s,
-           // Data
-           nngp_data_t<Type> nngp_data ){
+Type NNGP(
+    Type sigma2,
+    Type range,
+    vector<Type> field_s,
+    // Data
+    const nngp_data_t<Type> &nngp_data ){
 
   // Using original order and ordered_structure, by calling gp_order(i) and gp_order(nn_ids), because:
   // 1.  using original version in new order is very slow! presumably the order is terrible for the inner Hessian
@@ -345,11 +346,12 @@ Type NNGP( Type sigma2,
 
 // Function to calculate RAM matrices
 template<class Type>
-Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
-                                    vector<Type> ram_start,
-                                    vector<Type> beta_z,
-                                    int n_c,
-                                    int what ){
+Eigen::SparseMatrix<Type> make_ram(
+    const matrix<int> &ram,
+    vector<Type> ram_start,
+    vector<Type> beta_z,
+    int n_c,
+    int what ){
 
   Eigen::SparseMatrix<Type> out_cc(n_c, n_c);
   out_cc.setZero();
@@ -383,11 +385,12 @@ Eigen::SparseMatrix<Type> make_ram( matrix<int> ram,
 // Based on:
 //   https://github.com/meganferg/FergusonEtal_20250125_EBS_Beluga_DSM/blob/main/src/te_tw_DSM.cpp#L85C9-L85C40 (Megan Ferguson)
 template<class Type>
-Type gamma_distribution( vector<Type> gamma_k,
-                         vector<int> Sdims,
-                         vector<int> Sblock,
-                         Eigen::SparseMatrix<Type> S_kk,
-                         vector<Type> log_lambda ){
+Type gamma_distribution(
+    vector<Type> gamma_k,
+    vector<int> Sdims,
+    vector<int> Sblock,
+    const Eigen::SparseMatrix<Type> &S_kk,
+    vector<Type> log_lambda ){
 
   using namespace density;
   Type nll = 0.0;
@@ -436,15 +439,16 @@ Type gamma_distribution( vector<Type> gamma_k,
 
 // distribution/projection for omega
 template<class Type>
-tmbutils::array<Type> omega_distribution( tmbutils::array<Type> omega_sc,
-                                 vector<int> model_options,
-                                 Eigen::SparseMatrix<Type> Rho_cc,
-                                 Eigen::SparseMatrix<Type> Gamma_cc,
-                                 Eigen::SparseMatrix<Type> Gammainv_cc,
-                                 Eigen::SparseMatrix<Type> Q_ss,
-                                 Type range,
-                                 nngp_data_t<Type> nngp_data,
-                                 Type &nll ){
+tmbutils::array<Type> omega_distribution(
+    tmbutils::array<Type> omega_sc,
+    vector<int> model_options,
+    const Eigen::SparseMatrix<Type> &Rho_cc,
+    const Eigen::SparseMatrix<Type> &Gamma_cc,
+    const Eigen::SparseMatrix<Type> &Gammainv_cc,
+    const Eigen::SparseMatrix<Type> &Q_ss,
+    Type range,
+    const nngp_data_t<Type> &nngp_data,
+    Type &nll ){
 
   if( omega_sc.size() > 0 ){
     int n_c = omega_sc.dim(1);
@@ -500,12 +504,13 @@ tmbutils::array<Type> omega_distribution( tmbutils::array<Type> omega_sc,
 
 // distribution/projection for xi
 template<class Type>
-Type xi_distribution( vector<int> model_options,
-                      tmbutils::array<Type> xi_sl,
-                      vector<Type> log_sigmaxi_l,
-                      Eigen::SparseMatrix<Type> Q_ss,
-                      Type range,
-                      nngp_data_t<Type> nngp_data ){
+Type xi_distribution(
+    vector<int> model_options,
+    tmbutils::array<Type> xi_sl,
+    vector<Type> log_sigmaxi_l,
+    const Eigen::SparseMatrix<Type> &Q_ss,
+    Type range,
+    const nngp_data_t<Type> &nngp_data ){
 
   Type nll = 0;
   if( xi_sl.size() > 0 ){
