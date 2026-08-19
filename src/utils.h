@@ -520,7 +520,7 @@ Type xi_distribution(
       vector<Type> xi_s( xi_sl.rows() );
       for( int l=0; l<n_l; l++ ){
         xi_s = xi_sl.col(l);
-        NNGP( exp(2.0*log_sigmaxi_l(l)), range, xi_s, nngp_data );
+        nll += NNGP( exp(2.0*log_sigmaxi_l(l)), range, xi_s, nngp_data );
       }
     }else{
       for( int l=0; l<n_l; l++ ){
