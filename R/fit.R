@@ -271,7 +271,7 @@ function( formula,
       stop("specifying `triangle_formula` only makes sense when `spatial_domain` has class `vertex_coords`", call. = FALSE)
     }
   }
-  if( !is.null(control$nearest_neighbors) & (control$gmrf_parameterization != "projection") ){
+  if( is(spatial_domain,"nngp_domain") & (control$gmrf_parameterization != "projection") ){
     stop("`nearest neighbors` only works with `projection` gmrf_parameterization")
   }
 
