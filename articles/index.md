@@ -7,13 +7,13 @@
 - [tinyVAST model
   description](https://vast-lib.github.io/tinyVAST/articles/model-description.md):
 - [Comparison with
-  mgcv](https://vast-lib.github.io/tinyVAST/articles/mgcv.md):
+  mgcv](https://vast-lib.github.io/tinyVAST/articles/web_only/mgcv.md):
 - [Spatial
-  modeling](https://vast-lib.github.io/tinyVAST/articles/spatial.md):
+  modeling](https://vast-lib.github.io/tinyVAST/articles/web_only/spatial.md):
 - [Multiple data
-  types](https://vast-lib.github.io/tinyVAST/articles/multiple_data.md):
+  types](https://vast-lib.github.io/tinyVAST/articles/web_only/multiple_data.md):
 - [Dynamic structural equation
-  models](https://vast-lib.github.io/tinyVAST/articles/dsem.md):
+  models](https://vast-lib.github.io/tinyVAST/articles/web_only/dsem.md):
 - [Simultaneous autoregressive
   process](https://vast-lib.github.io/tinyVAST/articles/web_only/simultaneous_autoregressive_process.md):
 - [Stream network
@@ -31,7 +31,7 @@
 - [Empirical orthogonal
   functions](https://vast-lib.github.io/tinyVAST/articles/web_only/empirical_orthogonal_functions.md):
 - [Spatial factor
-  analysis](https://vast-lib.github.io/tinyVAST/articles/spatial_factor_analysis.md):
+  analysis](https://vast-lib.github.io/tinyVAST/articles/web_only/spatial_factor_analysis.md):
 - [Vector autoregressive spatio-temporal
   models](https://vast-lib.github.io/tinyVAST/articles/web_only/VAST.md):
 - [Predator expanded

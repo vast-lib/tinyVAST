@@ -4,22 +4,22 @@ pkgdown_sha: ~
 articles:
   web_only/age_composition_expansion: web_only/age_composition_expansion.html
   web_only/condition: web_only/condition.html
-  dsem: dsem.html
+  web_only/dsem: web_only/dsem.html
   web_only/empirical_orthogonal_functions: web_only/empirical_orthogonal_functions.html
-  mgcv: mgcv.html
+  web_only/mgcv: web_only/mgcv.html
   model-description: model-description.html
-  multiple_data: multiple_data.html
+  web_only/multiple_data: web_only/multiple_data.html
   web_only/overview: web_only/overview.html
   web_only/predator_expanded_diet: web_only/predator_expanded_diet.html
   web_only/probabilistic_forecasts: web_only/probabilistic_forecasts.html
   web_only/seasonal_index: web_only/seasonal_index.html
   web_only/simultaneous_autoregressive_process: web_only/simultaneous_autoregressive_process.html
-  spatial_factor_analysis: spatial_factor_analysis.html
+  web_only/spatial_factor_analysis: web_only/spatial_factor_analysis.html
   web_only/spatial_structural_model: web_only/spatial_structural_model.html
-  spatial: spatial.html
+  web_only/spatial: web_only/spatial.html
   web_only/stream_networks: web_only/stream_networks.html
   web_only/VAST: web_only/VAST.html
-last_built: 2026-07-14T05:27Z
+last_built: 2026-09-18T13:19Z
 urls:
   reference: https://vast-lib.github.io/tinyVAST/reference
   article: https://vast-lib.github.io/tinyVAST/articles

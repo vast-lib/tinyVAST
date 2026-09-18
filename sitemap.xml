@@ -1,22 +1,22 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://vast-lib.github.io/tinyVAST/404.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/LICENSE-text.html</loc></url>
-<url><loc>https://vast-lib.github.io/tinyVAST/articles/dsem.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/index.html</loc></url>
-<url><loc>https://vast-lib.github.io/tinyVAST/articles/mgcv.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/model-description.html</loc></url>
-<url><loc>https://vast-lib.github.io/tinyVAST/articles/multiple_data.html</loc></url>
-<url><loc>https://vast-lib.github.io/tinyVAST/articles/spatial.html</loc></url>
-<url><loc>https://vast-lib.github.io/tinyVAST/articles/spatial_factor_analysis.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/VAST.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/age_composition_expansion.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/condition.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/dsem.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/empirical_orthogonal_functions.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/mgcv.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/multiple_data.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/overview.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/predator_expanded_diet.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/probabilistic_forecasts.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/seasonal_index.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/simultaneous_autoregressive_process.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/spatial.html</loc></url>
+<url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/spatial_factor_analysis.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/spatial_structural_model.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/articles/web_only/stream_networks.html</loc></url>
 <url><loc>https://vast-lib.github.io/tinyVAST/authors.html</loc></url>

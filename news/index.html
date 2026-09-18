@@ -20,10 +20,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/web_only/overview.html">Overview of vignettes</a></li>
     <li><a class="dropdown-item" href="../articles/model-description.html">tinyVAST model description</a></li>
-    <li><a class="dropdown-item" href="../articles/mgcv.html">Comparison with mgcv</a></li>
-    <li><a class="dropdown-item" href="../articles/spatial.html">Spatial modeling</a></li>
-    <li><a class="dropdown-item" href="../articles/multiple_data.html">Multiple data types</a></li>
-    <li><a class="dropdown-item" href="../articles/dsem.html">Dynamic structural equation models</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/mgcv.html">Comparison with mgcv</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial.html">Spatial modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/multiple_data.html">Multiple data types</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/dsem.html">Dynamic structural equation models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/simultaneous_autoregressive_process.html">Simultaneous autoregressive process</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/stream_networks.html">Stream network models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/probabilistic_forecasts.html">Probabilistic forecasts</a></li>
@@ -32,7 +32,7 @@
     <li><a class="dropdown-item" href="../articles/web_only/age_composition_expansion.html">Age composition expansion</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/condition.html">Condition and density</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/empirical_orthogonal_functions.html">Empirical orthogonal functions</a></li>
-    <li><a class="dropdown-item" href="../articles/spatial_factor_analysis.html">Spatial factor analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/web_only/spatial_factor_analysis.html">Spatial factor analysis</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/VAST.html">Vector autoregressive spatio-temporal models</a></li>
     <li><a class="dropdown-item" href="../articles/web_only/predator_expanded_diet.html">Predator expanded diet</a></li>
   </ul></li>
@@ -52,11 +52,12 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.6.2" id="tinyvast-162">tinyVAST 1.6.2<a class="anchor" aria-label="anchor" href="#tinyvast-162"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.6.2" id="tinyvast-162">tinyVAST 1.6.2<a class="anchor" aria-label="anchor" href="#tinyvast-162"></a></h2><p class="text-muted">CRAN release: 2026-07-14</p>
 <ul><li>Replace array<type> with tmbutils::array<type> in CPP, to disambiguate new array typedef in RcppEigen, following andrjohns in dsem#63</type></type></li>
 <li>Remove “test-basic-fits.R” test “tinyVAST works as dsem” from CRAN, due to weird and un-reproducible ERROR on CRAN openBLAS check</li>
 <li>Update <code>epsilon_distribution</code> to pass arguments using const and pointers (pass-by-const-reference) to avoid compiler errors</li>
 <li>Move helper functions to <code>tinyVAST</code> namespace</li>
+<li>Move most vignettes to web_only vignettes directory, and update interface for visreg in mgcv.Rmd vignette</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.1" id="tinyvast-161">tinyVAST 1.6.1<a class="anchor" aria-label="anchor" href="#tinyvast-161"></a></h2><p class="text-muted">CRAN release: 2026-06-30</p>
