@@ -10,7 +10,7 @@ articles:
   contents:
   - web_only/overview
   - model-description
-  - mgcv 
+  - web_only/mgcv
   - spatial
   - multiple_data
   - dsem
