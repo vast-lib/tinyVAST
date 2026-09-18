@@ -4,7 +4,7 @@
 * Remove "test-basic-fits.R" test "tinyVAST works as dsem" from CRAN, due to weird and un-reproducible ERROR on CRAN openBLAS check
 * Update `epsilon_distribution` to pass arguments using const and pointers (pass-by-const-reference) to avoid compiler errors
 * Move helper functions to `tinyVAST` namespace
-* Move mgcv.Rmd to web_only vignettes directory
+* Move most vignettes to web_only vignettes directory, and update interface for visreg in mgcv.Rmd vignette
 
 # tinyVAST 1.6.1
 

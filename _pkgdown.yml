@@ -11,9 +11,9 @@ articles:
   - web_only/overview
   - model-description
   - web_only/mgcv
-  - spatial
-  - multiple_data
-  - dsem
+  - web_only/spatial
+  - web_only/multiple_data
+  - web_only/dsem
   - web_only/simultaneous_autoregressive_process
   - web_only/stream_networks
   - web_only/probabilistic_forecasts
@@ -22,7 +22,7 @@ articles:
   - web_only/age_composition_expansion
   - web_only/condition
   - web_only/empirical_orthogonal_functions
-  - spatial_factor_analysis
+  - web_only/spatial_factor_analysis
   - web_only/VAST
   - web_only/predator_expanded_diet
 
