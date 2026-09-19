@@ -4,7 +4,7 @@ library(devtools)
 #pandoc::pandoc_install()
 
 #setwd( R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)' )
-setwd( R'(C:\Users\james\OneDrive\Desktop\Git\tinyVAST)')
+setwd( R'(C:\Users\jtuth\Documents\GitHub\tinyVAST)')
 
 # Compile
 if( FALSE ){
