@@ -1,5 +1,10 @@
 # Changelog
 
+## tinyVAST 1.6.3
+
+- Move most vignettes to web_only vignettes directory, and update
+  interface for visreg in mgcv.Rmd vignette
+
 ## tinyVAST 1.6.2
 
 CRAN release: 2026-07-14
@@ -11,8 +16,6 @@ CRAN release: 2026-07-14
 - Update `epsilon_distribution` to pass arguments using const and
   pointers (pass-by-const-reference) to avoid compiler errors
 - Move helper functions to `tinyVAST` namespace
-- Move most vignettes to web_only vignettes directory, and update
-  interface for visreg in mgcv.Rmd vignette
 
 ## tinyVAST 1.6.1
 

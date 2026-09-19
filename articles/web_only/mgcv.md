@@ -182,4 +182,4 @@ plot( out, zlab="f(x,y) for group=1")
 
 ![](mgcv_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 56.29 secs
+Runtime for this vignette: 36.75 secs
