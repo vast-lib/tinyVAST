@@ -2,6 +2,8 @@
 
 ## tinyVAST 1.6.3
 
+CRAN release: 2026-09-20
+
 - Move most vignettes to web_only vignettes directory, and update
   interface for visreg in mgcv.Rmd vignette
 

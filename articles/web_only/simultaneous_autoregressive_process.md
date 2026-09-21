@@ -85,6 +85,8 @@ mytiny0 = tinyVAST(
     profile = "alpha_j" 
   ) 
 )
+#> Warning: The model may not have converged. Maximum final gradient:
+#> 0.017330465046883.
 
 # Summarize output
 Summary = summary(mytiny0, what="spacetime_term")
@@ -93,15 +95,15 @@ knitr::kable( Summary, digits=3)
 
 | heads | to      | from    | parameter | start | lag | Estimate | Std_Error | z_value | p_value |
 |:------|:--------|:--------|:----------|:------|:----|---------:|----------:|--------:|--------:|
-| 1     | sockeye | sockeye | 1         | NA    | 1   |    0.810 |     0.067 |  12.048 |   0.000 |
+| 1     | sockeye | sockeye | 1         | NA    | 1   |    0.810 |     0.067 |  12.049 |   0.000 |
 | 1     | sockeye | sockeye | 2         | NA    | 2   |    0.181 |     0.067 |   2.711 |   0.007 |
 | 1     | pink    | pink    | 3         | NA    | 1   |    0.038 |     0.015 |   2.532 |   0.011 |
-| 1     | pink    | pink    | 4         | NA    | 2   |    0.943 |     0.017 |  54.220 |   0.000 |
+| 1     | pink    | pink    | 4         | NA    | 2   |    0.943 |     0.017 |  54.219 |   0.000 |
 | 1     | chum    | chum    | 5         | NA    | 1   |    0.742 |     0.198 |   3.757 |   0.000 |
 | 1     | chum    | chum    | 6         | NA    | 2   |    0.247 |     0.196 |   1.263 |   0.207 |
 | 2     | pink    | pink    | 7         | NA    | 0   |    0.525 |     0.035 |  14.787 |   0.000 |
 | 2     | chum    | chum    | 8         | NA    | 0   |    0.252 |     0.048 |   5.231 |   0.000 |
-| 2     | sockeye | sockeye | 9         | NA    | 0   |    0.361 |     0.036 |   9.943 |   0.000 |
+| 2     | sockeye | sockeye | 9         | NA    | 0   |    0.361 |     0.036 |   9.944 |   0.000 |
 
 ### Spatially correlated dynamics among populations
 
@@ -189,12 +191,12 @@ knitr::kable( Summary, digits=3)
 
 | heads | to      | from    | parameter | start | lag | Estimate | Std_Error | z_value | p_value |
 |:------|:--------|:--------|:----------|:------|:----|---------:|----------:|--------:|--------:|
-| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.489 |     0.088 |  16.917 |   0.000 |
-| 1     | sockeye | sockeye | 2         | NA    | 2   |   -0.489 |     0.089 |  -5.494 |   0.000 |
+| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.489 |     0.088 |  16.916 |   0.000 |
+| 1     | sockeye | sockeye | 2         | NA    | 2   |   -0.489 |     0.089 |  -5.493 |   0.000 |
 | 1     | pink    | pink    | 3         | NA    | 1   |    0.001 |     0.005 |   0.258 |   0.797 |
 | 1     | pink    | pink    | 4         | NA    | 2   |    1.032 |     0.006 | 171.576 |   0.000 |
-| 1     | chum    | chum    | 5         | NA    | 1   |    1.897 |     0.032 |  59.452 |   0.000 |
-| 1     | chum    | chum    | 6         | NA    | 2   |   -0.901 |     0.032 | -28.109 |   0.000 |
+| 1     | chum    | chum    | 5         | NA    | 1   |    1.897 |     0.032 |  59.446 |   0.000 |
+| 1     | chum    | chum    | 6         | NA    | 2   |   -0.901 |     0.032 | -28.106 |   0.000 |
 | 2     | pink    | pink    | 7         | NA    | 0   |    0.191 |     0.017 |  11.499 |   0.000 |
 | 2     | chum    | chum    | 8         | NA    | 0   |   -0.023 |     0.004 |  -6.108 |   0.000 |
 | 2     | sockeye | sockeye | 9         | NA    | 0   |    0.079 |     0.010 |   7.850 |   0.000 |
@@ -233,6 +235,6 @@ ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat
 
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png)
 
-Runtime for this vignette: 22.59 secs
+Runtime for this vignette: 14.02 secs
 
 ## Works cited

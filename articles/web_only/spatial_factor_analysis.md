@@ -118,7 +118,7 @@ out
 #>     variables = c("f1", "f2", 1:n_c), distribution_column = "dist")
 #> 
 #> Run time: 
-#> Time difference of 1.560209 secs
+#> Time difference of 1.100668 secs
 #> 
 #> Family: 
 #> $obs
@@ -304,7 +304,7 @@ knitr::kable( Lhat_cf,
 
 Rotated estimated loadings with full rank {.table}
 
-Runtime for this vignette: 6.92 secs
+Runtime for this vignette: 5.17 secs
 
 ## Works cited
 
