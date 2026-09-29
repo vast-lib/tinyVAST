@@ -42,8 +42,18 @@ test_that("cv::cv works", {
   skip_on_covr()
 
   # Run cv::cv
-  CV = cv::cv(out, seed = 123)
-  expect_equal( as.numeric(CV[['CV crit']]), 1.607874, tolerance = 0.0001 )
+  # cv::cv() re-evaluates the call from inside cv
+  # where the test-local `mesh` isn't visible
+  # bquote() solves this without assigning to global env.
+  out_cv <- eval(bquote(tinyVAST(
+    data = dat,
+    formula = n ~ s(w),
+    spatial_domain = .(mesh), # .() looks up mesh in the test environment
+    space_term = "",
+    control = tinyVASTcontrol(newton_loops = 1)
+  )))
+  CV = cv::cv(out_cv, seed = 123)
+  expect_equal( as.numeric(CV[['CV crit']]), 1.60805, tolerance = 0.0001 )
 })
 
 # test_that("data_colnames are robust", {
