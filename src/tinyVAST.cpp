@@ -274,9 +274,6 @@ Type objective_function<Type>::operator() (){
   Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(1) );
   Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(2) );
 
-  // Random effects are on the scale of the linear predictor, with tau applied in their densities;
-  // scaling their projection by 1/tau instead adds per-observation terms to the random-effect Hessian
-
   // space_term
   omega_sc = omega_distribution( omega_sc, model_options, Rho_cc,
                                    Gamma_cc, Gammainv_cc, Q_ss, exp(log_tau),
