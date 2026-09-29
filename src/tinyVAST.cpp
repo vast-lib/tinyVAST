@@ -40,7 +40,6 @@ Type objective_function<Type>::operator() (){
   DATA_IVECTOR( c_i );
   DATA_VECTOR( offset_i );
   DATA_VECTOR( weights_i );
-  DATA_UPDATE( weights_i );  // Warning: cannot use branching (weights_i > 0) when using DATA_UPDATE
   DATA_VECTOR( size_i );  // Ignored unless family = binomial
   DATA_SPARSE_MATRIX( S_kk ); // Sparse penalization matrix
   DATA_IVECTOR( Sdims );   // Dimensions of blockwise components of S_kk
@@ -56,6 +55,11 @@ Type objective_function<Type>::operator() (){
   // model_options(2)==0: no RSS; model_options(2)==1: yes RSR
   // model_options(3)==0: no extra reporting; model_options(3)==1: yes extra reporting
   // model_options(4)==0: no SE for _g; model_options(4)==1: SE for p_g;  model_options(4)==2: SE for mu_g
+  // model_options(5)==0: fixed weights_i; model_options(5)==1: weights_i can be updated without re-taping
+  bool update_weights = (model_options.size() > 5) && (model_options(5) == 1);
+  if( update_weights ){
+    DATA_UPDATE( weights_i );  // Warning: cannot use branching (weights_i > 0) when using DATA_UPDATE
+  }
   DATA_IMATRIX( Aepsilon_zz );    // NAs get converted to -2147483648
   DATA_VECTOR( Aepsilon_z );
   DATA_IMATRIX( Aomega_zz );    // NAs get converted to -2147483648
@@ -270,20 +274,23 @@ Type objective_function<Type>::operator() (){
   Eigen::SparseMatrix<Type> Gammainv2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(1) );
   Eigen::SparseMatrix<Type> Gamma2_cc = make_ram( ram2_space_term, ram2_space_term_start, theta2_z, omega2_sc.dim(1), int(2) );
 
+  // Random effects are on the scale of the linear predictor, with tau applied in their densities;
+  // scaling their projection by 1/tau instead adds per-observation terms to the random-effect Hessian
+
   // space_term
   omega_sc = omega_distribution( omega_sc, model_options, Rho_cc,
-                                   Gamma_cc, Gammainv_cc, Q_ss,
+                                   Gamma_cc, Gammainv_cc, Q_ss, exp(log_tau),
                                    exp(log_kappa), nngp_data, nll );          // nngp_data,
   omega2_sc = omega_distribution( omega2_sc, model_options, Rho2_cc,
-                                   Gamma2_cc, Gammainv2_cc, Q_ss,
+                                   Gamma2_cc, Gammainv2_cc, Q_ss, exp(log_tau),
                                    exp(log_kappa), nngp_data, nll );           // nngp_data,
 
   // spacetime_term
   epsilon_stc = epsilon_distribution( epsilon_stc, model_options, Rho_hh,
-                                     Gamma_hh, Gammainv_hh, Q_ss,
+                                     Gamma_hh, Gammainv_hh, Q_ss, exp(log_tau),
                                      exp(log_kappa), nngp_data, nll );
   epsilon2_stc = epsilon_distribution( epsilon2_stc, model_options, Rho2_hh,
-                                       Gamma2_hh, Gammainv2_hh, Q_ss,
+                                       Gamma2_hh, Gammainv2_hh, Q_ss, exp(log_tau),
                                        exp(log_kappa), nngp_data, nll );
 
   // time_term
@@ -299,9 +306,9 @@ Type objective_function<Type>::operator() (){
 
   // Distribution for SVC components
   nll += xi_distribution( model_options, xi_sl, log_sigmaxi_l,
-                          Q_ss, exp(log_kappa), nngp_data );
+                          Q_ss, exp(log_tau), exp(log_kappa), nngp_data );
   nll += xi_distribution( model_options, xi2_sl, log_sigmaxi2_l,
-                          Q_ss, exp(log_kappa), nngp_data );
+                          Q_ss, exp(log_tau), exp(log_kappa), nngp_data );
 
   // Linear predictor .. keep partial effects for RSR adjustment below
   vector<Type> p_i( n_i );
@@ -312,9 +319,9 @@ Type objective_function<Type>::operator() (){
   p_i = offset_i;
   if(alpha_j.size() > 0){ palpha1_i = X_ij*alpha_j; }
   if(gamma_k.size() > 0){ pgamma1_i = Z_ik*gamma_k; }
-  vector<Type> pepsilon1_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() ) / exp(log_tau);
-  vector<Type> pomega1_i = multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() ) / exp(log_tau);
-  vector<Type> pxi1_i = multiply_xi( A_is, xi_sl, W_il ) / exp(log_tau);
+  vector<Type> pepsilon1_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon_stc, p_i.size() );
+  vector<Type> pomega1_i = multiply_omega( Aomega_zz, Aomega_z, omega_sc, p_i.size() );
+  vector<Type> pxi1_i = multiply_xi( A_is, xi_sl, W_il );
   vector<Type> pdelta1_i = multiply_delta( delta_tc, t_i, c_i, n_i );
   p_i += palpha1_i;
   p_i += pgamma1_i;
@@ -332,9 +339,9 @@ Type objective_function<Type>::operator() (){
   p2_i.setZero();
   if(alpha2_j.size() > 0){ palpha2_i = X2_ij*alpha2_j; }
   if(gamma2_k.size() > 0){ pgamma2_i = Z2_ik*gamma2_k; }
-  vector<Type> pepsilon2_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() ) / exp(log_tau);
-  vector<Type> pomega2_i = multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() ) / exp(log_tau);
-  vector<Type> pxi2_i = multiply_xi( A_is, xi2_sl, W2_il ) / exp(log_tau);
+  vector<Type> pepsilon2_i = multiply_epsilon( Aepsilon_zz, Aepsilon_z, epsilon2_stc, p_i.size() );
+  vector<Type> pomega2_i = multiply_omega( Aomega_zz, Aomega_z, omega2_sc, p_i.size() );
+  vector<Type> pxi2_i = multiply_xi( A_is, xi2_sl, W2_il );
   vector<Type> pdelta2_i = multiply_delta( delta2_tc, t_i, c_i, n_i );
   p2_i += palpha2_i;
   p2_i += pgamma2_i;
@@ -358,14 +365,18 @@ Type objective_function<Type>::operator() (){
     if( components_e(e_i(i))==1 ){
       mu_i(i) = one_predictor_likelihood( y_i(i), p_i(i), size_i(i), link_ez(e_i(i),0), family_ez(e_i(i),0), log_sigma_segment, nll_tmp, devresid, this );
       negloglik_i(i) = nll_tmp;
-      nll += weights_i(i) * nll_tmp;
+      // Multiplying by weights_i=1 is not free, because it adds per-observation terms to the random-effect Hessian
+      if( update_weights || (weights_i(i) != Type(1.0)) ) nll_tmp *= weights_i(i);
+      nll += nll_tmp;
       deviance += pow( devresid, 2.0 );
       devresid_i(i) = devresid;
     }
     if( components_e(e_i(i))==2 ){
       mu_i(i) = two_predictor_likelihood( y_i(i), p_i(i), p2_i(i), size_i(i), link_ez.row(e_i(i)), family_ez.row(e_i(i)), log_sigma_segment, poislink_e(e_i(i)), nll_tmp, dev, this );
       negloglik_i(i) = nll_tmp;
-      nll += weights_i(i) * nll_tmp;
+      // Multiplying by weights_i=1 is not free, because it adds per-observation terms to the random-effect Hessian
+      if( update_weights || (weights_i(i) != Type(1.0)) ) nll_tmp *= weights_i(i);
+      nll += nll_tmp;
       deviance += dev;
       devresid_i(i) = NAN;
     }
@@ -392,17 +403,17 @@ Type objective_function<Type>::operator() (){
   if( n_g > 0 ){
     vector<Type> palpha1_g = X_gj*alpha_j;
     vector<Type> pgamma1_g = Z_gk*gamma_k;
-    vector<Type> pepsilon1_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha1_g.size() ) / exp(log_tau);
-    vector<Type> pomega1_g = multiply_omega( AomegaG_zz, AomegaG_z, omega_sc, palpha1_g.size() ) / exp(log_tau);
-    vector<Type> pxi1_g = multiply_xi( A_gs, xi_sl, W_gl ) / exp(log_tau);
+    vector<Type> pepsilon1_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon_stc, palpha1_g.size() );
+    vector<Type> pomega1_g = multiply_omega( AomegaG_zz, AomegaG_z, omega_sc, palpha1_g.size() );
+    vector<Type> pxi1_g = multiply_xi( A_gs, xi_sl, W_gl );
     vector<Type> pdelta1_g = multiply_delta( delta_tc, t_g, c_g, n_g );
     vector<Type> p1_g = palpha1_g + pgamma1_g+ pepsilon1_g + pomega1_g + pdelta1_g + pxi1_g + offset_g ;
     // Second linear predictor
     vector<Type> palpha2_g = X2_gj*alpha2_j;
     vector<Type> pgamma2_g = Z2_gk*gamma2_k;
-    vector<Type> pepsilon2_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha2_g.size() ) / exp(log_tau);
-    vector<Type> pomega2_g = multiply_omega( AomegaG_zz, AomegaG_z, omega2_sc, palpha2_g.size() ) / exp(log_tau);
-    vector<Type> pxi2_g = multiply_xi( A_gs, xi2_sl, W2_gl ) / exp(log_tau);
+    vector<Type> pepsilon2_g = multiply_epsilon( AepsilonG_zz, AepsilonG_z, epsilon2_stc, palpha2_g.size() );
+    vector<Type> pomega2_g = multiply_omega( AomegaG_zz, AomegaG_z, omega2_sc, palpha2_g.size() );
+    vector<Type> pxi2_g = multiply_xi( A_gs, xi2_sl, W2_gl );
     vector<Type> pdelta2_g = multiply_delta( delta2_tc, t_g, c_g, n_g );
     vector<Type> p2_g = palpha2_g + pgamma2_g + pepsilon2_g + pomega2_g + pdelta2_g + pxi2_g;
     // Combined

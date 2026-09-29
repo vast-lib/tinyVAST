@@ -629,7 +629,7 @@ function( object,
 
   #
   AepsilonG_zz = cbind(predAtriplet$i, predAtriplet$j, t_g[predAtriplet$i], c_g[predAtriplet$i])
-  which_Arows = which(apply( AepsilonG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) & any(x>0) ))
+  which_Arows = which( rowSums(is.na(AepsilonG_zz))==0 & rowSums(AepsilonG_zz>0, na.rm=TRUE)>0 )
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
   if( (nrow(object$internal$spacetime_term_ram$output$ram)==0) & (nrow(object$internal$delta_spacetime_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
@@ -639,7 +639,7 @@ function( object,
 
   #
   AomegaG_zz = cbind(predAtriplet$i, predAtriplet$j, c_g[predAtriplet$i])
-  which_Arows = which(apply( AomegaG_zz, MARGIN=1, FUN=\(x) all(!is.na(x)) ))
+  which_Arows = which( rowSums(is.na(AomegaG_zz))==0 )
   which_Arows = which_Arows[ which(predAtriplet$x[which_Arows] > 0) ]
   if( (nrow(object$internal$space_term_ram$output$ram)==0) & (nrow(object$internal$delta_space_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
