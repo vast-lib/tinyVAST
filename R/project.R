@@ -203,7 +203,7 @@ function( object,
 
   new_control = object$internal$control
   new_control$run_model = TRUE
-  new_control$nlminb_loops = 0
+  new_control$opt_loops = 0
   new_control$newton_loops = 0
   new_control$getsd = FALSE
   new_control$calculate_deviance_explained = FALSE
