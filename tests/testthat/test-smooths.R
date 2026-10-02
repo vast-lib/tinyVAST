@@ -262,18 +262,21 @@ test_that("A model with s(x, bs = 'cc') works", {
 })
 
 test_that("A model with s() by variables works", {
-  set.seed(1)
-  # For some reason, it doesn't work on CI but does locally
   skip_on_ci()
   skip_on_cran()
 
-  dat <- mgcv::gamSim(4)
-  m_mgcv <- mgcv::gam(y ~ fac + s(x2, by = fac) + s(x0), data = dat)
+  set.seed(1)
+  n <- 400
+  x2 <- runif(n)
+  fac <- factor(sample(1:3, n, replace = TRUE))
+  mu <- ifelse(fac == 1, sin(2 * pi * x2), ifelse(fac == 2, cos(3 * pi * x2), 8 * (x2 - 0.5)^2))
+  dat <- data.frame(y = mu + rnorm(n, sd = 0.5), x2 = x2, fac = fac)
+  m_mgcv <- mgcv::gam(y ~ fac + s(x2, by = fac), data = dat)
   p_mgcv <- predict(m_mgcv)
 
-  m_s <- sdmTMB::sdmTMB(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat, spatial = "off")
+  m_s <- sdmTMB::sdmTMB(formula = y ~ fac + s(x2, by = fac), data = dat, spatial = "off")
 
-  m_v <- tinyVAST(formula = y ~ fac + s(x2, by = fac) + s(x0), data = dat)
+  m_v <- tinyVAST(formula = y ~ fac + s(x2, by = fac), data = dat)
   expect_s3_class(m_v, "tinyVAST")
 
   p_m <- predict(m_mgcv)

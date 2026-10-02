@@ -446,6 +446,7 @@ tmbutils::array<Type> omega_distribution(
     const Eigen::SparseMatrix<Type> &Gamma_cc,
     const Eigen::SparseMatrix<Type> &Gammainv_cc,
     const Eigen::SparseMatrix<Type> &Q_ss,
+    Type tau,
     Type range,
     const nngp_data_t<Type> &nngp_data,
     Type &nll ){
@@ -470,7 +471,7 @@ tmbutils::array<Type> omega_distribution(
         Eigen::SparseMatrix<Type> Q_cc = IminusRho_cc.transpose() * Vinv2_cc * IminusRho_cc;
 
         // GMRF for SEM:  separable variable-space
-        nll += SEPARABLE( GMRF(Q_cc), GMRF(Q_ss) )( omega_sc );
+        nll += SCALE( SEPARABLE( GMRF(Q_cc), GMRF(Q_ss) ), Type(1.0)/tau )( omega_sc );
         // Including this line with Makevars below seems to cause a crash:
         // PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
         // PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
@@ -483,7 +484,7 @@ tmbutils::array<Type> omega_distribution(
             nll += NNGP( Type(1.0), range, omega_s, nngp_data );
           }
         }else{
-          nll += SEPARABLE( GMRF(I_cc), GMRF(Q_ss) )( omega_sc );
+          nll += SCALE( SEPARABLE( GMRF(I_cc), GMRF(Q_ss) ), Type(1.0)/tau )( omega_sc );
         }
 
         // Sparse inverse-product
@@ -509,6 +510,7 @@ Type xi_distribution(
     tmbutils::array<Type> xi_sl,
     vector<Type> log_sigmaxi_l,
     const Eigen::SparseMatrix<Type> &Q_ss,
+    Type tau,
     Type range,
     const nngp_data_t<Type> &nngp_data ){
 
@@ -524,7 +526,7 @@ Type xi_distribution(
       }
     }else{
       for( int l=0; l<n_l; l++ ){
-        nll += SCALE( GMRF(Q_ss), exp(log_sigmaxi_l(l)) )( xi_sl.col(l) );
+        nll += SCALE( GMRF(Q_ss), exp(log_sigmaxi_l(l)) / tau )( xi_sl.col(l) );
       }
     }
   }
@@ -542,6 +544,7 @@ tmbutils::array<Type> epsilon_distribution(
     const Eigen::SparseMatrix<Type> &Gamma_hh,
     const Eigen::SparseMatrix<Type> &Gammainv_hh,
     const Eigen::SparseMatrix<Type> &Q_ss,
+    Type tau,
     Type range,
     const nngp_data_t<Type> &nngp_data,
     Type &nll ){
@@ -580,7 +583,7 @@ tmbutils::array<Type> epsilon_distribution(
       Eigen::SparseMatrix<Type> Q_hh = IminusRho_hh.transpose() * Vinv2_hh * IminusRho_hh;
 
       // GMRF for DSEM:  non-separable time-variable, with separable space
-      nll += SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) )( epsilon_hs );
+      nll += SCALE( SEPARABLE( GMRF(Q_ss), GMRF(Q_hh) ), Type(1.0)/tau )( epsilon_hs );
     }else{
       // Rank-deficient (projection) method
       if( model_options(0) == 7 ){
@@ -590,7 +593,7 @@ tmbutils::array<Type> epsilon_distribution(
           nll += NNGP( Type(1.0), range, epsilon_s, nngp_data );
         }
       }else{
-        nll += SEPARABLE( GMRF(Q_ss), GMRF(I_hh) )( epsilon_hs );
+        nll += SCALE( SEPARABLE( GMRF(Q_ss), GMRF(I_hh) ), Type(1.0)/tau )( epsilon_hs );
       }
 
       // Sparse inverse-product
@@ -933,28 +936,28 @@ Type one_predictor_likelihood(
     // Distribution
     switch( family ){
       case gaussian_family:
-        nll = -1 * dnorm( y, mu, exp(log_sigma_segment(0)), true );
+        nll = -dnorm( y, mu, exp(log_sigma_segment(0)), true );
         devresid = y - mu;
         if(isDouble<Type>::value && of->do_simulate){
           y = rnorm( mu, exp(log_sigma_segment(0)) );
         }
         break;
       case tweedie_family:
-        nll = -1 * dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
+        nll = -dtweedie( y, mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)), true );
         devresid = devresid_tweedie( y, mu, 1.0 + invlogit(log_sigma_segment(1)) );
         if(isDouble<Type>::value && of->do_simulate){
           y = rtweedie( mu, exp(log_sigma_segment(0)), 1.0 + invlogit(log_sigma_segment(1)) );
         }
         break;
       case lognormal_family:
-        nll = -1 * dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
+        nll = -dlnorm( y, logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)), true );
         devresid = log(y) - ( logmu - 0.5*exp(2.0*log_sigma_segment(0)) );
         if(isDouble<Type>::value && of->do_simulate){
           y = exp(rnorm( logmu - 0.5*exp(2.0*log_sigma_segment(0)), exp(log_sigma_segment(0)) ));
         }
         break;
       case poisson_family:
-        nll = -1 * dpois( y, mu, true );
+        nll = -dpois( y, mu, true );
         devresid = sign(y - mu) * pow(2*(y*log((Type(1e-10) + y)/mu) - (y-mu)), 0.5);
         if(isDouble<Type>::value && of->do_simulate){
           y = rpois( mu );
@@ -966,7 +969,7 @@ Type one_predictor_likelihood(
         //}else{
         //  nll = -1 * logmu;
         //}
-        nll = -1 * dbinom_custom( y * size, logmu, log_one_minus_mu, size, true );
+        nll = -dbinom_custom( y * size, logmu, log_one_minus_mu, size, true );
         if(isDouble<Type>::value && of->do_simulate){
           y = rbinom( size, mu );
         }
@@ -975,7 +978,7 @@ Type one_predictor_likelihood(
         devresid = devresid_binom( y, size, mu );
         break;
       case gamma_family: // shape = 1/CV^2;   scale = mean*CV^2
-        nll = -1 * dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
+        nll = -dgamma( y, exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)), true );
         devresid = sign(y - mu) * pow(2 * ( (y-mu)/mu - log(y/mu) ), 0.5);
         if(isDouble<Type>::value && of->do_simulate){
           y = rgamma( exp(-2.0*log_sigma_segment(0)), mu*exp(2.0*log_sigma_segment(0)) );
@@ -983,7 +986,7 @@ Type one_predictor_likelihood(
         break;
       case nbinom1_family:   // dnbinom_robust( x, log(mu_i), log(var - mu) )
         // var - mu = exp( log(mu) + log(theta) ) = theta * mu  -->  var = (theta+1) * mu
-        nll = -1 * dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
+        nll = -dnbinom_robust( y, logmu, logmu + log_sigma_segment(0), true);
         devresid = devresid_nbinom2( y, logmu, logmu - log_sigma_segment(0) );    // theta = mu / phi
         if(isDouble<Type>::value && of->do_simulate){
           // rnbinom2( mu, var )
@@ -992,7 +995,7 @@ Type one_predictor_likelihood(
         break;
       case nbinom2_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
         // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
-        nll = -1 * dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
+        nll = -dnbinom_robust( y, logmu, Type(2.0) * logmu - log_sigma_segment(0), true);
         devresid = devresid_nbinom2( y, logmu, log_sigma_segment(0) );
         if(isDouble<Type>::value && of->do_simulate){
           // rnbinom2( mu, var )
@@ -1001,7 +1004,7 @@ Type one_predictor_likelihood(
         break;
       case student_family:  // dnbinom_robust( x, log(mu_i), log(var - mu) )
         // var - mu = exp( 2 * log(mu) - log(theta) ) = mu^2 / theta  -->  var = mu + mu^2 / theta
-        nll = -1 * dstudent( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
+        nll = -dstudent( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)), true);
         devresid = devresid_student( y, mu, exp(log_sigma_segment(0)), 1.0 + exp(log_sigma_segment(1)) );
         if(isDouble<Type>::value && of->do_simulate){
           y = mu + exp(log_sigma_segment(0)) * rt(1.0 + exp(log_sigma_segment(1)));
@@ -1063,11 +1066,11 @@ Type two_predictor_likelihood(
       y = rbinom( Type(1), mu1 );
     }
     if( y == 0 ){
-      nll = -1 * log_one_minus_mu1;
+      nll = -log_one_minus_mu1;
       dev = -2 * log_one_minus_mu1;
     }
     if( y>0 ){  // Not if-else so y>0 triggered when simulating y>0
-      nll = -1 * logmu1;
+      nll = -logmu1;
       dev = -2 * logmu1;
       //deviance1_i(i) = -2 * log_mu1(i);
       switch( family(1) ){

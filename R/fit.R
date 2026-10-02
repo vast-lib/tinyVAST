@@ -604,7 +604,7 @@ function( formula,
 
   #
   Aepsilon_zz = cbind(Atriplet$i, Atriplet$j, t_i[Atriplet$i], c_i[Atriplet$i])
-  which_Arows = which(apply( Aepsilon_zz, MARGIN=1, FUN=function(x) all(!is.na(x)) & any(x>0) ))
+  which_Arows = which( rowSums(is.na(Aepsilon_zz))==0 & rowSums(Aepsilon_zz>0, na.rm=TRUE)>0 )
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
   if( (nrow(spacetime_term_ram$output$ram)==0) & (nrow(delta_spacetime_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
@@ -614,7 +614,7 @@ function( formula,
 
   #
   Aomega_zz = cbind(Atriplet$i, Atriplet$j, c_i[Atriplet$i])
-  which_Arows = which(apply( Aomega_zz, MARGIN=1, FUN=function(x) all(!is.na(x)) ))
+  which_Arows = which( rowSums(is.na(Aomega_zz))==0 )
   which_Arows = which_Arows[ which(Atriplet$x[which_Arows] > 0) ]
   if( (nrow(space_term_ram$output$ram)==0) & (nrow(delta_space_term_ram$output$ram)==0) ){
     which_Arows = numeric(0)
@@ -799,7 +799,8 @@ function( formula,
     ifelse( control$gmrf_parameterization=="separable", 0, 1),
     ifelse( isFALSE(control$get_rsr), 0, 1),
     ifelse( isFALSE(control$extra_reporting), 0, 1),
-    0
+    0,
+    ifelse( isTRUE(control$update_weights), 1, 0)
   )
 
   # make dat
@@ -1307,6 +1308,9 @@ function( formula,
 #'        in the SPDE method when using \code{add_mesh_covariates}.  The
 #'        default \code{barrier_stiffness = 0.01} is the value from Bakka et al.
 #'        2019.
+#' @param update_weights Whether to allow \code{weights_i} to be changed via
+#'        \code{obj$env$data} without re-taping (e.g., for stochastic gradient
+#'        descent).  This slows down fitting for large datasets.
 #'
 #' @references
 #' Bakka, H., Vanhatalo, J., Illian, J., Simpson, D., Rue, H. (2019).  Non-stationary Gaussian models with physical barriers. Spatial Statistics, 29, 268-288. \doi{10.1016/j.spasta.2019.01.002}
@@ -1343,7 +1347,8 @@ function( opt_loops = 1,
           extra_reporting = FALSE,
           use_anisotropy = FALSE,
           sar_adjacency = "queen",
-          barrier_stiffness = 0.01 ){
+          barrier_stiffness = 0.01,
+          update_weights = FALSE ){
 
   gmrf_parameterization = match.arg(gmrf_parameterization)
   #optimizer = match.arg(optimizer)
@@ -1383,7 +1388,8 @@ function( opt_loops = 1,
     extra_reporting = extra_reporting,
     use_anisotropy = use_anisotropy,
     sar_adjacency = sar_adjacency,
-    barrier_stiffness = barrier_stiffness
+    barrier_stiffness = barrier_stiffness,
+    update_weights = update_weights
   ), class = "tinyVASTcontrol" )
 }
 

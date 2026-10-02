@@ -203,7 +203,7 @@ function( object,
 
   new_control = object$internal$control
   new_control$run_model = TRUE
-  new_control$nlminb_loops = 0
+  new_control$opt_loops = 0
   new_control$newton_loops = 0
   new_control$getsd = FALSE
   new_control$calculate_deviance_explained = FALSE
@@ -366,7 +366,8 @@ function( object,
   #
   new_parlist = newobj$tmb_inputs$tmb_par
   #new_parlist = newobj$tmb_par
-  Q_ss = object$rep$Q_ss
+  # random effects are scaled by tau, so their precision is Q_ss * tau^2
+  Q_ss = object$rep$Q_ss * exp(2 * object$rep$log_tau)
 
   # Replace epsilon
   new_parlist$epsilon_stc = augment_epsilon(
