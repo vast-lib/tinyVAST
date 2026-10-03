@@ -262,27 +262,24 @@ function( object,
         IminusRho_hh = Matrix::Diagonal(n=nrow(newrep$Rho_hh)) - newrep$Rho2_hh
         Q_kk = Matrix::t(IminusRho_hh) %*% Matrix::solve(Matrix::t(newrep$Gamma2_hh) %*% newrep$Gamma2_hh) %*% IminusRho_hh
       }
-      Q_hh = Matrix::kronecker( Q_kk, Q_ss )
 
       #
-      grid = expand.grid( s = seq_len(dim(neweps_stc)[1]),
-                          t = all_times,
+      grid = expand.grid( t = all_times,
                           c = object$internal$variables )
-      grid$num = seq_len(prod(dim(neweps_stc)))
+      grid$num = seq_len(nrow(grid))
       observed_idx = subset( grid, t %in% object$internal$times )$num
+      unobserved_idx = setdiff( grid$num, observed_idx )
 
-      #
-      tmp = conditional_gmrf(
-        Q = Q_hh,
-        observed_idx = observed_idx,
-        x_obs = as.vector( eps_stc ),
-        n_sims = 1,
-        what = ifelse(future_var, "simulate", "predict")
-      )
+      # Precision is kronecker( Q_kk, Q_ss ) and past times include all sites, so the
+      # conditional mean only needs Q_kk and the conditional precision is kronecker( Q_uu, Q_ss )
+      Q_uu = Q_kk[unobserved_idx, unobserved_idx, drop = FALSE]
+      Q_uo = Q_kk[unobserved_idx, observed_idx, drop = FALSE]
+      eps_so = matrix( eps_stc, nrow = dim(eps_stc)[1] )
+      simeps_h = -1 * as.matrix( eps_so %*% Matrix::t(Matrix::solve(Q_uu, Q_uo)) )
       if( isTRUE(future_var) ){
-        simeps_h = tmp[,1]
-      }else{
-        simeps_h = tmp$mean
+        # Columns have precision Q_ss, and are then correlated to have precision Q_uu among columns
+        z_su = rmvnorm_prec( prec = Q_ss, n = length(unobserved_idx) )
+        simeps_h = simeps_h + t( backsolve(chol(as.matrix(Q_uu)), t(z_su)) )
       }
 
       # Compile
