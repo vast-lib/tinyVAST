@@ -87,9 +87,11 @@ function( Q,
 #'        condition of the forecast
 #' @param parm_var logical indicating whether to re-sample fixed effects from their
 #'        predictive distribution, thus changing the GMRF for future process errors
+#' @param nsim number of samples
 #'
 #' @return
-#' A vector of values corresponding to rows in \code{newdata}
+#' A vector of values corresponding to rows in \code{newdata}, or a matrix
+#' with a column for each sample when \code{nsim > 1}
 #'
 #' @examples
 #' # Convert to long-form
@@ -139,18 +141,15 @@ function( Q,
 #' extra_times = length(x) + 1:100
 #' n_sims = 10
 #' newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
-#' Y = NULL
-#' for(i in seq_len(n_sims) ){
-#'   tmp = project(
-#'     mytiny,
-#'     newdata = newdata,
-#'     extra_times = extra_times,
-#'     future_var = TRUE,
-#'     past_var = TRUE,
-#'     parm_var = TRUE
-#'   )
-#'   Y = cbind(Y, tmp)
-#' }
+#' Y = project(
+#'   mytiny,
+#'   newdata = newdata,
+#'   extra_times = extra_times,
+#'   future_var = TRUE,
+#'   past_var = TRUE,
+#'   parm_var = TRUE,
+#'   nsim = n_sims
+#' )
 #' matplot( x = row(Y),
 #'          y = Y,
 #'          type = "l", lty = "solid", col = "black" )
@@ -164,32 +163,31 @@ function( object,
           what = "mu_g",
           future_var = TRUE,
           past_var = FALSE,
-          parm_var = FALSE ){
+          parm_var = FALSE,
+          nsim = 1 ){
 
 
   ##############
   # Step 1: Generate uncertainty from parm_var and past_var,
-  #         and load into parlist
+  #         and load into columns of parmat
   ##############
 
   if( isFALSE(parm_var) & isFALSE(past_var) ){
-    parvec = object$obj$env$last.par.best
-    parlist = object$internal$parlist
+    parmat = object$obj$env$last.par.best %o% rep(1, nsim)
   }
   if( isTRUE(parm_var) & isFALSE(past_var) ){
     stop("option not available")
   }
   if( isFALSE(parm_var) & isTRUE(past_var) ){
-    parvec = object$obj$env$last.par.best
-    MC = object$obj$env$MC( keep=TRUE, n=1, antithetic=FALSE )
-    parvec[object$obj$env$lrandom()] = attr(MC, "samples")
-    parlist = object$obj$env$parList( par = parvec )
+    parmat = object$obj$env$last.par.best %o% rep(1, nsim)
+    MC = object$obj$env$MC( keep=TRUE, n=nsim, antithetic=FALSE )
+    parmat[object$obj$env$lrandom(),] = attr(MC, "samples")
   }
   if( isTRUE(parm_var) & isTRUE(past_var) ){
     if(is.null(object$sdrep$jointPrecision)) stop("Rerun with `getJointPrecision=TRUE`")
-    parvec = rmvnorm_prec( mu = object$obj$env$last.par.best,
-                           prec = object$sdrep$jointPrecision )
-    parlist = object$obj$env$parList( par = parvec )
+    parmat = rmvnorm_prec( mu = object$obj$env$last.par.best,
+                           prec = object$sdrep$jointPrecision,
+                           n = nsim )
   }
 
   ##############
@@ -235,13 +233,6 @@ function( object,
     control = new_control,
     development = object$internal$development
   )
-
-  #
-  newpar = newobj$obj$env$last.par
-  oldpar = object$obj$env$last.par.best
-  tmb_fixed = setdiff(unique(names(newpar)), newobj$tmb_inputs$tmb_random)
-  newpar[ (names(newpar) %in% tmb_fixed) ] = parvec[ (names(oldpar) %in% tmb_fixed) ]
-  newrep = newobj$obj$report( newpar )
 
   ##############
   # Step 4: Merge ParList and ParList1
@@ -364,106 +355,81 @@ function( object,
     return(newdelta_tc)
   }
 
-  #
-  new_parlist = newobj$tmb_inputs$tmb_par
-  #new_parlist = newobj$tmb_par
-  # random effects are scaled by tau, so their precision is Q_ss * tau^2
-  Q_ss = newrep$Q_ss * exp(2 * newrep$log_tau)
-
-  # Replace epsilon
-  new_parlist$epsilon_stc = augment_epsilon(
-    #beta_z = parlist$beta_z,
-    eps_stc = parlist$epsilon_stc,
-    neweps_stc = new_parlist$epsilon_stc,
-    #model = object$internal$spacetime_term_ram$output$model,
-    linpred = 1
-  )
-  new_parlist$epsilon2_stc = augment_epsilon(
-    #beta_z = parlist$beta2_z,
-    eps_stc = parlist$epsilon2_stc,
-    neweps_stc = new_parlist$epsilon2_stc,
-    #model = object$internal$delta_spacetime_term_ram$output$model,
-    linpred = 2
-  )
-
-  # Replace delta
-  new_parlist$delta_tc = augment_delta(
-    #nu_z = parlist$nu_z,
-    delta_tc = parlist$delta_tc,
-    newdelta_tc = new_parlist$delta_tc,
-    #model = object$internal$time_term_ram$output$model,
-    linpred = 1
-  )
-  new_parlist$delta2_tc = augment_delta(
-    #nu_z = parlist$nu2_z,
-    delta_tc = parlist$delta2_tc,
-    newdelta_tc = new_parlist$delta2_tc,
-    #model = object$internal$delta_time_term_ram$output$model,
-    linpred = 2
-  )
-
-  # Replace other variables that are not changed
-  same_vars = setdiff( names(new_parlist), c("epsilon_stc","epsilon2_stc","delta_tc","delta2_tc") )
-  new_parlist[same_vars] = parlist[same_vars]
-
   ##############
   # Step 5: Re-build model
   ##############
 
-  #new_control$run_model = TRUE
-  new_control$tmb_par = new_parlist
-  new_control$extra_reporting = FALSE
-  #new_control$nlminb_loops = 0
-  #new_control$newton_loops = 0
-  #new_control$getsd = FALSE
-  #new_control$calculate_deviance_explained = FALSE
-
-  newobj = tinyVAST(
-    formula = object$formula,
-    data = object$data,
-    time_term = object$internal$time_term,
-    space_term = object$internal$space_term,
-    spacetime_term = object$internal$spacetime_term,
-    family = object$internal$family,
-    space_columns = object$internal$space_columns,
-    spatial_domain = object$spatial_domain,
-    time_column = object$internal$time_column,
-    times = all_times,
-    variable_column = object$internal$variable_column,
-    variables = object$internal$variables,
-    distribution_column = object$internal$distribution_column,
-    delta_options = list( formula = object$internal$delta_formula,
-                          space_term = object$internal$delta_space_term,
-                          time_term = object$internal$delta_time_term,
-                          spacetime_term = object$internal$delta_spacetime_term,
-                          spatial_varying = object$internal$delta_spatial_varying ),
-    spatial_varying = object$internal$spatial_varying,
-    weights = object$internal$weights,
-    control = new_control,
-    development = object$internal$development
-  )
-
-  # CHECK SIZES ... if throwing error
-  if( FALSE ){
-    # Check length
-    range( 
-      # NEW
-      sapply( newobj$tmb_inputs$tmb_par, length ) -
-      # OLD
-      sapply( new_parlist, length )
-    )
-    #
-    isTRUE(all.equal(new_parlist, newobj$tmb_inputs$tmb_par, tolerance=Inf))
-  }
+  # Build prediction object once, and then REPORT for each sample
+  predobj = MakeADFun( data = add_predictions( object = newobj, newdata = newdata ),
+                       parameters = newobj$internal$parlist,
+                       map = newobj$tmb_inputs$tmb_map,
+                       random = newobj$tmb_inputs$tmb_random,
+                       profile = newobj$internal$control$profile,
+                       DLL = "tinyVAST" )
+  predobj$env$beSilent()
 
   ##############
   # Step 6: simulate samples
   ##############
 
-  pred = predict(
-    object = newobj,
-    newdata = newdata,
-    what = what
-  )
+  pred = matrix( NA, nrow = nrow(newdata), ncol = nsim )
+  for( i in seq_len(nsim) ){
+    parvec = parmat[,i]
+    parlist = object$obj$env$parList( par = parvec )
+
+    #
+    newpar = newobj$obj$env$last.par
+    oldpar = object$obj$env$last.par.best
+    tmb_fixed = setdiff(unique(names(newpar)), newobj$tmb_inputs$tmb_random)
+    newpar[ (names(newpar) %in% tmb_fixed) ] = parvec[ (names(oldpar) %in% tmb_fixed) ]
+    newrep = newobj$obj$report( newpar )
+
+    #
+    new_parlist = newobj$tmb_inputs$tmb_par
+    #new_parlist = newobj$tmb_par
+    # random effects are scaled by tau, so their precision is Q_ss * tau^2
+    Q_ss = newrep$Q_ss * exp(2 * newrep$log_tau)
+
+    # Replace epsilon
+    new_parlist$epsilon_stc = augment_epsilon(
+      #beta_z = parlist$beta_z,
+      eps_stc = parlist$epsilon_stc,
+      neweps_stc = new_parlist$epsilon_stc,
+      #model = object$internal$spacetime_term_ram$output$model,
+      linpred = 1
+    )
+    new_parlist$epsilon2_stc = augment_epsilon(
+      #beta_z = parlist$beta2_z,
+      eps_stc = parlist$epsilon2_stc,
+      neweps_stc = new_parlist$epsilon2_stc,
+      #model = object$internal$delta_spacetime_term_ram$output$model,
+      linpred = 2
+    )
+
+    # Replace delta
+    new_parlist$delta_tc = augment_delta(
+      #nu_z = parlist$nu_z,
+      delta_tc = parlist$delta_tc,
+      newdelta_tc = new_parlist$delta_tc,
+      #model = object$internal$time_term_ram$output$model,
+      linpred = 1
+    )
+    new_parlist$delta2_tc = augment_delta(
+      #nu_z = parlist$nu2_z,
+      delta_tc = parlist$delta2_tc,
+      newdelta_tc = new_parlist$delta2_tc,
+      #model = object$internal$delta_time_term_ram$output$model,
+      linpred = 2
+    )
+
+    # Replace other variables that are not changed
+    same_vars = setdiff( names(new_parlist), c("epsilon_stc","epsilon2_stc","delta_tc","delta2_tc") )
+    new_parlist[same_vars] = parlist[same_vars]
+
+    # Load into newpar and simulate sample
+    for( var in newobj$tmb_inputs$tmb_random ) newpar[ names(newpar) == var ] = new_parlist[[var]]
+    pred[,i] = predobj$report( newpar )[[what]]
+  }
+  if( nsim == 1 ) pred = pred[,1]
   return(pred)
 }
