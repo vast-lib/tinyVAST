@@ -173,6 +173,7 @@ function( object,
   ##############
 
   if( isFALSE(parm_var) & isFALSE(past_var) ){
+    parvec = object$obj$env$last.par.best
     parlist = object$internal$parlist
   }
   if( isTRUE(parm_var) & isFALSE(past_var) ){
@@ -239,7 +240,7 @@ function( object,
   newpar = newobj$obj$env$last.par
   oldpar = object$obj$env$last.par.best
   tmb_fixed = setdiff(unique(names(newpar)), newobj$tmb_inputs$tmb_random)
-  newpar[ (names(newpar) %in% tmb_fixed) ] = oldpar[ (names(oldpar) %in% tmb_fixed) ]
+  newpar[ (names(newpar) %in% tmb_fixed) ] = parvec[ (names(oldpar) %in% tmb_fixed) ]
   newrep = newobj$obj$report( newpar )
 
   ##############
@@ -367,7 +368,7 @@ function( object,
   new_parlist = newobj$tmb_inputs$tmb_par
   #new_parlist = newobj$tmb_par
   # random effects are scaled by tau, so their precision is Q_ss * tau^2
-  Q_ss = object$rep$Q_ss * exp(2 * object$rep$log_tau)
+  Q_ss = newrep$Q_ss * exp(2 * newrep$log_tau)
 
   # Replace epsilon
   new_parlist$epsilon_stc = augment_epsilon(
