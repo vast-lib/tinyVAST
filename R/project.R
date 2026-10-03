@@ -201,7 +201,7 @@ function( object,
   ##############
 
   new_control = object$internal$control
-  new_control$run_model = TRUE
+  new_control$run_model = FALSE
   new_control$opt_loops = 0
   new_control$newton_loops = 0
   new_control$getsd = FALSE
@@ -209,7 +209,7 @@ function( object,
   new_control$suppress_user_warnings = TRUE
   new_control$extra_reporting = TRUE
 
-  newobj = tinyVAST(
+  new_inputs = tinyVAST(
     formula = object$formula,
     data = object$data,
     time_term = object$internal$time_term,
@@ -233,6 +233,16 @@ function( object,
     control = new_control,
     development = object$internal$development
   )
+
+  # Copy object with padded times, and TMB object without random effects for REPORT
+  newobj = object
+  newobj$tmb_inputs = new_inputs
+  newobj$internal$times = all_times
+  newobj$obj = MakeADFun( data = new_inputs$tmb_data,
+                          parameters = new_inputs$tmb_par,
+                          map = new_inputs$tmb_map,
+                          silent = TRUE,
+                          DLL = "tinyVAST" )
 
   ##############
   # Step 4: Merge ParList and ParList1
@@ -358,12 +368,11 @@ function( object,
 
   # Build prediction object once, and then REPORT for each sample
   predobj = MakeADFun( data = add_predictions( object = newobj, newdata = newdata ),
-                       parameters = newobj$internal$parlist,
+                       parameters = newobj$tmb_inputs$tmb_par,
                        map = newobj$tmb_inputs$tmb_map,
-                       random = newobj$tmb_inputs$tmb_random,
-                       profile = newobj$internal$control$profile,
+                       type = "Fun",
+                       silent = TRUE,
                        DLL = "tinyVAST" )
-  predobj$env$beSilent()
 
   ##############
   # Step 6: simulate samples
