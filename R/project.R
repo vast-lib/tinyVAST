@@ -234,13 +234,13 @@ function( object,
     development = object$internal$development
   )
 
-  # Copy object with padded times, and TMB object without random effects for REPORT
+  # REPORT uses expanded parameter lists, so omit both maps and random effects.
+  # parList() on the fitted object restores fixed and shared mapped values.
   newobj = object
   newobj$tmb_inputs = new_inputs
   newobj$internal$times = all_times
   newobj$obj = MakeADFun( data = new_inputs$tmb_data,
                           parameters = new_inputs$tmb_par,
-                          map = new_inputs$tmb_map,
                           silent = TRUE,
                           DLL = "tinyVAST" )
 
@@ -369,7 +369,6 @@ function( object,
   # Build prediction object once, and then REPORT for each sample
   predobj = MakeADFun( data = add_predictions( object = newobj, newdata = newdata ),
                        parameters = newobj$tmb_inputs$tmb_par,
-                       map = newobj$tmb_inputs$tmb_map,
                        type = "Fun",
                        silent = TRUE,
                        DLL = "tinyVAST" )
@@ -378,21 +377,21 @@ function( object,
   # Step 6: simulate samples
   ##############
 
+  # Use TMB's parameter order when flattening lists for REPORT.
+  par_template = newobj$obj$env$parList()
+  same_vars = setdiff( names(par_template), c("epsilon_stc","epsilon2_stc","delta_tc","delta2_tc") )
   pred = matrix( NA, nrow = nrow(newdata), ncol = nsim )
   for( i in seq_len(nsim) ){
     parvec = parmat[,i]
     parlist = object$obj$env$parList( par = parvec )
 
-    #
-    newpar = newobj$obj$env$last.par
-    oldpar = object$obj$env$last.par.best
-    tmb_fixed = setdiff(unique(names(newpar)), newobj$tmb_inputs$tmb_random)
-    newpar[ (names(newpar) %in% tmb_fixed) ] = parvec[ (names(oldpar) %in% tmb_fixed) ]
-    newrep = newobj$obj$report( newpar )
+    # Copy parameters with unchanged dimensions before building future precisions.
+    # Process arrays retain their padded dimensions until augmented below.
+    new_parlist = par_template
+    new_parlist[same_vars] = parlist[same_vars]
+    newrep = newobj$obj$report( unlist(new_parlist, use.names = FALSE) )
 
     #
-    new_parlist = newobj$tmb_inputs$tmb_par
-    #new_parlist = newobj$tmb_par
     # random effects are scaled by tau, so their precision is Q_ss * tau^2
     Q_ss = newrep$Q_ss * exp(2 * newrep$log_tau)
 
@@ -428,13 +427,8 @@ function( object,
       linpred = 2
     )
 
-    # Replace other variables that are not changed
-    same_vars = setdiff( names(new_parlist), c("epsilon_stc","epsilon2_stc","delta_tc","delta2_tc") )
-    new_parlist[same_vars] = parlist[same_vars]
-
-    # Load into newpar and simulate sample
-    for( var in newobj$tmb_inputs$tmb_random ) newpar[ names(newpar) == var ] = new_parlist[[var]]
-    pred[,i] = predobj$report( newpar )[[what]]
+    # Include every augmented effect, including effects fitted as fixed parameters.
+    pred[,i] = predobj$report( unlist(new_parlist, use.names = FALSE) )[[what]]
   }
   if( nsim == 1 ) pred = pred[,1]
   return(pred)
