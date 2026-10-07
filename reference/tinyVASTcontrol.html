@@ -48,7 +48,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Control parameters for tinyVAST</h1>
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/R/fit.R" class="external-link"><code>R/fit.R</code></a></small>
       <div class="d-none name"><code>tinyVASTcontrol.Rd</code></div>
     </div>
 
@@ -81,7 +81,8 @@
 <span>  extra_reporting <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  use_anisotropy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  sar_adjacency <span class="op">=</span> <span class="st">"queen"</span>,</span>
-<span>  barrier_stiffness <span class="op">=</span> <span class="fl">0.01</span></span>
+<span>  barrier_stiffness <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  update_weights <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -219,6 +220,12 @@ rate and resulting decorrelation distance) for barriers relative to normal areas
 in the SPDE method when using <code>add_mesh_covariates</code>.  The
 default <code>barrier_stiffness = 0.01</code> is the value from Bakka et al.
 2019.</p></dd>
+
+
+<dt id="arg-update-weights">update_weights<a class="anchor" aria-label="anchor" href="#arg-update-weights"></a></dt>
+<dd><p>Whether to allow <code>weights_i</code> to be changed via
+<code>obj$env$data</code> without re-taping (e.g., for stochastic gradient
+descent).  This slows down fitting for large datasets.</p></dd>
 
 </dl></div>
     <div class="section level2">

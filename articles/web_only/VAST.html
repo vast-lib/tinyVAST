@@ -81,7 +81,7 @@
 Thorson</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/vignettes/web_only/VAST.Rmd" class="external-link"><code>vignettes/web_only/VAST.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/vignettes/web_only/VAST.Rmd" class="external-link"><code>vignettes/web_only/VAST.Rmd</code></a></small>
       <div class="d-none name"><code>VAST.Rmd</code></div>
     </div>
 
@@ -175,7 +175,7 @@ spatio-temporal process, i.e., a spatial Gompertz model <span class="citation">(
 <span><span class="co">#&gt;     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 8.961503 secs</span></span>
+<span><span class="co">#&gt; Time difference of 4.097495 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -194,8 +194,8 @@ spatio-temporal process, i.e., a spatial Gompertz model <span class="citation">(
 <span><span class="co">#&gt; theta_z    0.44410026 0.06898305</span></span>
 <span><span class="co">#&gt; log_sigma -0.64811725 0.05006776</span></span>
 <span><span class="co">#&gt; log_sigma  0.01446391 0.06494065</span></span>
-<span><span class="co">#&gt; log_kappa -0.15609782 0.16446773</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.002357441 </span></span>
+<span><span class="co">#&gt; log_kappa -0.15609781 0.16446773</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.002356339 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
 <span><span class="co">#&gt; [1] 0.4812353</span></span>
@@ -209,7 +209,7 @@ spatio-temporal process, i.e., a spatial Gompertz model <span class="citation">(
 <span><span class="co">#&gt; 1     1 logn logn         1  &lt;NA&gt;   1  0.8497593 0.07526407 11.290372</span></span>
 <span><span class="co">#&gt; 2     2 logn logn         2  &lt;NA&gt;   0 -0.2584151 0.03730060 -6.927908</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 1.464154e-29</span></span>
+<span><span class="co">#&gt; 1 1.464153e-29</span></span>
 <span><span class="co">#&gt; 2 4.271107e-12</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
@@ -267,13 +267,13 @@ it with its true value:</p>
 <span>   FUN<span class="op">=</span>\<span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="../../reference/integrate_output.html">integrate_output</a></span><span class="op">(</span><span class="va">mytinyVAST</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">Data</span>,<span class="va">time</span><span class="op">==</span><span class="va">t</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                          [,1]      [,2]      [,3]      [,4]     [,5]      [,6]</span></span>
 <span><span class="co">#&gt; Estimate            69.774447 68.167140 68.249630 64.038614 58.73677 60.506551</span></span>
-<span><span class="co">#&gt; Std. Error           4.733492  4.404923  4.324752  4.092695  3.88048  3.887898</span></span>
+<span><span class="co">#&gt; Std. Error           4.733491  4.404923  4.324752  4.092695  3.88048  3.887898</span></span>
 <span><span class="co">#&gt; Est. (bias.correct) 72.867385 71.288095 71.442818 67.062659 61.53693 63.391164</span></span>
 <span><span class="co">#&gt; Std. (bias.correct)        NA        NA        NA        NA       NA        NA</span></span>
 <span><span class="co">#&gt;                          [,7]      [,8]      [,9]     [,10]     [,11]     [,12]</span></span>
 <span><span class="co">#&gt; Estimate            54.977472 58.463750 64.523936 74.895753 84.490828 76.981717</span></span>
 <span><span class="co">#&gt; Std. Error           3.772124  3.863061  4.166782  4.702733  5.335558  5.141674</span></span>
-<span><span class="co">#&gt; Est. (bias.correct) 57.610590 61.214901 67.544370 78.337004 88.253708 80.405033</span></span>
+<span><span class="co">#&gt; Est. (bias.correct) 57.610591 61.214901 67.544370 78.337004 88.253708 80.405033</span></span>
 <span><span class="co">#&gt; Std. (bias.correct)        NA        NA        NA        NA        NA        NA</span></span>
 <span><span class="co">#&gt;                         [,13]      [,14]     [,15]</span></span>
 <span><span class="co">#&gt; Estimate            87.189069  96.106447 93.626602</span></span>
@@ -375,9 +375,9 @@ n.d.)</span></p>
 <th align="left">run times (sec.).sdmTMB</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td align="left">9 secs</td>
+<td align="left">4.1 secs</td>
 <td align="left">NA</td>
-<td align="left">11.8 secs</td>
+<td align="left">5 secs</td>
 </tr></tbody>
 </table>
 </div>
@@ -406,7 +406,7 @@ Poisson-linked gamma delta model <span class="citation">(Thorson
 <span><span class="co">#&gt;     spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 8.955978 secs</span></span>
+<span><span class="co">#&gt; Time difference of 3.750566 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -418,35 +418,35 @@ Poisson-linked gamma delta model <span class="citation">(Thorson
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
-<span><span class="co">#&gt;              Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j    0.96739823 0.03523113</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.24655298 0.14981116</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.29278058 0.17500264</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.30566167 0.19172295</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.32181139 0.20304345</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.57099225 0.21258960</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.44507944 0.21945080</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.71679761 0.22626434</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.54486363 0.23247503</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.39906167 0.23308060</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.12517481 0.23638081</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.22354604 0.23877446</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.51313799 0.24006162</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.24692322 0.24216447</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.12787370 0.24209142</span></span>
-<span><span class="co">#&gt; alpha2_j  -1.07072788 0.24334576</span></span>
-<span><span class="co">#&gt; beta2_z    0.89673998 0.03512556</span></span>
-<span><span class="co">#&gt; beta2_z    0.31333284 0.03906544</span></span>
-<span><span class="co">#&gt; log_sigma  0.02962709 0.02475190</span></span>
-<span><span class="co">#&gt; log_kappa  0.10856377 0.14818575</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.001976477 </span></span>
+<span><span class="co">#&gt;             Estimate Std. Error</span></span>
+<span><span class="co">#&gt; alpha_j    0.9673982 0.03523113</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2465531 0.14981116</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2927803 0.17500264</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.3056616 0.19172295</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.3218115 0.20304344</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.5709922 0.21258960</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.4450791 0.21945079</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.7167972 0.22626434</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.5448633 0.23247502</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.3990617 0.23308060</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.1251748 0.23638081</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2235461 0.23877445</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.5131381 0.24006161</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.2469234 0.24216446</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.1278738 0.24209141</span></span>
+<span><span class="co">#&gt; alpha2_j  -1.0707284 0.24334575</span></span>
+<span><span class="co">#&gt; beta2_z    0.8967400 0.03512556</span></span>
+<span><span class="co">#&gt; beta2_z    0.3133328 0.03906544</span></span>
+<span><span class="co">#&gt; log_sigma  0.0296271 0.02475190</span></span>
+<span><span class="co">#&gt; log_kappa  0.1085638 0.14818576</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.001978828 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
 <span><span class="co">#&gt; [1] 0.3295031</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
 <span><span class="co">#&gt;              Estimate  Std_Error  z_value       p_value</span></span>
-<span><span class="co">#&gt; (Intercept) 0.9673982 0.03523113 27.45862 5.482263e-166</span></span>
+<span><span class="co">#&gt; (Intercept) 0.9673982 0.03523113 27.45862 5.482327e-166</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Sanity check: </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -557,14 +557,14 @@ model</p>
 <span>           spatial_domain <span class="op">=</span> <span class="va">mesh</span>,</span>
 <span>           family <span class="op">=</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/families.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: The model may not have converged. Maximum final gradient:</span></span>
-<span><span class="co">#&gt; 0.0108477586651019.</span></span>
+<span><span class="co">#&gt; 0.0109577125685338.</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; Call: </span></span>
 <span><span class="co">#&gt; tinyVAST(formula = n ~ 0 + var, data = Data, spacetime_term = dsem, </span></span>
 <span><span class="co">#&gt;     family = tweedie(), spatial_domain = mesh)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Run time: </span></span>
-<span><span class="co">#&gt; Time difference of 32.78741 secs</span></span>
+<span><span class="co">#&gt; Time difference of 15.03889 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Family: </span></span>
 <span><span class="co">#&gt; $obs</span></span>
@@ -577,41 +577,41 @@ model</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; sdreport(.) result</span></span>
 <span><span class="co">#&gt;               Estimate Std. Error</span></span>
-<span><span class="co">#&gt; alpha_j    0.090202977 0.11486664</span></span>
-<span><span class="co">#&gt; alpha_j   -0.099500551 0.10318987</span></span>
-<span><span class="co">#&gt; beta_z     0.553897605 0.07628808</span></span>
-<span><span class="co">#&gt; beta_z     0.536424121 0.07383380</span></span>
-<span><span class="co">#&gt; beta_z    -0.225705445 0.07606824</span></span>
-<span><span class="co">#&gt; beta_z    -0.070945620 0.06259109</span></span>
-<span><span class="co">#&gt; beta_z     0.336688287 0.01863795</span></span>
-<span><span class="co">#&gt; log_sigma -0.696754576 0.02881155</span></span>
-<span><span class="co">#&gt; log_sigma -0.005321741 0.05462454</span></span>
-<span><span class="co">#&gt; log_kappa -0.635425849 0.10547174</span></span>
-<span><span class="co">#&gt; Maximum gradient component: 0.01084776 </span></span>
+<span><span class="co">#&gt; alpha_j    0.090202746 0.11486654</span></span>
+<span><span class="co">#&gt; alpha_j   -0.099500435 0.10318987</span></span>
+<span><span class="co">#&gt; beta_z     0.553897147 0.07628810</span></span>
+<span><span class="co">#&gt; beta_z     0.536424330 0.07383377</span></span>
+<span><span class="co">#&gt; beta_z    -0.225705952 0.07606827</span></span>
+<span><span class="co">#&gt; beta_z    -0.070945681 0.06259109</span></span>
+<span><span class="co">#&gt; beta_z     0.336688192 0.01863794</span></span>
+<span><span class="co">#&gt; log_sigma -0.696754524 0.02881155</span></span>
+<span><span class="co">#&gt; log_sigma -0.005321838 0.05462453</span></span>
+<span><span class="co">#&gt; log_kappa -0.635425686 0.10547169</span></span>
+<span><span class="co">#&gt; Maximum gradient component: 0.01095771 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Proportion conditional deviance explained: </span></span>
 <span><span class="co">#&gt; [1] 0.4057952</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; spacetime_term: </span></span>
 <span><span class="co">#&gt;   heads to from parameter start lag    Estimate  Std_Error   z_value</span></span>
-<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.55389761 0.07628808  7.260605</span></span>
-<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.53642412 0.07383380  7.265292</span></span>
-<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.22570545 0.07606824 -2.967144</span></span>
-<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.07094562 0.06259109 -1.133478</span></span>
-<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.33668829 0.01863795 18.064666</span></span>
-<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.33668829 0.01863795 18.064666</span></span>
+<span><span class="co">#&gt; 1     1 d1   d1         1  &lt;NA&gt;   1  0.55389715 0.07628810  7.260597</span></span>
+<span><span class="co">#&gt; 2     1 d2   d2         2  &lt;NA&gt;   1  0.53642433 0.07383377  7.265298</span></span>
+<span><span class="co">#&gt; 3     1 d1   d2         3  &lt;NA&gt;   1 -0.22570595 0.07606827 -2.967150</span></span>
+<span><span class="co">#&gt; 4     1 d2   d1         4  &lt;NA&gt;   1 -0.07094568 0.06259109 -1.133479</span></span>
+<span><span class="co">#&gt; 5     2 d1   d1         5  &lt;NA&gt;   0  0.33668819 0.01863794 18.064667</span></span>
+<span><span class="co">#&gt; 6     2 d2   d2         5  &lt;NA&gt;   0  0.33668819 0.01863794 18.064667</span></span>
 <span><span class="co">#&gt;        p_value</span></span>
-<span><span class="co">#&gt; 1 3.853618e-13</span></span>
-<span><span class="co">#&gt; 2 3.722327e-13</span></span>
-<span><span class="co">#&gt; 3 3.005799e-03</span></span>
-<span><span class="co">#&gt; 4 2.570136e-01</span></span>
-<span><span class="co">#&gt; 5 6.048655e-73</span></span>
-<span><span class="co">#&gt; 6 6.048655e-73</span></span>
+<span><span class="co">#&gt; 1 3.853846e-13</span></span>
+<span><span class="co">#&gt; 2 3.722160e-13</span></span>
+<span><span class="co">#&gt; 3 3.005745e-03</span></span>
+<span><span class="co">#&gt; 4 2.570132e-01</span></span>
+<span><span class="co">#&gt; 5 6.048602e-73</span></span>
+<span><span class="co">#&gt; 6 6.048602e-73</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed terms: </span></span>
 <span><span class="co">#&gt;          Estimate Std_Error    z_value   p_value</span></span>
-<span><span class="co">#&gt; vard1  0.09020298 0.1148666  0.7852844 0.4322869</span></span>
-<span><span class="co">#&gt; vard2 -0.09950055 0.1031899 -0.9642473 0.3349219</span></span>
+<span><span class="co">#&gt; vard1  0.09020275 0.1148665  0.7852830 0.4322877</span></span>
+<span><span class="co">#&gt; vard2 -0.09950044 0.1031899 -0.9642462 0.3349225</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Sanity check: </span></span>
 <span><span class="co">#&gt; </span></span>

@@ -120,8 +120,8 @@ summary(fit, "spacetime_term")
 #> 3     2 density density         3  <NA>   0 1.3015125 0.05159715 25.224503
 #>         p_value
 #> 1  2.080067e-08
-#> 2  2.761334e-27
-#> 3 2.157556e-140
+#> 2  2.761335e-27
+#> 3 2.157557e-140
 ```
 
 We can then visualize density in selected years. To do this, we first
@@ -298,7 +298,7 @@ ggplot(projdata) +
 
 ![](seasonal_index_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 8.4 mins
+Runtime for this vignette: 1.27 mins
 
 ## Works cited
 

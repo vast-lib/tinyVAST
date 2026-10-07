@@ -48,7 +48,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Project tinyVAST to future times (EXPERIMENTAL)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/main/R/project.R" class="external-link"><code>R/project.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vast-lib/tinyVAST/blob/dev/R/project.R" class="external-link"><code>R/project.R</code></a></small>
       <div class="d-none name"><code>project.Rd</code></div>
     </div>
 
@@ -65,7 +65,8 @@
 <span>  what <span class="op">=</span> <span class="st">"mu_g"</span>,</span>
 <span>  future_var <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  past_var <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  parm_var <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  parm_var <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  nsim <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -118,10 +119,15 @@ condition of the forecast</p></dd>
 <dd><p>logical indicating whether to re-sample fixed effects from their
 predictive distribution, thus changing the GMRF for future process errors</p></dd>
 
+
+<dt id="arg-nsim">nsim<a class="anchor" aria-label="anchor" href="#arg-nsim"></a></dt>
+<dd><p>number of samples</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A vector of values corresponding to rows in <code>newdata</code></p>
+    <p>A vector of values corresponding to rows in <code>newdata</code>, or a matrix
+with a column for each sample when <code>nsim &gt; 1</code></p>
     </div>
 
     <div class="section level2">
@@ -175,18 +181,15 @@ predictive distribution, thus changing the GMRF for future process errors</p></d
 <span class="r-in"><span><span class="va">extra_times</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span></span></span>
 <span class="r-in"><span><span class="va">n_sims</span> <span class="op">=</span> <span class="fl">10</span></span></span>
 <span class="r-in"><span><span class="va">newdata</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> <span class="st">"time"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,<span class="va">extra_times</span><span class="op">)</span>, <span class="st">"var"</span> <span class="op">=</span> <span class="st">"y"</span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">Y</span> <span class="op">=</span> <span class="cn">NULL</span></span></span>
-<span class="r-in"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sims</span><span class="op">)</span> <span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">tmp</span> <span class="op">=</span> <span class="fu">project</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">mytiny</span>,</span></span>
-<span class="r-in"><span>    newdata <span class="op">=</span> <span class="va">newdata</span>,</span></span>
-<span class="r-in"><span>    extra_times <span class="op">=</span> <span class="va">extra_times</span>,</span></span>
-<span class="r-in"><span>    future_var <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    past_var <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    parm_var <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">Y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">Y</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">Y</span> <span class="op">=</span> <span class="fu">project</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">mytiny</span>,</span></span>
+<span class="r-in"><span>  newdata <span class="op">=</span> <span class="va">newdata</span>,</span></span>
+<span class="r-in"><span>  extra_times <span class="op">=</span> <span class="va">extra_times</span>,</span></span>
+<span class="r-in"><span>  future_var <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  past_var <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  parm_var <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  nsim <span class="op">=</span> <span class="va">n_sims</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span> x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/row.html" class="external-link">row</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>         y <span class="op">=</span> <span class="va">Y</span>,</span></span>
 <span class="r-in"><span>         type <span class="op">=</span> <span class="st">"l"</span>, lty <span class="op">=</span> <span class="st">"solid"</span>, col <span class="op">=</span> <span class="st">"black"</span> <span class="op">)</span></span></span>
