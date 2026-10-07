@@ -403,7 +403,7 @@ function( x,
 
   # 
   control_initial = control
-    control_initial$nlminb_loops = 0
+    control_initial$opt_loops = 0
     control_initial$newton_loops = 0
     control_initial$run_model = FALSE
 
