@@ -12,7 +12,8 @@ project(
   what = "mu_g",
   future_var = TRUE,
   past_var = FALSE,
-  parm_var = FALSE
+  parm_var = FALSE,
+  nsim = 1
 )
 ```
 
@@ -66,9 +67,14 @@ project(
   predictive distribution, thus changing the GMRF for future process
   errors
 
+- nsim:
+
+  number of samples
+
 ## Value
 
-A vector of values corresponding to rows in `newdata`
+A vector of values corresponding to rows in `newdata`, or a matrix with
+a column for each sample when `nsim > 1`
 
 ## Examples
 
@@ -122,18 +128,15 @@ if (FALSE) { # \dontrun{
 extra_times = length(x) + 1:100
 n_sims = 10
 newdata = data.frame( "time" = c(seq_along(x),extra_times), "var" = "y" )
-Y = NULL
-for(i in seq_len(n_sims) ){
-  tmp = project(
-    mytiny,
-    newdata = newdata,
-    extra_times = extra_times,
-    future_var = TRUE,
-    past_var = TRUE,
-    parm_var = TRUE
-  )
-  Y = cbind(Y, tmp)
-}
+Y = project(
+  mytiny,
+  newdata = newdata,
+  extra_times = extra_times,
+  future_var = TRUE,
+  past_var = TRUE,
+  parm_var = TRUE,
+  nsim = n_sims
+)
 matplot( x = row(Y),
          y = Y,
          type = "l", lty = "solid", col = "black" )

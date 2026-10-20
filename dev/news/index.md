@@ -1,11 +1,29 @@
 # Changelog
 
-## tinyVAST 1.6.1.9000
+## tinyVAST 1.6.3.9999
+
+- Add an experimental option for cAIC to avoid constructing a dense
+  matrix prior to extracting its diagonal using
+  sparseinv::Takahashi_Davis
+
+## tinyVAST 1.6.3
+
+CRAN release: 2026-09-20
+
+- Move most vignettes to web_only vignettes directory, and update
+  interface for visreg in mgcv.Rmd vignette
+
+## tinyVAST 1.6.2
+
+CRAN release: 2026-07-14
 
 - Replace array with tmbutils::array in CPP, to disambiguate new array
   typedef in RcppEigen, following andrjohns in dsem#63
 - Remove “test-basic-fits.R” test “tinyVAST works as dsem” from CRAN,
   due to weird and un-reproducible ERROR on CRAN openBLAS check
+- Update `epsilon_distribution` to pass arguments using const and
+  pointers (pass-by-const-reference) to avoid compiler errors
+- Move helper functions to `tinyVAST` namespace
 
 ## tinyVAST 1.6.1
 

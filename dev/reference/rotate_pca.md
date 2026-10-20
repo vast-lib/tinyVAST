@@ -112,6 +112,7 @@ omega_sf = out$internal$parlist$omega_sc[, match(c("f1","f2"), vars), drop = FAL
 
 # Apply rotation
 Rotation = rotate_pca( L_cf, x_sf = omega_sf )
+#> Warning: NaNs produced
 
 # Extract rotated loadings
 Lprime_cf = Rotation$L_tf

@@ -28,7 +28,8 @@ tinyVASTcontrol(
   extra_reporting = FALSE,
   use_anisotropy = FALSE,
   sar_adjacency = "queen",
-  barrier_stiffness = 0.01
+  barrier_stiffness = 0.01,
+  update_weights = FALSE
 )
 ```
 
@@ -171,6 +172,12 @@ tinyVASTcontrol(
   resulting decorrelation distance) for barriers relative to normal
   areas in the SPDE method when using `add_mesh_covariates`. The default
   `barrier_stiffness = 0.01` is the value from Bakka et al. 2019.
+
+- update_weights:
+
+  Whether to allow `weights_i` to be changed via `obj$env$data` without
+  re-taping (e.g., for stochastic gradient descent). This slows down
+  fitting for large datasets.
 
 ## Value
 
