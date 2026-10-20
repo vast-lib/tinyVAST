@@ -3,6 +3,11 @@
 #' Calculates the conditional Akaike Information criterion (cAIC).
 #'
 #' @param object Output from [tinyVAST()].
+#' @param method whether to compute effective degrees of freedom using
+#'   the stable method \code{diag(solve(Hess, Hess_new))}
+#'   or a faster and experimental method
+#'   \code{-rowSums(sparseinv::Takahashi_Davis(-Hess) * t(Hess_new))},
+#'   where the latter avoids constructing a dense matrix prior to extracting its diagonal
 #'
 #' @details cAIC is designed to optimize the expected out-of-sample predictive
 #' performance for new data that share the same random effects as the in-sample
@@ -60,8 +65,10 @@
 #'
 #' @export
 cAIC <-
-function( object ){
+function( object,
+          method = c("stable", "fast") ){
 
+  method = match.arg(version)
   check_tinyVAST_version( object$internal$packageVersion )
   #what = match.arg(what)
   #requireNamespace(Matrix)
@@ -103,7 +110,17 @@ function( object ){
   ## Joint hessian etc
   Hess = -Matrix::Matrix(obj$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
   Hess = Hess[indx,indx]
-  negEDF = Matrix::diag(Matrix::solve(Hess, Hess_new))
+
+  if( method == "stable" ){
+    negEDF = Matrix::diag(Matrix::solve(Hess, Hess_new))
+  }else{
+    #S = TMB:::solveSubset(-Hess)
+    if( !requireNamespace("sparseinv", quietly = TRUE) ){
+      stop("method = 'fast' requires the 'sparseinv' package; use method = 'stable' or install it")
+    }
+    S = sparseinv::Takahashi_Davis(-Hess)
+    negEDF = -1 * Matrix::rowSums(S * Matrix::t(Hess_new))
+  }
 
   #if(what == "cAIC"){
     jnll = obj$env$f(parDataMode)

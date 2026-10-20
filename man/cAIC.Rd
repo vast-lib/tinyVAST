@@ -4,10 +4,16 @@
 \alias{cAIC}
 \title{Calculate conditional AIC}
 \usage{
-cAIC(object)
+cAIC(object, method = c("stable", "fast"))
 }
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}.}
+
+\item{method}{whether to compute effective degrees of freedom using
+the stable method \code{diag(solve(Hess, Hess_new))}
+or a faster and experimental method
+\code{-rowSums(sparseinv::Takahashi_Davis(-Hess) * t(Hess_new))},
+where the latter avoids constructing a dense matrix prior to extracting its diagonal}
 }
 \value{
 cAIC value

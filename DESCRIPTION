@@ -1,7 +1,7 @@
 Type: Package
 Package: tinyVAST
 Title: Multivariate Spatio-Temporal Models using Structural Equations
-Version: 1.6.3
+Version: 1.6.3.9999
 Date: 2026-09-19
 Authors@R: c(
     person(c("James", "T."), "Thorson", , "James.Thorson@noaa.gov", 
@@ -63,7 +63,8 @@ Suggests:
     DHARMa,
     glmmTMB,
     tibble,
-    RANN
+    RANN,
+    sparseinv
 LinkingTo:
     RcppEigen,
     TMB

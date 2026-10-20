@@ -466,7 +466,7 @@ tmbutils::array<Type> omega_distribution(
         // Separable precision ... Option-2
         // Only compute Vinv_kk if Gamma_kk is full rank
         Eigen::SparseMatrix<Type> V_cc = Gamma_cc.transpose() * Gamma_cc;
-        matrix<Type> Vinv_cc = invertSparseMatrix( V_cc );
+        matrix<Type> Vinv_cc = tmbutils::invertSparseMatrix( V_cc );
         Eigen::SparseMatrix<Type> Vinv2_cc = asSparseMatrix( Vinv_cc );
         Eigen::SparseMatrix<Type> Q_cc = IminusRho_cc.transpose() * Vinv2_cc * IminusRho_cc;
 
@@ -578,7 +578,7 @@ tmbutils::array<Type> epsilon_distribution(
       // Separable precision ... Option-2
       // Only compute Vinv_kk if Gamma_kk is full rank
       Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
-      matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
+      matrix<Type> Vinv_hh = tmbutils::invertSparseMatrix( V_hh );
       Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
       Eigen::SparseMatrix<Type> Q_hh = IminusRho_hh.transpose() * Vinv2_hh * IminusRho_hh;
 
@@ -649,7 +649,7 @@ tmbutils::array<Type> delta_distribution(
 
     if( model_options(1) == 0 ){
       Eigen::SparseMatrix<Type> V_hh = Gamma_hh.transpose() * Gamma_hh;
-      matrix<Type> Vinv_hh = invertSparseMatrix( V_hh );
+      matrix<Type> Vinv_hh = tmbutils::invertSparseMatrix( V_hh );
       Eigen::SparseMatrix<Type> Vinv2_hh = asSparseMatrix( Vinv_hh );
       Eigen::SparseMatrix<Type> Q_hh = IminusRho_hh.transpose() * Vinv2_hh * IminusRho_hh;
 
