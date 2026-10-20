@@ -68,7 +68,7 @@ cAIC <-
 function( object,
           method = c("stable", "fast") ){
 
-  method = match.arg(version)
+  method = match.arg(method)
   check_tinyVAST_version( object$internal$packageVersion )
   #what = match.arg(what)
   #requireNamespace(Matrix)
