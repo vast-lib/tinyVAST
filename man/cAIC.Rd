@@ -68,8 +68,8 @@ AIC(fit) # marginal AIC
 
 }
 \references{
-Zheng, N., Cadigan, N., & Thorson, J. T. (2024).
-A note on numerical evaluation of conditional Akaike information for
-nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
-\doi{10.48550/arXiv.2411.14185}
+Zheng, N., Cadigan, N., & Thorson, J. T. (2026).
+A unifying theory for the evaluation of conditional Akaike information for
+mixed-effects models. Journal of Statistical Computation and Simulation.
+\doi{10.1080/00949655.2026.2736799}
 }
