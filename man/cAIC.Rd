@@ -4,10 +4,12 @@
 \alias{cAIC}
 \title{Calculate conditional AIC}
 \usage{
-cAIC(object, method = c("stable", "fast"))
+cAIC(object, what = c("cAIC", "EDF"), method = c("stable", "fast"))
 }
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}.}
+
+\item{what}{whether to get cAIC or the EDF (the latter grouped by type of random effect).}
 
 \item{method}{whether to compute effective degrees of freedom using
 the stable method \code{diag(solve(Hess, Hess_new))}
@@ -34,7 +36,7 @@ that have new random effects, e.g., extrapolation, or inference about
 generative parameters.
 
 Both cAIC and EDF are calculated using Eq. 6 of Zheng, Cadigan, and Thorson
-(2024).
+(2026).
 
 For models that include profiled fixed effects, these profiles are turned
 off.

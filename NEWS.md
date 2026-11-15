@@ -1,6 +1,7 @@
 # tinyVAST 1.6.3.9999
 
 * Add an experimental option for cAIC to avoid constructing a dense matrix prior to extracting its diagonal using sparseinv::Takahashi_Davis
+* Add what = "EDF" option to cAIC(.)
 
 # tinyVAST 1.6.3
 

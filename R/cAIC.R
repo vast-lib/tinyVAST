@@ -3,6 +3,7 @@
 #' Calculates the conditional Akaike Information criterion (cAIC).
 #'
 #' @param object Output from [tinyVAST()].
+#' @param what whether to get cAIC or the EDF (the latter grouped by type of random effect).
 #' @param method whether to compute effective degrees of freedom using
 #'   the stable method \code{diag(solve(Hess, Hess_new))}
 #'   or a faster and experimental method
@@ -21,7 +22,7 @@
 #' generative parameters.
 #'
 #' Both cAIC and EDF are calculated using Eq. 6 of Zheng, Cadigan, and Thorson
-#' (2024).
+#' (2026).
 #'
 #' For models that include profiled fixed effects, these profiles are turned
 #' off.
@@ -66,8 +67,10 @@
 #' @export
 cAIC <-
 function( object,
+          what = c("cAIC", "EDF"),
           method = c("stable", "fast") ){
 
+  what = match.arg(what)
   method = match.arg(method)
   check_tinyVAST_version( object$internal$packageVersion )
   #what = match.arg(what)
@@ -78,27 +81,32 @@ function( object,
   if( is.null(object$internal$control$profile) ){
     obj = object$obj
   }else{
-    obj = TMB::MakeADFun( data = data,
-                        parameters = object$internal$parlist,
-                        map = object$tmb_inputs$tmb_map,
-                        random = object$tmb_inputs$tmb_random,
-                        DLL = "tinyVAST",
-                        profile = NULL )
+    obj = TMB::MakeADFun( 
+      data = data,
+      parameters = object$internal$parlist,
+      map = object$tmb_inputs$tmb_map,
+      random = object$tmb_inputs$tmb_random,
+      DLL = "tinyVAST",
+      profile = NULL 
+    )
   }
 
   # Make obj_new
   data$weights_i[] = 0
-  obj_new = TMB::MakeADFun( data = data,
-                      parameters = object$internal$parlist,
-                      map = object$tmb_inputs$tmb_map,
-                      random = object$tmb_inputs$tmb_random,
-                      DLL = "tinyVAST",
-                      profile = NULL )
+  obj_new = TMB::MakeADFun( 
+    data = data,
+    parameters = object$internal$parlist,
+    map = object$tmb_inputs$tmb_map,
+    random = object$tmb_inputs$tmb_random,
+    DLL = "tinyVAST",
+    profile = NULL 
+  )
 
   #
   par = obj$env$parList()
   parDataMode <- obj$env$last.par
   indx = obj$env$lrandom()
+  random_names = names(parDataMode)[indx]
   q = sum(indx)
   p = length(object$opt$par)
 
@@ -122,17 +130,18 @@ function( object,
     negEDF = -1 * Matrix::rowSums(S * Matrix::t(Hess_new))
   }
 
-  #if(what == "cAIC"){
+  if(what == "cAIC"){
     jnll = obj$env$f(parDataMode)
     cnll = jnll - obj_new$env$f(parDataMode)
     cAIC = 2*cnll + 2*(p+q) - 2*sum(negEDF)
     return(cAIC)
-  #}
-  #if(what == "EDF"){
-  #  group = colnames(object$tmb_inputs$tmb_data$Z_ik)
-  #  group = sapply(group, FUN=\(char)strsplit(char,split=".",fixed=TRUE)[[1]][1])
-  #  group = factor(group)
-  #  EDF = tapply(negEDF,INDEX=group,FUN=length) - tapply(negEDF,INDEX=group,FUN=sum)
-  #  return(EDF)
-  #}
+  }
+  if(what == "EDF"){
+    #group = colnames(object$tmb_inputs$tmb_data$Z_ik)
+    #group = sapply(group, FUN=\(char)strsplit(char,split=".",fixed=TRUE)[[1]][1])
+    #group = factor(group)
+    group = factor(random_names)
+    EDF = tapply(negEDF, INDEX=group, FUN=length) - tapply(negEDF, INDEX=group, FUN=sum)
+    return(EDF)
+  }
 }
