@@ -104,9 +104,9 @@ We can then compare this with the PDE reported by `mgcv`
 start_time = Sys.time()
 mygam = gam( n ~ s(w) + s(x,y), data=Data ) #
 Sys.time() - start_time
-#> Time difference of 0.0270493 secs
+#> Time difference of 0.02214766 secs
 summary(mygam)$dev.expl
-#> [1] 0.367318
+#> [1] 0.3517756
 ```
 
 where this comparison shows that using the SPDE method in tinyVAST
@@ -127,7 +127,7 @@ out_reduced = tinyVAST( data = Data,
 
 # Extract PDE for GAM-style spatial smoother in tinyVAST
 out_reduced$deviance_explained
-#> [1] 0.3606747
+#> [1] 0.3497174
 ```
 
 ## Visualize spatial response
@@ -204,4 +204,4 @@ ggplot(p, aes(x=w, y=fit,
 
 ![](spatial_files/figure-html/show_ggplot-1.png)
 
-Runtime for this vignette: 3.02 secs
+Runtime for this vignette: 3.34 secs

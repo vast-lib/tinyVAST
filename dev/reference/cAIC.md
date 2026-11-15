@@ -5,7 +5,7 @@ Calculates the conditional Akaike Information criterion (cAIC).
 ## Usage
 
 ``` r
-cAIC(object, method = c("stable", "fast"))
+cAIC(object, what = c("cAIC", "EDF"), method = c("stable", "fast"))
 ```
 
 ## Arguments
@@ -14,6 +14,11 @@ cAIC(object, method = c("stable", "fast"))
 
   Output from
   [`tinyVAST()`](https://vast-lib.github.io/tinyVAST/dev/reference/tinyVAST.md).
+
+- what:
+
+  whether to get cAIC or the EDF (the latter grouped by type of random
+  effect).
 
 - method:
 
@@ -41,7 +46,7 @@ expected predictive performance for new data that have new random
 effects, e.g., extrapolation, or inference about generative parameters.
 
 Both cAIC and EDF are calculated using Eq. 6 of Zheng, Cadigan, and
-Thorson (2024).
+Thorson (2026).
 
 For models that include profiled fixed effects, these profiles are
 turned off.
