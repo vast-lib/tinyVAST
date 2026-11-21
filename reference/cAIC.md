@@ -61,6 +61,7 @@ models. Journal of Statistical Computation and Simulation.
 ## Examples
 
 ``` r
+# \donttest{
 data( red_snapper )
 red_snapper = droplevels(subset(red_snapper, Data_type=="Biomass_KG"))
 
@@ -88,4 +89,5 @@ cAIC(fit) # conditional AIC
 #> Error in UseMethod("cAIC", object): no applicable method for 'cAIC' applied to an object of class "tinyVAST"
 AIC(fit) # marginal AIC
 #> [1] 43073.52
+# }
 ```

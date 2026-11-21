@@ -85,6 +85,8 @@ mytiny0 = tinyVAST(
     profile = "alpha_j" 
   ) 
 )
+#> Warning: The model may not have converged. Maximum final gradient:
+#> 0.025399222650752.
 
 # Summarize output
 Summary = summary(mytiny0, what="spacetime_term")
@@ -97,10 +99,10 @@ knitr::kable( Summary, digits=3)
 | 1     | sockeye | sockeye | 2         | NA    | 2   |    0.181 |     0.067 |   2.711 |   0.007 |
 | 1     | pink    | pink    | 3         | NA    | 1   |    0.038 |     0.015 |   2.532 |   0.011 |
 | 1     | pink    | pink    | 4         | NA    | 2   |    0.943 |     0.017 |  54.220 |   0.000 |
-| 1     | chum    | chum    | 5         | NA    | 1   |    0.742 |     0.198 |   3.757 |   0.000 |
-| 1     | chum    | chum    | 6         | NA    | 2   |    0.247 |     0.196 |   1.263 |   0.207 |
+| 1     | chum    | chum    | 5         | NA    | 1   |    0.742 |     0.198 |   3.758 |   0.000 |
+| 1     | chum    | chum    | 6         | NA    | 2   |    0.247 |     0.196 |   1.263 |   0.206 |
 | 2     | pink    | pink    | 7         | NA    | 0   |    0.525 |     0.035 |  14.787 |   0.000 |
-| 2     | chum    | chum    | 8         | NA    | 0   |    0.252 |     0.048 |   5.231 |   0.000 |
+| 2     | chum    | chum    | 8         | NA    | 0   |    0.252 |     0.048 |   5.232 |   0.000 |
 | 2     | sockeye | sockeye | 9         | NA    | 0   |    0.361 |     0.036 |   9.943 |   0.000 |
 
 ### Spatially correlated dynamics among populations
@@ -189,15 +191,15 @@ knitr::kable( Summary, digits=3)
 
 | heads | to      | from    | parameter | start | lag | Estimate | Std_Error | z_value | p_value |
 |:------|:--------|:--------|:----------|:------|:----|---------:|----------:|--------:|--------:|
-| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.469 |     0.113 |  12.967 |    0.00 |
-| 1     | sockeye | sockeye | 2         | NA    | 2   |   -0.469 |     0.114 |  -4.114 |    0.00 |
-| 1     | pink    | pink    | 3         | NA    | 1   |    0.004 |     0.006 |   0.628 |    0.53 |
-| 1     | pink    | pink    | 4         | NA    | 2   |    1.023 |     0.007 | 152.879 |    0.00 |
-| 1     | chum    | chum    | 5         | NA    | 1   |    1.836 |     0.052 |  35.324 |    0.00 |
-| 1     | chum    | chum    | 6         | NA    | 2   |   -0.841 |     0.052 | -16.172 |    0.00 |
-| 2     | pink    | pink    | 7         | NA    | 0   |    0.279 |     0.023 |  11.942 |    0.00 |
-| 2     | chum    | chum    | 8         | NA    | 0   |    0.037 |     0.008 |   4.896 |    0.00 |
-| 2     | sockeye | sockeye | 9         | NA    | 0   |    0.102 |     0.019 |   5.380 |    0.00 |
+| 1     | sockeye | sockeye | 1         | NA    | 1   |    1.510 |     0.101 |  15.022 |   0.000 |
+| 1     | sockeye | sockeye | 2         | NA    | 2   |   -0.510 |     0.101 |  -5.051 |   0.000 |
+| 1     | pink    | pink    | 3         | NA    | 1   |    0.006 |     0.007 |   0.888 |   0.374 |
+| 1     | pink    | pink    | 4         | NA    | 2   |    1.018 |     0.007 | 138.730 |   0.000 |
+| 1     | chum    | chum    | 5         | NA    | 1   |    1.759 |     0.073 |  24.066 |   0.000 |
+| 1     | chum    | chum    | 6         | NA    | 2   |   -0.766 |     0.073 | -10.485 |   0.000 |
+| 2     | pink    | pink    | 7         | NA    | 0   |    0.416 |     0.036 |  11.707 |   0.000 |
+| 2     | chum    | chum    | 8         | NA    | 0   |    0.070 |     0.016 |   4.387 |   0.000 |
+| 2     | sockeye | sockeye | 9         | NA    | 0   |    0.158 |     0.027 |   5.821 |   0.000 |
 
 ### Model selection and visualization
 
@@ -212,7 +214,7 @@ AIC(mytiny0)
 #> [1] 48939.44
 # AIC for SAR spatial variation
 AIC(mytiny)
-#> [1] 49521.82
+#> [1] 49477.36
 ```
 
 Finally, we can plot observations and predictions for the selected model
@@ -233,6 +235,6 @@ ggplot( data=Resid, aes(x=Year, y=Biomass_nozeros, col=Which) ) + # , group=yhat
 
 ![](simultaneous_autoregressive_process_files/figure-html/unnamed-chunk-8-1.png)
 
-Runtime for this vignette: 14.35 secs
+Runtime for this vignette: 19.6 secs
 
 ## Works cited
