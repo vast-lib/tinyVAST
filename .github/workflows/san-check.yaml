@@ -21,14 +21,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Use binary packages (avoid libc++/libstdc++ mismatch)
+        run: |
+          . /etc/os-release
+          echo "Distro codename: ${VERSION_CODENAME}"
+          echo "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/${VERSION_CODENAME}/latest'))" >> ~/.Rprofile
+          cat ~/.Rprofile
+
       - name: Install dependencies
         run: |
           R -q -e 'install.packages("pak")'
+          R -q -e 'pak::pkg_install(c("sf", "terra"), upgrade = FALSE)'
           R -q -e 'pak::pkg_install(c("local::.", "rcmdcheck", "knitr", "rmarkdown", "AER", "MARSS", "testthat", "RANN"))'
-          # R -q -e 'pak::pkg_install(c("phylopath", "reshape", "dynlm", "ggpubr", "vars", "DHARMa"))'    # Oher SUGGESTS packages
+          # R -q -e 'pak::pkg_install(c("phylopath", "reshape", "dynlm", "ggpubr", "vars", "DHARMa"))'    # Other SUGGESTS packages
+
+      - name: Check that sf loads
+        run: |
+          R -q -e 'library(sf); print(sf::sf_extSoftVersion())'
 
       - name: Run check
         run: |
-          # R -q -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-vignettes", "--no-build-vignettes", "--no-examples", "--no-tests"), build_args = c("--no-build-vignettes", "--no-build-vignettes"), error_on = "error")'
           R -q -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-vignettes", "--no-build-vignettes"), build_args = c("--no-build-vignettes", "--no-build-vignettes"), error_on = "error")'
-
