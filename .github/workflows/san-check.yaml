@@ -21,23 +21,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use binary packages (avoid libc++/libstdc++ mismatch)
+      - name: Show compiler configuration
         run: |
-          . /etc/os-release
-          echo "Distro codename: ${VERSION_CODENAME}"
-          echo "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/${VERSION_CODENAME}/latest'))" >> ~/.Rprofile
-          cat ~/.Rprofile
+          R CMD config CXX17
+          R CMD config CXX17FLAGS
+          R CMD config CXX17STD
+          R CMD config CXXFLAGS
+          cat /etc/os-release | head -3
+
+      - name: Compile dependencies against libstdc++ (matches system GDAL)
+        run: |
+          mkdir -p ~/.R
+          cat > ~/.R/Makevars <<'EOF'
+          CXX=clang++
+          CXX11=clang++
+          CXX14=clang++
+          CXX17=clang++
+          CXX20=clang++
+          CXXFLAGS=-O2 -fPIC
+          CXX11FLAGS=-O2 -fPIC
+          CXX14FLAGS=-O2 -fPIC
+          CXX17FLAGS=-O2 -fPIC
+          CXX20FLAGS=-O2 -fPIC
+          EOF
 
       - name: Install dependencies
         run: |
           R -q -e 'install.packages("pak")'
-          R -q -e 'pak::pkg_install(c("sf", "terra"), upgrade = FALSE)'
           R -q -e 'pak::pkg_install(c("local::.", "rcmdcheck", "knitr", "rmarkdown", "AER", "MARSS", "testthat", "RANN"))'
-          # R -q -e 'pak::pkg_install(c("phylopath", "reshape", "dynlm", "ggpubr", "vars", "DHARMa"))'    # Other SUGGESTS packages
 
       - name: Check that sf loads
         run: |
           R -q -e 'library(sf); print(sf::sf_extSoftVersion())'
+
+      - name: Restore sanitizer compiler settings
+        run: rm -f ~/.R/Makevars
 
       - name: Run check
         run: |
