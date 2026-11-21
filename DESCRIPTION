@@ -41,7 +41,6 @@ Imports:
     dsem (>= 3.0.0),
     insight,
     cv,
-    sparseinv,
     gstat,
     cli,
     GpGp,
