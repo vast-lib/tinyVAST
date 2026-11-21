@@ -53,8 +53,11 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.3.9999" id="tinyvast-1639999">tinyVAST 1.6.3.9999<a class="anchor" aria-label="anchor" href="#tinyvast-1639999"></a></h2>
-<ul><li>Add an experimental option for cAIC to avoid constructing a dense matrix prior to extracting its diagonal using sparseinv::Takahashi_Davis</li>
+<ul><li>Add an experimental option for cAIC to avoid constructing a dense matrix prior to extracting its diagonal using sparseinv::Takahashi_Davis, and use spHess(random=TRUE) to efficiently access sparse Hessians</li>
 <li>Add what = “EDF” option to cAIC(.)</li>
+<li>Remove ti and te mgcv tests from CRAN</li>
+<li>Speed up <code>project</code> by adding argument <code>nsim</code> and using more efficient linear algebra</li>
+<li>Speed up TMB code on C++ side, e.g., by making DATA_UPDATE optional, making weights_i optional, using SCALE for scaling a precision matrix, and other smaller improvements</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.3" id="tinyvast-163">tinyVAST 1.6.3<a class="anchor" aria-label="anchor" href="#tinyvast-163"></a></h2><p class="text-muted">CRAN release: 2026-09-20</p>

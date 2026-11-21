@@ -133,7 +133,7 @@ matplot( y=L_tf, x=unique(Data$year), type="l",
 
 ![](empirical_orthogonal_functions_files/figure-html/EOF-1.png)
 
-Runtime for this vignette: 2.98 mins
+Runtime for this vignette: 2.76 mins
 
 #### Works cited
 
