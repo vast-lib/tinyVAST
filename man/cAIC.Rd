@@ -4,10 +4,18 @@
 \alias{cAIC}
 \title{Calculate conditional AIC}
 \usage{
-cAIC(object)
+cAIC(object, what = c("cAIC", "EDF"), method = c("stable", "fast"))
 }
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}.}
+
+\item{what}{whether to get cAIC or the EDF (the latter grouped by type of random effect).}
+
+\item{method}{whether to compute effective degrees of freedom using
+the stable method \code{diag(solve(Hess, Hess_new))}
+or a faster and experimental method
+\code{-rowSums(sparseinv::Takahashi_Davis(-Hess) * t(Hess_new))},
+where the latter avoids constructing a dense matrix prior to extracting its diagonal}
 }
 \value{
 cAIC value
@@ -28,7 +36,7 @@ that have new random effects, e.g., extrapolation, or inference about
 generative parameters.
 
 Both cAIC and EDF are calculated using Eq. 6 of Zheng, Cadigan, and Thorson
-(2024).
+(2026).
 
 For models that include profiled fixed effects, these profiles are turned
 off.
@@ -62,8 +70,8 @@ AIC(fit) # marginal AIC
 
 }
 \references{
-Zheng, N., Cadigan, N., & Thorson, J. T. (2024).
-A note on numerical evaluation of conditional Akaike information for
-nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
-\doi{10.48550/arXiv.2411.14185}
+Zheng, N., Cadigan, N., & Thorson, J. T. (2026).
+A unifying theory for the evaluation of conditional Akaike information for
+mixed-effects models. Journal of Statistical Computation and Simulation.
+\doi{10.1080/00949655.2026.2736799}
 }

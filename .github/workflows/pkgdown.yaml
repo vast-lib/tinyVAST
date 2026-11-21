@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -30,25 +30,26 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install dependencies Ubuntu
-        if: runner.os == 'Linux'
-        run: |
-          install.packages('remotes')
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("knitr")
-          remotes::install_cran("rmarkdown")
-          remotes::install_cran("rcmdcheck")
-          install.packages("Matrix", type = "source")
-          install.packages("TMB", type = "source")
-        shell: Rscript {0}
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
+          cache-version: 2
+
+      - name: Reinstall TMB/Matrix from source
+        run: |
+          install.packages(c("Matrix", "TMB"), type = "source")
+        shell: Rscript {0}
+
+      - name: Check systemfonts
+        run: |
+          print(.libPaths())
+          print(find.package("systemfonts"))
+          print(packageVersion("systemfonts"))
+        shell: Rscript {0}
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        run: pkgdown::build_site_github_pages(new_process = TRUE, install = FALSE)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
