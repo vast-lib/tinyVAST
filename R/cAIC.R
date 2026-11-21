@@ -37,6 +37,7 @@
 #' \doi{10.1080/00949655.2026.2736799}
 #'
 #' @examples
+#' \donttest{
 #' data( red_snapper )
 #' red_snapper = droplevels(subset(red_snapper, Data_type=="Biomass_KG"))
 #'
@@ -63,6 +64,7 @@
 #'
 #' cAIC(fit) # conditional AIC
 #' AIC(fit) # marginal AIC
+#' }
 #'
 #' @export
 cAIC <-
