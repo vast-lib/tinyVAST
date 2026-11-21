@@ -122,9 +122,9 @@ function( object,
 
     negEDF = Matrix::diag(Matrix::solve(Hess, Hess_new))
   }else{
-    if( !requireNamespace("sparseinv", quietly = TRUE) ){
-      stop("method = 'fast' requires the 'sparseinv' package; use method = 'stable' or install it")
-    }
+    #if( !requireNamespace("sparseinv", quietly = TRUE) ){
+    #  stop("method = 'fast' requires the 'sparseinv' package; use method = 'stable' or install it")
+    #}
     # h/t Jie Cao for suggesting spHess to avoid sparsifying a dense Hessian as done previously
     # Also dropping negative signs (which all cancel)
     Hess_new = obj_new$env$spHess(par, random = TRUE)
