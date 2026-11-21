@@ -71,6 +71,11 @@ test_that("Basic index standardization works", {
              family = delta_gamma(type="poisson-link"),
              control = tinyVASTcontrol(gmrf="sep") )
   expect_equal( my3$opt[c("par","objective")], my4$opt[c("par","objective")], tolerance=0.001 )
+
+  # check cAIC
+  expect_equal( cAIC(my1, method = "stable"), cAIC(my1, method = "fast"), tolerance=0.001 )
+  expect_equal( cAIC(my2, method = "stable"), cAIC(my2, method = "fast"), tolerance=0.001 )
+  expect_equal( cAIC(my3, method = "stable", what = "EDF"), cAIC(my3, method = "fast", what = "EDF"), tolerance=0.001 )
 })
 
 test_that("Index standardization results are identical in VAST, tinyVAST, and sdmTMB", {

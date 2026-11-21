@@ -68,7 +68,7 @@
 cAIC <-
 function( object,
           what = c("cAIC", "EDF"),
-          method = c("stable", "fast") ){
+          method = c("fast", "stable") ){
 
   what = match.arg(what)
   method = match.arg(method)
@@ -127,8 +127,8 @@ function( object,
     #}
     # h/t Jie Cao for suggesting spHess to avoid sparsifying a dense Hessian as done previously
     # Also dropping negative signs (which all cancel)
-    Hess_new = obj_new$env$spHess(par, random = TRUE)
-    Hess = obj$env$spHess(par, random = TRUE)
+    Hess_new = obj_new$env$spHess(parDataMode, random = TRUE)
+    Hess = obj$env$spHess(parDataMode, random = TRUE)
     #S = TMB:::solveSubset(Hess)
     S = sparseinv::Takahashi_Davis(Hess)
     negEDF = Matrix::rowSums(S * Hess_new)

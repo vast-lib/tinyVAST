@@ -4,7 +4,7 @@
 \alias{cAIC}
 \title{Calculate conditional AIC}
 \usage{
-cAIC(object, what = c("cAIC", "EDF"), method = c("stable", "fast"))
+cAIC(object, what = c("cAIC", "EDF"), method = c("fast", "stable"))
 }
 \arguments{
 \item{object}{Output from \code{\link[=tinyVAST]{tinyVAST()}}.}
