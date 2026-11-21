@@ -154,6 +154,7 @@
 #' @importFrom cli cli_abort cli_warn cli_inform cli_alert_success cli_alert_danger cli_alert_info
 #' @importFrom GpGp find_ordered_nn
 #' @importFrom GPvecchia order_maxmin_exact
+#' @importFrom sparseinv Takahashi_Davis
 #'
 #' @seealso Details section of [make_dsem_ram()] for a summary of the math involved with constructing the DSEM, and \doi{10.1111/2041-210X.14289} for more background on math and inference
 #' @seealso \doi{10.48550/arXiv.2401.10193} for more details on how GAM, SEM, and DSEM components are combined from a statistical and software-user perspective
