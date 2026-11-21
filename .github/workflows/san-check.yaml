@@ -23,27 +23,26 @@ jobs:
 
       - name: Show compiler configuration
         run: |
-          R CMD config CXX17
-          R CMD config CXX17FLAGS
-          R CMD config CXX17STD
-          R CMD config CXXFLAGS
-          cat /etc/os-release | head -3
+          for v in CXX CXX17 CXX17FLAGS CXX17STD CXXFLAGS LDFLAGS; do
+            echo "$v = $(R CMD config $v)"
+          done
 
       - name: Compile dependencies against libstdc++ (matches system GDAL)
         run: |
           mkdir -p ~/.R
-          cat > ~/.R/Makevars <<'EOF'
-          CXX=clang++
-          CXX11=clang++
-          CXX14=clang++
-          CXX17=clang++
-          CXX20=clang++
-          CXXFLAGS=-O2 -fPIC
-          CXX11FLAGS=-O2 -fPIC
-          CXX14FLAGS=-O2 -fPIC
-          CXX17FLAGS=-O2 -fPIC
-          CXX20FLAGS=-O2 -fPIC
-          EOF
+          : > ~/.R/Makevars
+          strip_stdlib() { sed -e 's/-stdlib=[A-Za-z+]*//g'; }
+          for s in "" 11 14 17 20; do
+            cxx=$(R CMD config CXX$s 2>/dev/null | strip_stdlib || true)
+            flags=$(R CMD config CXX${s}FLAGS 2>/dev/null | strip_stdlib || true)
+            if [ -n "$cxx" ]; then
+              echo "CXX$s = $cxx -stdlib=libstdc++" >> ~/.R/Makevars
+              echo "CXX${s}FLAGS = $flags" >> ~/.R/Makevars
+            fi
+          done
+          echo "LDFLAGS = $(R CMD config LDFLAGS | strip_stdlib)" >> ~/.R/Makevars
+          echo "---- ~/.R/Makevars ----"
+          cat ~/.R/Makevars
 
       - name: Install dependencies
         run: |
