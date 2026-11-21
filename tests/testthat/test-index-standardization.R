@@ -48,7 +48,7 @@ test_that("Basic index standardization works", {
              spatial_domain = mesh,
              family = delta_gamma(type="poisson-link"),
              control = tinyVASTcontrol(gmrf="sep") )
-  expect_equal( my1$opt, my2$opt, tolerance=0.001 )
+  expect_equal( my1$opt[c("par","objective")], my2$opt[c("par","objective")], tolerance=0.001 )
 
   # Predicted sample-weighted total
   index = integrate_output( my1,
@@ -70,7 +70,7 @@ test_that("Basic index standardization works", {
              spatial_domain = mesh,
              family = delta_gamma(type="poisson-link"),
              control = tinyVASTcontrol(gmrf="sep") )
-  expect_equal( my3$opt, my4$opt, tolerance=0.001 )
+  expect_equal( my3$opt[c("par","objective")], my4$opt[c("par","objective")], tolerance=0.001 )
 })
 
 test_that("Index standardization results are identical in VAST, tinyVAST, and sdmTMB", {

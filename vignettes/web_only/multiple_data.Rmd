@@ -3,7 +3,7 @@ title: "Multiple data types"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #output: rmarkdown::pdf_document
-bibliography: 'tinyVAST_vignettes.bib'
+bibliography: '../tinyVAST_vignettes.bib'
 vignette: >
   %\VignetteIndexEntry{Multiple data types}
   %\VignetteEngine{knitr::rmarkdown}

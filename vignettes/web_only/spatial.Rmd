@@ -84,7 +84,7 @@ out = tinyVAST( data = Data,
            space_term = sem)
 ```
 
-We can then calculate the area-weighted total abundance:
+We can then calculate the area-weighted total abundance by supplying a `newdata` object that has rows for each area in the domain.  Here however we show a simpler sample-weighted index:
 ```{r calculate_total, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 # Predicted sample-weighted total
 integrate_output(out, newdata = out$data)
