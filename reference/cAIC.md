@@ -5,7 +5,7 @@ Calculates the conditional Akaike Information criterion (cAIC).
 ## Usage
 
 ``` r
-cAIC(object)
+cAIC(object, what = c("cAIC", "EDF"), method = c("fast", "stable"))
 ```
 
 ## Arguments
@@ -14,6 +14,19 @@ cAIC(object)
 
   Output from
   [`tinyVAST()`](https://vast-lib.github.io/tinyVAST/reference/tinyVAST.md).
+
+- what:
+
+  whether to get cAIC or the EDF (the latter grouped by type of random
+  effect).
+
+- method:
+
+  whether to compute effective degrees of freedom using the stable
+  method `diag(solve(Hess, Hess_new))` or a faster and experimental
+  method `-rowSums(sparseinv::Takahashi_Davis(-Hess) * t(Hess_new))`,
+  where the latter avoids constructing a dense matrix prior to
+  extracting its diagonal
 
 ## Value
 
@@ -33,17 +46,17 @@ expected predictive performance for new data that have new random
 effects, e.g., extrapolation, or inference about generative parameters.
 
 Both cAIC and EDF are calculated using Eq. 6 of Zheng, Cadigan, and
-Thorson (2024).
+Thorson (2026).
 
 For models that include profiled fixed effects, these profiles are
 turned off.
 
 ## References
 
-Zheng, N., Cadigan, N., & Thorson, J. T. (2024). A note on numerical
-evaluation of conditional Akaike information for nonlinear mixed-effects
-models (arXiv:2411.14185). arXiv.
-[doi:10.48550/arXiv.2411.14185](https://doi.org/10.48550/arXiv.2411.14185)
+Zheng, N., Cadigan, N., & Thorson, J. T. (2026). A unifying theory for
+the evaluation of conditional Akaike information for mixed-effects
+models. Journal of Statistical Computation and Simulation.
+[doi:10.1080/00949655.2026.2736799](https://doi.org/10.1080/00949655.2026.2736799)
 
 ## Examples
 

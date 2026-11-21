@@ -88,6 +88,9 @@ Partial = partial( object = myfit,
 
 # Lattice plots as default option
 plotPartial( Partial )
+#> Warning in plotPartial(Partial): pdp::plotPartial() is deprecated and will be
+#> removed in a future release. Please use plot(..., lattice = TRUE) instead; see
+#> ?pdp::plot.partial for details.
 ```
 
 ![](mgcv_files/figure-html/unnamed-chunk-6-1.png)
@@ -156,6 +159,9 @@ mypartial = partial( object = myfit,
 
 # Lattice plots as default option
 plotPartial( mypartial )
+#> Warning in plotPartial(mypartial): pdp::plotPartial() is deprecated and will be
+#> removed in a future release. Please use plot(..., lattice = TRUE) instead; see
+#> ?pdp::plot.partial for details.
 ```
 
 ![](mgcv_files/figure-html/unnamed-chunk-9-1.png)
@@ -166,6 +172,9 @@ plotPartial( mypartial )
 # Lattice plot of true values
 mypartial$yhat = Data$z
 plotPartial( mypartial )
+#> Warning in plotPartial(mypartial): pdp::plotPartial() is deprecated and will be
+#> removed in a future release. Please use plot(..., lattice = TRUE) instead; see
+#> ?pdp::plot.partial for details.
 ```
 
 ![](mgcv_files/figure-html/unnamed-chunk-9-2.png)
@@ -182,4 +191,4 @@ plot( out, zlab="f(x,y) for group=1")
 
 ![](mgcv_files/figure-html/unnamed-chunk-10-1.png)
 
-Runtime for this vignette: 24.64 secs
+Runtime for this vignette: 36.9 secs

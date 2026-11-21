@@ -236,7 +236,7 @@ ggplot( data=long, aes(x=Var2, y=p, col=method) ) +
 
 ![](age_composition_expansion_files/figure-html/agecomp-1.png)
 
-Runtime for this vignette: 7.86 mins
+Runtime for this vignette: 13.58 mins
 
 ## Works cited
 
