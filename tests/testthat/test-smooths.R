@@ -114,6 +114,7 @@ test_that("t2 splines throw an error for now", {
 })
 
 test_that("ti and te splines work", {
+  skip_on_cran()
   set.seed(1)
   dat <- mgcv::gamSim(1, n = 400, scale = 2)
   dat$fac <- fac <- as.factor(sample(1:20, 400, replace = TRUE))

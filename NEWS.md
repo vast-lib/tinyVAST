@@ -3,6 +3,8 @@
 * Add an experimental option for cAIC to avoid constructing a dense matrix prior to extracting its diagonal using sparseinv::Takahashi_Davis
 * Add what = "EDF" option to cAIC(.)
 * Remove ti and te mgcv tests from CRAN
+* Speed up `project` by adding argument `nsim` and using more efficient linear algebra
+* Speed up TMB code on C++ side, e.g., by making DATA_UPDATE optional, making weights_i optional, using SCALE for scaling a precision matrix, and other smaller improvements
 
 # tinyVAST 1.6.3
 

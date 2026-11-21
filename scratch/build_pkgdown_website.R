@@ -34,7 +34,7 @@ if( FALSE ){
   #             output = "web_only/VAST.Rmd" )
 }
 
-setwd(R'(C:\Users\James.Thorson\Desktop\Git\tinyVAST)')
+setwd(R'(C:\Users\james\OneDrive\Desktop\Git\tinyVAST)')
 
 # Only needed once
 if( FALSE ){
