@@ -110,24 +110,28 @@ function( object,
   q = sum(indx)
   p = length(object$opt$par)
 
-  ## use - for Hess because model returns negative loglikelihood;
-  #cov_Psi_inv = -Hess_new[indx,indx]; ## this is the marginal prec mat of REs;
-  Hess_new = -Matrix::Matrix(obj_new$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
-  Hess_new = Hess_new[indx,indx]
-
-  ## Joint hessian etc
-  Hess = -Matrix::Matrix(obj$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
-  Hess = Hess[indx,indx]
-
   if( method == "stable" ){
+    ## use - for Hess because model returns negative loglikelihood;
+    #cov_Psi_inv = -Hess_new[indx,indx]; ## this is the marginal prec mat of REs;
+    Hess_new = -Matrix::Matrix(obj_new$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
+    Hess_new = Hess_new[indx,indx]
+
+    # Joint hessian etc
+    Hess = -Matrix::Matrix(obj$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
+    Hess = Hess[indx,indx]
+
     negEDF = Matrix::diag(Matrix::solve(Hess, Hess_new))
   }else{
-    #S = TMB:::solveSubset(-Hess)
     if( !requireNamespace("sparseinv", quietly = TRUE) ){
       stop("method = 'fast' requires the 'sparseinv' package; use method = 'stable' or install it")
     }
-    S = sparseinv::Takahashi_Davis(-Hess)
-    negEDF = -1 * Matrix::rowSums(S * Matrix::t(Hess_new))
+    # h/t Jie Cao for suggesting spHess to avoid sparsifying a dense Hessian as done previously
+    # Also dropping negative signs (which all cancel)
+    Hess_new = obj_new$env$spHess(par, random = TRUE)
+    Hess = obj$env$spHess(par, random = TRUE)
+    #S = TMB:::solveSubset(Hess)
+    S = sparseinv::Takahashi_Davis(Hess)
+    negEDF = Matrix::rowSums(S * Hess_new)
   }
 
   if(what == "cAIC"){

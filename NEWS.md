@@ -1,6 +1,6 @@
 # tinyVAST 1.6.3.9999
 
-* Add an experimental option for cAIC to avoid constructing a dense matrix prior to extracting its diagonal using sparseinv::Takahashi_Davis
+* Add an experimental option for cAIC to avoid constructing a dense matrix prior to extracting its diagonal using sparseinv::Takahashi_Davis, and use spHess(random=TRUE) to efficiently access sparse Hessians
 * Add what = "EDF" option to cAIC(.)
 * Remove ti and te mgcv tests from CRAN
 * Speed up `project` by adding argument `nsim` and using more efficient linear algebra
