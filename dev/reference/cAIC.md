@@ -5,7 +5,7 @@ Calculates the conditional Akaike Information criterion (cAIC).
 ## Usage
 
 ``` r
-cAIC(object, what = c("cAIC", "EDF"), method = c("stable", "fast"))
+cAIC(object, what = c("cAIC", "EDF"), method = c("fast", "stable"))
 ```
 
 ## Arguments
