@@ -35,6 +35,7 @@ jobs:
         run: |
           install.packages('remotes')
           remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("systemfonts")
           remotes::install_cran("knitr")
           remotes::install_cran("rmarkdown")
           remotes::install_cran("rcmdcheck")
