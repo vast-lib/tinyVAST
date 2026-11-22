@@ -118,7 +118,7 @@ out
 #>     variables = c("f1", "f2", 1:n_c), distribution_column = "dist")
 #> 
 #> Run time: 
-#> Time difference of 2.038939 secs
+#> Time difference of 0.972928 secs
 #> 
 #> Family: 
 #> $obs
@@ -148,7 +148,7 @@ out
 #> log_sigma -0.52203929 0.06761656
 #> log_sigma  0.21850709 0.13313013
 #> log_kappa -0.26762174 0.21031509
-#> Maximum gradient component: 0.002544265 
+#> Maximum gradient component: 0.002544263 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.5312474
@@ -304,7 +304,7 @@ knitr::kable( Lhat_cf,
 
 Rotated estimated loadings with full rank {.table}
 
-Runtime for this vignette: 9.2 secs
+Runtime for this vignette: 4.86 secs
 
 ## Works cited
 
