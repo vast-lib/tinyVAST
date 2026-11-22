@@ -21,14 +21,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show compiler configuration
+        run: |
+          for v in CXX CXX17 CXX17FLAGS CXX17STD CXXFLAGS LDFLAGS; do
+            echo "$v = $(R CMD config $v)"
+          done
+
+      - name: Compile dependencies against libstdc++ (matches system GDAL)
+        run: |
+          mkdir -p ~/.R
+          : > ~/.R/Makevars
+          strip_stdlib() { sed -e 's/-stdlib=[A-Za-z+]*//g'; }
+          for s in "" 11 14 17 20; do
+            cxx=$(R CMD config CXX$s 2>/dev/null | strip_stdlib || true)
+            flags=$(R CMD config CXX${s}FLAGS 2>/dev/null | strip_stdlib || true)
+            if [ -n "$cxx" ]; then
+              echo "CXX$s = $cxx -stdlib=libstdc++" >> ~/.R/Makevars
+              echo "CXX${s}FLAGS = $flags" >> ~/.R/Makevars
+            fi
+          done
+          echo "LDFLAGS = $(R CMD config LDFLAGS | strip_stdlib)" >> ~/.R/Makevars
+          echo "---- ~/.R/Makevars ----"
+          cat ~/.R/Makevars
+
       - name: Install dependencies
         run: |
           R -q -e 'install.packages("pak")'
           R -q -e 'pak::pkg_install(c("local::.", "rcmdcheck", "knitr", "rmarkdown", "AER", "MARSS", "testthat", "RANN"))'
-          # R -q -e 'pak::pkg_install(c("phylopath", "reshape", "dynlm", "ggpubr", "vars", "DHARMa"))'    # Oher SUGGESTS packages
+
+      - name: Check that sf loads
+        run: |
+          R -q -e 'library(sf); print(sf::sf_extSoftVersion())'
+
+      - name: Restore sanitizer compiler settings
+        run: rm -f ~/.R/Makevars
 
       - name: Run check
         run: |
-          # R -q -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-vignettes", "--no-build-vignettes", "--no-examples", "--no-tests"), build_args = c("--no-build-vignettes", "--no-build-vignettes"), error_on = "error")'
           R -q -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-vignettes", "--no-build-vignettes"), build_args = c("--no-build-vignettes", "--no-build-vignettes"), error_on = "error")'
-

@@ -3,6 +3,12 @@
 #' Calculates the conditional Akaike Information criterion (cAIC).
 #'
 #' @param object Output from [tinyVAST()].
+#' @param what whether to get cAIC or the EDF (the latter grouped by type of random effect).
+#' @param method whether to compute effective degrees of freedom using
+#'   the stable method \code{diag(solve(Hess, Hess_new))}
+#'   or a faster and experimental method
+#'   \code{-rowSums(sparseinv::Takahashi_Davis(-Hess) * t(Hess_new))},
+#'   where the latter avoids constructing a dense matrix prior to extracting its diagonal
 #'
 #' @details cAIC is designed to optimize the expected out-of-sample predictive
 #' performance for new data that share the same random effects as the in-sample
@@ -16,7 +22,7 @@
 #' generative parameters.
 #'
 #' Both cAIC and EDF are calculated using Eq. 6 of Zheng, Cadigan, and Thorson
-#' (2024).
+#' (2026).
 #'
 #' For models that include profiled fixed effects, these profiles are turned
 #' off.
@@ -25,12 +31,13 @@
 #' cAIC value
 #'
 #' @references
-#' Zheng, N., Cadigan, N., & Thorson, J. T. (2024).
-#' A note on numerical evaluation of conditional Akaike information for
-#' nonlinear mixed-effects models (arXiv:2411.14185). arXiv.
-#' \doi{10.48550/arXiv.2411.14185}
+#' Zheng, N., Cadigan, N., & Thorson, J. T. (2026).
+#' A unifying theory for the evaluation of conditional Akaike information for
+#' mixed-effects models. Journal of Statistical Computation and Simulation.
+#' \doi{10.1080/00949655.2026.2736799}
 #'
 #' @examples
+#' \donttest{
 #' data( red_snapper )
 #' red_snapper = droplevels(subset(red_snapper, Data_type=="Biomass_KG"))
 #'
@@ -57,11 +64,16 @@
 #'
 #' cAIC(fit) # conditional AIC
 #' AIC(fit) # marginal AIC
+#' }
 #'
 #' @export
 cAIC <-
-function( object ){
+function( object,
+          what = c("cAIC", "EDF"),
+          method = c("fast", "stable") ){
 
+  what = match.arg(what)
+  method = match.arg(method)
   check_tinyVAST_version( object$internal$packageVersion )
   #what = match.arg(what)
   #requireNamespace(Matrix)
@@ -71,51 +83,71 @@ function( object ){
   if( is.null(object$internal$control$profile) ){
     obj = object$obj
   }else{
-    obj = TMB::MakeADFun( data = data,
-                        parameters = object$internal$parlist,
-                        map = object$tmb_inputs$tmb_map,
-                        random = object$tmb_inputs$tmb_random,
-                        DLL = "tinyVAST",
-                        profile = NULL )
+    obj = TMB::MakeADFun( 
+      data = data,
+      parameters = object$internal$parlist,
+      map = object$tmb_inputs$tmb_map,
+      random = object$tmb_inputs$tmb_random,
+      DLL = "tinyVAST",
+      profile = NULL 
+    )
   }
 
   # Make obj_new
   data$weights_i[] = 0
-  obj_new = TMB::MakeADFun( data = data,
-                      parameters = object$internal$parlist,
-                      map = object$tmb_inputs$tmb_map,
-                      random = object$tmb_inputs$tmb_random,
-                      DLL = "tinyVAST",
-                      profile = NULL )
+  obj_new = TMB::MakeADFun( 
+    data = data,
+    parameters = object$internal$parlist,
+    map = object$tmb_inputs$tmb_map,
+    random = object$tmb_inputs$tmb_random,
+    DLL = "tinyVAST",
+    profile = NULL 
+  )
 
   #
   par = obj$env$parList()
   parDataMode <- obj$env$last.par
   indx = obj$env$lrandom()
+  random_names = names(parDataMode)[indx]
   q = sum(indx)
   p = length(object$opt$par)
 
-  ## use - for Hess because model returns negative loglikelihood;
-  #cov_Psi_inv = -Hess_new[indx,indx]; ## this is the marginal prec mat of REs;
-  Hess_new = -Matrix::Matrix(obj_new$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
-  Hess_new = Hess_new[indx,indx]
+  if( method == "stable" ){
+    ## use - for Hess because model returns negative loglikelihood;
+    #cov_Psi_inv = -Hess_new[indx,indx]; ## this is the marginal prec mat of REs;
+    Hess_new = -Matrix::Matrix(obj_new$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
+    Hess_new = Hess_new[indx,indx]
 
-  ## Joint hessian etc
-  Hess = -Matrix::Matrix(obj$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
-  Hess = Hess[indx,indx]
-  negEDF = Matrix::diag(Matrix::solve(Hess, Hess_new))
+    # Joint hessian etc
+    Hess = -Matrix::Matrix(obj$env$f(parDataMode,order=1,type="ADGrad"),sparse = TRUE)
+    Hess = Hess[indx,indx]
 
-  #if(what == "cAIC"){
+    negEDF = Matrix::diag(Matrix::solve(Hess, Hess_new))
+  }else{
+    #if( !requireNamespace("sparseinv", quietly = TRUE) ){
+    #  stop("method = 'fast' requires the 'sparseinv' package; use method = 'stable' or install it")
+    #}
+    # h/t Jie Cao for suggesting spHess to avoid sparsifying a dense Hessian as done previously
+    # Also dropping negative signs (which all cancel)
+    Hess_new = obj_new$env$spHess(parDataMode, random = TRUE)
+    Hess = obj$env$spHess(parDataMode, random = TRUE)
+    #S = TMB:::solveSubset(Hess)
+    S = sparseinv::Takahashi_Davis(Hess)
+    negEDF = Matrix::rowSums(S * Hess_new)
+  }
+
+  if(what == "cAIC"){
     jnll = obj$env$f(parDataMode)
     cnll = jnll - obj_new$env$f(parDataMode)
     cAIC = 2*cnll + 2*(p+q) - 2*sum(negEDF)
     return(cAIC)
-  #}
-  #if(what == "EDF"){
-  #  group = colnames(object$tmb_inputs$tmb_data$Z_ik)
-  #  group = sapply(group, FUN=\(char)strsplit(char,split=".",fixed=TRUE)[[1]][1])
-  #  group = factor(group)
-  #  EDF = tapply(negEDF,INDEX=group,FUN=length) - tapply(negEDF,INDEX=group,FUN=sum)
-  #  return(EDF)
-  #}
+  }
+  if(what == "EDF"){
+    #group = colnames(object$tmb_inputs$tmb_data$Z_ik)
+    #group = sapply(group, FUN=\(char)strsplit(char,split=".",fixed=TRUE)[[1]][1])
+    #group = factor(group)
+    group = factor(random_names)
+    EDF = tapply(negEDF, INDEX=group, FUN=length) - tapply(negEDF, INDEX=group, FUN=sum)
+    return(EDF)
+  }
 }

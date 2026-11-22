@@ -8,4 +8,5 @@ inst/doc
 docs
 *.pdf
 *.Rhistory
+scratch/*.tar.gz
 vignettes\.Rhistory

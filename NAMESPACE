@@ -45,91 +45,119 @@ export(tweedie)
 import(methods)
 importFrom(GPvecchia,order_maxmin_exact)
 importFrom(GpGp,find_ordered_nn)
-importFrom(Matrix,Cholesky)
-importFrom(Matrix,Diagonal)
-importFrom(Matrix,Matrix)
-importFrom(Matrix,diag)
-importFrom(Matrix,mat2triplet)
-importFrom(Matrix,rowSums)
-importFrom(Matrix,solve)
-importFrom(Matrix,sparseMatrix)
-importFrom(Matrix,t)
-importFrom(TMB,MakeADFun)
-importFrom(TMB,config)
-importFrom(TMB,runSymbolicAnalysis)
-importFrom(TMB,sdreport)
+importFrom(Matrix,
+  Cholesky,
+  Diagonal,
+  Matrix,
+  diag,
+  mat2triplet,
+  rowSums,
+  solve,
+  sparseMatrix,
+  t
+)
+importFrom(TMB,
+  MakeADFun,
+  config,
+  runSymbolicAnalysis,
+  sdreport
+)
 importFrom(abind,abind)
-importFrom(checkmate,assertClass)
-importFrom(checkmate,assertDataFrame)
-importFrom(checkmate,assertInteger)
-importFrom(checkmate,assertNumeric)
-importFrom(cli,cli_abort)
-importFrom(cli,cli_alert_danger)
-importFrom(cli,cli_alert_info)
-importFrom(cli,cli_alert_success)
-importFrom(cli,cli_inform)
-importFrom(cli,cli_warn)
+importFrom(checkmate,
+  assertClass,
+  assertDataFrame,
+  assertInteger,
+  assertNumeric
+)
+importFrom(cli,
+  cli_abort,
+  cli_alert_danger,
+  cli_alert_info,
+  cli_alert_success,
+  cli_inform,
+  cli_warn
+)
 importFrom(corpcor,pseudoinverse)
-importFrom(cv,GetResponse)
-importFrom(cv,cv)
+importFrom(cv,
+  GetResponse,
+  cv
+)
 importFrom(dsem,make_matrices)
-importFrom(fmesher,fm_evaluator)
-importFrom(fmesher,fm_fem)
-importFrom(fmesher,fm_mesh_2d)
-importFrom(igraph,as_adjacency_matrix)
-importFrom(igraph,ecount)
-importFrom(insight,get_data)
-importFrom(insight,get_response)
-importFrom(methods,as)
-importFrom(methods,is)
-importFrom(sdmTMB,lognormal)
-importFrom(sdmTMB,nbinom1)
-importFrom(sdmTMB,nbinom2)
-importFrom(sdmTMB,student)
-importFrom(sdmTMB,tweedie)
-importFrom(sf,st_as_sf)
-importFrom(sf,st_centroid)
-importFrom(sf,st_coordinates)
-importFrom(sf,st_crs)
-importFrom(sf,st_distance)
-importFrom(sf,st_geometry)
-importFrom(sf,st_geometry_type)
-importFrom(sf,st_length)
-importFrom(sf,st_nearest_feature)
-importFrom(sf,st_relate)
-importFrom(sf,st_within)
+importFrom(fmesher,
+  fm_evaluator,
+  fm_fem,
+  fm_mesh_2d
+)
+importFrom(igraph,
+  as_adjacency_matrix,
+  ecount
+)
+importFrom(insight,
+  get_data,
+  get_response
+)
+importFrom(methods,
+  as,
+  is
+)
+importFrom(sdmTMB,
+  lognormal,
+  nbinom1,
+  nbinom2,
+  student,
+  tweedie
+)
+importFrom(sf,
+  st_as_sf,
+  st_centroid,
+  st_coordinates,
+  st_crs,
+  st_distance,
+  st_geometry,
+  st_geometry_type,
+  st_length,
+  st_nearest_feature,
+  st_relate,
+  st_within
+)
 importFrom(sfnetworks,activate)
-importFrom(sparseinv,Takahashi_Davis)
-importFrom(sparseinv,cholPermute)
-importFrom(stats,.getXlevels)
-importFrom(stats,Gamma)
-importFrom(stats,as.formula)
-importFrom(stats,binomial)
-importFrom(stats,dist)
-importFrom(stats,fitted)
-importFrom(stats,gaussian)
-importFrom(stats,lm)
-importFrom(stats,logLik)
-importFrom(stats,model.frame)
-importFrom(stats,model.matrix)
-importFrom(stats,model.offset)
-importFrom(stats,model.response)
-importFrom(stats,na.omit)
-importFrom(stats,na.pass)
-importFrom(stats,nlminb)
-importFrom(stats,optim)
-importFrom(stats,optimHess)
-importFrom(stats,pnorm)
-importFrom(stats,poisson)
-importFrom(stats,predict)
-importFrom(stats,rnorm)
-importFrom(stats,sd)
-importFrom(stats,simulate)
-importFrom(stats,terms)
-importFrom(stats,update)
-importFrom(stats,update.formula)
-importFrom(stats,vcov)
+importFrom(sparseinv,
+  Takahashi_Davis,
+  cholPermute
+)
+importFrom(stats,
+  .getXlevels,
+  Gamma,
+  as.formula,
+  binomial,
+  dist,
+  fitted,
+  gaussian,
+  lm,
+  logLik,
+  model.frame,
+  model.matrix,
+  model.offset,
+  model.response,
+  na.omit,
+  na.pass,
+  nlminb,
+  optim,
+  optimHess,
+  pnorm,
+  poisson,
+  predict,
+  rnorm,
+  sd,
+  simulate,
+  terms,
+  update,
+  update.formula,
+  vcov
+)
 importFrom(units,drop_units)
-importFrom(utils,capture.output)
-importFrom(utils,packageVersion)
+importFrom(utils,
+  capture.output,
+  packageVersion
+)
 useDynLib(tinyVAST, .registration = TRUE)
