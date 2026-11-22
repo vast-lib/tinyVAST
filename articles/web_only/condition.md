@@ -209,7 +209,7 @@ ggplot( cond_tz ) +
 
 ![](condition_files/figure-html/condition-timeseries-1.png)
 
-Runtime for this vignette: 7.66 mins
+Runtime for this vignette: 11.36 mins
 
 #### Works cited
 
