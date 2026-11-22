@@ -95,7 +95,7 @@ mytinyVAST
 #>     spacetime_term = spacetime_term, family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 6.385689 secs
+#> Time difference of 7.556949 secs
 #> 
 #> Family: 
 #> $obs
@@ -115,7 +115,7 @@ mytinyVAST
 #> log_sigma -0.64811725 0.05006776
 #> log_sigma  0.01446391 0.06494065
 #> log_kappa -0.15609781 0.16446773
-#> Maximum gradient component: 0.002356372 
+#> Maximum gradient component: 0.002356348 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.4812353
@@ -325,7 +325,7 @@ knitr::kable( cbind("run times (sec.)"=Times), digits=1)
 
 | run times (sec.).tinyVAST | run times (sec.).VAST | run times (sec.).sdmTMB |
 |:--------------------------|:----------------------|:------------------------|
-| 6.4 secs                  | NA                    | 6.1 secs                |
+| 7.6 secs                  | NA                    | 9.2 secs                |
 
 ### Delta models
 
@@ -352,7 +352,7 @@ mydelta2
 #>     spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 6.199582 secs
+#> Time difference of 7.602202 secs
 #> 
 #> Family: 
 #> $obs
@@ -366,7 +366,7 @@ mydelta2
 #> sdreport(.) result
 #>             Estimate Std. Error
 #> alpha_j    0.9673982 0.03523113
-#> alpha2_j  -1.2465530 0.14981116
+#> alpha2_j  -1.2465531 0.14981116
 #> alpha2_j  -1.2927804 0.17500264
 #> alpha2_j  -1.3056616 0.19172295
 #> alpha2_j  -1.3218115 0.20304344
@@ -377,22 +377,22 @@ mydelta2
 #> alpha2_j  -1.3990617 0.23308060
 #> alpha2_j  -1.1251748 0.23638081
 #> alpha2_j  -1.2235461 0.23877445
-#> alpha2_j  -1.5131380 0.24006161
+#> alpha2_j  -1.5131381 0.24006161
 #> alpha2_j  -1.2469233 0.24216447
-#> alpha2_j  -1.1278737 0.24209142
-#> alpha2_j  -1.0707281 0.24334575
+#> alpha2_j  -1.1278738 0.24209141
+#> alpha2_j  -1.0707282 0.24334575
 #> beta2_z    0.8967400 0.03512556
 #> beta2_z    0.3133328 0.03906544
 #> log_sigma  0.0296271 0.02475190
 #> log_kappa  0.1085638 0.14818576
-#> Maximum gradient component: 0.001977448 
+#> Maximum gradient component: 0.001977795 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.3295031
 #> 
 #> Fixed terms: 
 #>              Estimate  Std_Error  z_value       p_value
-#> (Intercept) 0.9673982 0.03523113 27.45862 5.482293e-166
+#> (Intercept) 0.9673982 0.03523113 27.45862 5.482301e-166
 #> 
 #> Sanity check: 
 #> 
@@ -504,14 +504,14 @@ out = tinyVAST( spacetime_term = dsem,
            spatial_domain = mesh,
            family = tweedie() )
 #> Warning: The model may not have converged. Maximum final gradient:
-#> 0.0109605467229446.
+#> 0.010952503508884.
 out
 #> Call: 
 #> tinyVAST(formula = n ~ 0 + var, data = Data, spacetime_term = dsem, 
 #>     family = tweedie(), spatial_domain = mesh)
 #> 
 #> Run time: 
-#> Time difference of 24.45978 secs
+#> Time difference of 29.07513 secs
 #> 
 #> Family: 
 #> $obs
@@ -524,41 +524,41 @@ out
 #> 
 #> sdreport(.) result
 #>               Estimate Std. Error
-#> alpha_j    0.090202734 0.11486654
-#> alpha_j   -0.099500426 0.10318987
-#> beta_z     0.553897115 0.07628810
-#> beta_z     0.536424345 0.07383376
-#> beta_z    -0.225705980 0.07606827
-#> beta_z    -0.070945683 0.06259109
-#> beta_z     0.336688188 0.01863794
-#> log_sigma -0.696754522 0.02881155
-#> log_sigma -0.005321844 0.05462453
-#> log_kappa -0.635425685 0.10547169
-#> Maximum gradient component: 0.01096055 
+#> alpha_j    0.090202715 0.11486653
+#> alpha_j   -0.099500398 0.10318988
+#> beta_z     0.553896998 0.07628811
+#> beta_z     0.536424396 0.07383376
+#> beta_z    -0.225706069 0.07606828
+#> beta_z    -0.070945678 0.06259110
+#> beta_z     0.336688185 0.01863794
+#> log_sigma -0.696754526 0.02881155
+#> log_sigma -0.005321866 0.05462453
+#> log_kappa -0.635425715 0.10547168
+#> Maximum gradient component: 0.0109525 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 0.4057952
 #> 
 #> spacetime_term: 
 #>   heads to from parameter start lag    Estimate  Std_Error   z_value
-#> 1     1 d1   d1         1  <NA>   1  0.55389711 0.07628810  7.260597
-#> 2     1 d2   d2         2  <NA>   1  0.53642434 0.07383376  7.265299
-#> 3     1 d1   d2         3  <NA>   1 -0.22570598 0.07606827 -2.967150
-#> 4     1 d2   d1         4  <NA>   1 -0.07094568 0.06259109 -1.133479
+#> 1     1 d1   d1         1  <NA>   1  0.55389700 0.07628811  7.260594
+#> 2     1 d2   d2         2  <NA>   1  0.53642440 0.07383376  7.265300
+#> 3     1 d1   d2         3  <NA>   1 -0.22570607 0.07606828 -2.967151
+#> 4     1 d2   d1         4  <NA>   1 -0.07094568 0.06259110 -1.133479
 #> 5     2 d1   d1         5  <NA>   0  0.33668819 0.01863794 18.064667
 #> 6     2 d2   d2         5  <NA>   0  0.33668819 0.01863794 18.064667
 #>        p_value
-#> 1 3.853864e-13
-#> 2 3.722150e-13
-#> 3 3.005742e-03
-#> 4 2.570132e-01
-#> 5 6.048601e-73
-#> 6 6.048601e-73
+#> 1 3.853937e-13
+#> 2 3.722118e-13
+#> 3 3.005734e-03
+#> 4 2.570133e-01
+#> 5 6.048599e-73
+#> 6 6.048599e-73
 #> 
 #> Fixed terms: 
 #>          Estimate Std_Error    z_value   p_value
-#> vard1  0.09020273 0.1148665  0.7852829 0.4322877
-#> vard2 -0.09950043 0.1031899 -0.9642461 0.3349226
+#> vard1  0.09020272 0.1148665  0.7852829 0.4322877
+#> vard2 -0.09950040 0.1031899 -0.9642457 0.3349228
 #> 
 #> Sanity check: 
 #> 

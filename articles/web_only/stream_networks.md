@@ -155,7 +155,7 @@ plot(
 
 ![](stream_networks_files/figure-html/unnamed-chunk-7-1.png)
 
-Runtime for this vignette: 3.77 secs
+Runtime for this vignette: 4.46 secs
 
 ## Works cited
 

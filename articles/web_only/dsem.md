@@ -43,7 +43,7 @@ mytiny
 #>         2:3]))
 #> 
 #> Run time: 
-#> Time difference of 0.5375602 secs
+#> Time difference of 0.6213841 secs
 #> 
 #> Family: 
 #> $obs
@@ -65,8 +65,8 @@ mytiny
 #> beta_z     -0.01285890 5.063467e-02
 #> beta_z      0.37727131 3.504314e-02
 #> beta_z      0.17062265 1.584742e-02
-#> log_sigma -12.68428376 2.177077e+04
-#> Maximum gradient component: 3.220166e-05 
+#> log_sigma -12.68475922 2.166555e+04
+#> Maximum gradient component: 3.227831e-05 
 #> 
 #> Proportion conditional deviance explained: 
 #> [1] 1
@@ -84,7 +84,7 @@ mytiny
 #> 1 2.812222e-26
 #> 2 9.115511e-01
 #> 3 1.270388e-04
-#> 4 8.189498e-34
+#> 4 8.189499e-34
 #> 5 7.995307e-01
 #> 6 4.986648e-27
 #> 7 4.950061e-27
@@ -92,7 +92,7 @@ mytiny
 #> Fixed terms: 
 #>           Estimate Std_Error  z_value       p_value
 #> varwolves 3.325262 0.2483494 13.38945  6.969620e-41
-#> varmoose  6.441653 0.2116035 30.44210 1.524017e-203
+#> varmoose  6.441653 0.2116035 30.44210 1.524018e-203
 #> 
 #> Sanity check:
 
@@ -190,7 +190,7 @@ where we again inspect the estimated interaction matrix:
 | wolves |  0.896 | -0.125 |
 | moose  |  0.007 |  0.875 |
 
-Runtime for this vignette: 1.96 secs
+Runtime for this vignette: 2.28 secs
 
 ## Works cited
 
